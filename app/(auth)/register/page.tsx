@@ -37,27 +37,38 @@ export default function RegisterPage() {
     setLoading(true);
     setError(null);
 
-    const supabase = createClient();
-    const { error } = await supabase.auth.signUp({
-      email: form.email,
-      password: form.password,
-      options: {
-        data: {
-          full_name: form.name,
-          company: form.company,
-          user_count: form.userCount,
-        },
-      },
-    });
+    try {
+      const supabase = createClient();
+      const timeout = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error("Tilkoblingen tok for lang tid. Sjekk internettforbindelsen og prøv igjen.")), 10000)
+      );
+      const { error } = await Promise.race([
+        supabase.auth.signUp({
+          email: form.email,
+          password: form.password,
+          options: {
+            data: {
+              full_name: form.name,
+              company: form.company,
+              user_count: form.userCount,
+            },
+          },
+        }),
+        timeout,
+      ]);
 
-    if (error) {
-      setError(error.message);
+      if (error) {
+        setError(error.message);
+        return;
+      }
+
+      router.push("/dashboard");
+      router.refresh();
+    } catch (err: any) {
+      setError(err.message ?? "Noe gikk galt. Prøv igjen.");
+    } finally {
       setLoading(false);
-      return;
     }
-
-    router.push("/dashboard");
-    router.refresh();
   };
 
   return (
