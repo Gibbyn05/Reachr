@@ -1,10 +1,11 @@
 "use client";
 import { TopBar } from "@/components/layout/top-bar";
-import { TrendingUp, Users, Calendar, Star, ArrowUpRight, ArrowRight, Phone, Mail, AlertCircle, Clock } from "lucide-react";
+import { TrendingUp, Users, Calendar, Star, ArrowUpRight, ArrowRight, Phone, Mail, AlertCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useAppStore } from "@/store/app-store";
+import { Lead } from "@/lib/mock-data";
 
 const statusColors: Record<string, "gray" | "blue" | "yellow" | "purple" | "red" | "green"> = {
   "Ikke kontaktet": "gray",
@@ -15,7 +16,7 @@ const statusColors: Record<string, "gray" | "blue" | "yellow" | "purple" | "red"
   "Kunde": "green",
 };
 
-function needsFollowUpReason(lead: ReturnType<typeof useAppStore>["leads"][0]): string | null {
+function needsFollowUpReason(lead: Lead): string | null {
   const now = new Date();
   const twoDaysAgo = new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000);
   const threeDaysAgo = new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000);
