@@ -10,10 +10,16 @@ interface AppStore {
   updateLeadNotes: (id: string, notes: string) => void;
   updateLeadAssigned: (id: string, assignedTo: string) => void;
   updateLeadLastContacted: (id: string, date: string | null) => void;
+  meetingDates: Record<string, string>; // leadId → ISO datetime string
+  setMeetingDate: (leadId: string, datetime: string) => void;
   isLoggedIn: boolean;
   setLoggedIn: (value: boolean) => void;
   currentUser: { name: string; email: string; company: string } | null;
   setCurrentUser: (user: { name: string; email: string; company: string } | null) => void;
+  avatarUrl: string | null;
+  setAvatarUrl: (url: string | null) => void;
+  profilePhone: string;
+  setProfilePhone: (phone: string) => void;
 }
 
 export const useAppStore = create<AppStore>((set) => ({
@@ -50,8 +56,17 @@ export const useAppStore = create<AppStore>((set) => ({
     set((state) => ({
       leads: state.leads.map((l) => (l.id === id ? { ...l, lastContacted: date } : l)),
     })),
+  meetingDates: {},
+  setMeetingDate: (leadId, datetime) =>
+    set((state) => ({
+      meetingDates: { ...state.meetingDates, [leadId]: datetime },
+    })),
   isLoggedIn: false,
   setLoggedIn: (value) => set({ isLoggedIn: value }),
   currentUser: null,
   setCurrentUser: (user) => set({ currentUser: user }),
+  avatarUrl: null,
+  setAvatarUrl: (url) => set({ avatarUrl: url }),
+  profilePhone: "+47 22 11 22 33",
+  setProfilePhone: (phone) => set({ profilePhone: phone }),
 }));

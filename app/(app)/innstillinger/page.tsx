@@ -1,5 +1,5 @@
 "use client";
-import { useState, useRef } from "react";
+import { useState, useRef, useCallback } from "react";
 import { TopBar } from "@/components/layout/top-bar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -66,7 +66,7 @@ const NOTIFICATION_ITEMS = [
 ];
 
 export default function InnstillingerPage() {
-  const { currentUser, setCurrentUser, leads } = useAppStore();
+  const { currentUser, setCurrentUser, leads, avatarUrl, setAvatarUrl, profilePhone, setProfilePhone } = useAppStore();
   const [activeTab, setActiveTab] = useState("profil");
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteSending, setInviteSending] = useState(false);
@@ -76,11 +76,11 @@ export default function InnstillingerPage() {
   const [profileForm, setProfileForm] = useState({
     name: currentUser?.name ?? "Ola Nordmann",
     email: currentUser?.email ?? "ola@bedrift.no",
-    phone: "+47 22 11 22 33",
+    phone: profilePhone || "+47 22 11 22 33",
     company: currentUser?.company ?? "Demo Bedrift AS",
   });
   const [profileSaved, setProfileSaved] = useState(false);
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [showPlanModal, setShowPlanModal] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -97,9 +97,21 @@ export default function InnstillingerPage() {
       email: profileForm.email,
       company: profileForm.company,
     });
+    setProfilePhone(profileForm.phone);
     setProfileSaved(true);
     setTimeout(() => setProfileSaved(false), 3000);
   };
+
+  const handleInvoiceDownload = useCallback((date: string, amount: string) => {
+    const content = `FAKTURA\n\nDato: ${date}\nBeløp: ${amount}\nStatus: Betalt\n\nReachr Pro-plan\nreachr.no`;
+    const blob = new Blob([content], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `faktura-reachr-${date.replace(/\s|\./g, "-")}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }, []);
 
   const handleInvite = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -139,6 +151,37 @@ export default function InnstillingerPage() {
   return (
     <div>
       <TopBar title="Innstillinger" />
+
+      {/* Plan change modal */}
+      {showPlanModal && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50" onClick={() => setShowPlanModal(false)}>
+          <div className="bg-white rounded-2xl shadow-2xl p-8 w-[480px] max-w-full" onClick={(e) => e.stopPropagation()}>
+            <h2 className="text-lg font-bold text-slate-900 mb-2">Velg plan</h2>
+            <p className="text-sm text-gray-500 mb-6">Velg planen som passer din bedrift.</p>
+            <div className="space-y-3">
+              {[
+                { name: "Starter", price: "99 kr/mnd", desc: "1 bruker · 50 leads · Leadsøk" },
+                { name: "Pro", price: "199 kr/mnd", desc: "5 brukere · Ubegrenset leads · Alt i Starter + e-postintegrasjon", current: true },
+                { name: "Team", price: "499 kr/mnd", desc: "15 brukere · Prioritert support · Alt i Pro + API-tilgang" },
+              ].map((plan) => (
+                <div key={plan.name} className={`border-2 rounded-xl p-4 cursor-pointer transition-all ${plan.current ? "border-green-500 bg-green-50" : "border-gray-200 hover:border-gray-300"}`}>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-semibold text-slate-900">{plan.name}{plan.current && <span className="ml-2 text-xs text-green-600 font-medium">(Aktiv)</span>}</p>
+                      <p className="text-xs text-gray-500 mt-0.5">{plan.desc}</p>
+                    </div>
+                    <p className="font-bold text-slate-900 text-sm">{plan.price}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="flex gap-3 mt-6">
+              <button onClick={() => setShowPlanModal(false)} className="flex-1 py-2.5 border border-gray-200 rounded-xl text-sm font-semibold text-gray-600 hover:bg-gray-50">Avbryt</button>
+              <button onClick={() => { alert("Kontakt salg@reachr.no for å endre plan."); setShowPlanModal(false); }} className="flex-1 py-2.5 bg-green-500 text-white rounded-xl text-sm font-semibold hover:bg-green-600">Kontakt oss</button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="p-8">
         <div className="flex gap-8">
@@ -349,22 +392,18 @@ export default function InnstillingerPage() {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 gap-4">
                     <div className="border border-gray-200 rounded-xl p-4">
                       <p className="text-sm font-semibold text-slate-900 mb-1">Brukere</p>
                       <p className="text-2xl font-extrabold text-[#0F1729]">1 / 5</p>
                       <p className="text-xs text-gray-400">Maks 5 på Pro-planen</p>
                     </div>
-                    <div className="border border-gray-200 rounded-xl p-4">
-                      <p className="text-sm font-semibold text-slate-900 mb-1">Lagrede leads</p>
-                      <p className="text-2xl font-extrabold text-[#0F1729]">{leads.length} / ∞</p>
-                      <p className="text-xs text-gray-400">Ubegrenset på Pro-planen</p>
-                    </div>
                   </div>
 
                   <div className="flex gap-3 mt-6">
-                    <Button variant="secondary" size="md">Endre plan</Button>
-                    <Button variant="ghost" size="md" className="text-red-500 hover:text-red-600 hover:bg-red-50">
+                    <Button variant="secondary" size="md" onClick={() => setShowPlanModal(true)}>Endre plan</Button>
+                    <Button variant="ghost" size="md" className="text-red-500 hover:text-red-600 hover:bg-red-50"
+                      onClick={() => { if (confirm("Er du sikker på at du vil avbestille abonnementet?")) alert("Abonnement avbestilt. Du beholder tilgang til slutten av perioden."); }}>
                       Avbestill abonnement
                     </Button>
                   </div>
@@ -386,7 +425,10 @@ export default function InnstillingerPage() {
                         <span className="text-xs bg-green-100 text-green-700 px-2.5 py-1 rounded-full font-semibold">
                           {invoice.status}
                         </span>
-                        <button className="text-sm text-green-600 hover:underline font-medium">
+                        <button
+                          className="text-sm text-green-600 hover:underline font-medium"
+                          onClick={() => handleInvoiceDownload(invoice.date, invoice.amount)}
+                        >
                           Last ned
                         </button>
                       </div>

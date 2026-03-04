@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState, useEffect } from "react";
+import { useAppStore } from "@/store/app-store";
 
 const mainNavItems = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
@@ -22,13 +23,38 @@ const mainNavItems = [
   { href: "/varsler", icon: Bell, label: "Varsler" },
 ];
 
+/** Compute how many leads need follow-up (mirrors dashboard logic) */
+function countNeedsFollowUp(leads: ReturnType<typeof useAppStore>["leads"]): number {
+  const now = new Date();
+  const twoDaysAgo = new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000);
+  const threeDaysAgo = new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000);
+  return leads.filter((l) => {
+    if (l.status === "Ikke kontaktet") return new Date(l.addedDate) <= threeDaysAgo;
+    if (l.status === "Kontaktet - ikke svar") {
+      if (!l.lastContacted) return true;
+      return new Date(l.lastContacted) <= twoDaysAgo;
+    }
+    if (l.status === "Kontaktet") {
+      if (!l.lastContacted) return true;
+      return new Date(l.lastContacted) <= threeDaysAgo;
+    }
+    return false;
+  }).length;
+}
+
 export function Sidebar() {
   const pathname = usePathname();
   const [dark, setDark] = useState(false);
+  const { currentUser, avatarUrl, leads } = useAppStore();
+
+  const notifCount = countNeedsFollowUp(leads);
 
   useEffect(() => {
     const saved = localStorage.getItem("reachr-dark");
-    if (saved === "1") { setDark(true); document.documentElement.classList.add("dark"); }
+    if (saved === "1") {
+      setDark(true);
+      document.documentElement.classList.add("dark");
+    }
   }, []);
 
   const toggleDark = () => {
@@ -37,6 +63,14 @@ export function Sidebar() {
     document.documentElement.classList.toggle("dark", next);
     localStorage.setItem("reachr-dark", next ? "1" : "0");
   };
+
+  const displayName = currentUser?.name ?? "Ola Nordmann";
+  const initials = displayName
+    .split(" ")
+    .map((w) => w[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
 
   return (
     <aside className="fixed left-0 top-0 h-full w-60 bg-[#0F1729] flex flex-col z-50">
@@ -66,13 +100,13 @@ export function Sidebar() {
               )}
             >
               <Icon
-                className={cn("w-4.5 h-4.5", isActive ? "text-blue-400" : "text-current")}
+                className={cn(isActive ? "text-blue-400" : "text-current")}
                 style={{ width: "18px", height: "18px" }}
               />
               {label}
-              {label === "Varsler" && (
-                <span className="ml-auto bg-[#2563EB] text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-semibold">
-                  3
+              {label === "Varsler" && notifCount > 0 && (
+                <span className="ml-auto bg-[#2563EB] text-white text-xs rounded-full min-w-5 h-5 flex items-center justify-center font-semibold px-1">
+                  {notifCount}
                 </span>
               )}
             </Link>
@@ -87,7 +121,9 @@ export function Sidebar() {
           onClick={toggleDark}
           className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-white/60 hover:text-white hover:bg-white/10 transition-all duration-200"
         >
-          {dark ? <Sun style={{ width: "18px", height: "18px" }} /> : <Moon style={{ width: "18px", height: "18px" }} />}
+          {dark
+            ? <Sun style={{ width: "18px", height: "18px" }} />
+            : <Moon style={{ width: "18px", height: "18px" }} />}
           {dark ? "Lyst tema" : "Mørkt tema"}
         </button>
 
@@ -109,15 +145,20 @@ export function Sidebar() {
         </Link>
 
         {/* User profile */}
-        <div className="flex items-center gap-3 px-3 py-2.5 rounded-lg mt-1">
-          <div className="w-8 h-8 bg-[#2563EB] rounded-full flex items-center justify-center text-white text-xs font-bold">
-            ON
-          </div>
+        <Link href="/innstillinger" className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-white/10 transition-colors mt-1">
+          {avatarUrl ? (
+            <img src={avatarUrl} alt="Avatar" className="w-8 h-8 rounded-full object-cover flex-shrink-0" />
+          ) : (
+            <div className="w-8 h-8 bg-[#2563EB] rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+              {initials}
+            </div>
+          )}
           <div className="flex-1 min-w-0">
-            <p className="text-white text-xs font-semibold truncate">Ola Nordmann</p>
+            <p className="text-white text-xs font-semibold truncate">{displayName}</p>
             <p className="text-white/40 text-xs truncate">Pro-plan</p>
           </div>
-        </div>
+        </Link>
+
         <Link
           href="/"
           className="flex items-center gap-3 px-3 py-2 rounded-lg text-white/50 hover:text-white/80 text-sm transition-colors"

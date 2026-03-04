@@ -12,6 +12,48 @@ import {
 import { useAppStore } from "@/store/app-store";
 import { Lead, LeadStatus } from "@/lib/mock-data";
 
+/* ── Meeting date modal ───────────────────────────────────── */
+function MeetingDateModal({
+  leadName,
+  existing,
+  onSave,
+  onClose,
+}: {
+  leadName: string;
+  existing?: string;
+  onSave: (dt: string) => void;
+  onClose: () => void;
+}) {
+  const [dt, setDt] = useState(existing ?? "");
+  return (
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40" onClick={onClose}>
+      <div className="bg-white rounded-2xl shadow-2xl p-6 w-80" onClick={(e) => e.stopPropagation()}>
+        <h3 className="text-sm font-bold text-slate-900 mb-1">Dato og tid for møtet</h3>
+        <p className="text-xs text-gray-400 mb-4">{leadName}</p>
+        <input
+          type="datetime-local"
+          value={dt}
+          onChange={(e) => setDt(e.target.value)}
+          className="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:border-green-500 bg-white"
+          autoFocus
+        />
+        <div className="flex gap-2 mt-4">
+          <button
+            onClick={() => { if (dt) onSave(dt); }}
+            disabled={!dt}
+            className="flex-1 py-2 bg-green-500 text-white text-sm font-semibold rounded-lg hover:bg-green-600 disabled:opacity-40"
+          >
+            Lagre møtetid
+          </button>
+          <button onClick={onClose} className="px-4 py-2 border border-gray-200 text-sm rounded-lg hover:bg-gray-50">
+            Avbryt
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 const statusOptions: LeadStatus[] = [
   "Ikke kontaktet",
   "Kontaktet",
@@ -44,6 +86,8 @@ function LeadRow({
   onAssignedChange: (id: string, val: string) => void;
   onLastContactedChange: (id: string, date: string | null) => void;
   onRemove: (id: string) => void;
+  meetingDate?: string;
+  onMeetingDateSave: (leadId: string, dt: string) => void;
 }) {
   const [expanded, setExpanded] = useState(false);
   const [editingNotes, setEditingNotes] = useState(false);
@@ -54,6 +98,7 @@ function LeadRow({
   const [editingAssigned, setEditingAssigned] = useState(false);
   const [assignedDraft, setAssignedDraft] = useState(lead.assignedTo);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [meetingModalOpen, setMeetingModalOpen] = useState(false);
   const [reminderOpen, setReminderOpen] = useState(false);
   const [reminderMsg, setReminderMsg] = useState("");
   const [reminderSending, setReminderSending] = useState(false);
@@ -129,11 +174,16 @@ function LeadRow({
           </div>
         </td>
 
-        {/* Last contacted */}
+        {/* Last contacted / Meeting date */}
         <td className="px-4 py-3.5 text-sm text-gray-500 whitespace-nowrap">
-          {lead.lastContacted
-            ? new Date(lead.lastContacted).toLocaleDateString("nb-NO")
-            : "—"}
+          {lead.status === "Booket møte" && meetingDate ? (
+            <span className="flex items-center gap-1 text-purple-600 font-medium text-xs">
+              <Calendar className="w-3 h-3" />
+              {new Date(meetingDate).toLocaleString("nb-NO", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
+            </span>
+          ) : lead.lastContacted ? (
+            new Date(lead.lastContacted).toLocaleDateString("nb-NO")
+          ) : "—"}
         </td>
 
         {/* Assigned */}
@@ -173,6 +223,7 @@ function LeadRow({
                     onClick={() => {
                       onStatusChange(lead.id, s);
                       setStatusDropdown(false);
+                      if (s === "Booket møte") setMeetingModalOpen(true);
                     }}
                   >
                     <Badge variant={statusColors[s]}>{s}</Badge>
@@ -197,7 +248,7 @@ function LeadRow({
                   {statusOptions.map((s) => (
                     <button
                       key={s}
-                      onClick={() => onStatusChange(lead.id, s)}
+                      onClick={() => { onStatusChange(lead.id, s); if (s === "Booket møte") setMeetingModalOpen(true); }}
                       className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${
                         lead.status === s
                           ? "border-transparent ring-2 ring-offset-1"
@@ -473,12 +524,22 @@ function LeadRow({
           </td>
         </tr>
       )}
+
+      {/* Meeting date modal */}
+      {meetingModalOpen && (
+        <MeetingDateModal
+          leadName={lead.name}
+          existing={meetingDate}
+          onSave={(dt) => { onMeetingDateSave(lead.id, dt); setMeetingModalOpen(false); }}
+          onClose={() => setMeetingModalOpen(false)}
+        />
+      )}
     </>
   );
 }
 
 export default function MineLeadsPage() {
-  const { leads, updateLeadStatus, updateLeadNotes, updateLeadAssigned, updateLeadLastContacted, removeLead } = useAppStore();
+  const { leads, updateLeadStatus, updateLeadNotes, updateLeadAssigned, updateLeadLastContacted, removeLead, meetingDates, setMeetingDate } = useAppStore();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("Alle");
 
@@ -630,6 +691,8 @@ export default function MineLeadsPage() {
                     onAssignedChange={updateLeadAssigned}
                     onLastContactedChange={updateLeadLastContacted}
                     onRemove={removeLead}
+                    meetingDate={meetingDates[lead.id]}
+                    onMeetingDateSave={setMeetingDate}
                   />
                 ))}
               </tbody>
