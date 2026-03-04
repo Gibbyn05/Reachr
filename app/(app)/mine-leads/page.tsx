@@ -79,6 +79,8 @@ function LeadRow({
   onAssignedChange,
   onLastContactedChange,
   onRemove,
+  meetingDate,
+  onMeetingDateSave,
 }: {
   lead: Lead;
   onStatusChange: (id: string, status: LeadStatus) => void;
