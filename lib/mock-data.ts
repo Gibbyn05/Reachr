@@ -27,6 +27,7 @@ export interface Lead extends Company {
   lastContacted: string | null;
   assignedTo: string;
   assignedAvatar: string;
+  addedBy: string;
   notes: string;
   addedDate: string;
 }

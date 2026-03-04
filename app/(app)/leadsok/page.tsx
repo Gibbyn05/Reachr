@@ -79,7 +79,7 @@ function toKommune(city: string) {
 
 /* ─── Component ───────────────────────────────────────────── */
 export default function LeadsokPage() {
-  const { leads, addLead } = useAppStore();
+  const { leads, addLead, currentUser } = useAppStore();
   const existingIds = new Set(leads.map((l) => l.id));
 
   const [locationQ, setLocationQ]   = useState("");
@@ -186,7 +186,13 @@ export default function LeadsokPage() {
     else { setSortField(field); setSortDir("asc"); }
   };
 
-  const sorted = [...results].sort((a, b) => {
+  // Hide leads that are already in the pipeline
+  const visible = results.filter(
+    (e) => !existingIds.has(e.organisasjonsnummer) && !addedIds.has(e.organisasjonsnummer)
+  );
+  const hiddenCount = results.length - visible.length;
+
+  const sorted = [...visible].sort((a, b) => {
     if (!sortField) return 0;
     let av: any, bv: any;
     if (sortField === "navn") { av = a.navn; bv = b.navn; }
@@ -217,8 +223,9 @@ export default function LeadsokPage() {
       lat: 0, lng: 0,
       status: "Ikke kontaktet",
       lastContacted: null,
-      assignedTo: "Ola Nordmann",
-      assignedAvatar: "ON",
+      assignedTo: currentUser?.name ?? "Meg",
+      assignedAvatar: (currentUser?.name ?? "M").split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2),
+      addedBy: currentUser?.name ?? "Meg",
       notes: "",
       addedDate: new Date().toISOString().split("T")[0],
     });
@@ -488,10 +495,21 @@ export default function LeadsokPage() {
           <>
             {/* Result meta row */}
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
-              <p style={{ fontSize: 13, color: "#6B7280", margin: 0 }}>
-                Viser <strong style={{ color: "#111827" }}>{sorted.length}</strong> av{" "}
-                <strong style={{ color: "#111827" }}>{total.toLocaleString("nb-NO")}</strong> treff fra Brreg
-              </p>
+              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                <p style={{ fontSize: 13, color: "#6B7280", margin: 0 }}>
+                  Viser <strong style={{ color: "#111827" }}>{sorted.length}</strong> av{" "}
+                  <strong style={{ color: "#111827" }}>{total.toLocaleString("nb-NO")}</strong> treff fra Brreg
+                </p>
+                {hiddenCount > 0 && (
+                  <span style={{
+                    fontSize: 12, color: "#16A34A", backgroundColor: "#F0FDF4",
+                    border: "1px solid #BBF7D0", borderRadius: 6,
+                    padding: "2px 8px", fontWeight: 500,
+                  }}>
+                    {hiddenCount} allerede lagt til (skjult)
+                  </span>
+                )}
+              </div>
               <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                 <div style={{ width: 6, height: 6, backgroundColor: "#22C55E", borderRadius: "50%" }} />
                 <span style={{ fontSize: 12, color: "#6B7280" }}>Sanntidsdata fra Brønnøysundregisteret</span>

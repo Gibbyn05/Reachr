@@ -5,17 +5,9 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
-  Users,
-  TrendingUp,
-  Calendar,
-  Star,
-  Search,
-  ChevronDown,
-  X,
-  Phone,
-  Mail,
-  MessageSquare,
-  ChevronRight,
+  Users, TrendingUp, Calendar, Star, Search, ChevronDown,
+  X, Phone, Mail, MessageSquare, ChevronRight, Trash2,
+  UserCheck, Clock, Building2,
 } from "lucide-react";
 import { useAppStore } from "@/store/app-store";
 import { Lead, LeadStatus } from "@/lib/mock-data";
@@ -38,21 +30,28 @@ const statusColors: Record<LeadStatus, "gray" | "blue" | "yellow" | "purple" | "
   "Kunde": "green",
 };
 
-const teamMembers = ["Alle", "Ola Nordmann", "Kari Hansen", "Per Olsen"];
-
 function LeadRow({
   lead,
   onStatusChange,
   onNotesChange,
+  onAssignedChange,
+  onLastContactedChange,
+  onRemove,
 }: {
   lead: Lead;
   onStatusChange: (id: string, status: LeadStatus) => void;
   onNotesChange: (id: string, notes: string) => void;
+  onAssignedChange: (id: string, val: string) => void;
+  onLastContactedChange: (id: string, date: string | null) => void;
+  onRemove: (id: string) => void;
 }) {
   const [expanded, setExpanded] = useState(false);
   const [editingNotes, setEditingNotes] = useState(false);
   const [notes, setNotes] = useState(lead.notes);
   const [statusDropdown, setStatusDropdown] = useState(false);
+  const [editingAssigned, setEditingAssigned] = useState(false);
+  const [assignedDraft, setAssignedDraft] = useState(lead.assignedTo);
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   return (
     <>
@@ -60,21 +59,26 @@ function LeadRow({
         className="hover:bg-gray-50 transition-colors cursor-pointer"
         onClick={() => setExpanded(!expanded)}
       >
+        {/* Name */}
         <td className="px-4 py-3.5">
           <div className="flex items-center gap-3">
             <ChevronRight
-              className={`w-4 h-4 text-gray-400 transition-transform ${expanded ? "rotate-90" : ""}`}
+              className={`w-4 h-4 text-gray-400 transition-transform flex-shrink-0 ${expanded ? "rotate-90" : ""}`}
             />
-            <div className="w-8 h-8 bg-slate-100 rounded-lg flex items-center justify-center text-xs font-bold text-slate-600">
+            <div className="w-8 h-8 bg-slate-100 rounded-lg flex items-center justify-center text-xs font-bold text-slate-600 flex-shrink-0">
               {lead.name.substring(0, 2).toUpperCase()}
             </div>
-            <div>
-              <p className="text-sm font-semibold text-slate-900">{lead.name}</p>
+            <div className="min-w-0">
+              <p className="text-sm font-semibold text-slate-900 truncate">{lead.name}</p>
               <p className="text-xs text-gray-400">{lead.industry}</p>
             </div>
           </div>
         </td>
+
+        {/* Contact */}
         <td className="px-4 py-3.5 text-sm text-gray-600 whitespace-nowrap">{lead.contactPerson}</td>
+
+        {/* Status */}
         <td className="px-4 py-3.5" onClick={(e) => e.stopPropagation()}>
           <div className="relative">
             <button
@@ -105,117 +109,268 @@ function LeadRow({
             )}
           </div>
         </td>
+
+        {/* Last contacted */}
         <td className="px-4 py-3.5 text-sm text-gray-500 whitespace-nowrap">
           {lead.lastContacted
             ? new Date(lead.lastContacted).toLocaleDateString("nb-NO")
             : "—"}
         </td>
+
+        {/* Assigned */}
         <td className="px-4 py-3.5">
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 bg-[#0F1729] rounded-full flex items-center justify-center text-white text-[10px] font-bold">
+            <div className="w-6 h-6 bg-[#0F1729] rounded-full flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0">
               {lead.assignedAvatar}
             </div>
             <span className="text-sm text-gray-600 whitespace-nowrap">{lead.assignedTo}</span>
           </div>
         </td>
+
+        {/* Notes preview */}
         <td className="px-4 py-3.5 text-sm text-gray-400 max-w-xs truncate">
           {lead.notes || <span className="text-gray-300 italic">Ingen notater</span>}
         </td>
       </tr>
+
+      {/* Expanded detail panel */}
       {expanded && (
         <tr>
-          <td colSpan={6} className="bg-slate-50 px-6 py-4 border-b border-gray-100">
-            <div className="flex gap-6">
-              {/* Contact info */}
-              <div className="flex-1">
-                <h4 className="text-sm font-semibold text-slate-900 mb-3">Kontaktinformasjon</h4>
-                <div className="space-y-2">
-                  <a
-                    href={`tel:${lead.phone}`}
-                    className="flex items-center gap-2 text-sm text-gray-600 hover:text-green-600"
-                  >
-                    <Phone className="w-4 h-4" />
-                    {lead.phone}
-                  </a>
-                  <a
-                    href={`mailto:${lead.email}`}
-                    className="flex items-center gap-2 text-sm text-gray-600 hover:text-green-600"
-                  >
-                    <Mail className="w-4 h-4" />
-                    {lead.email}
-                  </a>
-                  <p className="text-xs text-gray-400">{lead.address}</p>
+          <td colSpan={6} className="bg-slate-50 border-b border-gray-100" onClick={(e) => e.stopPropagation()}>
+            <div className="px-6 py-5 space-y-5">
+
+              {/* Quick status buttons */}
+              <div>
+                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Status</p>
+                <div className="flex flex-wrap gap-2">
+                  {statusOptions.map((s) => (
+                    <button
+                      key={s}
+                      onClick={() => onStatusChange(lead.id, s)}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${
+                        lead.status === s
+                          ? "border-transparent ring-2 ring-offset-1"
+                          : "border-gray-200 bg-white hover:border-gray-300"
+                      }`}
+                      style={lead.status === s ? {
+                        backgroundColor: {
+                          "Ikke kontaktet": "#F3F4F6", "Kontaktet": "#DBEAFE",
+                          "Kontaktet - ikke svar": "#FEF3C7", "Booket møte": "#EDE9FE",
+                          "Avslått": "#FEE2E2", "Kunde": "#DCFCE7",
+                        }[s] as string,
+                        color: {
+                          "Ikke kontaktet": "#374151", "Kontaktet": "#1D4ED8",
+                          "Kontaktet - ikke svar": "#92400E", "Booket møte": "#6D28D9",
+                          "Avslått": "#B91C1C", "Kunde": "#15803D",
+                        }[s] as string,
+                      } : {}}
+                    >
+                      {s}
+                    </button>
+                  ))}
                 </div>
               </div>
 
-              {/* Notes editor */}
-              <div className="flex-1">
-                <div className="flex items-center justify-between mb-3">
-                  <h4 className="text-sm font-semibold text-slate-900 flex items-center gap-1.5">
-                    <MessageSquare className="w-4 h-4" />
-                    Notater
-                  </h4>
-                  {!editingNotes && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setEditingNotes(true);
-                      }}
+              <div className="grid grid-cols-3 gap-6">
+                {/* Contact info */}
+                <div>
+                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                    <Phone className="w-3.5 h-3.5" /> Kontaktinformasjon
+                  </p>
+                  <div className="space-y-2">
+                    <a
+                      href={`tel:${lead.phone}`}
+                      className="flex items-center gap-2 text-sm text-gray-600 hover:text-green-600"
                     >
-                      Rediger
-                    </Button>
+                      <Phone className="w-4 h-4 text-gray-400" />
+                      {lead.phone !== "—" ? lead.phone : <span className="text-gray-300 italic">Ingen telefon</span>}
+                    </a>
+                    <a
+                      href={`mailto:${lead.email}`}
+                      className="flex items-center gap-2 text-sm text-gray-600 hover:text-green-600"
+                    >
+                      <Mail className="w-4 h-4 text-gray-400" />
+                      {lead.email !== "—" ? lead.email : <span className="text-gray-300 italic">Ingen e-post</span>}
+                    </a>
+                    <p className="text-xs text-gray-400 flex items-center gap-2">
+                      <Building2 className="w-3.5 h-3.5" />{lead.address || "—"}
+                    </p>
+                  </div>
+
+                  {/* Last contacted */}
+                  <div className="mt-4">
+                    <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                      <Clock className="w-3.5 h-3.5" /> Sist kontaktet
+                    </p>
+                    <input
+                      type="date"
+                      value={lead.lastContacted ?? ""}
+                      onChange={(e) => onLastContactedChange(lead.id, e.target.value || null)}
+                      className="text-sm border border-gray-200 rounded-lg px-2 py-1.5 text-gray-700 focus:outline-none focus:border-green-500 bg-white w-full"
+                    />
+                    {lead.lastContacted && (
+                      <button
+                        onClick={() => onLastContactedChange(lead.id, null)}
+                        className="text-xs text-gray-400 hover:text-gray-600 mt-1 underline"
+                      >
+                        Nullstill dato
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* Notes */}
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
+                      <MessageSquare className="w-3.5 h-3.5" /> Notater
+                    </p>
+                    {!editingNotes && (
+                      <button
+                        onClick={() => setEditingNotes(true)}
+                        className="text-xs text-blue-600 hover:underline font-medium"
+                      >
+                        Rediger
+                      </button>
+                    )}
+                  </div>
+                  {editingNotes ? (
+                    <div>
+                      <textarea
+                        value={notes}
+                        onChange={(e) => setNotes(e.target.value)}
+                        className="w-full p-3 border border-gray-200 rounded-lg text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500 resize-none bg-white"
+                        rows={5}
+                        placeholder="Legg til notater om dette leadet..."
+                        autoFocus
+                      />
+                      <div className="flex gap-2 mt-2">
+                        <Button
+                          variant="primary"
+                          size="sm"
+                          onClick={() => {
+                            onNotesChange(lead.id, notes);
+                            setEditingNotes(false);
+                          }}
+                        >
+                          Lagre
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            setNotes(lead.notes);
+                            setEditingNotes(false);
+                          }}
+                        >
+                          Avbryt
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div
+                      className="text-sm text-gray-600 bg-white border border-gray-100 rounded-lg p-3 min-h-[80px] cursor-text"
+                      onClick={() => setEditingNotes(true)}
+                    >
+                      {notes || <span className="italic text-gray-300">Klikk for å legge til notater…</span>}
+                    </div>
                   )}
                 </div>
-                {editingNotes ? (
-                  <div onClick={(e) => e.stopPropagation()}>
-                    <textarea
-                      value={notes}
-                      onChange={(e) => setNotes(e.target.value)}
-                      className="w-full p-3 border border-gray-200 rounded-lg text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500 resize-none"
-                      rows={3}
-                      placeholder="Legg til notater om dette leadet..."
-                    />
-                    <div className="flex gap-2 mt-2">
-                      <Button
-                        variant="primary"
-                        size="sm"
-                        onClick={() => {
-                          onNotesChange(lead.id, notes);
-                          setEditingNotes(false);
-                        }}
-                      >
-                        Lagre
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => {
-                          setNotes(lead.notes);
-                          setEditingNotes(false);
-                        }}
-                      >
-                        Avbryt
-                      </Button>
+
+                {/* Meta info */}
+                <div>
+                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                    <UserCheck className="w-3.5 h-3.5" /> Ansvar og info
+                  </p>
+                  <div className="space-y-3">
+                    {/* Assigned to — editable */}
+                    <div>
+                      <p className="text-xs text-gray-400 mb-1">Ansvarlig</p>
+                      {editingAssigned ? (
+                        <div className="flex gap-1.5">
+                          <input
+                            type="text"
+                            value={assignedDraft}
+                            onChange={(e) => setAssignedDraft(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") {
+                                onAssignedChange(lead.id, assignedDraft.trim() || lead.assignedTo);
+                                setEditingAssigned(false);
+                              }
+                              if (e.key === "Escape") {
+                                setAssignedDraft(lead.assignedTo);
+                                setEditingAssigned(false);
+                              }
+                            }}
+                            className="flex-1 text-sm border border-gray-200 rounded-lg px-2 py-1.5 focus:outline-none focus:border-green-500 bg-white"
+                            autoFocus
+                          />
+                          <button
+                            onClick={() => {
+                              onAssignedChange(lead.id, assignedDraft.trim() || lead.assignedTo);
+                              setEditingAssigned(false);
+                            }}
+                            className="px-2 py-1.5 bg-green-500 text-white rounded-lg text-xs font-semibold hover:bg-green-600"
+                          >
+                            OK
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => { setAssignedDraft(lead.assignedTo); setEditingAssigned(true); }}
+                          className="flex items-center gap-2 text-sm text-gray-700 hover:text-green-600 group"
+                        >
+                          <div className="w-6 h-6 bg-[#0F1729] rounded-full flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0">
+                            {lead.assignedAvatar}
+                          </div>
+                          {lead.assignedTo}
+                          <span className="text-xs text-gray-300 group-hover:text-green-500">(endre)</span>
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Added by — read only */}
+                    <div>
+                      <p className="text-xs text-gray-400 mb-1">Lagt til av</p>
+                      <p className="text-sm text-gray-700">{lead.addedBy || "—"}</p>
+                    </div>
+
+                    {/* Other meta */}
+                    <div className="space-y-1.5 text-sm text-gray-600 pt-2 border-t border-gray-100">
+                      <p><span className="text-gray-400">Org.nr:</span> {lead.orgNumber}</p>
+                      <p><span className="text-gray-400">Ansatte:</span> {lead.employees || "—"}</p>
+                      <p><span className="text-gray-400">La til:</span> {new Date(lead.addedDate).toLocaleDateString("nb-NO")}</p>
+                    </div>
+
+                    {/* Remove lead */}
+                    <div className="pt-3 border-t border-gray-100">
+                      {confirmDelete ? (
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs text-red-600 font-medium">Sikker?</span>
+                          <button
+                            onClick={() => onRemove(lead.id)}
+                            className="px-2 py-1 bg-red-500 text-white rounded text-xs font-semibold hover:bg-red-600"
+                          >
+                            Ja, fjern
+                          </button>
+                          <button
+                            onClick={() => setConfirmDelete(false)}
+                            className="px-2 py-1 border border-gray-200 rounded text-xs text-gray-500 hover:bg-gray-50"
+                          >
+                            Avbryt
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => setConfirmDelete(true)}
+                          className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-red-500 transition-colors"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                          Fjern fra pipeline
+                        </button>
+                      )}
                     </div>
                   </div>
-                ) : (
-                  <p className="text-sm text-gray-500">
-                    {notes || <span className="italic text-gray-300">Ingen notater ennå</span>}
-                  </p>
-                )}
-              </div>
-
-              {/* Company info */}
-              <div className="flex-1">
-                <h4 className="text-sm font-semibold text-slate-900 mb-3">Bedriftsinfo</h4>
-                <div className="space-y-1.5 text-sm text-gray-600">
-                  <p><span className="text-gray-400">Org.nr:</span> {lead.orgNumber}</p>
-                  <p><span className="text-gray-400">Bransje:</span> {lead.industry}</p>
-                  <p><span className="text-gray-400">Sted:</span> {lead.city}</p>
-                  <p><span className="text-gray-400">Ansatte:</span> {lead.employees}</p>
-                  <p><span className="text-gray-400">La til:</span> {new Date(lead.addedDate).toLocaleDateString("nb-NO")}</p>
                 </div>
               </div>
             </div>
@@ -227,26 +382,32 @@ function LeadRow({
 }
 
 export default function MineLeadsPage() {
-  const { leads, updateLeadStatus, updateLeadNotes } = useAppStore();
+  const { leads, updateLeadStatus, updateLeadNotes, updateLeadAssigned, updateLeadLastContacted, removeLead } = useAppStore();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("Alle");
+
+  // Dynamic assigned filter based on actual leads
+  const assignedOptions = ["Alle", ...Array.from(new Set(leads.map((l) => l.assignedTo)))];
   const [assignedFilter, setAssignedFilter] = useState<string>("Alle");
 
   const filteredLeads = leads.filter((lead) => {
     const matchSearch =
       !search ||
       lead.name.toLowerCase().includes(search.toLowerCase()) ||
-      lead.contactPerson.toLowerCase().includes(search.toLowerCase());
+      lead.contactPerson.toLowerCase().includes(search.toLowerCase()) ||
+      lead.orgNumber.includes(search);
     const matchStatus = statusFilter === "Alle" || lead.status === statusFilter;
     const matchAssigned = assignedFilter === "Alle" || lead.assignedTo === assignedFilter;
     return matchSearch && matchStatus && matchAssigned;
   });
 
+  const thisWeek = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
+
   const stats = [
     { label: "Totalt leads", value: leads.length, icon: Users, color: "text-blue-600", bg: "bg-blue-50" },
     {
       label: "Nye denne uken",
-      value: leads.filter((l) => l.addedDate >= new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split("T")[0]).length,
+      value: leads.filter((l) => l.addedDate >= thisWeek).length,
       icon: TrendingUp,
       color: "text-green-600",
       bg: "bg-green-50",
@@ -278,7 +439,7 @@ export default function MineLeadsPage() {
             <div key={label} className="bg-white rounded-xl border border-gray-200 p-5" style={{boxShadow: "0 1px 3px rgba(0,0,0,0.08)"}}>
               <div className="flex items-center gap-3">
                 <div className={`w-9 h-9 ${bg} rounded-lg flex items-center justify-center`}>
-                  <Icon className={`w-4.5 h-4.5 ${color}`} style={{ width: "18px", height: "18px" }} />
+                  <Icon className={`${color}`} style={{ width: "18px", height: "18px" }} />
                 </div>
                 <div>
                   <p className="text-2xl font-extrabold text-[#0F1729]">{value}</p>
@@ -294,7 +455,7 @@ export default function MineLeadsPage() {
           <div className="flex flex-wrap items-center gap-3">
             <div className="flex-1 min-w-48">
               <Input
-                placeholder="Søk etter bedrift eller kontakt..."
+                placeholder="Søk etter bedrift, kontakt eller org.nr..."
                 icon={<Search className="w-4 h-4" />}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
@@ -302,7 +463,7 @@ export default function MineLeadsPage() {
             </div>
 
             {/* Status filter */}
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-1.5">
               {["Alle", ...statusOptions].map((s) => (
                 <button
                   key={s}
@@ -318,19 +479,21 @@ export default function MineLeadsPage() {
               ))}
             </div>
 
-            {/* Assigned filter */}
-            <div className="relative">
-              <select
-                value={assignedFilter}
-                onChange={(e) => setAssignedFilter(e.target.value)}
-                className="appearance-none pl-3 pr-8 py-1.5 rounded-lg border border-gray-200 text-sm text-gray-600 focus:outline-none focus:border-green-500 cursor-pointer bg-white"
-              >
-                {teamMembers.map((m) => (
-                  <option key={m}>{m}</option>
-                ))}
-              </select>
-              <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-            </div>
+            {/* Assigned filter — dynamic */}
+            {assignedOptions.length > 1 && (
+              <div className="relative">
+                <select
+                  value={assignedFilter}
+                  onChange={(e) => setAssignedFilter(e.target.value)}
+                  className="appearance-none pl-3 pr-8 py-1.5 rounded-lg border border-gray-200 text-sm text-gray-600 focus:outline-none focus:border-green-500 cursor-pointer bg-white"
+                >
+                  {assignedOptions.map((m) => (
+                    <option key={m}>{m}</option>
+                  ))}
+                </select>
+                <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+              </div>
+            )}
 
             {(statusFilter !== "Alle" || assignedFilter !== "Alle" || search) && (
               <button
@@ -354,24 +517,12 @@ export default function MineLeadsPage() {
             <table className="w-full">
               <thead>
                 <tr className="bg-gray-50 border-b border-gray-100">
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                    Bedriftsnavn
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                    Kontaktperson
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                    Sist kontaktet
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                    Ansvarlig
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                    Notater
-                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Bedriftsnavn</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Kontaktperson</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Sist kontaktet</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Ansvarlig</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Notater</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
@@ -381,6 +532,9 @@ export default function MineLeadsPage() {
                     lead={lead}
                     onStatusChange={updateLeadStatus}
                     onNotesChange={updateLeadNotes}
+                    onAssignedChange={updateLeadAssigned}
+                    onLastContactedChange={updateLeadLastContacted}
+                    onRemove={removeLead}
                   />
                 ))}
               </tbody>
@@ -389,12 +543,19 @@ export default function MineLeadsPage() {
             {filteredLeads.length === 0 && (
               <div className="text-center py-16">
                 <Users className="w-10 h-10 text-gray-300 mx-auto mb-3" />
-                <p className="text-gray-500 font-medium">Ingen leads funnet</p>
+                <p className="text-gray-500 font-medium">
+                  {leads.length === 0 ? "Ingen leads ennå" : "Ingen leads matcher filteret"}
+                </p>
                 <p className="text-sm text-gray-400 mt-1">
-                  Prøv å endre filtrene eller{" "}
-                  <a href="/leadsok" className="text-green-600 font-medium hover:underline">
-                    søk etter nye leads
-                  </a>
+                  {leads.length === 0 ? (
+                    <>
+                      Gå til{" "}
+                      <a href="/leadsok" className="text-green-600 font-medium hover:underline">
+                        Leadsøk
+                      </a>{" "}
+                      for å finne og legge til bedrifter.
+                    </>
+                  ) : "Prøv å endre søket eller filtrene."}
                 </p>
               </div>
             )}
