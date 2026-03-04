@@ -15,6 +15,7 @@ import {
 import { cn } from "@/lib/utils";
 import { useState, useEffect } from "react";
 import { useAppStore } from "@/store/app-store";
+import { Lead } from "@/lib/mock-data";
 
 const mainNavItems = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
@@ -24,7 +25,7 @@ const mainNavItems = [
 ];
 
 /** Compute how many leads need follow-up (mirrors dashboard logic) */
-function countNeedsFollowUp(leads: ReturnType<typeof useAppStore>["leads"]): number {
+function countNeedsFollowUp(leads: Lead[]): number {
   const now = new Date();
   const twoDaysAgo = new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000);
   const threeDaysAgo = new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000);
