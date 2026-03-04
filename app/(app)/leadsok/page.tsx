@@ -1,418 +1,662 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { TopBar } from "@/components/layout/top-bar";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import {
-  Search,
-  MapPin,
-  List,
-  Map,
-  Plus,
-  Filter,
-  ChevronUp,
-  ChevronDown,
-  Phone,
-  Mail,
-  Building2,
-  Users,
-  TrendingUp,
-  Check,
+  Search, MapPin, SlidersHorizontal, Plus, Check,
+  Phone, Mail, Users, Building2, X, ChevronUp, ChevronDown,
+  Loader2, AlertCircle, List, Map, ExternalLink,
 } from "lucide-react";
-import { mockCompanies, mockLeads, industries, norwegianCities, Company } from "@/lib/mock-data";
 import { useAppStore } from "@/store/app-store";
-import { formatCurrency } from "@/lib/utils";
 
+/* ─── Types ──────────────────────────────────────────────── */
+interface BrregEnhet {
+  organisasjonsnummer: string;
+  navn: string;
+  organisasjonsform?: { kode: string; beskrivelse: string };
+  naeringskode1?: { kode: string; beskrivelse: string };
+  forretningsadresse?: {
+    adresse?: string[];
+    postnummer?: string;
+    poststed?: string;
+    kommune?: string;
+  };
+  antallAnsatte?: number;
+  hjemmeside?: string;
+  telefon?: string;
+  dagligLeder?: string; // will be filled by roles fetch
+}
+
+interface Filters {
+  ansatte: string;   // "all"|"1-10"|"11-50"|"51-200"|"200+"
+  mva: boolean;
+}
+
+const NACE_MAP: Record<string, string> = {
+  frisør: "96.021", frisørsalong: "96.021", hår: "96.021",
+  regnskap: "69.201", revisjon: "69.202", bokføring: "69.201",
+  bygg: "41", byggentreprenør: "41", entreprenør: "43",
+  it: "62", software: "62", teknologi: "62",
+  restaurant: "56.101", kafé: "56.102", kafe: "56.102",
+  transport: "49", frakt: "52",
+  elektro: "43.210", elektriker: "43.210",
+  advokat: "69.100", jus: "69.100",
+  eiendom: "68", bolig: "68.100",
+  helse: "86", lege: "86.210", tannlege: "86.230",
+  rengjøring: "81.210", vakt: "80.100",
+  markedsføring: "73.110", reklame: "73.110",
+  butikk: "47", handel: "46", import: "46",
+};
+
+function guessNace(q: string): string | undefined {
+  const lower = q.toLowerCase().trim();
+  for (const [key, code] of Object.entries(NACE_MAP)) {
+    if (lower.includes(key)) return code;
+  }
+  return undefined;
+}
+
+function capitalize(s: string) {
+  return s
+    .toLowerCase()
+    .replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+function toKommune(city: string) {
+  // Brreg wants uppercase municipality name
+  const map: Record<string, string> = {
+    oslo: "OSLO", bergen: "BERGEN", trondheim: "TRONDHEIM",
+    stavanger: "STAVANGER", tromsø: "TROMSØ", drammen: "DRAMMEN",
+    fredrikstad: "FREDRIKSTAD", kristiansand: "KRISTIANSAND",
+    sandnes: "SANDNES", bodø: "BODØ", ålesund: "ÅLESUND",
+    molde: "MOLDE", haugesund: "HAUGESUND", arendal: "ARENDAL",
+    sarpsborg: "SARPSBORG", sandefjord: "SANDEFJORD", porsgrunn: "PORSGRUNN",
+  };
+  return map[city.toLowerCase()] ?? city.toUpperCase();
+}
+
+/* ─── Component ───────────────────────────────────────────── */
 export default function LeadsokPage() {
-  const [view, setView] = useState<"list" | "map">("list");
-  const [locationQuery, setLocationQuery] = useState("");
-  const [industryQuery, setIndustryQuery] = useState("");
-  const [selectedIndustry, setSelectedIndustry] = useState("Alle bransjer");
-  const [employeeFilter, setEmployeeFilter] = useState<string>("all");
-  const [revenueFilter, setRevenueFilter] = useState<string>("all");
-  const [addedIds, setAddedIds] = useState<Set<string>>(new Set());
-  const [sortField, setSortField] = useState<keyof Company | null>(null);
-  const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
-
   const { leads, addLead } = useAppStore();
   const existingIds = new Set(leads.map((l) => l.id));
 
-  const handleAddLead = (company: Company) => {
-    if (!existingIds.has(company.id) && !addedIds.has(company.id)) {
-      addLead({
-        ...company,
-        status: "Ikke kontaktet",
-        lastContacted: null,
-        assignedTo: "Ola Nordmann",
-        assignedAvatar: "ON",
-        notes: "",
-        addedDate: new Date().toISOString().split("T")[0],
-      });
-      setAddedIds((prev) => new Set([...prev, company.id]));
-    }
-  };
+  const [locationQ, setLocationQ]   = useState("");
+  const [industryQ, setIndustryQ]   = useState("");
+  const [results, setResults]       = useState<BrregEnhet[]>([]);
+  const [total, setTotal]           = useState(0);
+  const [loading, setLoading]       = useState(false);
+  const [error, setError]           = useState("");
+  const [hasSearched, setHasSearched] = useState(false);
+  const [addedIds, setAddedIds]     = useState<Set<string>>(new Set());
+  const [view, setView]             = useState<"list" | "map">("list");
+  const [filterOpen, setFilterOpen] = useState(false);
+  const [sortField, setSortField]   = useState<string | null>(null);
+  const [sortDir, setSortDir]       = useState<"asc" | "desc">("asc");
 
-  const handleSort = (field: keyof Company) => {
-    if (sortField === field) {
-      setSortDir(sortDir === "asc" ? "desc" : "asc");
-    } else {
-      setSortField(field);
-      setSortDir("asc");
-    }
-  };
+  const [filters, setFilters] = useState<Filters>({ ansatte: "all", mva: false });
+  const [pendingFilters, setPendingFilters] = useState<Filters>({ ansatte: "all", mva: false });
 
-  const filteredCompanies = mockCompanies
-    .filter((c) => {
-      const matchLocation = !locationQuery || c.city.toLowerCase().includes(locationQuery.toLowerCase());
-      const matchIndustry =
-        selectedIndustry === "Alle bransjer" ||
-        c.industry.toLowerCase().includes(selectedIndustry.toLowerCase()) ||
-        c.industry.toLowerCase().includes(industryQuery.toLowerCase());
-      const matchEmployee =
-        employeeFilter === "all" ||
-        (employeeFilter === "1-10" && c.employees <= 10) ||
-        (employeeFilter === "11-50" && c.employees > 10 && c.employees <= 50) ||
-        (employeeFilter === "51+" && c.employees > 50);
-      const matchRevenue =
-        revenueFilter === "all" ||
-        (revenueFilter === "under5m" && c.revenue < 5000000) ||
-        (revenueFilter === "5-20m" && c.revenue >= 5000000 && c.revenue < 20000000) ||
-        (revenueFilter === "over20m" && c.revenue >= 20000000);
-      return matchLocation && matchIndustry && matchEmployee && matchRevenue;
-    })
-    .sort((a, b) => {
-      if (!sortField) return 0;
-      const aVal = a[sortField];
-      const bVal = b[sortField];
-      if (typeof aVal === "number" && typeof bVal === "number") {
-        return sortDir === "asc" ? aVal - bVal : bVal - aVal;
+  const filterRef = useRef<HTMLDivElement>(null);
+
+  // Close filter on outside click
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (filterRef.current && !filterRef.current.contains(e.target as Node)) {
+        setFilterOpen(false);
       }
-      return sortDir === "asc"
-        ? String(aVal).localeCompare(String(bVal))
-        : String(bVal).localeCompare(String(aVal));
-    });
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
 
-  const SortIcon = ({ field }: { field: keyof Company }) => (
-    <span className="ml-1 inline-flex flex-col">
-      <ChevronUp className={`w-2.5 h-2.5 ${sortField === field && sortDir === "asc" ? "text-green-500" : "text-gray-300"}`} />
-      <ChevronDown className={`w-2.5 h-2.5 ${sortField === field && sortDir === "desc" ? "text-green-500" : "text-gray-300"}`} />
-    </span>
+  const activeFilterCount = (filters.ansatte !== "all" ? 1 : 0) + (filters.mva ? 1 : 0);
+
+  const doSearch = useCallback(async (loc: string, ind: string, f: Filters) => {
+    if (!loc && !ind) return;
+    setLoading(true);
+    setError("");
+    setHasSearched(true);
+
+    const params = new URLSearchParams({ size: "40" });
+    if (loc) params.set("kommunenavn", toKommune(loc));
+    if (ind) {
+      const nace = guessNace(ind);
+      if (nace) params.set("naeringskode", nace);
+      else params.set("navn", ind);
+    }
+    if (f.ansatte !== "all") {
+      const [fra, til] = {
+        "1-10": ["1", "10"], "11-50": ["11", "50"],
+        "51-200": ["51", "200"], "200+": ["200", "99999"],
+      }[f.ansatte] ?? [];
+      if (fra) params.set("fraAntallAnsatte", fra);
+      if (til) params.set("tilAntallAnsatte", til);
+    }
+
+    try {
+      const res  = await fetch(`/api/brreg?${params}`);
+      const data = await res.json();
+      const enheter: BrregEnhet[] = data?._embedded?.enheter ?? [];
+      setTotal(data?.page?.totalElements ?? enheter.length);
+
+      // Fetch daglig leder for first 15 in parallel
+      const withLeaders = await Promise.all(
+        enheter.slice(0, 15).map(async (e) => {
+          try {
+            const r = await fetch(`/api/brreg/roller?orgnr=${e.organisasjonsnummer}`);
+            const d = await r.json();
+            const groups: any[] = d?.rollegrupper ?? [];
+            const dagl = groups
+              .flatMap((g: any) => g.roller ?? [])
+              .find((r: any) => r.type?.kode === "DAGL" || r.type?.kode === "LEDE");
+            if (dagl?.person?.navn) {
+              const n = dagl.person.navn;
+              e.dagligLeder = capitalize(`${n.fornavn ?? ""} ${n.etternavn ?? ""}`).trim();
+            }
+          } catch {}
+          return e;
+        })
+      );
+      // rest without leader
+      setResults([...withLeaders, ...enheter.slice(15)]);
+    } catch (err) {
+      setError("Kunne ikke laste data fra Brønnøysundregisteret. Sjekk nettilkoblingen.");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const handleSearch = (e?: React.FormEvent) => {
+    e?.preventDefault();
+    setFilters(pendingFilters);
+    doSearch(locationQ, industryQ, pendingFilters);
+  };
+
+  const applyFilters = () => {
+    setFilters(pendingFilters);
+    setFilterOpen(false);
+    if (hasSearched) doSearch(locationQ, industryQ, pendingFilters);
+  };
+
+  const handleSort = (field: string) => {
+    if (sortField === field) setSortDir(d => d === "asc" ? "desc" : "asc");
+    else { setSortField(field); setSortDir("asc"); }
+  };
+
+  const sorted = [...results].sort((a, b) => {
+    if (!sortField) return 0;
+    let av: any, bv: any;
+    if (sortField === "navn") { av = a.navn; bv = b.navn; }
+    else if (sortField === "ansatte") { av = a.antallAnsatte ?? 0; bv = b.antallAnsatte ?? 0; }
+    else if (sortField === "sted") { av = a.forretningsadresse?.poststed ?? ""; bv = b.forretningsadresse?.poststed ?? ""; }
+    if (typeof av === "number") return sortDir === "asc" ? av - bv : bv - av;
+    return sortDir === "asc" ? String(av).localeCompare(String(bv)) : String(bv).localeCompare(String(av));
+  });
+
+  const handleAdd = (e: BrregEnhet) => {
+    if (existingIds.has(e.organisasjonsnummer) || addedIds.has(e.organisasjonsnummer)) return;
+    addLead({
+      id: e.organisasjonsnummer,
+      name: capitalize(e.navn),
+      orgNumber: e.organisasjonsnummer,
+      contactPerson: e.dagligLeder ?? "—",
+      phone: e.telefon ?? "—",
+      email: "—",
+      industry: e.naeringskode1?.beskrivelse ? capitalize(e.naeringskode1.beskrivelse) : "—",
+      city: e.forretningsadresse?.poststed ? capitalize(e.forretningsadresse.poststed) : "—",
+      address: [
+        ...(e.forretningsadresse?.adresse ?? []),
+        e.forretningsadresse?.postnummer,
+        e.forretningsadresse?.poststed,
+      ].filter(Boolean).join(", "),
+      revenue: 0,
+      employees: e.antallAnsatte ?? 0,
+      lat: 0, lng: 0,
+      status: "Ikke kontaktet",
+      lastContacted: null,
+      assignedTo: "Ola Nordmann",
+      assignedAvatar: "ON",
+      notes: "",
+      addedDate: new Date().toISOString().split("T")[0],
+    });
+    setAddedIds(prev => new Set([...prev, e.organisasjonsnummer]));
+  };
+
+  const SortBtn = ({ field, label }: { field: string; label: string }) => (
+    <button
+      onClick={() => handleSort(field)}
+      style={{
+        display: "inline-flex", alignItems: "center", gap: 4,
+        background: "none", border: "none", cursor: "pointer",
+        fontSize: 11, fontWeight: 600, color: "#6B7280",
+        textTransform: "uppercase", letterSpacing: "0.05em", padding: 0,
+      }}
+    >
+      {label}
+      <span style={{ display: "flex", flexDirection: "column", gap: 1 }}>
+        <ChevronUp size={9} color={sortField === field && sortDir === "asc" ? "#22C55E" : "#D1D5DB"} />
+        <ChevronDown size={9} color={sortField === field && sortDir === "desc" ? "#22C55E" : "#D1D5DB"} />
+      </span>
+    </button>
   );
 
   return (
-    <div>
-      <TopBar title="Leadsøk" subtitle={`${filteredCompanies.length} bedrifter funnet`} />
+    <div style={{ display: "flex", flexDirection: "column", height: "100vh", overflow: "hidden" }}>
+      <TopBar title="Leadsøk" subtitle="Søk i Brønnøysundregisteret" />
 
-      <div className="p-8">
-        {/* Search bar */}
-        <div className="bg-white rounded-xl border border-gray-200 p-5 mb-6" style={{boxShadow: "0 1px 3px rgba(0,0,0,0.08)"}}>
-          <div className="flex flex-col md:flex-row gap-3">
-            <div className="flex-1">
-              <Input
-                placeholder="Søk etter sted (f.eks. Oslo, Bergen)"
-                icon={<MapPin className="w-4 h-4" />}
-                value={locationQuery}
-                onChange={(e) => setLocationQuery(e.target.value)}
-              />
-            </div>
-            <div className="flex-1">
-              <Input
-                placeholder="Søk etter bransje (f.eks. frisør, bygg)"
-                icon={<Building2 className="w-4 h-4" />}
-                value={industryQuery}
-                onChange={(e) => setIndustryQuery(e.target.value)}
-              />
-            </div>
-            <Button variant="primary" size="md" className="px-8">
-              <Search className="w-4 h-4" />
-              Søk
-            </Button>
-            {/* View toggle */}
-            <div className="flex items-center gap-1 bg-gray-100 p-1 rounded-lg">
-              <button
-                onClick={() => setView("list")}
-                className={`p-2 rounded-md transition-all ${view === "list" ? "bg-white shadow-sm text-slate-900" : "text-gray-500 hover:text-slate-700"}`}
-              >
-                <List className="w-4 h-4" />
-              </button>
-              <button
-                onClick={() => setView("map")}
-                className={`p-2 rounded-md transition-all ${view === "map" ? "bg-white shadow-sm text-slate-900" : "text-gray-500 hover:text-slate-700"}`}
-              >
-                <Map className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-        </div>
+      {/* ── Search bar ───────────────────────────────────── */}
+      <div style={{ padding: "16px 24px", borderBottom: "1px solid #E5E7EB", backgroundColor: "white", flexShrink: 0 }}>
+        <form onSubmit={handleSearch} style={{ display: "flex", gap: 10, alignItems: "center" }}>
 
-        <div className="flex gap-6">
-          {/* Filter sidebar */}
-          <div className="w-56 flex-shrink-0 space-y-5">
-            <div className="bg-white rounded-xl border border-gray-200 p-5" style={{boxShadow: "0 1px 3px rgba(0,0,0,0.08)"}}>
-              <h3 className="font-semibold text-sm text-slate-900 flex items-center gap-2 mb-4">
-                <Filter className="w-4 h-4" />
-                Filtre
-              </h3>
-
-              {/* Industry filter */}
-              <div className="mb-4">
-                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Bransje</p>
-                <div className="space-y-1 max-h-48 overflow-y-auto">
-                  {industries.map((ind) => (
-                    <button
-                      key={ind}
-                      onClick={() => setSelectedIndustry(ind)}
-                      className={`w-full text-left px-2.5 py-1.5 rounded-lg text-xs transition-all ${
-                        selectedIndustry === ind
-                          ? "bg-green-50 text-green-700 font-semibold"
-                          : "text-gray-600 hover:bg-gray-50"
-                      }`}
-                    >
-                      {ind}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Employee filter */}
-              <div className="mb-4">
-                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Ansatte</p>
-                <div className="space-y-1">
-                  {[
-                    { value: "all", label: "Alle" },
-                    { value: "1-10", label: "1–10 ansatte" },
-                    { value: "11-50", label: "11–50 ansatte" },
-                    { value: "51+", label: "51+ ansatte" },
-                  ].map((opt) => (
-                    <button
-                      key={opt.value}
-                      onClick={() => setEmployeeFilter(opt.value)}
-                      className={`w-full text-left px-2.5 py-1.5 rounded-lg text-xs transition-all flex items-center gap-2 ${
-                        employeeFilter === opt.value
-                          ? "bg-green-50 text-green-700 font-semibold"
-                          : "text-gray-600 hover:bg-gray-50"
-                      }`}
-                    >
-                      <Users className="w-3 h-3" />
-                      {opt.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Revenue filter */}
-              <div>
-                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Omsetning</p>
-                <div className="space-y-1">
-                  {[
-                    { value: "all", label: "Alle" },
-                    { value: "under5m", label: "Under 5 MNOK" },
-                    { value: "5-20m", label: "5–20 MNOK" },
-                    { value: "over20m", label: "Over 20 MNOK" },
-                  ].map((opt) => (
-                    <button
-                      key={opt.value}
-                      onClick={() => setRevenueFilter(opt.value)}
-                      className={`w-full text-left px-2.5 py-1.5 rounded-lg text-xs transition-all flex items-center gap-2 ${
-                        revenueFilter === opt.value
-                          ? "bg-green-50 text-green-700 font-semibold"
-                          : "text-gray-600 hover:bg-gray-50"
-                      }`}
-                    >
-                      <TrendingUp className="w-3 h-3" />
-                      {opt.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
+          {/* Location */}
+          <div style={{ flex: 1, position: "relative" }}>
+            <MapPin size={15} color="#9CA3AF" style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }} />
+            <input
+              value={locationQ}
+              onChange={e => setLocationQ(e.target.value)}
+              placeholder="By eller kommune (f.eks. Oslo, Bergen)"
+              style={{
+                width: "100%", padding: "10px 12px 10px 36px",
+                border: "1.5px solid #E5E7EB", borderRadius: 10,
+                fontSize: 14, color: "#111827", outline: "none",
+                fontFamily: "inherit", backgroundColor: "#FAFAFA",
+              }}
+              onFocus={e => (e.currentTarget.style.borderColor = "#22C55E")}
+              onBlur={e => (e.currentTarget.style.borderColor = "#E5E7EB")}
+            />
           </div>
 
-          {/* Main content */}
-          <div className="flex-1">
-            {view === "list" ? (
-              <div className="bg-white rounded-xl border border-gray-200 overflow-hidden" style={{boxShadow: "0 1px 3px rgba(0,0,0,0.08)"}}>
-                <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-                  <p className="text-sm text-gray-500">
-                    Viser <span className="font-semibold text-slate-900">{filteredCompanies.length}</span> bedrifter
+          {/* Industry */}
+          <div style={{ flex: 1, position: "relative" }}>
+            <Building2 size={15} color="#9CA3AF" style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }} />
+            <input
+              value={industryQ}
+              onChange={e => setIndustryQ(e.target.value)}
+              placeholder="Bransje (f.eks. frisør, bygg, regnskap)"
+              style={{
+                width: "100%", padding: "10px 12px 10px 36px",
+                border: "1.5px solid #E5E7EB", borderRadius: 10,
+                fontSize: 14, color: "#111827", outline: "none",
+                fontFamily: "inherit", backgroundColor: "#FAFAFA",
+              }}
+              onFocus={e => (e.currentTarget.style.borderColor = "#22C55E")}
+              onBlur={e => (e.currentTarget.style.borderColor = "#E5E7EB")}
+            />
+          </div>
+
+          {/* Search button */}
+          <button type="submit" style={{
+            display: "inline-flex", alignItems: "center", gap: 7,
+            backgroundColor: "#22C55E", color: "white",
+            fontWeight: 700, fontSize: 14, padding: "10px 20px",
+            borderRadius: 10, border: "none", cursor: "pointer",
+            flexShrink: 0, fontFamily: "inherit",
+          }}>
+            <Search size={15} />
+            Søk
+          </button>
+
+          {/* Filter popup */}
+          <div ref={filterRef} style={{ position: "relative", flexShrink: 0 }}>
+            <button
+              type="button"
+              onClick={() => { setPendingFilters(filters); setFilterOpen(o => !o); }}
+              style={{
+                display: "inline-flex", alignItems: "center", gap: 7,
+                backgroundColor: filterOpen ? "#F0FDF4" : "white",
+                color: activeFilterCount > 0 ? "#15803D" : "#374151",
+                fontWeight: 600, fontSize: 14, padding: "10px 16px",
+                borderRadius: 10, border: `1.5px solid ${activeFilterCount > 0 ? "#22C55E" : "#E5E7EB"}`,
+                cursor: "pointer", fontFamily: "inherit",
+              }}
+            >
+              <SlidersHorizontal size={15} />
+              Filtre
+              {activeFilterCount > 0 && (
+                <span style={{
+                  backgroundColor: "#22C55E", color: "white",
+                  fontSize: 11, fontWeight: 700, width: 18, height: 18,
+                  borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center",
+                }}>{activeFilterCount}</span>
+              )}
+            </button>
+
+            {filterOpen && (
+              <div style={{
+                position: "absolute", top: "calc(100% + 8px)", right: 0,
+                backgroundColor: "white", borderRadius: 16,
+                border: "1px solid #E5E7EB",
+                boxShadow: "0 16px 48px rgba(0,0,0,0.14)", zIndex: 50,
+                width: 300, padding: 20,
+              }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+                  <p style={{ fontWeight: 700, fontSize: 14, color: "#111827", margin: 0 }}>Filtre</p>
+                  <button onClick={() => setFilterOpen(false)} style={{ background: "none", border: "none", cursor: "pointer", color: "#9CA3AF" }}>
+                    <X size={16} />
+                  </button>
+                </div>
+
+                {/* Ansatte */}
+                <div style={{ marginBottom: 20 }}>
+                  <p style={{ fontSize: 12, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 10 }}>
+                    Antall ansatte
                   </p>
-                </div>
-
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead>
-                      <tr className="bg-gray-50 border-b border-gray-100">
-                        {[
-                          { label: "Bedriftsnavn", field: "name" as keyof Company },
-                          { label: "Kontaktperson", field: "contactPerson" as keyof Company },
-                          { label: "Telefon", field: null },
-                          { label: "E-post", field: null },
-                          { label: "Bransje", field: "industry" as keyof Company },
-                          { label: "Sted", field: "city" as keyof Company },
-                          { label: "Omsetning", field: "revenue" as keyof Company },
-                          { label: "Ansatte", field: "employees" as keyof Company },
-                          { label: "", field: null },
-                        ].map(({ label, field }) => (
-                          <th
-                            key={label}
-                            className={`px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap ${field ? "cursor-pointer hover:text-slate-700 select-none" : ""}`}
-                            onClick={() => field && handleSort(field)}
-                          >
-                            {label}
-                            {field && <SortIcon field={field} />}
-                          </th>
-                        ))}
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-50">
-                      {filteredCompanies.map((company) => {
-                        const isAdded = existingIds.has(company.id) || addedIds.has(company.id);
-                        return (
-                          <tr key={company.id} className="hover:bg-gray-50 transition-colors">
-                            <td className="px-4 py-3.5">
-                              <div className="flex items-center gap-2.5">
-                                <div className="w-8 h-8 bg-slate-100 rounded-lg flex items-center justify-center text-xs font-bold text-slate-600 flex-shrink-0">
-                                  {company.name.substring(0, 2).toUpperCase()}
-                                </div>
-                                <div>
-                                  <p className="text-sm font-semibold text-slate-900 whitespace-nowrap">{company.name}</p>
-                                  <p className="text-xs text-gray-400">{company.orgNumber}</p>
-                                </div>
-                              </div>
-                            </td>
-                            <td className="px-4 py-3.5 text-sm text-gray-600 whitespace-nowrap">{company.contactPerson}</td>
-                            <td className="px-4 py-3.5">
-                              <a href={`tel:${company.phone}`} className="text-sm text-gray-600 hover:text-green-600 flex items-center gap-1.5 whitespace-nowrap">
-                                <Phone className="w-3 h-3" />
-                                {company.phone}
-                              </a>
-                            </td>
-                            <td className="px-4 py-3.5">
-                              <a href={`mailto:${company.email}`} className="text-sm text-gray-600 hover:text-green-600 flex items-center gap-1.5 whitespace-nowrap">
-                                <Mail className="w-3 h-3" />
-                                {company.email}
-                              </a>
-                            </td>
-                            <td className="px-4 py-3.5">
-                              <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-md font-medium whitespace-nowrap">
-                                {company.industry}
-                              </span>
-                            </td>
-                            <td className="px-4 py-3.5 text-sm text-gray-600 whitespace-nowrap">
-                              <div className="flex items-center gap-1">
-                                <MapPin className="w-3 h-3 text-gray-400" />
-                                {company.city}
-                              </div>
-                            </td>
-                            <td className="px-4 py-3.5 text-sm font-medium text-slate-700 whitespace-nowrap">
-                              {formatCurrency(company.revenue).replace("NOK", "kr").replace(/\s/g, " ")}
-                            </td>
-                            <td className="px-4 py-3.5 text-sm text-gray-600 whitespace-nowrap">
-                              <div className="flex items-center gap-1">
-                                <Users className="w-3 h-3 text-gray-400" />
-                                {company.employees}
-                              </div>
-                            </td>
-                            <td className="px-4 py-3.5">
-                              <Button
-                                variant={isAdded ? "secondary" : "primary"}
-                                size="sm"
-                                onClick={() => !isAdded && handleAddLead(company)}
-                                disabled={isAdded}
-                                className="whitespace-nowrap"
-                              >
-                                {isAdded ? (
-                                  <>
-                                    <Check className="w-3 h-3" />
-                                    Lagt til
-                                  </>
-                                ) : (
-                                  <>
-                                    <Plus className="w-3 h-3" />
-                                    Legg til
-                                  </>
-                                )}
-                              </Button>
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-
-                  {filteredCompanies.length === 0 && (
-                    <div className="text-center py-16">
-                      <Search className="w-10 h-10 text-gray-300 mx-auto mb-3" />
-                      <p className="text-gray-500 font-medium">Ingen bedrifter funnet</p>
-                      <p className="text-sm text-gray-400 mt-1">Prøv å endre søkeord eller filtre</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-            ) : (
-              /* Map view */
-              <div className="bg-white rounded-xl border border-gray-200 overflow-hidden" style={{boxShadow: "0 1px 3px rgba(0,0,0,0.08)", height: "600px"}}>
-                <div className="relative w-full h-full bg-gradient-to-b from-blue-50 to-green-50 flex items-center justify-center">
-                  {/* Norway map placeholder */}
-                  <div className="text-center">
-                    <div className="w-64 h-80 relative mx-auto">
-                      {/* Simplified Norway shape */}
-                      <svg viewBox="0 0 200 280" className="w-full h-full opacity-20">
-                        <path
-                          d="M100,10 L130,30 L150,60 L160,100 L155,140 L165,170 L150,200 L130,230 L100,260 L80,250 L60,220 L50,190 L60,160 L45,130 L50,100 L60,70 L80,40 Z"
-                          fill="#0F1729"
-                          stroke="#0F1729"
-                          strokeWidth="2"
-                        />
-                      </svg>
-                    </div>
-                    <p className="text-gray-500 font-medium mt-4">Kartvisning</p>
-                    <p className="text-sm text-gray-400">Google Maps API trengs for live kart</p>
-                    <p className="text-sm text-gray-400 mt-1">
-                      {filteredCompanies.length} bedrifter funnet i søket
-                    </p>
-                  </div>
-
-                  {/* Company pins overlay */}
-                  <div className="absolute inset-0 pointer-events-none">
-                    {filteredCompanies.slice(0, 8).map((company, i) => (
-                      <div
-                        key={company.id}
-                        className="absolute pointer-events-auto"
-                        style={{
-                          left: `${20 + (i % 4) * 20}%`,
-                          top: `${20 + Math.floor(i / 4) * 30}%`,
-                        }}
-                      >
-                        <div className="group relative">
-                          <div className="w-8 h-8 bg-green-500 rounded-full border-2 border-white shadow-lg flex items-center justify-center cursor-pointer hover:scale-110 transition-transform">
-                            <MapPin className="w-4 h-4 text-white fill-white" />
-                          </div>
-                          {/* Tooltip */}
-                          <div className="absolute bottom-10 left-1/2 -translate-x-1/2 bg-white rounded-lg shadow-lg border border-gray-200 p-3 w-48 hidden group-hover:block z-10">
-                            <p className="font-semibold text-xs text-slate-900">{company.name}</p>
-                            <p className="text-xs text-gray-500">{company.city}</p>
-                            <p className="text-xs text-gray-500">{company.industry}</p>
-                            <Button
-                              variant="primary"
-                              size="sm"
-                              className="mt-2 w-full justify-center text-xs"
-                              onClick={() => handleAddLead(company)}
-                            >
-                              <Plus className="w-3 h-3" />
-                              Legg til lead
-                            </Button>
-                          </div>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                    {[
+                      { v: "all", l: "Alle" },
+                      { v: "1-10", l: "1–10 ansatte" },
+                      { v: "11-50", l: "11–50 ansatte" },
+                      { v: "51-200", l: "51–200 ansatte" },
+                      { v: "200+", l: "200+ ansatte" },
+                    ].map(({ v, l }) => (
+                      <label key={v} style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer", fontSize: 14, color: "#374151" }}>
+                        <div onClick={() => setPendingFilters(f => ({ ...f, ansatte: v }))} style={{
+                          width: 18, height: 18, borderRadius: "50%", border: "2px solid",
+                          borderColor: pendingFilters.ansatte === v ? "#22C55E" : "#D1D5DB",
+                          backgroundColor: pendingFilters.ansatte === v ? "#22C55E" : "white",
+                          display: "flex", alignItems: "center", justifyContent: "center",
+                          flexShrink: 0, cursor: "pointer",
+                        }}>
+                          {pendingFilters.ansatte === v && <div style={{ width: 6, height: 6, borderRadius: "50%", backgroundColor: "white" }} />}
                         </div>
-                      </div>
+                        {l}
+                      </label>
                     ))}
                   </div>
+                </div>
+
+                {/* MVA */}
+                <div style={{ marginBottom: 20 }}>
+                  <p style={{ fontSize: 12, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 10 }}>
+                    MVA-registrert
+                  </p>
+                  <label style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer", fontSize: 14, color: "#374151" }}>
+                    <div
+                      onClick={() => setPendingFilters(f => ({ ...f, mva: !f.mva }))}
+                      style={{
+                        width: 38, height: 22, borderRadius: 11,
+                        backgroundColor: pendingFilters.mva ? "#22C55E" : "#E5E7EB",
+                        position: "relative", cursor: "pointer", transition: "background-color 0.2s",
+                        flexShrink: 0,
+                      }}
+                    >
+                      <div style={{
+                        position: "absolute", top: 3, left: pendingFilters.mva ? 19 : 3,
+                        width: 16, height: 16, borderRadius: "50%", backgroundColor: "white",
+                        boxShadow: "0 1px 4px rgba(0,0,0,0.2)", transition: "left 0.2s",
+                      }} />
+                    </div>
+                    Kun MVA-registrerte
+                  </label>
+                </div>
+
+                {/* Actions */}
+                <div style={{ display: "flex", gap: 8 }}>
+                  <button
+                    onClick={() => setPendingFilters({ ansatte: "all", mva: false })}
+                    style={{
+                      flex: 1, padding: "9px 0", borderRadius: 8,
+                      border: "1.5px solid #E5E7EB", backgroundColor: "white",
+                      fontSize: 13, fontWeight: 600, cursor: "pointer", color: "#374151", fontFamily: "inherit",
+                    }}
+                  >Nullstill</button>
+                  <button
+                    onClick={applyFilters}
+                    style={{
+                      flex: 2, padding: "9px 0", borderRadius: 8,
+                      border: "none", backgroundColor: "#22C55E",
+                      fontSize: 13, fontWeight: 700, cursor: "pointer", color: "white", fontFamily: "inherit",
+                    }}
+                  >Bruk filtre</button>
                 </div>
               </div>
             )}
           </div>
-        </div>
+
+          {/* View toggle */}
+          <div style={{ display: "flex", backgroundColor: "#F3F4F6", borderRadius: 10, padding: 3, gap: 2, flexShrink: 0 }}>
+            {([["list", List], ["map", Map]] as const).map(([v, Icon]) => (
+              <button
+                key={v}
+                type="button"
+                onClick={() => setView(v)}
+                style={{
+                  padding: "7px 10px", borderRadius: 8, border: "none", cursor: "pointer",
+                  backgroundColor: view === v ? "white" : "transparent",
+                  boxShadow: view === v ? "0 1px 4px rgba(0,0,0,0.08)" : "none",
+                  color: view === v ? "#111827" : "#9CA3AF",
+                  transition: "all 0.15s",
+                }}
+              >
+                <Icon size={16} />
+              </button>
+            ))}
+          </div>
+        </form>
+      </div>
+
+      {/* ── Results area ─────────────────────────────────── */}
+      <div style={{ flex: 1, overflow: "auto", padding: "20px 24px", backgroundColor: "#F8F9FC" }}>
+
+        {/* Empty state */}
+        {!hasSearched && !loading && (
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100%", gap: 12 }}>
+            <div style={{ width: 64, height: 64, backgroundColor: "#F0FDF4", borderRadius: 20, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <Search size={28} color="#22C55E" />
+            </div>
+            <p style={{ fontSize: 16, fontWeight: 600, color: "#374151", margin: 0 }}>Søk for å finne bedrifter</p>
+            <p style={{ fontSize: 14, color: "#9CA3AF", margin: 0, textAlign: "center", maxWidth: 380 }}>
+              Skriv inn by og bransje over for å søke i Brønnøysundregisteret (Brreg).
+              Over 600 000 norske bedrifter tilgjengelig.
+            </p>
+            <div style={{ display: "flex", gap: 8, marginTop: 8, flexWrap: "wrap", justifyContent: "center" }}>
+              {[["Oslo", "frisør"], ["Bergen", "bygg"], ["Trondheim", "regnskap"], ["Stavanger", "elektro"]].map(([loc, ind]) => (
+                <button key={loc + ind} onClick={() => { setLocationQ(loc); setIndustryQ(ind); doSearch(loc, ind, filters); }}
+                  style={{
+                    padding: "6px 14px", borderRadius: 999, border: "1.5px solid #E5E7EB",
+                    backgroundColor: "white", fontSize: 13, fontWeight: 500, color: "#374151",
+                    cursor: "pointer", fontFamily: "inherit",
+                  }}
+                >{loc} · {ind}</button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Loading */}
+        {loading && (
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "60%", gap: 12 }}>
+            <Loader2 size={32} color="#22C55E" style={{ animation: "spin 1s linear infinite" }} />
+            <p style={{ fontSize: 14, color: "#6B7280", margin: 0 }}>Søker i Brønnøysundregisteret…</p>
+            <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
+          </div>
+        )}
+
+        {/* Error */}
+        {error && !loading && (
+          <div style={{ display: "flex", alignItems: "center", gap: 10, backgroundColor: "#FEF2F2", border: "1px solid #FECACA", borderRadius: 12, padding: "14px 18px", marginBottom: 16 }}>
+            <AlertCircle size={18} color="#DC2626" />
+            <p style={{ fontSize: 14, color: "#DC2626", margin: 0 }}>{error}</p>
+          </div>
+        )}
+
+        {/* Results */}
+        {!loading && hasSearched && !error && (
+          <>
+            {/* Result meta row */}
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
+              <p style={{ fontSize: 13, color: "#6B7280", margin: 0 }}>
+                Viser <strong style={{ color: "#111827" }}>{sorted.length}</strong> av{" "}
+                <strong style={{ color: "#111827" }}>{total.toLocaleString("nb-NO")}</strong> treff fra Brreg
+              </p>
+              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                <div style={{ width: 6, height: 6, backgroundColor: "#22C55E", borderRadius: "50%" }} />
+                <span style={{ fontSize: 12, color: "#6B7280" }}>Sanntidsdata fra Brønnøysundregisteret</span>
+              </div>
+            </div>
+
+            {view === "list" ? (
+              <div style={{ backgroundColor: "white", borderRadius: 14, border: "1px solid #E5E7EB", overflow: "hidden", boxShadow: "0 1px 4px rgba(0,0,0,0.05)" }}>
+                {/* Table header */}
+                <div style={{
+                  display: "grid",
+                  gridTemplateColumns: "2fr 1.4fr 1fr 1.3fr 1.2fr 0.8fr 90px",
+                  padding: "10px 16px",
+                  backgroundColor: "#F9FAFB",
+                  borderBottom: "1px solid #F3F4F6",
+                  gap: 8,
+                }}>
+                  <SortBtn field="navn" label="Bedriftsnavn" />
+                  <span style={{ fontSize: 11, fontWeight: 600, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.05em" }}>Daglig leder</span>
+                  <span style={{ fontSize: 11, fontWeight: 600, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.05em" }}>Telefon</span>
+                  <span style={{ fontSize: 11, fontWeight: 600, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.05em" }}>Bransje</span>
+                  <SortBtn field="sted" label="Sted" />
+                  <SortBtn field="ansatte" label="Ansatte" />
+                  <span />
+                </div>
+
+                {/* Rows */}
+                {sorted.length === 0 ? (
+                  <div style={{ padding: "48px 24px", textAlign: "center" }}>
+                    <p style={{ fontSize: 15, color: "#9CA3AF", margin: 0 }}>Ingen bedrifter funnet med disse søkekriteriene.</p>
+                    <p style={{ fontSize: 13, color: "#D1D5DB", margin: "6px 0 0" }}>Prøv et annet stedsnavn eller en annen bransje.</p>
+                  </div>
+                ) : (
+                  sorted.map((enhet, idx) => {
+                    const alreadyAdded = existingIds.has(enhet.organisasjonsnummer) || addedIds.has(enhet.organisasjonsnummer);
+                    const adr = enhet.forretningsadresse;
+                    const poststed = adr?.poststed ? capitalize(adr.poststed) : "—";
+                    const bransje = enhet.naeringskode1?.beskrivelse ? capitalize(enhet.naeringskode1.beskrivelse) : "—";
+                    const initials = enhet.navn.trim().split(/\s+/).slice(0,2).map(w => w[0]).join("").toUpperCase();
+
+                    return (
+                      <div key={enhet.organisasjonsnummer} style={{
+                        display: "grid",
+                        gridTemplateColumns: "2fr 1.4fr 1fr 1.3fr 1.2fr 0.8fr 90px",
+                        padding: "12px 16px",
+                        borderBottom: idx < sorted.length - 1 ? "1px solid #F9FAFB" : "none",
+                        alignItems: "center", gap: 8,
+                        transition: "background-color 0.1s",
+                        backgroundColor: "white",
+                      }}
+                        onMouseEnter={e => (e.currentTarget.style.backgroundColor = "#FAFAFA")}
+                        onMouseLeave={e => (e.currentTarget.style.backgroundColor = "white")}
+                      >
+                        {/* Name */}
+                        <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0 }}>
+                          <div style={{
+                            width: 34, height: 34, borderRadius: 8,
+                            backgroundColor: "#F1F5F9", flexShrink: 0,
+                            display: "flex", alignItems: "center", justifyContent: "center",
+                            fontSize: 11, fontWeight: 700, color: "#475569",
+                          }}>{initials}</div>
+                          <div style={{ minWidth: 0 }}>
+                            <p style={{ fontSize: 13, fontWeight: 600, color: "#111827", margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                              {capitalize(enhet.navn)}
+                            </p>
+                            <p style={{ fontSize: 11, color: "#9CA3AF", margin: 0 }}>{enhet.organisasjonsnummer}</p>
+                          </div>
+                        </div>
+
+                        {/* Daglig leder */}
+                        <p style={{ fontSize: 13, color: "#374151", margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                          {enhet.dagligLeder ?? <span style={{ color: "#D1D5DB" }}>—</span>}
+                        </p>
+
+                        {/* Telefon */}
+                        <p style={{ fontSize: 13, color: "#6B7280", margin: 0 }}>
+                          {enhet.telefon ? (
+                            <a href={`tel:${enhet.telefon}`} style={{ color: "#374151", textDecoration: "none", display: "flex", alignItems: "center", gap: 4 }}>
+                              <Phone size={12} />{enhet.telefon}
+                            </a>
+                          ) : <span style={{ color: "#D1D5DB" }}>—</span>}
+                        </p>
+
+                        {/* Bransje */}
+                        <div style={{ minWidth: 0 }}>
+                          <span style={{
+                            fontSize: 11, fontWeight: 500, padding: "3px 8px",
+                            borderRadius: 6, backgroundColor: "#F1F5F9", color: "#475569",
+                            whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+                            display: "inline-block", maxWidth: "100%",
+                          }}>{bransje}</span>
+                        </div>
+
+                        {/* Sted */}
+                        <p style={{ fontSize: 13, color: "#374151", margin: 0, display: "flex", alignItems: "center", gap: 4 }}>
+                          <MapPin size={11} color="#9CA3AF" style={{ flexShrink: 0 }} />
+                          {poststed}
+                        </p>
+
+                        {/* Ansatte */}
+                        <p style={{ fontSize: 13, color: "#374151", margin: 0, display: "flex", alignItems: "center", gap: 4 }}>
+                          <Users size={11} color="#9CA3AF" />
+                          {enhet.antallAnsatte ?? "—"}
+                        </p>
+
+                        {/* CTA */}
+                        <button
+                          onClick={() => handleAdd(enhet)}
+                          disabled={alreadyAdded}
+                          style={{
+                            display: "inline-flex", alignItems: "center", gap: 5,
+                            padding: "7px 12px", borderRadius: 8, border: "none",
+                            backgroundColor: alreadyAdded ? "#F0FDF4" : "#22C55E",
+                            color: alreadyAdded ? "#16A34A" : "white",
+                            fontSize: 12, fontWeight: 600, cursor: alreadyAdded ? "default" : "pointer",
+                            fontFamily: "inherit", flexShrink: 0,
+                          }}
+                        >
+                          {alreadyAdded ? <><Check size={12} /> Lagt til</> : <><Plus size={12} /> Legg til</>}
+                        </button>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+            ) : (
+              /* Map view */
+              <div style={{
+                backgroundColor: "white", borderRadius: 14, border: "1px solid #E5E7EB",
+                overflow: "hidden", height: 480, position: "relative",
+                boxShadow: "0 1px 4px rgba(0,0,0,0.05)",
+              }}>
+                <div style={{
+                  position: "absolute", inset: 0,
+                  background: "linear-gradient(135deg, #E8F5E9 0%, #E3F2FD 100%)",
+                  display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 12,
+                }}>
+                  <Map size={40} color="#9CA3AF" />
+                  <p style={{ fontSize: 15, fontWeight: 600, color: "#6B7280", margin: 0 }}>Kartvisning</p>
+                  <p style={{ fontSize: 13, color: "#9CA3AF", margin: 0, textAlign: "center", maxWidth: 320 }}>
+                    Integrer Google Maps eller Mapbox API for interaktivt kart.
+                    {sorted.length > 0 && ` ${sorted.length} bedrifter er klar til å vises.`}
+                  </p>
+                </div>
+                {/* Overlapping pins */}
+                {sorted.slice(0,10).map((e, i) => (
+                  <div key={e.organisasjonsnummer} style={{
+                    position: "absolute",
+                    left: `${15 + (i % 5) * 18}%`,
+                    top: `${20 + Math.floor(i / 5) * 35}%`,
+                    zIndex: 10,
+                  }}>
+                    <div style={{
+                      width: 36, height: 36, borderRadius: "50%",
+                      backgroundColor: "#22C55E", border: "3px solid white",
+                      boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      cursor: "pointer", position: "relative",
+                    }}
+                      title={capitalize(e.navn)}
+                    >
+                      <MapPin size={16} color="white" fill="white" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </>
+        )}
       </div>
     </div>
   );
