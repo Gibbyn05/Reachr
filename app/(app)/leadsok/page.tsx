@@ -57,6 +57,17 @@ const INDUSTRY_CATEGORIES: { label: string; nace: string }[] = [
   { label: "Juridisk & konsulentvirksomhet", nace: "70" },
 ];
 
+/** Map a NACE code (e.g. "47.110") to the broad category label */
+function naceToCategory(kode: string | undefined, beskrivelse: string | undefined): string {
+  if (!kode) return beskrivelse ? capitalize(beskrivelse) : "—";
+  const prefix2 = kode.slice(0, 2);
+  const prefix1 = kode.slice(0, 1);
+  const cat =
+    INDUSTRY_CATEGORIES.find(c => c.nace && prefix2 === c.nace) ??
+    INDUSTRY_CATEGORIES.find(c => c.nace && prefix1 === c.nace);
+  return cat ? cat.label : (beskrivelse ? capitalize(beskrivelse) : "—");
+}
+
 const NACE_MAP: Record<string, string> = {
   frisør: "96.021", frisørsalong: "96.021", hår: "96.021",
   regnskap: "69.201", revisjon: "69.202", bokføring: "69.201",
@@ -322,7 +333,7 @@ export default function LeadsokPage() {
       contactPerson: e.dagligLeder ?? "—",
       phone: e.telefon ?? enriched[e.organisasjonsnummer]?.phone ?? "—",
       email: "—",
-      industry: e.naeringskode1?.beskrivelse ? capitalize(e.naeringskode1.beskrivelse) : "—",
+      industry: naceToCategory(e.naeringskode1?.kode, e.naeringskode1?.beskrivelse),
       city: e.forretningsadresse?.poststed ? capitalize(e.forretningsadresse.poststed) : "—",
       address: [
         ...(e.forretningsadresse?.adresse ?? []),
@@ -682,7 +693,7 @@ export default function LeadsokPage() {
                     const alreadyAdded = existingIds.has(enhet.organisasjonsnummer) || addedIds.has(enhet.organisasjonsnummer);
                     const adr = enhet.forretningsadresse;
                     const poststed = adr?.poststed ? capitalize(adr.poststed) : "—";
-                    const bransje = enhet.naeringskode1?.beskrivelse ? capitalize(enhet.naeringskode1.beskrivelse) : "—";
+                    const bransje = naceToCategory(enhet.naeringskode1?.kode, enhet.naeringskode1?.beskrivelse);
                     const initials = enhet.navn.trim().split(/\s+/).slice(0,2).map(w => w[0]).join("").toUpperCase();
 
                     return (

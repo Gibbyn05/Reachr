@@ -77,6 +77,23 @@ async function fetchPage(url: string): Promise<string | null> {
   }
 }
 
+/** Try Brreg's own entity record — returns telefon/mobil as structured JSON */
+async function tryBrreg(orgnr: string): Promise<string | null> {
+  try {
+    const res = await fetch(
+      `https://data.brreg.no/enhetsregisteret/api/enheter/${orgnr}`,
+      { headers: { Accept: "application/json" }, signal: AbortSignal.timeout(4000) }
+    );
+    if (!res.ok) return null;
+    const data = await res.json();
+    const raw = data.telefon ?? data.mobil ?? null;
+    if (!raw) return null;
+    return formatNO(String(raw).replace(/\s/g, ""));
+  } catch {
+    return null;
+  }
+}
+
 async function tryGulesider(orgnr: string): Promise<string | null> {
   const html = await fetchPage(`https://www.gulesider.no/bedrift/${orgnr}`);
   return html ? extractPhone(html) : null;
@@ -111,12 +128,13 @@ export async function GET(request: NextRequest) {
   }
 
   // Run all direct-lookup sources in parallel for speed
-  const [fromGulesider, from1881] = await Promise.all([
+  const [fromBrreg, fromGulesider, from1881] = await Promise.all([
+    tryBrreg(orgnr),
     tryGulesider(orgnr),
     try1881(orgnr),
   ]);
 
-  let phone = fromGulesider ?? from1881;
+  let phone = fromBrreg ?? fromGulesider ?? from1881;
 
   // If direct lookups failed, try name-based search in parallel
   if (!phone && name) {
