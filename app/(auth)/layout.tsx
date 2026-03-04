@@ -7,7 +7,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
       {/* Simple auth navbar */}
       <nav className="bg-white border-b border-gray-100 px-6 py-4">
         <Link href="/" className="flex items-center gap-2 w-fit">
-          <div className="w-7 h-7 bg-green-500 rounded-md flex items-center justify-center">
+          <div className="w-7 h-7 bg-[#2563EB] rounded-md flex items-center justify-center">
             <Zap className="w-3.5 h-3.5 text-white fill-white" />
           </div>
           <span className="font-bold text-lg text-[#0F1729] tracking-tight">Reachr</span>

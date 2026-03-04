@@ -12,8 +12,8 @@ const features = [
   },
   {
     Icon: Database,
-    iconBg: "bg-green-50",
-    iconColor: "text-green-600",
+    iconBg: "bg-blue-50",
+    iconColor: "text-blue-600",
     title: "CRM-pipeline",
     description: "Hold styr på alle leads gjennom salgsprosessen. Fra første kontakt til signert avtale – samlet i ett system.",
     highlights: ["6 statusnivåer med farger", "Samarbeid i team", "Notater og historikk"],
@@ -41,7 +41,7 @@ export function Features() {
       <div className="mx-auto max-w-6xl">
         {/* Section header */}
         <div className="mx-auto mb-16 max-w-xl text-center">
-          <span className="text-xs font-bold uppercase tracking-widest text-[#22C55E]">
+          <span className="text-xs font-bold uppercase tracking-widest text-[#2563EB]">
             Funksjoner
           </span>
           <h2 className="mt-3 text-3xl sm:text-4xl font-extrabold tracking-tight text-[#0F1729]">
@@ -68,7 +68,7 @@ export function Features() {
               <ul className="flex flex-col gap-2.5">
                 {highlights.map((h) => (
                   <li key={h} className="flex items-center gap-2.5 text-sm text-gray-600">
-                    <div className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#22C55E]" />
+                    <div className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#2563EB]" />
                     {h}
                   </li>
                 ))}
@@ -81,7 +81,7 @@ export function Features() {
         <div className="mt-16 grid grid-cols-2 gap-6 rounded-2xl bg-[#0F1729] px-10 py-12 sm:grid-cols-4">
           {stats.map(({ value, label }) => (
             <div key={label} className="text-center">
-              <p className="text-3xl font-extrabold text-[#4ADE80]">{value}</p>
+              <p className="text-3xl font-extrabold text-[#60A5FA]">{value}</p>
               <p className="mt-1.5 text-xs text-white/55">{label}</p>
             </div>
           ))}

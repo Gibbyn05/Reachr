@@ -28,7 +28,7 @@ export function Sidebar() {
       {/* Logo */}
       <div className="p-6 border-b border-white/10">
         <Link href="/dashboard" className="flex items-center gap-2.5">
-          <div className="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center">
+          <div className="w-8 h-8 bg-[#2563EB] rounded-lg flex items-center justify-center">
             <Zap className="w-4 h-4 text-white fill-white" />
           </div>
           <span className="text-white font-bold text-xl tracking-tight">Reachr</span>
@@ -53,13 +53,13 @@ export function Sidebar() {
               <Icon
                 className={cn(
                   "w-4.5 h-4.5",
-                  isActive ? "text-green-400" : "text-current"
+                  isActive ? "text-blue-400" : "text-current"
                 )}
                 style={{ width: "18px", height: "18px" }}
               />
               {label}
               {label === "Varsler" && (
-                <span className="ml-auto bg-green-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-semibold">
+                <span className="ml-auto bg-[#2563EB] text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-semibold">
                   3
                 </span>
               )}
@@ -71,7 +71,7 @@ export function Sidebar() {
       {/* Bottom section */}
       <div className="p-4 border-t border-white/10">
         <div className="flex items-center gap-3 px-3 py-2.5 rounded-lg">
-          <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center text-white text-xs font-bold">
+          <div className="w-8 h-8 bg-[#2563EB] rounded-full flex items-center justify-center text-white text-xs font-bold">
             ON
           </div>
           <div className="flex-1 min-w-0">

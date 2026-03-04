@@ -4,14 +4,14 @@
   --color-background: #F8F9FC;
   --color-foreground: #0F1729;
   --color-sidebar: #0F1729;
-  --color-accent: #22C55E;
+  --color-accent: #2563EB;
   --color-primary: #0F1729;
   --color-muted: #F3F4F6;
   --color-muted-foreground: #6B7280;
   --color-card: #ffffff;
   --color-card-foreground: #0F1729;
   --color-border: #E5E7EB;
-  --color-ring: #22C55E;
+  --color-ring: #2563EB;
   --font-family-sans: 'Inter', system-ui, sans-serif;
 
   /* Animations */
@@ -34,8 +34,8 @@ body {
 
 /* CSS vars for Glow component radial gradients */
 :root {
-  --brand: 142 72% 46%;
-  --brand-foreground: 142 72% 59%;
+  --brand: 220 90% 56%;
+  --brand-foreground: 217 91% 70%;
 }
 
 /* Animation delay utilities */

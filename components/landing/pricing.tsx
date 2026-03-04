@@ -56,7 +56,7 @@ export function Pricing() {
 
         {/* Header */}
         <div style={{ textAlign: "center", maxWidth: 600, margin: "0 auto 64px" }}>
-          <span style={{ fontSize: 13, fontWeight: 700, color: "#22C55E", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+          <span style={{ fontSize: 13, fontWeight: 700, color: "#2563EB", textTransform: "uppercase", letterSpacing: "0.08em" }}>
             Priser
           </span>
           <h2 style={{ fontSize: "clamp(28px, 3.5vw, 42px)", fontWeight: 800, color: "#0F1729", letterSpacing: "-0.8px", marginTop: 12, marginBottom: 16 }}>
@@ -74,14 +74,14 @@ export function Pricing() {
               position: "relative",
               backgroundColor: "white",
               borderRadius: 20,
-              border: plan.popular ? "2px solid #22C55E" : "2px solid #E5E7EB",
+              border: plan.popular ? "2px solid #2563EB" : "2px solid #E5E7EB",
               padding: "28px 24px",
-              boxShadow: plan.popular ? "0 8px 32px rgba(34,197,94,0.12)" : "0 1px 4px rgba(0,0,0,0.06)",
+              boxShadow: plan.popular ? "0 8px 32px rgba(37,99,235,0.12)" : "0 1px 4px rgba(0,0,0,0.06)",
             }}>
               {plan.popular && (
                 <div style={{
                   position: "absolute", top: -14, left: "50%", transform: "translateX(-50%)",
-                  backgroundColor: "#22C55E", color: "white",
+                  backgroundColor: "#2563EB", color: "white",
                   fontSize: 12, fontWeight: 700, padding: "4px 14px", borderRadius: 999,
                   display: "flex", alignItems: "center", gap: 4, whiteSpace: "nowrap",
                 }}>
@@ -106,7 +106,7 @@ export function Pricing() {
               <ul style={{ listStyle: "none", padding: 0, margin: "0 0 24px", display: "flex", flexDirection: "column", gap: 10 }}>
                 {plan.features.map(f => (
                   <li key={f} style={{ display: "flex", alignItems: "flex-start", gap: 10, fontSize: 14, color: "#4B5563" }}>
-                    <Check size={15} color="#22C55E" style={{ flexShrink: 0, marginTop: 1 }} />
+                    <Check size={15} color="#2563EB" style={{ flexShrink: 0, marginTop: 1 }} />
                     {f}
                   </li>
                 ))}
@@ -116,7 +116,7 @@ export function Pricing() {
                 display: "block", textAlign: "center",
                 padding: "11px 0", borderRadius: 10,
                 fontWeight: 700, fontSize: 14, textDecoration: "none",
-                backgroundColor: plan.popular ? "#22C55E" : "white",
+                backgroundColor: plan.popular ? "#2563EB" : "white",
                 color: plan.popular ? "white" : "#0F1729",
                 border: plan.popular ? "none" : "1.5px solid #E5E7EB",
                 transition: "background-color 0.15s",

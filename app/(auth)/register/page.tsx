@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { ArrowRight, Check, Users, Building2, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { createClient } from "@/lib/supabase/client";
 
 const userCountOptions = [
   { value: "1", label: "1 bruker", price: "249 kr/mnd" },
@@ -17,6 +18,7 @@ export default function RegisterPage() {
   const router = useRouter();
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -31,21 +33,43 @@ export default function RegisterPage() {
       setStep(2);
       return;
     }
+
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 1000));
+    setError(null);
+
+    const supabase = createClient();
+    const { error } = await supabase.auth.signUp({
+      email: form.email,
+      password: form.password,
+      options: {
+        data: {
+          full_name: form.name,
+          company: form.company,
+          user_count: form.userCount,
+        },
+      },
+    });
+
+    if (error) {
+      setError(error.message);
+      setLoading(false);
+      return;
+    }
+
     router.push("/dashboard");
+    router.refresh();
   };
 
   return (
     <div className="w-full max-w-md">
-      {/* Progress */}
+      {/* Progress steps */}
       <div className="flex items-center justify-center gap-3 mb-8">
         {[1, 2].map((s) => (
           <div key={s} className="flex items-center gap-3">
             <div
               className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold transition-all ${
                 s < step
-                  ? "bg-green-500 text-white"
+                  ? "bg-[#2563EB] text-white"
                   : s === step
                   ? "bg-[#0F1729] text-white"
                   : "bg-gray-200 text-gray-500"
@@ -56,19 +80,25 @@ export default function RegisterPage() {
             <span className={`text-sm font-medium ${s === step ? "text-slate-900" : "text-gray-400"}`}>
               {s === 1 ? "Personlig info" : "Bedrift & plan"}
             </span>
-            {s < 2 && <div className="w-8 h-px bg-gray-200"></div>}
+            {s < 2 && <div className="w-8 h-px bg-gray-200" />}
           </div>
         ))}
       </div>
 
       <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-8">
+        {error && (
+          <div className="mb-4 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+            {error}
+          </div>
+        )}
+
         {step === 1 ? (
           <>
             <div className="text-center mb-8">
               <h1 className="text-2xl font-bold text-[#0F1729] mb-2">Opprett konto</h1>
               <p className="text-gray-500 text-sm">
                 Allerede registrert?{" "}
-                <Link href="/login" className="text-green-600 font-semibold hover:underline">
+                <Link href="/login" className="text-blue-600 font-semibold hover:underline">
                   Logg inn her
                 </Link>
               </p>
@@ -76,9 +106,7 @@ export default function RegisterPage() {
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                  Fullt navn
-                </label>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">Fullt navn</label>
                 <Input
                   type="text"
                   placeholder="Ola Nordmann"
@@ -90,9 +118,7 @@ export default function RegisterPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                  E-postadresse
-                </label>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">E-postadresse</label>
                 <Input
                   type="email"
                   placeholder="du@bedrift.no"
@@ -103,9 +129,7 @@ export default function RegisterPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                  Passord
-                </label>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">Passord</label>
                 <Input
                   type="password"
                   placeholder="Minst 8 tegn"
@@ -116,14 +140,8 @@ export default function RegisterPage() {
                 />
               </div>
 
-              <Button
-                type="submit"
-                variant="primary"
-                size="lg"
-                className="w-full justify-center mt-2"
-              >
-                Neste
-                <ArrowRight className="w-4 h-4" />
+              <Button type="submit" variant="primary" size="lg" className="w-full justify-center mt-2">
+                Neste <ArrowRight className="w-4 h-4" />
               </Button>
             </form>
           </>
@@ -136,9 +154,7 @@ export default function RegisterPage() {
 
             <form onSubmit={handleSubmit} className="space-y-5">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                  Bedriftsnavn
-                </label>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">Bedriftsnavn</label>
                 <Input
                   type="text"
                   placeholder="Bedrift AS"
@@ -150,9 +166,7 @@ export default function RegisterPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-3">
-                  Antall brukere
-                </label>
+                <label className="block text-sm font-medium text-slate-700 mb-3">Antall brukere</label>
                 <div className="grid grid-cols-2 gap-3">
                   {userCountOptions.map((opt) => (
                     <button
@@ -161,17 +175,17 @@ export default function RegisterPage() {
                       onClick={() => setForm({ ...form, userCount: opt.value })}
                       className={`p-4 rounded-xl border-2 text-left transition-all ${
                         form.userCount === opt.value
-                          ? "border-green-500 bg-green-50"
+                          ? "border-blue-600 bg-blue-50"
                           : "border-gray-200 hover:border-gray-300"
                       }`}
                     >
                       <div className="flex items-center gap-2 mb-1">
-                        <Users className={`w-4 h-4 ${form.userCount === opt.value ? "text-green-600" : "text-gray-400"}`} />
-                        <span className={`text-sm font-semibold ${form.userCount === opt.value ? "text-green-700" : "text-slate-700"}`}>
+                        <Users className={`w-4 h-4 ${form.userCount === opt.value ? "text-blue-600" : "text-gray-400"}`} />
+                        <span className={`text-sm font-semibold ${form.userCount === opt.value ? "text-blue-700" : "text-slate-700"}`}>
                           {opt.label}
                         </span>
                       </div>
-                      <span className={`text-xs ${form.userCount === opt.value ? "text-green-600" : "text-gray-400"}`}>
+                      <span className={`text-xs ${form.userCount === opt.value ? "text-blue-600" : "text-gray-400"}`}>
                         {opt.price}
                       </span>
                     </button>
@@ -180,35 +194,21 @@ export default function RegisterPage() {
               </div>
 
               {/* Trial banner */}
-              <div className="bg-green-50 border border-green-200 rounded-xl p-4 flex items-start gap-3">
-                <div className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+              <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 flex items-start gap-3">
+                <div className="w-5 h-5 bg-[#2563EB] rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                   <Check className="w-3 h-3 text-white" />
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-green-800">3 dager gratis prøveperiode</p>
-                  <p className="text-xs text-green-700 mt-0.5">
-                    Ingen kredittkort nødvendig. Du kan avbestille når som helst.
-                  </p>
+                  <p className="text-sm font-semibold text-blue-800">3 dager gratis prøveperiode</p>
+                  <p className="text-xs text-blue-700 mt-0.5">Ingen kredittkort nødvendig. Du kan avbestille når som helst.</p>
                 </div>
               </div>
 
               <div className="flex gap-3">
-                <Button
-                  type="button"
-                  variant="secondary"
-                  size="lg"
-                  onClick={() => setStep(1)}
-                  className="flex-1 justify-center"
-                >
+                <Button type="button" variant="secondary" size="lg" onClick={() => setStep(1)} className="flex-1 justify-center">
                   Tilbake
                 </Button>
-                <Button
-                  type="submit"
-                  variant="primary"
-                  size="lg"
-                  className="flex-1 justify-center"
-                  disabled={loading}
-                >
+                <Button type="submit" variant="primary" size="lg" className="flex-1 justify-center" disabled={loading}>
                   {loading ? "Oppretter konto..." : "Start gratis"}
                   {!loading && <ArrowRight className="w-4 h-4" />}
                 </Button>

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Eye, EyeOff, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { createClient } from "@/lib/supabase/client";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -12,13 +13,24 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    // Simulate login
-    await new Promise((r) => setTimeout(r, 800));
+    setError(null);
+
+    const supabase = createClient();
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+
+    if (error) {
+      setError(error.message);
+      setLoading(false);
+      return;
+    }
+
     router.push("/dashboard");
+    router.refresh();
   };
 
   return (
@@ -28,11 +40,17 @@ export default function LoginPage() {
           <h1 className="text-2xl font-bold text-[#0F1729] mb-2">Logg inn på Reachr</h1>
           <p className="text-gray-500 text-sm">
             Har du ikke konto?{" "}
-            <Link href="/register" className="text-green-600 font-semibold hover:underline">
+            <Link href="/register" className="text-blue-600 font-semibold hover:underline">
               Registrer deg gratis
             </Link>
           </p>
         </div>
+
+        {error && (
+          <div className="mb-4 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+            {error}
+          </div>
+        )}
 
         <form onSubmit={handleLogin} className="space-y-4">
           <div>
@@ -50,10 +68,8 @@ export default function LoginPage() {
 
           <div>
             <div className="flex items-center justify-between mb-1.5">
-              <label className="block text-sm font-medium text-slate-700">
-                Passord
-              </label>
-              <Link href="#" className="text-xs text-green-600 hover:underline">
+              <label className="block text-sm font-medium text-slate-700">Passord</label>
+              <Link href="#" className="text-xs text-blue-600 hover:underline">
                 Glemt passord?
               </Link>
             </div>
@@ -95,12 +111,6 @@ export default function LoginPage() {
             <Link href="#" className="underline">personvernreglene</Link>.
           </p>
         </div>
-      </div>
-
-      {/* Demo credentials hint */}
-      <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-xl text-center">
-        <p className="text-sm text-blue-700 font-medium">Demo-modus</p>
-        <p className="text-xs text-blue-600 mt-0.5">Bruk hvilken som helst e-post og passord for å logge inn</p>
       </div>
     </div>
   );

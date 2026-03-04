@@ -10,7 +10,7 @@ export function Footer() {
           {/* Brand */}
           <div>
             <Link href="/" style={{ display: "flex", alignItems: "center", gap: 10, textDecoration: "none", marginBottom: 16 }}>
-              <div style={{ width: 32, height: 32, backgroundColor: "#22C55E", borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <div style={{ width: 32, height: 32, backgroundColor: "#2563EB", borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center" }}>
                 <Zap size={15} color="white" fill="white" />
               </div>
               <span style={{ fontWeight: 800, fontSize: 18, color: "white" }}>Reachr</span>
