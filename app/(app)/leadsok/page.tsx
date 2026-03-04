@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect, useRef, useCallback } from "react";
+import dynamic from "next/dynamic";
 import { TopBar } from "@/components/layout/top-bar";
 import {
   Search, MapPin, SlidersHorizontal, Plus, Check,
@@ -7,6 +8,8 @@ import {
   Loader2, AlertCircle, List, Map, ExternalLink,
 } from "lucide-react";
 import { useAppStore } from "@/store/app-store";
+
+const MapView = dynamic(() => import("@/components/map/MapView"), { ssr: false });
 
 /* ─── Types ──────────────────────────────────────────────── */
 interface BrregEnhet {
@@ -615,46 +618,13 @@ export default function LeadsokPage() {
                 )}
               </div>
             ) : (
-              /* Map view */
-              <div style={{
-                backgroundColor: "white", borderRadius: 14, border: "1px solid #E5E7EB",
-                overflow: "hidden", height: 480, position: "relative",
-                boxShadow: "0 1px 4px rgba(0,0,0,0.05)",
-              }}>
-                <div style={{
-                  position: "absolute", inset: 0,
-                  background: "linear-gradient(135deg, #E8F5E9 0%, #E3F2FD 100%)",
-                  display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 12,
-                }}>
-                  <Map size={40} color="#9CA3AF" />
-                  <p style={{ fontSize: 15, fontWeight: 600, color: "#6B7280", margin: 0 }}>Kartvisning</p>
-                  <p style={{ fontSize: 13, color: "#9CA3AF", margin: 0, textAlign: "center", maxWidth: 320 }}>
-                    Integrer Google Maps eller Mapbox API for interaktivt kart.
-                    {sorted.length > 0 && ` ${sorted.length} bedrifter er klar til å vises.`}
-                  </p>
-                </div>
-                {/* Overlapping pins */}
-                {sorted.slice(0,10).map((e, i) => (
-                  <div key={e.organisasjonsnummer} style={{
-                    position: "absolute",
-                    left: `${15 + (i % 5) * 18}%`,
-                    top: `${20 + Math.floor(i / 5) * 35}%`,
-                    zIndex: 10,
-                  }}>
-                    <div style={{
-                      width: 36, height: 36, borderRadius: "50%",
-                      backgroundColor: "#22C55E", border: "3px solid white",
-                      boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
-                      display: "flex", alignItems: "center", justifyContent: "center",
-                      cursor: "pointer", position: "relative",
-                    }}
-                      title={capitalize(e.navn)}
-                    >
-                      <MapPin size={16} color="white" fill="white" />
-                    </div>
-                  </div>
-                ))}
-              </div>
+              <MapView
+                enheter={sorted}
+                addedIds={addedIds}
+                existingIds={existingIds}
+                onAdd={handleAdd}
+                capitalize={capitalize}
+              />
             )}
           </>
         )}
