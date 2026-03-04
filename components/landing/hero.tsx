@@ -1,130 +1,175 @@
+"use client";
 import Link from "next/link";
 import { ArrowRight, Play, TrendingUp, Users, Bell } from "lucide-react";
-import { Button } from "@/components/ui/button";
 
 export function Hero() {
   return (
-    <section className="pt-32 pb-20 px-6 bg-gradient-to-b from-white to-[#F8F9FC]">
-      <div className="max-w-7xl mx-auto">
-        <div className="text-center max-w-4xl mx-auto mb-16">
+    <section style={{ paddingTop: 128, paddingBottom: 96, background: "linear-gradient(180deg,#ffffff 0%,#F8F9FC 100%)" }}>
+      <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px" }}>
+
+        {/* Centered headline block */}
+        <div style={{ textAlign: "center", maxWidth: 720, margin: "0 auto 72px" }}>
+
           {/* Badge */}
-          <div className="inline-flex items-center gap-2 bg-green-50 border border-green-200 text-green-700 text-sm font-medium px-4 py-1.5 rounded-full mb-6">
-            <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+          <div style={{
+            display: "inline-flex", alignItems: "center", gap: 8,
+            backgroundColor: "#F0FDF4", border: "1px solid #BBF7D0",
+            color: "#15803D", fontSize: 13, fontWeight: 600,
+            padding: "6px 16px", borderRadius: 999, marginBottom: 32,
+          }}>
+            <span style={{ width: 8, height: 8, backgroundColor: "#22C55E", borderRadius: "50%", display: "inline-block" }} />
             3 dagers gratis prøveperiode – ingen kredittkort
           </div>
 
           {/* Headline */}
-          <h1 className="text-5xl md:text-6xl font-extrabold text-[#0F1729] leading-tight mb-6 tracking-tight">
+          <h1 style={{
+            fontSize: "clamp(42px, 5.5vw, 64px)", fontWeight: 800,
+            color: "#0F1729", lineHeight: 1.08, letterSpacing: "-2px",
+            marginBottom: 24,
+          }}>
             Finn leads.{" "}
-            <span className="text-green-500">Ta kontakt.</span>
-            <br />
-            Lukk avtaler.
+            <span style={{ color: "#22C55E" }}>Ta kontakt.</span>
+            <br />Lukk avtaler.
           </h1>
 
           {/* Subtext */}
-          <p className="text-xl text-gray-500 max-w-2xl mx-auto mb-10 leading-relaxed">
-            Reachr er det norske B2B verktøyet som hjelper deg finne nye kunder,
-            følge opp leads og bygge varige forretningsrelasjoner – alt på ett sted.
+          <p style={{ fontSize: 19, color: "#6B7280", lineHeight: 1.65, maxWidth: 560, margin: "0 auto 40px" }}>
+            Reachr er det norske B2B-verktøyet som hjelper deg finne nye kunder,
+            følge opp leads og lukke avtaler – alt på ett sted.
           </p>
 
-          {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link href="/register">
-              <Button variant="primary" size="lg" className="text-base px-8 py-3 shadow-lg shadow-green-500/25">
-                Start gratis i dag
-                <ArrowRight className="w-5 h-5" />
-              </Button>
+          {/* CTAs */}
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 16, flexWrap: "wrap" }}>
+            <Link href="/register" style={{
+              display: "inline-flex", alignItems: "center", gap: 8,
+              backgroundColor: "#22C55E", color: "white",
+              fontWeight: 700, fontSize: 15, textDecoration: "none",
+              padding: "14px 28px", borderRadius: 12,
+              boxShadow: "0 4px 16px rgba(34,197,94,0.35)",
+            }}>
+              Start gratis i dag <ArrowRight size={18} />
             </Link>
-            <button className="flex items-center gap-2.5 text-slate-700 font-medium hover:text-slate-900 transition-colors">
-              <div className="w-10 h-10 rounded-full bg-white shadow-md flex items-center justify-center border border-gray-200">
-                <Play className="w-4 h-4 text-green-500 fill-green-500 ml-0.5" />
+            <div style={{ display: "inline-flex", alignItems: "center", gap: 10, cursor: "pointer", color: "#374151", fontWeight: 600, fontSize: 15 }}>
+              <div style={{
+                width: 42, height: 42, borderRadius: "50%", backgroundColor: "white",
+                boxShadow: "0 2px 10px rgba(0,0,0,0.1)", border: "1px solid #E5E7EB",
+                display: "flex", alignItems: "center", justifyContent: "center",
+              }}>
+                <Play size={14} color="#22C55E" fill="#22C55E" style={{ marginLeft: 2 }} />
               </div>
               Se demo
-            </button>
+            </div>
           </div>
 
-          {/* Social proof */}
-          <p className="text-sm text-gray-400 mt-8">
-            Over <strong className="text-gray-600">500+ norske bedrifter</strong> bruker allerede Reachr
+          <p style={{ fontSize: 13, color: "#9CA3AF", marginTop: 28 }}>
+            Brukt av <strong style={{ color: "#6B7280" }}>500+ norske bedrifter</strong>
           </p>
         </div>
 
         {/* App mockup */}
-        <div className="relative max-w-5xl mx-auto">
-          {/* Glow effect */}
-          <div className="absolute inset-0 bg-gradient-to-r from-green-500/10 to-blue-500/10 rounded-3xl blur-3xl"></div>
+        <div style={{ position: "relative", maxWidth: 960, margin: "0 auto", paddingLeft: 40, paddingRight: 40 }}>
 
-          {/* Main mockup container */}
-          <div className="relative bg-[#0F1729] rounded-2xl shadow-[0_40px_120px_rgba(0,0,0,0.25)] overflow-hidden border border-white/10 animate-float">
-            {/* Browser bar */}
-            <div className="flex items-center gap-2 px-5 py-3.5 bg-[#1A2540] border-b border-white/10">
-              <div className="flex gap-1.5">
-                <div className="w-3 h-3 rounded-full bg-red-500/60"></div>
-                <div className="w-3 h-3 rounded-full bg-yellow-500/60"></div>
-                <div className="w-3 h-3 rounded-full bg-green-500/60"></div>
+          {/* Glow behind */}
+          <div style={{
+            position: "absolute", left: "50%", top: "50%",
+            transform: "translate(-50%, -50%)",
+            width: 800, height: 400,
+            background: "radial-gradient(ellipse, rgba(34,197,94,0.07) 0%, transparent 70%)",
+            pointerEvents: "none",
+          }} />
+
+          {/* Browser window */}
+          <div className="animate-float" style={{
+            position: "relative", backgroundColor: "#0F1729", borderRadius: 16,
+            boxShadow: "0 40px 100px rgba(0,0,0,0.28), 0 8px 24px rgba(0,0,0,0.12)",
+            border: "1px solid rgba(255,255,255,0.07)", overflow: "hidden",
+          }}>
+            {/* Title bar */}
+            <div style={{
+              display: "flex", alignItems: "center", gap: 8,
+              padding: "12px 18px", backgroundColor: "#1A2540",
+              borderBottom: "1px solid rgba(255,255,255,0.07)",
+            }}>
+              <div style={{ display: "flex", gap: 6 }}>
+                {["#EF4444","#F59E0B","#22C55E"].map(c => (
+                  <div key={c} style={{ width: 11, height: 11, borderRadius: "50%", backgroundColor: c, opacity: 0.7 }} />
+                ))}
               </div>
-              <div className="flex-1 mx-4 bg-white/10 rounded-md px-4 py-1 text-white/40 text-xs">
-                app.reachr.no/leadsok
-              </div>
+              <div style={{
+                flex: 1, margin: "0 14px", backgroundColor: "rgba(255,255,255,0.07)",
+                borderRadius: 6, padding: "4px 14px",
+                fontSize: 11, color: "rgba(255,255,255,0.35)",
+              }}>app.reachr.no/leadsok</div>
             </div>
 
-            {/* App UI mockup */}
-            <div className="flex h-80">
-              {/* Sidebar mockup */}
-              <div className="w-48 bg-[#0F1729] border-r border-white/10 p-4 flex flex-col gap-2">
-                <div className="flex items-center gap-2 mb-4">
-                  <div className="w-6 h-6 bg-green-500 rounded-md"></div>
-                  <span className="text-white font-bold text-sm">Reachr</span>
+            {/* Body */}
+            <div style={{ display: "flex", height: 340 }}>
+              {/* Sidebar */}
+              <div style={{
+                width: 172, backgroundColor: "#0F1729",
+                borderRight: "1px solid rgba(255,255,255,0.06)",
+                padding: 16, flexShrink: 0,
+              }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 20 }}>
+                  <div style={{ width: 24, height: 24, backgroundColor: "#22C55E", borderRadius: 6 }} />
+                  <span style={{ color: "white", fontWeight: 800, fontSize: 13 }}>Reachr</span>
                 </div>
-                {["Dashboard", "Leadsøk", "Mine Leads", "Varsler", "Innstillinger"].map((item, i) => (
-                  <div
-                    key={item}
-                    className={`flex items-center gap-2 px-2 py-2 rounded-lg text-xs ${
-                      i === 1 ? "bg-white/15 text-white" : "text-white/50"
-                    }`}
-                  >
-                    <div className={`w-1.5 h-1.5 rounded-full ${i === 1 ? "bg-green-400" : "bg-white/20"}`}></div>
-                    {item}
+                {[["Dashboard",false],["Leadsøk",true],["Mine Leads",false],["Varsler",false],["Innstillinger",false]].map(([l,a]) => (
+                  <div key={String(l)} style={{
+                    display: "flex", alignItems: "center", gap: 8,
+                    padding: "8px 10px", borderRadius: 8, marginBottom: 3,
+                    backgroundColor: a ? "rgba(255,255,255,0.11)" : "transparent",
+                    color: a ? "white" : "rgba(255,255,255,0.42)",
+                    fontSize: 12, fontWeight: a ? 600 : 400,
+                  }}>
+                    <div style={{ width: 6, height: 6, borderRadius: "50%", backgroundColor: a ? "#4ADE80" : "rgba(255,255,255,0.18)", flexShrink: 0 }} />
+                    {l}
                   </div>
                 ))}
               </div>
 
-              {/* Main content mockup */}
-              <div className="flex-1 bg-[#F8F9FC] p-5">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="flex-1 h-9 bg-white rounded-lg border border-gray-200 flex items-center px-3 gap-2">
-                    <div className="w-3 h-3 rounded-full bg-gray-300"></div>
-                    <div className="h-2 w-24 bg-gray-200 rounded"></div>
-                  </div>
-                  <div className="flex-1 h-9 bg-white rounded-lg border border-gray-200 flex items-center px-3 gap-2">
-                    <div className="w-3 h-3 rounded-full bg-gray-300"></div>
-                    <div className="h-2 w-20 bg-gray-200 rounded"></div>
-                  </div>
-                  <div className="h-9 px-4 bg-green-500 rounded-lg flex items-center">
-                    <div className="h-2 w-12 bg-white/80 rounded"></div>
+              {/* Content */}
+              <div style={{ flex: 1, backgroundColor: "#F8F9FC", padding: 18, overflow: "hidden" }}>
+                {/* Search row */}
+                <div style={{ display: "flex", gap: 8, marginBottom: 14 }}>
+                  {[0,1].map(i => (
+                    <div key={i} style={{
+                      flex: 1, height: 36, backgroundColor: "white",
+                      border: "1px solid #E5E7EB", borderRadius: 8,
+                      display: "flex", alignItems: "center", padding: "0 10px", gap: 7,
+                    }}>
+                      <div style={{ width: 10, height: 10, borderRadius: "50%", backgroundColor: "#D1D5DB", flexShrink: 0 }} />
+                      <div style={{ height: 6, width: "55%", backgroundColor: "#E9ECF0", borderRadius: 3 }} />
+                    </div>
+                  ))}
+                  <div style={{ height: 36, padding: "0 16px", backgroundColor: "#22C55E", borderRadius: 8, display: "flex", alignItems: "center" }}>
+                    <div style={{ height: 6, width: 34, backgroundColor: "rgba(255,255,255,0.85)", borderRadius: 3 }} />
                   </div>
                 </div>
-                {/* Table mockup */}
-                <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-                  <div className="flex items-center gap-3 px-4 py-2.5 bg-gray-50 border-b border-gray-100">
-                    {["Bedrift", "Kontaktperson", "Bransje", "Omsetning", ""].map((h) => (
-                      <div key={h} className="flex-1 h-2 bg-gray-200 rounded text-xs text-gray-500">{h}</div>
+
+                {/* Table */}
+                <div style={{ backgroundColor: "white", borderRadius: 10, border: "1px solid #E5E7EB", overflow: "hidden" }}>
+                  <div style={{ display: "flex", gap: 10, padding: "8px 14px", backgroundColor: "#F9FAFB", borderBottom: "1px solid #F3F4F6" }}>
+                    {[100,80,70,60,64].map((w,i) => (
+                      <div key={i} style={{ flex: i===4 ? "0 0 64px" : 1, height: 6, backgroundColor: "#E5E7EB", borderRadius: 3 }} />
                     ))}
                   </div>
-                  {[
-                    ["Bergheim Regnskap", "Anders Bergheim", "Regnskap", "8,5 MNOK"],
-                    ["Nordvik Bygg AS", "Erik Nordvik", "Bygg", "15,6 MNOK"],
-                    ["TechStart Bergen", "Silje Bakke", "IT", "3,2 MNOK"],
-                    ["Hansen & Co", "Ingrid Hansen", "Juridisk", "22 MNOK"],
-                  ].map((row, i) => (
-                    <div key={i} className="flex items-center gap-3 px-4 py-2.5 border-b border-gray-50 last:border-0">
-                      {row.map((cell, j) => (
-                        <div key={j} className="flex-1">
-                          <div className={`h-2 rounded ${j === 0 ? "bg-slate-700 w-24" : j === 3 ? "bg-green-200 w-16" : "bg-gray-200 w-20"}`}></div>
+                  {[85,72,90,78].map((w,i) => (
+                    <div key={i} style={{
+                      display: "flex", alignItems: "center", gap: 10,
+                      padding: "9px 14px", borderBottom: i<3 ? "1px solid #F9FAFB" : "none",
+                    }}>
+                      <div style={{ flex: 1, display: "flex", alignItems: "center", gap: 7 }}>
+                        <div style={{ width: 22, height: 22, borderRadius: 6, backgroundColor: "#F1F5F9", flexShrink: 0 }} />
+                        <div style={{ height: 6, width: w, backgroundColor: "#1A2540", borderRadius: 3, opacity: 0.6 }} />
+                      </div>
+                      <div style={{ flex: 1 }}><div style={{ height: 6, width: 58, backgroundColor: "#D1D5DB", borderRadius: 3 }} /></div>
+                      <div style={{ flex: 1 }}><div style={{ height: 16, width: 56, backgroundColor: "#F1F5F9", borderRadius: 5 }} /></div>
+                      <div style={{ flex: 1 }}><div style={{ height: 6, width: 48, backgroundColor: "#BBF7D0", borderRadius: 3 }} /></div>
+                      <div style={{ flexBasis: 64, flexShrink: 0 }}>
+                        <div style={{ height: 26, backgroundColor: "#22C55E", borderRadius: 6, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                          <div style={{ height: 5, width: 36, backgroundColor: "rgba(255,255,255,0.85)", borderRadius: 3 }} />
                         </div>
-                      ))}
-                      <div className="flex-1 flex justify-end">
-                        <div className="h-6 w-20 bg-green-500 rounded-md"></div>
                       </div>
                     </div>
                   ))}
@@ -133,37 +178,55 @@ export function Hero() {
             </div>
           </div>
 
-          {/* Floating stats cards */}
-          <div className="absolute -left-8 top-20 bg-white rounded-xl shadow-xl p-4 border border-gray-100 hidden lg:flex items-center gap-3">
-            <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center">
-              <TrendingUp className="w-5 h-5 text-blue-500" />
+          {/* Floating card left */}
+          <div style={{
+            position: "absolute", left: -16, top: 56,
+            backgroundColor: "white", borderRadius: 14,
+            boxShadow: "0 10px 40px rgba(0,0,0,0.12)", border: "1px solid #F3F4F6",
+            padding: "12px 16px", display: "flex", alignItems: "center", gap: 12,
+          }}>
+            <div style={{ width: 38, height: 38, backgroundColor: "#EFF6FF", borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <TrendingUp size={18} color="#3B82F6" />
             </div>
             <div>
-              <p className="text-xs text-gray-500">Nye leads i dag</p>
-              <p className="text-lg font-bold text-slate-900">+24</p>
+              <p style={{ fontSize: 11, color: "#9CA3AF", margin: 0 }}>Nye leads i dag</p>
+              <p style={{ fontSize: 20, fontWeight: 800, color: "#0F1729", margin: 0 }}>+24</p>
             </div>
           </div>
 
-          <div className="absolute -right-8 top-32 bg-white rounded-xl shadow-xl p-4 border border-gray-100 hidden lg:flex items-center gap-3">
-            <div className="w-10 h-10 bg-green-50 rounded-lg flex items-center justify-center">
-              <Users className="w-5 h-5 text-green-500" />
+          {/* Floating card right top */}
+          <div style={{
+            position: "absolute", right: -16, top: 80,
+            backgroundColor: "white", borderRadius: 14,
+            boxShadow: "0 10px 40px rgba(0,0,0,0.12)", border: "1px solid #F3F4F6",
+            padding: "12px 16px", display: "flex", alignItems: "center", gap: 12,
+          }}>
+            <div style={{ width: 38, height: 38, backgroundColor: "#F0FDF4", borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <Users size={18} color="#22C55E" />
             </div>
             <div>
-              <p className="text-xs text-gray-500">Bookede møter</p>
-              <p className="text-lg font-bold text-slate-900">7 denne uka</p>
+              <p style={{ fontSize: 11, color: "#9CA3AF", margin: 0 }}>Bookede møter</p>
+              <p style={{ fontSize: 17, fontWeight: 800, color: "#0F1729", margin: 0 }}>7 denne uka</p>
             </div>
           </div>
 
-          <div className="absolute -right-6 bottom-16 bg-white rounded-xl shadow-xl p-4 border border-gray-100 hidden lg:flex items-center gap-3">
-            <div className="w-10 h-10 bg-yellow-50 rounded-lg flex items-center justify-center">
-              <Bell className="w-5 h-5 text-yellow-500" />
+          {/* Floating card right bottom */}
+          <div style={{
+            position: "absolute", right: -8, bottom: 48,
+            backgroundColor: "white", borderRadius: 14,
+            boxShadow: "0 10px 40px rgba(0,0,0,0.12)", border: "1px solid #F3F4F6",
+            padding: "12px 16px", display: "flex", alignItems: "center", gap: 12,
+          }}>
+            <div style={{ width: 38, height: 38, backgroundColor: "#FFFBEB", borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <Bell size={18} color="#F59E0B" />
             </div>
             <div>
-              <p className="text-xs text-gray-500">Varsler venter</p>
-              <p className="text-lg font-bold text-slate-900">3 oppfølginger</p>
+              <p style={{ fontSize: 11, color: "#9CA3AF", margin: 0 }}>Varsler venter</p>
+              <p style={{ fontSize: 17, fontWeight: 800, color: "#0F1729", margin: 0 }}>3 oppfølginger</p>
             </div>
           </div>
         </div>
+
       </div>
     </section>
   );

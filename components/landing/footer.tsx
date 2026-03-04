@@ -1,64 +1,49 @@
+"use client";
 import Link from "next/link";
 import { Zap } from "lucide-react";
 
 export function Footer() {
   return (
-    <footer className="bg-[#0F1729] text-white py-16 px-6">
-      <div className="max-w-7xl mx-auto">
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-8 mb-12">
+    <footer style={{ backgroundColor: "#0F1729", color: "white", padding: "72px 24px 40px" }}>
+      <div style={{ maxWidth: 1200, margin: "0 auto" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr", gap: 48, marginBottom: 56 }}>
           {/* Brand */}
-          <div className="col-span-2">
-            <Link href="/" className="flex items-center gap-2 mb-4">
-              <div className="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center">
-                <Zap className="w-4 h-4 text-white fill-white" />
+          <div>
+            <Link href="/" style={{ display: "flex", alignItems: "center", gap: 10, textDecoration: "none", marginBottom: 16 }}>
+              <div style={{ width: 32, height: 32, backgroundColor: "#22C55E", borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <Zap size={15} color="white" fill="white" />
               </div>
-              <span className="font-bold text-xl tracking-tight">Reachr</span>
+              <span style={{ fontWeight: 800, fontSize: 18, color: "white" }}>Reachr</span>
             </Link>
-            <p className="text-white/50 text-sm leading-relaxed max-w-xs">
-              Norges ledende B2B-verktøy for leadsøk og salgspipeline.
-              Hjelper hundrevis av bedrifter finne og lukke nye kunder.
+            <p style={{ fontSize: 14, color: "rgba(255,255,255,0.45)", lineHeight: 1.7, maxWidth: 260, margin: 0 }}>
+              Norges B2B-verktøy for leadsøk og salgspipeline. Hjelper hundrevis av bedrifter finne og lukke nye kunder.
             </p>
           </div>
 
-          {/* Links */}
-          <div>
-            <h4 className="font-semibold text-sm mb-4">Produkt</h4>
-            <ul className="space-y-2.5 text-sm text-white/50">
-              <li><Link href="#features" className="hover:text-white transition-colors">Funksjoner</Link></li>
-              <li><Link href="#pricing" className="hover:text-white transition-colors">Priser</Link></li>
-              <li><Link href="#" className="hover:text-white transition-colors">Integrasjoner</Link></li>
-              <li><Link href="#" className="hover:text-white transition-colors">Oppdateringer</Link></li>
-            </ul>
-          </div>
-
-          <div>
-            <h4 className="font-semibold text-sm mb-4">Selskap</h4>
-            <ul className="space-y-2.5 text-sm text-white/50">
-              <li><Link href="#" className="hover:text-white transition-colors">Om oss</Link></li>
-              <li><Link href="#" className="hover:text-white transition-colors">Blogg</Link></li>
-              <li><Link href="#" className="hover:text-white transition-colors">Karriere</Link></li>
-              <li><Link href="#" className="hover:text-white transition-colors">Kontakt</Link></li>
-            </ul>
-          </div>
-
-          <div>
-            <h4 className="font-semibold text-sm mb-4">Juridisk</h4>
-            <ul className="space-y-2.5 text-sm text-white/50">
-              <li><Link href="#" className="hover:text-white transition-colors">Personvern</Link></li>
-              <li><Link href="#" className="hover:text-white transition-colors">Vilkår</Link></li>
-              <li><Link href="#" className="hover:text-white transition-colors">Cookies</Link></li>
-              <li><Link href="#" className="hover:text-white transition-colors">GDPR</Link></li>
-            </ul>
-          </div>
+          {[
+            { title: "Produkt", links: ["Funksjoner", "Priser", "Integrasjoner", "Oppdateringer"] },
+            { title: "Selskap", links: ["Om oss", "Blogg", "Karriere", "Kontakt"] },
+            { title: "Juridisk", links: ["Personvern", "Vilkår", "Cookies", "GDPR"] },
+          ].map(({ title, links }) => (
+            <div key={title}>
+              <p style={{ fontSize: 13, fontWeight: 700, color: "white", marginBottom: 16, textTransform: "uppercase", letterSpacing: "0.06em" }}>{title}</p>
+              <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 10 }}>
+                {links.map(l => (
+                  <li key={l}>
+                    <a href="#" style={{ fontSize: 14, color: "rgba(255,255,255,0.45)", textDecoration: "none", transition: "color 0.15s" }}
+                      onMouseEnter={e => (e.currentTarget.style.color = "white")}
+                      onMouseLeave={e => (e.currentTarget.style.color = "rgba(255,255,255,0.45)")}
+                    >{l}</a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
         </div>
 
-        <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
-          <p className="text-white/40 text-sm">
-            © 2024 Reachr AS. Alle rettigheter forbeholdt.
-          </p>
-          <p className="text-white/40 text-sm">
-            Org.nr: 123 456 789 • Oslo, Norge
-          </p>
+        <div style={{ borderTop: "1px solid rgba(255,255,255,0.1)", paddingTop: 28, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
+          <p style={{ fontSize: 13, color: "rgba(255,255,255,0.35)", margin: 0 }}>© 2024 Reachr AS. Alle rettigheter forbeholdt.</p>
+          <p style={{ fontSize: 13, color: "rgba(255,255,255,0.35)", margin: 0 }}>Org.nr: 123 456 789 · Oslo, Norge</p>
         </div>
       </div>
     </footer>

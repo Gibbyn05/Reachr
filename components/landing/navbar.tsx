@@ -1,79 +1,58 @@
 "use client";
 import Link from "next/link";
-import { useState } from "react";
-import { Zap, Menu, X } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Zap } from "lucide-react";
 
 export function Navbar() {
-  const [mobileOpen, setMobileOpen] = useState(false);
-
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100">
-      <div className="max-w-7xl mx-auto px-6 py-4 flex items-center gap-8">
+    <nav style={{
+      position: "fixed", top: 0, left: 0, right: 0, zIndex: 100,
+      backgroundColor: "rgba(255,255,255,0.92)",
+      backdropFilter: "blur(12px)",
+      WebkitBackdropFilter: "blur(12px)",
+      borderBottom: "1px solid #E5E7EB",
+    }}>
+      <div style={{
+        maxWidth: 1200, margin: "0 auto",
+        padding: "0 24px", height: 68,
+        display: "flex", alignItems: "center",
+      }}>
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2 flex-shrink-0">
-          <div className="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center">
-            <Zap className="w-4 h-4 text-white fill-white" />
+        <Link href="/" style={{ display: "flex", alignItems: "center", gap: 10, textDecoration: "none", flexShrink: 0 }}>
+          <div style={{ width: 34, height: 34, backgroundColor: "#22C55E", borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <Zap size={16} color="white" fill="white" />
           </div>
-          <span className="font-bold text-xl text-[#0F1729] tracking-tight">Reachr</span>
+          <span style={{ fontWeight: 800, fontSize: 20, color: "#0F1729", letterSpacing: "-0.5px" }}>Reachr</span>
         </Link>
 
-        {/* Nav links - desktop */}
-        <div className="hidden md:flex items-center gap-6 flex-1 justify-center">
-          <Link href="#features" className="text-sm text-gray-600 hover:text-[#0F1729] transition-colors font-medium">
-            Funksjoner
-          </Link>
-          <Link href="#pricing" className="text-sm text-gray-600 hover:text-[#0F1729] transition-colors font-medium">
-            Priser
-          </Link>
-          <Link href="#" className="text-sm text-gray-600 hover:text-[#0F1729] transition-colors font-medium">
-            Om oss
-          </Link>
-          <Link href="#" className="text-sm text-gray-600 hover:text-[#0F1729] transition-colors font-medium">
-            Kontakt
-          </Link>
+        {/* Nav links */}
+        <div style={{ display: "flex", alignItems: "center", gap: 32, flex: 1, justifyContent: "center" }}>
+          {[["#features","Funksjoner"],["#pricing","Priser"],["#","Om oss"],["#","Kontakt"]].map(([href,label]) => (
+            <a key={label} href={href} style={{ fontSize: 14, fontWeight: 500, color: "#6B7280", textDecoration: "none" }}
+              onMouseEnter={e => (e.currentTarget.style.color = "#111827")}
+              onMouseLeave={e => (e.currentTarget.style.color = "#6B7280")}
+            >{label}</a>
+          ))}
         </div>
 
-        {/* CTA buttons - desktop */}
-        <div className="hidden md:flex items-center gap-3">
-          <Link href="/login">
-            <Button variant="ghost" size="md" className="text-slate-700 hover:text-slate-900">
-              Logg inn
-            </Button>
-          </Link>
-          <Link href="/register">
-            <Button variant="primary" size="md">
-              Start gratis
-            </Button>
-          </Link>
+        {/* CTA */}
+        <div style={{ display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
+          <Link href="/login" style={{
+            fontSize: 14, fontWeight: 600, color: "#374151", textDecoration: "none",
+            padding: "8px 16px", borderRadius: 8,
+          }}
+            onMouseEnter={e => (e.currentTarget.style.backgroundColor = "#F3F4F6")}
+            onMouseLeave={e => (e.currentTarget.style.backgroundColor = "transparent")}
+          >Logg inn</Link>
+          <Link href="/register" style={{
+            fontSize: 14, fontWeight: 700, color: "white", textDecoration: "none",
+            padding: "9px 20px", borderRadius: 10, backgroundColor: "#22C55E",
+            boxShadow: "0 1px 4px rgba(34,197,94,0.3)",
+          }}
+            onMouseEnter={e => (e.currentTarget.style.backgroundColor = "#16A34A")}
+            onMouseLeave={e => (e.currentTarget.style.backgroundColor = "#22C55E")}
+          >Start gratis</Link>
         </div>
-
-        {/* Mobile menu toggle */}
-        <button
-          className="md:hidden ml-auto p-2 rounded-lg hover:bg-gray-100"
-          onClick={() => setMobileOpen(!mobileOpen)}
-        >
-          {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-        </button>
       </div>
-
-      {/* Mobile menu */}
-      {mobileOpen && (
-        <div className="md:hidden bg-white border-t border-gray-100 px-6 py-4 space-y-3">
-          <Link href="#features" className="block text-sm text-gray-600 py-2">Funksjoner</Link>
-          <Link href="#pricing" className="block text-sm text-gray-600 py-2">Priser</Link>
-          <Link href="#" className="block text-sm text-gray-600 py-2">Om oss</Link>
-          <Link href="#" className="block text-sm text-gray-600 py-2">Kontakt</Link>
-          <div className="pt-3 border-t border-gray-100 flex gap-3">
-            <Link href="/login" className="flex-1">
-              <Button variant="secondary" size="md" className="w-full justify-center">Logg inn</Button>
-            </Link>
-            <Link href="/register" className="flex-1">
-              <Button variant="primary" size="md" className="w-full justify-center">Start gratis</Button>
-            </Link>
-          </div>
-        </div>
-      )}
     </nav>
   );
 }

@@ -1,150 +1,133 @@
+"use client";
 import Link from "next/link";
 import { Check, Zap } from "lucide-react";
-import { Button } from "@/components/ui/button";
 
 const plans = [
   {
     name: "Solo",
     price: 249,
+    unit: "/mnd",
     users: "1 bruker",
-    description: "Perfekt for deg som jobber alene med salg.",
-    features: [
-      "Ubegrenset leadsøk",
-      "Opptil 500 lagrede leads",
-      "CRM-pipeline",
-      "E-postvarsler",
-      "Basisfiltre",
-    ],
+    desc: "Perfekt for deg som jobber alene med salg.",
+    features: ["Ubegrenset leadsøk", "Opptil 500 lagrede leads", "CRM-pipeline", "E-postvarsler", "Basisfiltre"],
     cta: "Start gratis",
     popular: false,
-    color: "border-gray-200",
+    href: "/register",
   },
   {
     name: "Team",
     price: 199,
+    unit: "/bruker/mnd",
     users: "2–5 brukere",
-    priceNote: "per bruker/mnd",
-    description: "For team som vil jobbe effektivt med B2B-salg.",
-    features: [
-      "Alt i Solo",
-      "Ubegrenset lagrede leads",
-      "Teamdeling og samarbeid",
-      "Avanserte filtre",
-      "Kart-visning",
-      "Prioritert support",
-    ],
+    desc: "For team som vil jobbe effektivt med B2B-salg.",
+    features: ["Alt i Solo", "Ubegrenset lagrede leads", "Teamdeling og samarbeid", "Avanserte filtre", "Kartvisning", "Prioritert support"],
     cta: "Start gratis",
     popular: true,
-    color: "border-green-500",
+    href: "/register",
   },
   {
     name: "Vekst",
     price: 169,
+    unit: "/bruker/mnd",
     users: "6–10 brukere",
-    priceNote: "per bruker/mnd",
-    description: "Skalerbar løsning for salgsavdelinger i vekst.",
-    features: [
-      "Alt i Team",
-      "Egendefinerte statuser",
-      "API-tilgang",
-      "Dedikert kundehåndterer",
-      "SLA-garanti",
-      "Onboarding-assistanse",
-    ],
+    desc: "Skalerbar løsning for salgsavdelinger i vekst.",
+    features: ["Alt i Team", "Egendefinerte statuser", "API-tilgang", "Dedikert kundehåndterer", "SLA-garanti", "Onboarding"],
     cta: "Start gratis",
     popular: false,
-    color: "border-gray-200",
+    href: "/register",
   },
   {
     name: "Enterprise",
     price: null,
+    unit: "",
     users: "10+ brukere",
-    description: "Skreddersydd for store salgsorganisasjoner.",
-    features: [
-      "Alt i Vekst",
-      "Egendefinerte integrasjoner",
-      "Dedikert infrastruktur",
-      "Opplæring og support",
-      "Fleksibel fakturering",
-      "Sikkerhetsrevisjon",
-    ],
+    desc: "Skreddersydd for store salgsorganisasjoner.",
+    features: ["Alt i Vekst", "Egendefinerte integrasjoner", "Dedikert infrastruktur", "Opplæring og support", "Fleksibel fakturering", "Sikkerhetsrevisjon"],
     cta: "Kontakt oss",
     popular: false,
-    color: "border-gray-200",
+    href: "#",
   },
 ];
 
 export function Pricing() {
   return (
-    <section id="pricing" className="py-24 px-6 bg-[#F8F9FC]">
-      <div className="max-w-7xl mx-auto">
+    <section id="pricing" style={{ padding: "96px 24px", backgroundColor: "#F8F9FC" }}>
+      <div style={{ maxWidth: 1200, margin: "0 auto" }}>
+
         {/* Header */}
-        <div className="text-center max-w-2xl mx-auto mb-16">
-          <span className="text-green-600 font-semibold text-sm uppercase tracking-wider">Priser</span>
-          <h2 className="text-4xl font-bold text-[#0F1729] mt-3 mb-4">
+        <div style={{ textAlign: "center", maxWidth: 600, margin: "0 auto 64px" }}>
+          <span style={{ fontSize: 13, fontWeight: 700, color: "#22C55E", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+            Priser
+          </span>
+          <h2 style={{ fontSize: "clamp(28px, 3.5vw, 42px)", fontWeight: 800, color: "#0F1729", letterSpacing: "-0.8px", marginTop: 12, marginBottom: 16 }}>
             Enkle og transparente priser
           </h2>
-          <p className="text-lg text-gray-500">
-            Alle planer inkluderer 3 dagers gratis prøveperiode.
-            Ingen kredittkort nødvendig. Avbestill når som helst.
+          <p style={{ fontSize: 17, color: "#6B7280", lineHeight: 1.65 }}>
+            Alle planer inkluderer 3 dagers gratis prøveperiode. Ingen kredittkort nødvendig.
           </p>
         </div>
 
-        {/* Pricing grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 items-start">
-          {plans.map((plan) => (
-            <div
-              key={plan.name}
-              className={`relative bg-white rounded-2xl border-2 p-7 ${plan.color} ${
-                plan.popular ? "shadow-xl shadow-green-500/10" : "shadow-card"
-              }`}
-            >
+        {/* Cards grid */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 20, alignItems: "start" }}>
+          {plans.map(plan => (
+            <div key={plan.name} style={{
+              position: "relative",
+              backgroundColor: "white",
+              borderRadius: 20,
+              border: plan.popular ? "2px solid #22C55E" : "2px solid #E5E7EB",
+              padding: "28px 24px",
+              boxShadow: plan.popular ? "0 8px 32px rgba(34,197,94,0.12)" : "0 1px 4px rgba(0,0,0,0.06)",
+            }}>
               {plan.popular && (
-                <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
-                  <span className="bg-green-500 text-white text-xs font-bold px-4 py-1 rounded-full flex items-center gap-1">
-                    <Zap className="w-3 h-3 fill-white" />
-                    Mest populær
-                  </span>
+                <div style={{
+                  position: "absolute", top: -14, left: "50%", transform: "translateX(-50%)",
+                  backgroundColor: "#22C55E", color: "white",
+                  fontSize: 12, fontWeight: 700, padding: "4px 14px", borderRadius: 999,
+                  display: "flex", alignItems: "center", gap: 4, whiteSpace: "nowrap",
+                }}>
+                  <Zap size={11} fill="white" color="white" /> Mest populær
                 </div>
               )}
 
-              <div className="mb-6">
-                <h3 className="text-lg font-bold text-[#0F1729] mb-1">{plan.name}</h3>
-                <p className="text-sm text-gray-500 mb-4">{plan.users}</p>
+              <div style={{ marginBottom: 24 }}>
+                <p style={{ fontSize: 14, fontWeight: 700, color: "#6B7280", margin: "0 0 4px" }}>{plan.users}</p>
+                <h3 style={{ fontSize: 22, fontWeight: 800, color: "#0F1729", margin: "0 0 16px" }}>{plan.name}</h3>
                 {plan.price !== null ? (
-                  <div className="flex items-end gap-1">
-                    <span className="text-4xl font-extrabold text-[#0F1729]">{plan.price}kr</span>
-                    <span className="text-sm text-gray-400 mb-1">/{plan.priceNote ?? "mnd"}</span>
+                  <div style={{ display: "flex", alignItems: "flex-end", gap: 4 }}>
+                    <span style={{ fontSize: 38, fontWeight: 800, color: "#0F1729", lineHeight: 1 }}>{plan.price} kr</span>
+                    <span style={{ fontSize: 13, color: "#9CA3AF", paddingBottom: 4 }}>{plan.unit}</span>
                   </div>
                 ) : (
-                  <div className="text-3xl font-extrabold text-[#0F1729]">Pris etter avtale</div>
+                  <span style={{ fontSize: 26, fontWeight: 800, color: "#0F1729" }}>Pris etter avtale</span>
                 )}
-                <p className="text-sm text-gray-500 mt-3">{plan.description}</p>
+                <p style={{ fontSize: 14, color: "#6B7280", marginTop: 12, lineHeight: 1.5 }}>{plan.desc}</p>
               </div>
 
-              <ul className="space-y-2.5 mb-7">
-                {plan.features.map((f) => (
-                  <li key={f} className="flex items-start gap-2.5 text-sm text-gray-600">
-                    <Check className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
+              <ul style={{ listStyle: "none", padding: 0, margin: "0 0 24px", display: "flex", flexDirection: "column", gap: 10 }}>
+                {plan.features.map(f => (
+                  <li key={f} style={{ display: "flex", alignItems: "flex-start", gap: 10, fontSize: 14, color: "#4B5563" }}>
+                    <Check size={15} color="#22C55E" style={{ flexShrink: 0, marginTop: 1 }} />
                     {f}
                   </li>
                 ))}
               </ul>
 
-              <Link href={plan.price !== null ? "/register" : "#"}>
-                <Button
-                  variant={plan.popular ? "primary" : "secondary"}
-                  size="md"
-                  className="w-full justify-center"
-                >
-                  {plan.cta}
-                </Button>
+              <Link href={plan.href} style={{
+                display: "block", textAlign: "center",
+                padding: "11px 0", borderRadius: 10,
+                fontWeight: 700, fontSize: 14, textDecoration: "none",
+                backgroundColor: plan.popular ? "#22C55E" : "white",
+                color: plan.popular ? "white" : "#0F1729",
+                border: plan.popular ? "none" : "1.5px solid #E5E7EB",
+                transition: "background-color 0.15s",
+              }}>
+                {plan.cta}
               </Link>
             </div>
           ))}
         </div>
 
-        <p className="text-center text-sm text-gray-400 mt-10">
+        <p style={{ textAlign: "center", fontSize: 13, color: "#9CA3AF", marginTop: 36 }}>
           Alle priser er ekskl. MVA. Faktureres månedlig. Kan avbestilles når som helst.
         </p>
       </div>
