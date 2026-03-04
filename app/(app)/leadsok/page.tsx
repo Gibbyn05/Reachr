@@ -123,6 +123,7 @@ export default function LeadsokPage() {
       if (nace) params.set("naeringskode", nace);
       else params.set("navn", ind);
     }
+    if (f.mva) params.set("mva", "true");
     if (f.ansatte !== "all") {
       const [fra, til] = {
         "1-10": ["1", "10"], "11-50": ["11", "50"],

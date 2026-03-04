@@ -63,7 +63,9 @@ const recentActivity = [
 ];
 
 export default function DashboardPage() {
-  const recentLeads = mockLeads.slice(0, 5);
+  const recentLeads = mockLeads
+    .filter((l) => l.status === "Ikke kontaktet" || l.status === "Kontaktet - ikke svar")
+    .slice(0, 5);
 
   return (
     <div>
@@ -107,11 +109,11 @@ export default function DashboardPage() {
         </div>
 
         <div className="grid lg:grid-cols-3 gap-6">
-          {/* Recent leads */}
+          {/* Needs follow-up */}
           <div className="lg:col-span-2 bg-white rounded-xl border border-gray-200 overflow-hidden" style={{boxShadow: "0 1px 3px rgba(0,0,0,0.08)"}}>
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-              <h3 className="font-semibold text-slate-900">Siste leads</h3>
-              <Link href="/mine-leads" className="text-sm text-green-600 font-medium hover:underline flex items-center gap-1">
+              <h3 className="font-semibold text-slate-900">Trenger oppfølging!</h3>
+              <Link href="/mine-leads" className="text-sm text-blue-600 font-medium hover:underline flex items-center gap-1">
                 Se alle <ArrowRight className="w-3.5 h-3.5" />
               </Link>
             </div>

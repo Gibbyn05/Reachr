@@ -9,6 +9,7 @@ export async function GET(request: NextRequest) {
   const nkode   = sp.get("naeringskode");
   const fra     = sp.get("fraAntallAnsatte");
   const til     = sp.get("tilAntallAnsatte");
+  const mva     = sp.get("mva");
   const size    = sp.get("size") || "25";
 
   if (kommune) params.set("kommunenavn", kommune.toUpperCase());
@@ -16,9 +17,9 @@ export async function GET(request: NextRequest) {
   if (nkode)   params.set("naeringskode", nkode);
   if (fra)     params.set("fraAntallAnsatte", fra);
   if (til)     params.set("tilAntallAnsatte", til);
+  if (mva === "true") params.set("registrertIMvaregisteret", "true");
   params.set("size", size);
   params.set("konkurs", "false");
-  params.set("registrertIMvaregisteret", "true");
 
   try {
     const res = await fetch(
