@@ -117,7 +117,7 @@ export default function LeadsokPage() {
     setHasSearched(true);
 
     const params = new URLSearchParams({ size: "40" });
-    if (loc) params.set("kommunenavn", toKommune(loc));
+    if (loc) params.set("poststed", loc.trim().toUpperCase());
     if (ind) {
       const nace = guessNace(ind);
       if (nace) params.set("naeringskode", nace);

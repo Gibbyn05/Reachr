@@ -4,19 +4,19 @@ export async function GET(request: NextRequest) {
   const sp = request.nextUrl.searchParams;
 
   const params = new URLSearchParams();
-  const kommune = sp.get("kommunenavn");
-  const navn    = sp.get("navn");
-  const nkode   = sp.get("naeringskode");
-  const fra     = sp.get("fraAntallAnsatte");
-  const til     = sp.get("tilAntallAnsatte");
-  const mva     = sp.get("mva");
-  const size    = sp.get("size") || "25";
+  const poststed = sp.get("poststed");
+  const navn     = sp.get("navn");
+  const nkode    = sp.get("naeringskode");
+  const fra      = sp.get("fraAntallAnsatte");
+  const til      = sp.get("tilAntallAnsatte");
+  const mva      = sp.get("mva");
+  const size     = sp.get("size") || "25";
 
-  if (kommune) params.set("kommunenavn", kommune.toUpperCase());
-  if (navn)    params.set("navn", navn);
-  if (nkode)   params.set("naeringskode", nkode);
-  if (fra)     params.set("fraAntallAnsatte", fra);
-  if (til)     params.set("tilAntallAnsatte", til);
+  if (poststed) params.set("forretningsadresse.poststed", poststed.toUpperCase());
+  if (navn)     params.set("navn", navn);
+  if (nkode)    params.set("naeringskode", nkode);
+  if (fra)      params.set("fraAntallAnsatte", fra);
+  if (til)      params.set("tilAntallAnsatte", til);
   if (mva === "true") params.set("registrertIMvaregisteret", "true");
   params.set("size", size);
   params.set("konkurs", "false");
