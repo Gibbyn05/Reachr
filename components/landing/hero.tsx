@@ -1,232 +1,263 @@
 "use client";
 import Link from "next/link";
+import { motion, type Transition } from "framer-motion";
 import { ArrowRight, Play, TrendingUp, Users, Bell } from "lucide-react";
+import { BorderBeam } from "@/components/ui/border-beam";
+
+const fadeUp = (delay = 0) => ({
+  initial: { opacity: 0, y: 20 },
+  animate: { opacity: 1, y: 0 },
+  transition: { duration: 0.6, delay, ease: "easeOut" } as Transition,
+});
 
 export function Hero() {
   return (
-    <section style={{ paddingTop: 128, paddingBottom: 96, background: "linear-gradient(180deg,#ffffff 0%,#F8F9FC 100%)" }}>
-      <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px" }}>
+    <section className="relative overflow-hidden bg-white pt-32 pb-0">
+      {/* Subtle radial glow in background */}
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_40%_at_50%_0%,rgba(34,197,94,0.07),transparent)]" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_40%_20%_at_50%_0%,rgba(34,197,94,0.05),transparent)]" />
 
-        {/* Centered headline block */}
-        <div style={{ textAlign: "center", maxWidth: 720, margin: "0 auto 72px" }}>
-
+      <div className="relative mx-auto max-w-6xl px-6">
+        {/* ── Centered headline block ── */}
+        <div className="mx-auto max-w-3xl text-center mb-16">
           {/* Badge */}
-          <div style={{
-            display: "inline-flex", alignItems: "center", gap: 8,
-            backgroundColor: "#F0FDF4", border: "1px solid #BBF7D0",
-            color: "#15803D", fontSize: 13, fontWeight: 600,
-            padding: "6px 16px", borderRadius: 999, marginBottom: 32,
-          }}>
-            <span style={{ width: 8, height: 8, backgroundColor: "#22C55E", borderRadius: "50%", display: "inline-block" }} />
-            3 dagers gratis prøveperiode – ingen kredittkort
-          </div>
+          <motion.div {...fadeUp(0)} className="mb-8 inline-flex">
+            <span className="inline-flex items-center gap-2 rounded-full border border-green-200 bg-green-50 px-4 py-1.5 text-sm font-semibold text-green-700">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-green-500" />
+              </span>
+              3 dagers gratis prøveperiode – ingen kredittkort
+            </span>
+          </motion.div>
 
           {/* Headline */}
-          <h1 style={{
-            fontSize: "clamp(42px, 5.5vw, 64px)", fontWeight: 800,
-            color: "#0F1729", lineHeight: 1.08, letterSpacing: "-2px",
-            marginBottom: 24,
-          }}>
+          <motion.h1
+            {...fadeUp(0.1)}
+            className="text-5xl sm:text-6xl md:text-[4.25rem] font-extrabold tracking-tight text-[#0F1729] leading-[1.05] mb-6"
+          >
             Finn leads.{" "}
-            <span style={{ color: "#22C55E" }}>Ta kontakt.</span>
-            <br />Lukk avtaler.
-          </h1>
+            <span className="text-[#22C55E]">Ta kontakt.</span>
+            <br />
+            Lukk avtaler.
+          </motion.h1>
 
           {/* Subtext */}
-          <p style={{ fontSize: 19, color: "#6B7280", lineHeight: 1.65, maxWidth: 560, margin: "0 auto 40px" }}>
+          <motion.p
+            {...fadeUp(0.2)}
+            className="mx-auto max-w-xl text-lg text-gray-500 leading-relaxed mb-10"
+          >
             Reachr er det norske B2B-verktøyet som hjelper deg finne nye kunder,
             følge opp leads og lukke avtaler – alt på ett sted.
-          </p>
+          </motion.p>
 
           {/* CTAs */}
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 16, flexWrap: "wrap" }}>
-            <Link href="/register" style={{
-              display: "inline-flex", alignItems: "center", gap: 8,
-              backgroundColor: "#22C55E", color: "white",
-              fontWeight: 700, fontSize: 15, textDecoration: "none",
-              padding: "14px 28px", borderRadius: 12,
-              boxShadow: "0 4px 16px rgba(34,197,94,0.35)",
-            }}>
-              Start gratis i dag <ArrowRight size={18} />
+          <motion.div
+            {...fadeUp(0.3)}
+            className="flex flex-wrap items-center justify-center gap-4"
+          >
+            <Link
+              href="/register"
+              className="inline-flex items-center gap-2 rounded-xl bg-[#22C55E] px-6 py-3 text-sm font-bold text-white shadow-[0_4px_14px_rgba(34,197,94,0.4)] transition-all duration-200 hover:bg-[#16A34A] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(34,197,94,0.5)]"
+            >
+              Start gratis i dag <ArrowRight size={16} />
             </Link>
-            <div style={{ display: "inline-flex", alignItems: "center", gap: 10, cursor: "pointer", color: "#374151", fontWeight: 600, fontSize: 15 }}>
-              <div style={{
-                width: 42, height: 42, borderRadius: "50%", backgroundColor: "white",
-                boxShadow: "0 2px 10px rgba(0,0,0,0.1)", border: "1px solid #E5E7EB",
-                display: "flex", alignItems: "center", justifyContent: "center",
-              }}>
-                <Play size={14} color="#22C55E" fill="#22C55E" style={{ marginLeft: 2 }} />
-              </div>
+            <button className="inline-flex items-center gap-3 text-sm font-semibold text-gray-700 transition-colors hover:text-gray-900">
+              <span className="flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 bg-white shadow-sm transition-shadow hover:shadow-md">
+                <Play size={12} fill="#22C55E" color="#22C55E" className="ml-0.5" />
+              </span>
               Se demo
-            </div>
-          </div>
+            </button>
+          </motion.div>
 
-          <p style={{ fontSize: 13, color: "#9CA3AF", marginTop: 28 }}>
-            Brukt av <strong style={{ color: "#6B7280" }}>500+ norske bedrifter</strong>
-          </p>
+          <motion.p {...fadeUp(0.45)} className="mt-6 text-xs text-gray-400">
+            Brukt av <strong className="text-gray-500">500+ norske bedrifter</strong>
+          </motion.p>
         </div>
 
-        {/* App mockup */}
-        <div style={{ position: "relative", maxWidth: 960, margin: "0 auto", paddingLeft: 40, paddingRight: 40 }}>
+        {/* ── App mockup ── */}
+        <motion.div
+          initial={{ opacity: 0, y: 48, scale: 0.97 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ duration: 0.9, delay: 0.45, ease: [0.16, 1, 0.3, 1] }}
+          className="relative mx-auto max-w-4xl px-6"
+        >
+          {/* Glow behind mockup */}
+          <div className="pointer-events-none absolute -inset-10 top-8 bg-[radial-gradient(ellipse_70%_40%_at_50%_60%,rgba(34,197,94,0.1),transparent)]" />
 
-          {/* Glow behind */}
-          <div style={{
-            position: "absolute", left: "50%", top: "50%",
-            transform: "translate(-50%, -50%)",
-            width: 800, height: 400,
-            background: "radial-gradient(ellipse, rgba(34,197,94,0.07) 0%, transparent 70%)",
-            pointerEvents: "none",
-          }} />
+          {/* Mockup frame with border beam */}
+          <div className="relative rounded-2xl bg-black/[0.03] p-2 ring-1 ring-black/[0.06] shadow-[0_32px_80px_rgba(0,0,0,0.18)]">
+            <BorderBeam
+              size={320}
+              duration={10}
+              colorFrom="#22C55E"
+              colorTo="#4ADE80"
+              borderWidth={1.5}
+            />
 
-          {/* Browser window */}
-          <div className="animate-float" style={{
-            position: "relative", backgroundColor: "#0F1729", borderRadius: 16,
-            boxShadow: "0 40px 100px rgba(0,0,0,0.28), 0 8px 24px rgba(0,0,0,0.12)",
-            border: "1px solid rgba(255,255,255,0.07)", overflow: "hidden",
-          }}>
-            {/* Title bar */}
-            <div style={{
-              display: "flex", alignItems: "center", gap: 8,
-              padding: "12px 18px", backgroundColor: "#1A2540",
-              borderBottom: "1px solid rgba(255,255,255,0.07)",
-            }}>
-              <div style={{ display: "flex", gap: 6 }}>
-                {["#EF4444","#F59E0B","#22C55E"].map(c => (
-                  <div key={c} style={{ width: 11, height: 11, borderRadius: "50%", backgroundColor: c, opacity: 0.7 }} />
-                ))}
-              </div>
-              <div style={{
-                flex: 1, margin: "0 14px", backgroundColor: "rgba(255,255,255,0.07)",
-                borderRadius: 6, padding: "4px 14px",
-                fontSize: 11, color: "rgba(255,255,255,0.35)",
-              }}>app.reachr.no/leadsok</div>
-            </div>
-
-            {/* Body */}
-            <div style={{ display: "flex", height: 340 }}>
-              {/* Sidebar */}
-              <div style={{
-                width: 172, backgroundColor: "#0F1729",
-                borderRight: "1px solid rgba(255,255,255,0.06)",
-                padding: 16, flexShrink: 0,
-              }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 20 }}>
-                  <div style={{ width: 24, height: 24, backgroundColor: "#22C55E", borderRadius: 6 }} />
-                  <span style={{ color: "white", fontWeight: 800, fontSize: 13 }}>Reachr</span>
+            {/* Browser chrome */}
+            <div className="overflow-hidden rounded-xl bg-[#0F1729] ring-1 ring-white/5 shadow-xl">
+              {/* Title bar */}
+              <div className="flex items-center gap-2 border-b border-white/5 bg-[#1A2540] px-4 py-3">
+                <div className="flex gap-1.5">
+                  {["#EF4444", "#F59E0B", "#22C55E"].map((c) => (
+                    <div
+                      key={c}
+                      className="h-3 w-3 rounded-full opacity-70"
+                      style={{ backgroundColor: c }}
+                    />
+                  ))}
                 </div>
-                {[["Dashboard",false],["Leadsøk",true],["Mine Leads",false],["Varsler",false],["Innstillinger",false]].map(([l,a]) => (
-                  <div key={String(l)} style={{
-                    display: "flex", alignItems: "center", gap: 8,
-                    padding: "8px 10px", borderRadius: 8, marginBottom: 3,
-                    backgroundColor: a ? "rgba(255,255,255,0.11)" : "transparent",
-                    color: a ? "white" : "rgba(255,255,255,0.42)",
-                    fontSize: 12, fontWeight: a ? 600 : 400,
-                  }}>
-                    <div style={{ width: 6, height: 6, borderRadius: "50%", backgroundColor: a ? "#4ADE80" : "rgba(255,255,255,0.18)", flexShrink: 0 }} />
-                    {l}
-                  </div>
-                ))}
+                <div className="mx-4 flex-1 rounded-md bg-white/5 px-4 py-1 text-[11px] text-white/30">
+                  app.reachr.no/leadsok
+                </div>
               </div>
 
-              {/* Content */}
-              <div style={{ flex: 1, backgroundColor: "#F8F9FC", padding: 18, overflow: "hidden" }}>
-                {/* Search row */}
-                <div style={{ display: "flex", gap: 8, marginBottom: 14 }}>
-                  {[0,1].map(i => (
-                    <div key={i} style={{
-                      flex: 1, height: 36, backgroundColor: "white",
-                      border: "1px solid #E5E7EB", borderRadius: 8,
-                      display: "flex", alignItems: "center", padding: "0 10px", gap: 7,
-                    }}>
-                      <div style={{ width: 10, height: 10, borderRadius: "50%", backgroundColor: "#D1D5DB", flexShrink: 0 }} />
-                      <div style={{ height: 6, width: "55%", backgroundColor: "#E9ECF0", borderRadius: 3 }} />
+              {/* App body */}
+              <div className="flex h-[300px] sm:h-[340px]">
+                {/* Sidebar */}
+                <div className="w-44 shrink-0 border-r border-white/5 bg-[#0F1729] p-3">
+                  <div className="mb-5 flex items-center gap-2">
+                    <div className="h-6 w-6 rounded-md bg-[#22C55E]" />
+                    <span className="text-xs font-bold text-white">Reachr</span>
+                  </div>
+                  {[
+                    ["Dashboard", false],
+                    ["Leadsøk", true],
+                    ["Mine Leads", false],
+                    ["Varsler", false],
+                    ["Innstillinger", false],
+                  ].map(([label, active]) => (
+                    <div
+                      key={String(label)}
+                      className={`mb-1 flex items-center gap-2 rounded-lg px-2.5 py-2 text-xs ${
+                        active
+                          ? "bg-white/10 font-semibold text-white"
+                          : "text-white/40"
+                      }`}
+                    >
+                      <div
+                        className={`h-1.5 w-1.5 shrink-0 rounded-full ${
+                          active ? "bg-[#4ADE80]" : "bg-white/15"
+                        }`}
+                      />
+                      {label}
                     </div>
                   ))}
-                  <div style={{ height: 36, padding: "0 16px", backgroundColor: "#22C55E", borderRadius: 8, display: "flex", alignItems: "center" }}>
-                    <div style={{ height: 6, width: 34, backgroundColor: "rgba(255,255,255,0.85)", borderRadius: 3 }} />
-                  </div>
                 </div>
 
-                {/* Table */}
-                <div style={{ backgroundColor: "white", borderRadius: 10, border: "1px solid #E5E7EB", overflow: "hidden" }}>
-                  <div style={{ display: "flex", gap: 10, padding: "8px 14px", backgroundColor: "#F9FAFB", borderBottom: "1px solid #F3F4F6" }}>
-                    {[100,80,70,60,64].map((w,i) => (
-                      <div key={i} style={{ flex: i===4 ? "0 0 64px" : 1, height: 6, backgroundColor: "#E5E7EB", borderRadius: 3 }} />
-                    ))}
-                  </div>
-                  {[85,72,90,78].map((w,i) => (
-                    <div key={i} style={{
-                      display: "flex", alignItems: "center", gap: 10,
-                      padding: "9px 14px", borderBottom: i<3 ? "1px solid #F9FAFB" : "none",
-                    }}>
-                      <div style={{ flex: 1, display: "flex", alignItems: "center", gap: 7 }}>
-                        <div style={{ width: 22, height: 22, borderRadius: 6, backgroundColor: "#F1F5F9", flexShrink: 0 }} />
-                        <div style={{ height: 6, width: w, backgroundColor: "#1A2540", borderRadius: 3, opacity: 0.6 }} />
+                {/* Main content */}
+                <div className="flex-1 overflow-hidden bg-[#F8F9FC] p-4">
+                  {/* Search row */}
+                  <div className="mb-3 flex gap-2">
+                    {[0, 1].map((i) => (
+                      <div
+                        key={i}
+                        className="flex flex-1 items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2"
+                      >
+                        <div className="h-2.5 w-2.5 shrink-0 rounded-full bg-gray-300" />
+                        <div className="h-1.5 w-3/5 rounded bg-gray-200" />
                       </div>
-                      <div style={{ flex: 1 }}><div style={{ height: 6, width: 58, backgroundColor: "#D1D5DB", borderRadius: 3 }} /></div>
-                      <div style={{ flex: 1 }}><div style={{ height: 16, width: 56, backgroundColor: "#F1F5F9", borderRadius: 5 }} /></div>
-                      <div style={{ flex: 1 }}><div style={{ height: 6, width: 48, backgroundColor: "#BBF7D0", borderRadius: 3 }} /></div>
-                      <div style={{ flexBasis: 64, flexShrink: 0 }}>
-                        <div style={{ height: 26, backgroundColor: "#22C55E", borderRadius: 6, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                          <div style={{ height: 5, width: 36, backgroundColor: "rgba(255,255,255,0.85)", borderRadius: 3 }} />
+                    ))}
+                    <div className="flex items-center rounded-lg bg-[#22C55E] px-4 py-2">
+                      <div className="h-1.5 w-8 rounded bg-white/85" />
+                    </div>
+                  </div>
+
+                  {/* Table */}
+                  <div className="overflow-hidden rounded-xl border border-gray-200 bg-white">
+                    {/* Header row */}
+                    <div className="flex gap-3 border-b border-gray-100 bg-gray-50 px-4 py-2.5">
+                      {[1, 1, 1, 1].map((_, i) => (
+                        <div key={i} className="h-1.5 flex-1 rounded bg-gray-200" />
+                      ))}
+                      <div className="h-1.5 w-16 shrink-0 rounded bg-gray-200" />
+                    </div>
+                    {/* Data rows */}
+                    {[85, 72, 90, 78].map((w, i) => (
+                      <div
+                        key={i}
+                        className={`flex items-center gap-3 px-4 py-2.5 ${
+                          i < 3 ? "border-b border-gray-50" : ""
+                        }`}
+                      >
+                        <div className="flex flex-1 items-center gap-2">
+                          <div className="h-6 w-6 shrink-0 rounded-md bg-gray-100" />
+                          <div
+                            className="h-1.5 rounded bg-gray-700/50"
+                            style={{ width: w }}
+                          />
+                        </div>
+                        <div className="flex-1">
+                          <div className="h-1.5 w-14 rounded bg-gray-300" />
+                        </div>
+                        <div className="flex-1">
+                          <div className="h-4 w-14 rounded-md bg-gray-100" />
+                        </div>
+                        <div className="flex-1">
+                          <div className="h-1.5 w-12 rounded bg-green-200" />
+                        </div>
+                        <div className="w-16 shrink-0">
+                          <div className="flex h-7 items-center justify-center rounded-md bg-[#22C55E]">
+                            <div className="h-1 w-9 rounded bg-white/85" />
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Floating card left */}
-          <div style={{
-            position: "absolute", left: -16, top: 56,
-            backgroundColor: "white", borderRadius: 14,
-            boxShadow: "0 10px 40px rgba(0,0,0,0.12)", border: "1px solid #F3F4F6",
-            padding: "12px 16px", display: "flex", alignItems: "center", gap: 12,
-          }}>
-            <div style={{ width: 38, height: 38, backgroundColor: "#EFF6FF", borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <TrendingUp size={18} color="#3B82F6" />
+          {/* Floating stat card – left */}
+          <motion.div
+            initial={{ opacity: 0, x: -16 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.75, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+            className="absolute -left-4 top-10 flex items-center gap-3 rounded-2xl border border-gray-100 bg-white p-3 shadow-[0_8px_30px_rgba(0,0,0,0.1)]"
+          >
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50">
+              <TrendingUp size={18} className="text-blue-500" />
             </div>
             <div>
-              <p style={{ fontSize: 11, color: "#9CA3AF", margin: 0 }}>Nye leads i dag</p>
-              <p style={{ fontSize: 20, fontWeight: 800, color: "#0F1729", margin: 0 }}>+24</p>
+              <p className="text-[10px] leading-none text-gray-400 mb-1">Nye leads i dag</p>
+              <p className="text-xl font-extrabold leading-none text-[#0F1729]">+24</p>
             </div>
-          </div>
+          </motion.div>
 
-          {/* Floating card right top */}
-          <div style={{
-            position: "absolute", right: -16, top: 80,
-            backgroundColor: "white", borderRadius: 14,
-            boxShadow: "0 10px 40px rgba(0,0,0,0.12)", border: "1px solid #F3F4F6",
-            padding: "12px 16px", display: "flex", alignItems: "center", gap: 12,
-          }}>
-            <div style={{ width: 38, height: 38, backgroundColor: "#F0FDF4", borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <Users size={18} color="#22C55E" />
+          {/* Floating stat card – right top */}
+          <motion.div
+            initial={{ opacity: 0, x: 16 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.85, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+            className="absolute -right-4 top-16 flex items-center gap-3 rounded-2xl border border-gray-100 bg-white p-3 shadow-[0_8px_30px_rgba(0,0,0,0.1)]"
+          >
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-green-50">
+              <Users size={18} className="text-green-500" />
             </div>
             <div>
-              <p style={{ fontSize: 11, color: "#9CA3AF", margin: 0 }}>Bookede møter</p>
-              <p style={{ fontSize: 17, fontWeight: 800, color: "#0F1729", margin: 0 }}>7 denne uka</p>
+              <p className="text-[10px] leading-none text-gray-400 mb-1">Bookede møter</p>
+              <p className="text-base font-extrabold leading-none text-[#0F1729]">7 denne uka</p>
             </div>
-          </div>
+          </motion.div>
 
-          {/* Floating card right bottom */}
-          <div style={{
-            position: "absolute", right: -8, bottom: 48,
-            backgroundColor: "white", borderRadius: 14,
-            boxShadow: "0 10px 40px rgba(0,0,0,0.12)", border: "1px solid #F3F4F6",
-            padding: "12px 16px", display: "flex", alignItems: "center", gap: 12,
-          }}>
-            <div style={{ width: 38, height: 38, backgroundColor: "#FFFBEB", borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <Bell size={18} color="#F59E0B" />
+          {/* Floating stat card – right bottom */}
+          <motion.div
+            initial={{ opacity: 0, x: 16 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.95, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+            className="absolute -right-2 bottom-10 flex items-center gap-3 rounded-2xl border border-gray-100 bg-white p-3 shadow-[0_8px_30px_rgba(0,0,0,0.1)]"
+          >
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-50">
+              <Bell size={18} className="text-amber-500" />
             </div>
             <div>
-              <p style={{ fontSize: 11, color: "#9CA3AF", margin: 0 }}>Varsler venter</p>
-              <p style={{ fontSize: 17, fontWeight: 800, color: "#0F1729", margin: 0 }}>3 oppfølginger</p>
+              <p className="text-[10px] leading-none text-gray-400 mb-1">Varsler venter</p>
+              <p className="text-base font-extrabold leading-none text-[#0F1729]">3 oppfølginger</p>
             </div>
-          </div>
-        </div>
-
+          </motion.div>
+        </motion.div>
       </div>
     </section>
   );

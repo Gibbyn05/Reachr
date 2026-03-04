@@ -2,14 +2,25 @@
 
 @theme {
   --color-background: #F8F9FC;
+  --color-foreground: #0F1729;
   --color-sidebar: #0F1729;
   --color-accent: #22C55E;
   --color-primary: #0F1729;
+  --color-muted: #F3F4F6;
+  --color-muted-foreground: #6B7280;
+  --color-card: #ffffff;
+  --color-card-foreground: #0F1729;
+  --color-border: #E5E7EB;
+  --color-ring: #22C55E;
   --font-family-sans: 'Inter', system-ui, sans-serif;
-}
 
-/* Tailwind v4 Preflight already handles box-sizing/margin resets.
-   Do NOT add a manual * reset here – it overrides utility layers. */
+  /* Animations */
+  --animate-float: float 5s ease-in-out infinite;
+  --animate-border-beam: border-beam calc(var(--duration) * 1s) infinite linear;
+  --animate-appear: appear 0.5s ease-out forwards;
+  --animate-appear-zoom: appear-zoom 0.5s ease-out forwards;
+  --animate-ping-slow: ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
 
 html {
   font-family: 'Inter', system-ui, sans-serif;
@@ -21,6 +32,20 @@ body {
   color: #0F1729;
 }
 
+/* CSS vars for Glow component radial gradients */
+:root {
+  --brand: 142 72% 46%;
+  --brand-foreground: 142 72% 59%;
+}
+
+/* Animation delay utilities */
+.delay-100 { animation-delay: 100ms; }
+.delay-200 { animation-delay: 200ms; }
+.delay-300 { animation-delay: 300ms; }
+.delay-500 { animation-delay: 500ms; }
+.delay-700 { animation-delay: 700ms; }
+.delay-1000 { animation-delay: 1000ms; }
+
 @keyframes float {
   0%, 100% { transform: translateY(0px); }
   50% { transform: translateY(-12px); }
@@ -31,8 +56,18 @@ body {
   to { opacity: 1; transform: translateY(0); }
 }
 
-.animate-float {
-  animation: float 5s ease-in-out infinite;
+@keyframes appear {
+  0% { opacity: 0; transform: translateY(10px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes appear-zoom {
+  0% { opacity: 0; transform: scale(0.95); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes border-beam {
+  100% { offset-distance: 100%; }
 }
 
 ::-webkit-scrollbar { width: 5px; height: 5px; }
