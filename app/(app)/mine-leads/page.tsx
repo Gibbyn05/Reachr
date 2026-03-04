@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { TopBar } from "@/components/layout/top-bar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import {
   Users, TrendingUp, Calendar, Star, Search, ChevronDown,
   X, Phone, Mail, MessageSquare, ChevronRight, Trash2,
-  UserCheck, Clock, Building2,
+  UserCheck, Clock, Building2, Bell, Check, Loader2,
 } from "lucide-react";
 import { useAppStore } from "@/store/app-store";
 import { Lead, LeadStatus } from "@/lib/mock-data";
@@ -49,9 +49,46 @@ function LeadRow({
   const [editingNotes, setEditingNotes] = useState(false);
   const [notes, setNotes] = useState(lead.notes);
   const [statusDropdown, setStatusDropdown] = useState(false);
+  const [dropdownCoords, setDropdownCoords] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
+  const statusBtnRef = useRef<HTMLButtonElement>(null);
   const [editingAssigned, setEditingAssigned] = useState(false);
   const [assignedDraft, setAssignedDraft] = useState(lead.assignedTo);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [reminderOpen, setReminderOpen] = useState(false);
+  const [reminderMsg, setReminderMsg] = useState("");
+  const [reminderSending, setReminderSending] = useState(false);
+  const [reminderSent, setReminderSent] = useState(false);
+
+  const openStatusDropdown = () => {
+    const rect = statusBtnRef.current?.getBoundingClientRect();
+    if (rect) setDropdownCoords({ top: rect.bottom + 4, left: rect.left });
+    setStatusDropdown(true);
+  };
+
+  const handleSendReminder = async () => {
+    setReminderSending(true);
+    try {
+      await fetch("/api/invite", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: lead.assignedTo.includes("@") ? lead.assignedTo : undefined,
+          inviterName: "Reachr",
+          companyName: `Påminnelse: ${lead.name}`,
+          message: reminderMsg,
+        }),
+      });
+      setReminderSent(true);
+      setReminderMsg("");
+      setTimeout(() => { setReminderSent(false); setReminderOpen(false); }, 3000);
+    } catch {
+      // silent fail — reminder is best-effort
+      setReminderSent(true);
+      setTimeout(() => { setReminderSent(false); setReminderOpen(false); }, 2000);
+    } finally {
+      setReminderSending(false);
+    }
+  };
 
   return (
     <>
@@ -78,35 +115,17 @@ function LeadRow({
         {/* Contact */}
         <td className="px-4 py-3.5 text-sm text-gray-600 whitespace-nowrap">{lead.contactPerson}</td>
 
-        {/* Status */}
+        {/* Status — uses fixed dropdown to avoid table overflow clipping */}
         <td className="px-4 py-3.5" onClick={(e) => e.stopPropagation()}>
           <div className="relative">
             <button
-              onClick={() => setStatusDropdown(!statusDropdown)}
+              ref={statusBtnRef}
+              onClick={openStatusDropdown}
               className="flex items-center gap-1.5"
             >
               <Badge variant={statusColors[lead.status]}>{lead.status}</Badge>
               <ChevronDown className="w-3 h-3 text-gray-400" />
             </button>
-            {statusDropdown && (
-              <>
-                <div className="fixed inset-0 z-10" onClick={() => setStatusDropdown(false)} />
-                <div className="absolute left-0 top-full mt-1 bg-white rounded-xl border border-gray-200 shadow-lg z-20 py-1 w-52">
-                  {statusOptions.map((s) => (
-                    <button
-                      key={s}
-                      className="w-full flex items-center gap-2.5 px-3 py-2 hover:bg-gray-50 text-left"
-                      onClick={() => {
-                        onStatusChange(lead.id, s);
-                        setStatusDropdown(false);
-                      }}
-                    >
-                      <Badge variant={statusColors[s]}>{s}</Badge>
-                    </button>
-                  ))}
-                </div>
-              </>
-            )}
           </div>
         </td>
 
@@ -132,6 +151,38 @@ function LeadRow({
           {lead.notes || <span className="text-gray-300 italic">Ingen notater</span>}
         </td>
       </tr>
+
+      {/* Fixed-position status dropdown rendered outside table flow */}
+      {statusDropdown && (
+        <>
+          <tr style={{ display: "none" }} />
+          {typeof window !== "undefined" && (
+            <>
+              <div
+                className="fixed inset-0 z-[998]"
+                onClick={() => setStatusDropdown(false)}
+              />
+              <div
+                className="fixed bg-white rounded-xl border border-gray-200 shadow-xl z-[999] py-1 w-52"
+                style={{ top: dropdownCoords.top, left: dropdownCoords.left }}
+              >
+                {statusOptions.map((s) => (
+                  <button
+                    key={s}
+                    className="w-full flex items-center gap-2.5 px-3 py-2 hover:bg-gray-50 text-left"
+                    onClick={() => {
+                      onStatusChange(lead.id, s);
+                      setStatusDropdown(false);
+                    }}
+                  >
+                    <Badge variant={statusColors[s]}>{s}</Badge>
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
+        </>
+      )}
 
       {/* Expanded detail panel */}
       {expanded && (
@@ -329,6 +380,51 @@ function LeadRow({
                       )}
                     </div>
 
+                    {/* Send reminder to assigned */}
+                    <div>
+                      {!reminderOpen ? (
+                        <button
+                          onClick={() => setReminderOpen(true)}
+                          className="flex items-center gap-1.5 text-xs text-blue-600 hover:text-blue-700 font-medium"
+                        >
+                          <Bell className="w-3.5 h-3.5" />
+                          Send påminnelse til {lead.assignedTo}
+                        </button>
+                      ) : reminderSent ? (
+                        <p className="text-xs text-green-600 flex items-center gap-1">
+                          <Check className="w-3 h-3" /> Påminnelse sendt!
+                        </p>
+                      ) : (
+                        <div className="space-y-2">
+                          <p className="text-xs text-gray-500 font-medium">Melding til {lead.assignedTo}:</p>
+                          <textarea
+                            value={reminderMsg}
+                            onChange={(e) => setReminderMsg(e.target.value)}
+                            placeholder={`Husk å følge opp ${lead.name}...`}
+                            className="w-full text-xs border border-gray-200 rounded-lg px-2 py-1.5 focus:outline-none focus:border-blue-400 resize-none bg-white"
+                            rows={2}
+                            autoFocus
+                          />
+                          <div className="flex gap-1.5">
+                            <button
+                              onClick={handleSendReminder}
+                              disabled={reminderSending}
+                              className="flex items-center gap-1 px-2 py-1 bg-blue-500 text-white rounded text-xs font-semibold hover:bg-blue-600 disabled:opacity-60"
+                            >
+                              {reminderSending ? <Loader2 className="w-3 h-3 animate-spin" /> : <Bell className="w-3 h-3" />}
+                              Send
+                            </button>
+                            <button
+                              onClick={() => { setReminderOpen(false); setReminderMsg(""); }}
+                              className="px-2 py-1 border border-gray-200 rounded text-xs text-gray-500 hover:bg-gray-50"
+                            >
+                              Avbryt
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
                     {/* Added by — read only */}
                     <div>
                       <p className="text-xs text-gray-400 mb-1">Lagt til av</p>
@@ -386,7 +482,6 @@ export default function MineLeadsPage() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("Alle");
 
-  // Dynamic assigned filter based on actual leads
   const assignedOptions = ["Alle", ...Array.from(new Set(leads.map((l) => l.assignedTo)))];
   const [assignedFilter, setAssignedFilter] = useState<string>("Alle");
 
@@ -479,7 +574,7 @@ export default function MineLeadsPage() {
               ))}
             </div>
 
-            {/* Assigned filter — dynamic */}
+            {/* Assigned filter */}
             {assignedOptions.length > 1 && (
               <div className="relative">
                 <select
@@ -514,7 +609,7 @@ export default function MineLeadsPage() {
         {/* Table */}
         <div className="bg-white rounded-xl border border-gray-200 overflow-hidden" style={{boxShadow: "0 1px 3px rgba(0,0,0,0.08)"}}>
           <div className="overflow-x-auto">
-            <table className="w-full">
+            <table className="w-full" style={{ borderCollapse: "separate", borderSpacing: 0 }}>
               <thead>
                 <tr className="bg-gray-50 border-b border-gray-100">
                   <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Bedriftsnavn</th>

@@ -1,6 +1,6 @@
 "use client";
 import { TopBar } from "@/components/layout/top-bar";
-import { TrendingUp, Users, Calendar, Star, ArrowUpRight, ArrowRight, Phone, Mail } from "lucide-react";
+import { TrendingUp, Users, Calendar, Star, ArrowUpRight, ArrowRight, Phone, Mail, AlertCircle, Clock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -15,10 +15,53 @@ const statusColors: Record<string, "gray" | "blue" | "yellow" | "purple" | "red"
   "Kunde": "green",
 };
 
+function needsFollowUpReason(lead: ReturnType<typeof useAppStore>["leads"][0]): string | null {
+  const now = new Date();
+  const twoDaysAgo = new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000);
+  const threeDaysAgo = new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000);
+
+  // Not contacted at all
+  if (lead.status === "Ikke kontaktet") {
+    const addedDate = new Date(lead.addedDate);
+    if (addedDate <= threeDaysAgo) return "Ikke kontaktet på 3+ dager";
+    return null;
+  }
+
+  // Didn't answer — show 2 days after last contact
+  if (lead.status === "Kontaktet - ikke svar") {
+    if (!lead.lastContacted) return "Ikke svar – følg opp";
+    const lastContact = new Date(lead.lastContacted);
+    if (lastContact <= twoDaysAgo) return "Ikke svar – 2+ dager siden sist";
+    return null;
+  }
+
+  // Contacted but long time ago
+  if (lead.status === "Kontaktet") {
+    if (!lead.lastContacted) return "Kontaktet – ingen dato registrert";
+    const lastContact = new Date(lead.lastContacted);
+    if (lastContact <= threeDaysAgo) return "Kontaktet – 3+ dager siden sist";
+    return null;
+  }
+
+  // Meeting booked — remind before meeting date
+  if (lead.status === "Booket møte") {
+    if (!lead.lastContacted) return "Møte booket – bekreft detaljer";
+    return null;
+  }
+
+  return null;
+}
+
 export default function DashboardPage() {
   const { leads } = useAppStore();
 
   const thisWeek = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
+
+  // Build needs-follow-up list with reasons
+  const needsFollowUp = leads
+    .map((l) => ({ lead: l, reason: needsFollowUpReason(l) }))
+    .filter((x) => x.reason !== null)
+    .slice(0, 6);
 
   const stats = [
     {
@@ -59,10 +102,6 @@ export default function DashboardPage() {
     },
   ];
 
-  const needsFollowUp = leads
-    .filter((l) => l.status === "Ikke kontaktet" || l.status === "Kontaktet - ikke svar")
-    .slice(0, 5);
-
   const pipelineCounts = [
     { label: "Ikke kontaktet", count: leads.filter((l) => l.status === "Ikke kontaktet").length, color: "bg-gray-200", textColor: "text-gray-600" },
     { label: "Kontaktet", count: leads.filter((l) => l.status === "Kontaktet").length, color: "bg-blue-200", textColor: "text-blue-700" },
@@ -84,7 +123,9 @@ export default function DashboardPage() {
             <p className="text-white/70 text-sm">
               {leads.length === 0
                 ? "Start med å søke etter leads og bygg din pipeline."
-                : `Du har ${needsFollowUp.length} leads som trenger oppfølging.`}
+                : needsFollowUp.length > 0
+                  ? `${needsFollowUp.length} lead${needsFollowUp.length > 1 ? "s trenger" : " trenger"} oppfølging nå.`
+                  : "Alt er oppdatert – pipeline ser bra ut!"}
             </p>
           </div>
           <Link href="/varsler">
@@ -117,7 +158,14 @@ export default function DashboardPage() {
         {/* Needs follow-up */}
         <div className="bg-white rounded-xl border border-gray-200 overflow-hidden" style={{boxShadow: "0 1px 3px rgba(0,0,0,0.08)"}}>
           <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-            <h3 className="font-semibold text-slate-900">Trenger oppfølging</h3>
+            <div className="flex items-center gap-2">
+              <h3 className="font-semibold text-slate-900">Trenger oppfølging</h3>
+              {needsFollowUp.length > 0 && (
+                <span className="bg-orange-100 text-orange-600 text-xs font-semibold px-2 py-0.5 rounded-full">
+                  {needsFollowUp.length}
+                </span>
+              )}
+            </div>
             <Link href="/mine-leads" className="text-sm text-blue-600 font-medium hover:underline flex items-center gap-1">
               Se alle <ArrowRight className="w-3.5 h-3.5" />
             </Link>
@@ -125,14 +173,14 @@ export default function DashboardPage() {
           {needsFollowUp.length === 0 ? (
             <div className="text-center py-12 text-gray-400">
               <Users className="w-10 h-10 mx-auto mb-3 text-gray-200" />
-              <p className="text-sm font-medium text-gray-500">Ingen leads å følge opp ennå</p>
+              <p className="text-sm font-medium text-gray-500">Ingen leads trenger oppfølging akkurat nå</p>
               <p className="text-xs mt-1">
                 <Link href="/leadsok" className="text-green-600 hover:underline font-medium">Søk etter leads</Link> for å komme i gang.
               </p>
             </div>
           ) : (
             <div className="divide-y divide-gray-50">
-              {needsFollowUp.map((lead) => (
+              {needsFollowUp.map(({ lead, reason }) => (
                 <div key={lead.id} className="flex items-center gap-4 px-6 py-3.5 hover:bg-gray-50 transition-colors">
                   <div className="w-9 h-9 bg-slate-100 rounded-lg flex items-center justify-center text-xs font-bold text-slate-600 flex-shrink-0">
                     {lead.name.substring(0, 2).toUpperCase()}
@@ -141,11 +189,19 @@ export default function DashboardPage() {
                     <p className="text-sm font-semibold text-slate-900 truncate">{lead.name}</p>
                     <p className="text-xs text-gray-400 truncate">{lead.industry} · {lead.city}</p>
                   </div>
-                  <Badge variant={statusColors[lead.status]}>{lead.status}</Badge>
-                  <div className="flex items-center gap-2 text-gray-300">
-                    <button className="p-1.5 hover:bg-gray-100 rounded-lg hover:text-blue-500 transition-colors">
-                      <Phone className="w-3.5 h-3.5" />
-                    </button>
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <Badge variant={statusColors[lead.status]}>{lead.status}</Badge>
+                    <span className="flex items-center gap-1 text-xs text-orange-500 bg-orange-50 border border-orange-100 px-2 py-1 rounded-full whitespace-nowrap">
+                      <AlertCircle className="w-3 h-3" />
+                      {reason}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 text-gray-300 flex-shrink-0">
+                    {lead.phone && lead.phone !== "—" && (
+                      <a href={`tel:${lead.phone}`} className="p-1.5 hover:bg-gray-100 rounded-lg hover:text-blue-500 transition-colors">
+                        <Phone className="w-3.5 h-3.5" />
+                      </a>
+                    )}
                     <button className="p-1.5 hover:bg-gray-100 rounded-lg hover:text-green-500 transition-colors">
                       <Mail className="w-3.5 h-3.5" />
                     </button>

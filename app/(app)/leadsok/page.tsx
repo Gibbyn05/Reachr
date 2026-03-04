@@ -32,7 +32,30 @@ interface BrregEnhet {
 interface Filters {
   ansatte: string;   // "all"|"1-10"|"11-50"|"51-200"|"200+"
   mva: boolean;
+  bransje: string;   // NACE prefix, empty = alle
 }
+
+/* ─── Industry categories ─────────────────────────────────── */
+const INDUSTRY_CATEGORIES: { label: string; nace: string }[] = [
+  { label: "Alle bransjer", nace: "" },
+  { label: "Handel & butikk", nace: "47" },
+  { label: "Grossist & import", nace: "46" },
+  { label: "Bygg & anlegg", nace: "41" },
+  { label: "Håndverk & installasjoner", nace: "43" },
+  { label: "IT & teknologi", nace: "62" },
+  { label: "Restaurant & mat", nace: "56" },
+  { label: "Transport & logistikk", nace: "49" },
+  { label: "Helse & velvære", nace: "86" },
+  { label: "Regnskap & økonomi", nace: "69" },
+  { label: "Eiendom", nace: "68" },
+  { label: "Markedsføring & reklame", nace: "73" },
+  { label: "Rengjøring & service", nace: "81" },
+  { label: "Personlig service (frisør, negler…)", nace: "96" },
+  { label: "Industri & produksjon", nace: "25" },
+  { label: "Utdanning & kurs", nace: "85" },
+  { label: "Finans & forsikring", nace: "64" },
+  { label: "Juridisk & konsulentvirksomhet", nace: "70" },
+];
 
 const NACE_MAP: Record<string, string> = {
   frisør: "96.021", frisørsalong: "96.021", hår: "96.021",
@@ -100,8 +123,8 @@ export default function LeadsokPage() {
   const [sortField, setSortField]   = useState<string | null>(null);
   const [sortDir, setSortDir]       = useState<"asc" | "desc">("asc");
 
-  const [filters, setFilters] = useState<Filters>({ ansatte: "all", mva: false });
-  const [pendingFilters, setPendingFilters] = useState<Filters>({ ansatte: "all", mva: false });
+  const [filters, setFilters] = useState<Filters>({ ansatte: "all", mva: false, bransje: "" });
+  const [pendingFilters, setPendingFilters] = useState<Filters>({ ansatte: "all", mva: false, bransje: "" });
 
   const filterRef = useRef<HTMLDivElement>(null);
 
@@ -116,12 +139,18 @@ export default function LeadsokPage() {
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  const activeFilterCount = (filters.ansatte !== "all" ? 1 : 0) + (filters.mva ? 1 : 0);
+  const activeFilterCount =
+    (filters.ansatte !== "all" ? 1 : 0) +
+    (filters.mva ? 1 : 0) +
+    (filters.bransje ? 1 : 0);
 
   const buildParams = (loc: string, ind: string, f: Filters, page: number) => {
     const params = new URLSearchParams({ size: "100", page: String(page) });
     if (loc) params.set("poststed", loc.trim().toUpperCase());
-    if (ind) {
+    // bransje category takes priority over free-text industry search
+    if (f.bransje) {
+      params.set("naeringskode", f.bransje);
+    } else if (ind) {
       const nace = guessNace(ind);
       if (nace) params.set("naeringskode", nace);
       else params.set("navn", ind);
@@ -208,7 +237,7 @@ export default function LeadsokPage() {
   }, []);
 
   const doSearch = useCallback(async (loc: string, ind: string, f: Filters, page = 0, append = false) => {
-    if (!loc && !ind) return;
+    if (!loc && !ind && !f.bransje) return;
     if (append) setLoadingMore(true);
     else { setLoading(true); setResults([]); setEnriched({}); }
     setError("");
@@ -240,6 +269,12 @@ export default function LeadsokPage() {
       setLoadingMore(false);
     }
   }, [fetchLeadersInBackground, fetchPhonesInBackground]);
+
+  // Auto-load Oslo businesses on first page open
+  useEffect(() => {
+    doSearch("Oslo", "", { ansatte: "all", mva: false, bransje: "" }, 0, false);
+    setLocationQ("Oslo");
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleSearch = (e?: React.FormEvent) => {
     e?.preventDefault();
@@ -413,7 +448,7 @@ export default function LeadsokPage() {
                 backgroundColor: "white", borderRadius: 16,
                 border: "1px solid #E5E7EB",
                 boxShadow: "0 16px 48px rgba(0,0,0,0.14)", zIndex: 50,
-                width: 300, padding: 20,
+                width: 320, padding: 20,
               }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
                   <p style={{ fontWeight: 700, fontSize: 14, color: "#111827", margin: 0 }}>Filtre</p>
@@ -476,10 +511,33 @@ export default function LeadsokPage() {
                   </label>
                 </div>
 
+                {/* Bransje kategori */}
+                <div style={{ marginBottom: 20 }}>
+                  <p style={{ fontSize: 12, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 10 }}>
+                    Bransje-kategori
+                  </p>
+                  <select
+                    value={pendingFilters.bransje}
+                    onChange={(e) => setPendingFilters(f => ({ ...f, bransje: e.target.value }))}
+                    style={{
+                      width: "100%", padding: "8px 12px", borderRadius: 8,
+                      border: "1.5px solid #E5E7EB", fontSize: 13, color: "#374151",
+                      fontFamily: "inherit", outline: "none", backgroundColor: "white",
+                      cursor: "pointer",
+                    }}
+                    onFocus={(e) => (e.currentTarget.style.borderColor = "#22C55E")}
+                    onBlur={(e) => (e.currentTarget.style.borderColor = "#E5E7EB")}
+                  >
+                    {INDUSTRY_CATEGORIES.map(({ label, nace }) => (
+                      <option key={nace} value={nace}>{label}</option>
+                    ))}
+                  </select>
+                </div>
+
                 {/* Actions */}
                 <div style={{ display: "flex", gap: 8 }}>
                   <button
-                    onClick={() => setPendingFilters({ ansatte: "all", mva: false })}
+                    onClick={() => setPendingFilters({ ansatte: "all", mva: false, bransje: "" })}
                     style={{
                       flex: 1, padding: "9px 0", borderRadius: 8,
                       border: "1.5px solid #E5E7EB", backgroundColor: "white",
@@ -588,7 +646,7 @@ export default function LeadsokPage() {
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                 <div style={{ width: 6, height: 6, backgroundColor: "#22C55E", borderRadius: "50%" }} />
-                <span style={{ fontSize: 12, color: "#6B7280" }}>Sanntidsdata fra Brønnøysundregisteret</span>
+                <span style={{ fontSize: 12, color: "#6B7280" }}>Live data</span>
               </div>
             </div>
 

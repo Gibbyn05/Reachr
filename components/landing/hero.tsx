@@ -3,6 +3,7 @@ import Link from "next/link";
 import { motion, type Transition } from "framer-motion";
 import { ArrowRight, Play, TrendingUp, Users, Bell } from "lucide-react";
 import { BorderBeam } from "@/components/ui/border-beam";
+import { FlipWords } from "@/components/ui/flip-words";
 
 const fadeUp = (delay = 0) => ({
   initial: { opacity: 0, y: 20 },
@@ -36,10 +37,13 @@ export function Hero() {
             {...fadeUp(0.1)}
             className="text-5xl sm:text-6xl md:text-[4.25rem] font-extrabold tracking-tight text-[#0F1729] leading-[1.05] mb-6"
           >
-            Finn leads.{" "}
-            <span className="text-[#2563EB]">Ta kontakt.</span>
+            Finn{" "}
+            <span className="inline-block relative" style={{ minWidth: "7rem" }}>
+              <FlipWords words={["leads", "kunder", "avtaler", "salg"]} duration={2800} />
+            </span>
             <br />
-            Lukk avtaler.
+            Ta kontakt.{" "}
+            <span className="text-[#2563EB]">Lukk avtaler.</span>
           </motion.h1>
 
           {/* Subtext */}
