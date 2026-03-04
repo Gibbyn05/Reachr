@@ -92,6 +92,9 @@ export default function LeadsokPage() {
   const [error, setError]           = useState("");
   const [hasSearched, setHasSearched] = useState(false);
   const [addedIds, setAddedIds]     = useState<Set<string>>(new Set());
+  // Phone enrichment: orgnr → { loading, phone }
+  type EnrichEntry = { loading: boolean; phone: string | null };
+  const [enriched, setEnriched] = useState<Record<string, EnrichEntry>>({});
   const [view, setView]             = useState<"list" | "map">("list");
   const [filterOpen, setFilterOpen] = useState(false);
   const [sortField, setSortField]   = useState<string | null>(null);
@@ -249,7 +252,7 @@ export default function LeadsokPage() {
       name: capitalize(e.navn),
       orgNumber: e.organisasjonsnummer,
       contactPerson: e.dagligLeder ?? "—",
-      phone: e.telefon ?? "—",
+      phone: e.telefon ?? enriched[e.organisasjonsnummer]?.phone ?? "—",
       email: "—",
       industry: e.naeringskode1?.beskrivelse ? capitalize(e.naeringskode1.beskrivelse) : "—",
       city: e.forretningsadresse?.poststed ? capitalize(e.forretningsadresse.poststed) : "—",
@@ -270,6 +273,22 @@ export default function LeadsokPage() {
       addedDate: new Date().toISOString().split("T")[0],
     });
     setAddedIds(prev => new Set([...prev, e.organisasjonsnummer]));
+  };
+
+  const fetchPhone = async (enhet: BrregEnhet) => {
+    const orgnr = enhet.organisasjonsnummer;
+    if (enriched[orgnr]?.loading || enriched[orgnr]?.phone) return;
+    setEnriched(prev => ({ ...prev, [orgnr]: { loading: true, phone: null } }));
+    try {
+      const params = new URLSearchParams({ orgnr });
+      if (enhet.navn) params.set("name", enhet.navn);
+      if (enhet.forretningsadresse?.poststed) params.set("poststed", enhet.forretningsadresse.poststed);
+      const res = await fetch(`/api/enrich?${params}`);
+      const data = await res.json();
+      setEnriched(prev => ({ ...prev, [orgnr]: { loading: false, phone: data.phone ?? null } }));
+    } catch {
+      setEnriched(prev => ({ ...prev, [orgnr]: { loading: false, phone: null } }));
+    }
   };
 
   const SortBtn = ({ field, label }: { field: string; label: string }) => (
@@ -626,13 +645,39 @@ export default function LeadsokPage() {
                         </p>
 
                         {/* Telefon */}
-                        <p style={{ fontSize: 13, color: "#6B7280", margin: 0 }}>
-                          {enhet.telefon ? (
-                            <a href={`tel:${enhet.telefon}`} style={{ color: "#374151", textDecoration: "none", display: "flex", alignItems: "center", gap: 4 }}>
-                              <Phone size={12} />{enhet.telefon}
-                            </a>
-                          ) : <span style={{ color: "#E5E7EB" }}>—</span>}
-                        </p>
+                        <div style={{ fontSize: 13, color: "#6B7280" }}>
+                          {(() => {
+                            const brreg = enhet.telefon;
+                            const en = enriched[enhet.organisasjonsnummer];
+                            const phone = brreg || en?.phone;
+                            if (phone) {
+                              return (
+                                <a href={`tel:${phone}`} style={{ color: "#374151", textDecoration: "none", display: "flex", alignItems: "center", gap: 4 }}>
+                                  <Phone size={12} />{phone}
+                                </a>
+                              );
+                            }
+                            if (en?.loading) {
+                              return <span style={{ color: "#9CA3AF", fontSize: 11, display: "flex", alignItems: "center", gap: 3 }}><Loader2 size={11} style={{ animation: "spin 1s linear infinite" }} />Henter…</span>;
+                            }
+                            if (en && !en.loading && !en.phone) {
+                              return <span style={{ color: "#D1D5DB", fontSize: 12 }}>Ikke funnet</span>;
+                            }
+                            return (
+                              <button
+                                onClick={() => fetchPhone(enhet)}
+                                style={{
+                                  background: "none", border: "1px solid #E5E7EB", borderRadius: 5,
+                                  padding: "2px 7px", fontSize: 11, fontWeight: 600, color: "#6B7280",
+                                  cursor: "pointer", fontFamily: "inherit", display: "flex", alignItems: "center", gap: 3,
+                                  whiteSpace: "nowrap",
+                                }}
+                              >
+                                <Phone size={10} />Hent tlf
+                              </button>
+                            );
+                          })()}
+                        </div>
 
                         {/* Nettside */}
                         <div style={{ minWidth: 0, overflow: "hidden" }}>
