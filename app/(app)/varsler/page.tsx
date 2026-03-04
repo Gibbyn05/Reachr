@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { TopBar } from "@/components/layout/top-bar";
 import { Button } from "@/components/ui/button";
-import { mockNotifications, Notification } from "@/lib/mock-data";
+import { Notification } from "@/lib/mock-data";
 import {
   Bell,
   Phone,
@@ -35,7 +35,7 @@ const typeLabels: Record<Notification["type"], string> = {
 };
 
 export default function VarslerPage() {
-  const [notifications, setNotifications] = useState<Notification[]>(mockNotifications);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
   const [activeTab, setActiveTab] = useState<"active" | "done">("active");
 
   const activeNotifications = notifications.filter((n) => !n.done);

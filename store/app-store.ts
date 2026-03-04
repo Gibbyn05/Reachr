@@ -1,6 +1,6 @@
 "use client";
 import { create } from "zustand";
-import { Lead, mockLeads } from "@/lib/mock-data";
+import { Lead } from "@/lib/mock-data";
 
 interface AppStore {
   leads: Lead[];
@@ -14,7 +14,7 @@ interface AppStore {
 }
 
 export const useAppStore = create<AppStore>((set) => ({
-  leads: mockLeads,
+  leads: [],
   addLead: (lead) =>
     set((state) => ({
       leads: [...state.leads, lead],
