@@ -138,6 +138,37 @@ export default function LeadsokPage() {
     return params;
   };
 
+  // Fetch phone numbers in background batches from Gulesider/1881
+  const fetchPhonesInBackground = useCallback((enheter: BrregEnhet[]) => {
+    const BATCH = 5;
+    const toFetch = enheter.filter(e => !e.telefon);
+    let i = 0;
+    const run = async () => {
+      while (i < toFetch.length) {
+        const batch = toFetch.slice(i, i + BATCH);
+        i += BATCH;
+        await Promise.all(batch.map(async (e) => {
+          const orgnr = e.organisasjonsnummer;
+          setEnriched(prev => {
+            if (prev[orgnr]) return prev; // already fetching or fetched
+            return { ...prev, [orgnr]: { loading: true, phone: null } };
+          });
+          try {
+            const params = new URLSearchParams({ orgnr });
+            if (e.navn) params.set("name", e.navn);
+            if (e.forretningsadresse?.poststed) params.set("poststed", e.forretningsadresse.poststed);
+            const res = await fetch(`/api/enrich?${params}`);
+            const data = await res.json();
+            setEnriched(prev => ({ ...prev, [orgnr]: { loading: false, phone: data.phone ?? null } }));
+          } catch {
+            setEnriched(prev => ({ ...prev, [orgnr]: { loading: false, phone: null } }));
+          }
+        }));
+      }
+    };
+    run();
+  }, []);
+
   // Fetch leaders in background batches and update state incrementally
   const fetchLeadersInBackground = useCallback((enheter: BrregEnhet[], isAppend: boolean) => {
     const BATCH = 8;
@@ -179,7 +210,7 @@ export default function LeadsokPage() {
   const doSearch = useCallback(async (loc: string, ind: string, f: Filters, page = 0, append = false) => {
     if (!loc && !ind) return;
     if (append) setLoadingMore(true);
-    else { setLoading(true); setResults([]); }
+    else { setLoading(true); setResults([]); setEnriched({}); }
     setError("");
     setHasSearched(true);
 
@@ -196,9 +227,11 @@ export default function LeadsokPage() {
           fetchLeadersInBackground(newList, true);
           return newList;
         });
+        fetchPhonesInBackground(enheter);
       } else {
         setResults(enheter);
         fetchLeadersInBackground(enheter, false);
+        fetchPhonesInBackground(enheter);
       }
     } catch {
       setError("Kunne ikke laste data fra Brønnøysundregisteret. Sjekk nettilkoblingen.");
@@ -206,7 +239,7 @@ export default function LeadsokPage() {
       setLoading(false);
       setLoadingMore(false);
     }
-  }, [fetchLeadersInBackground]);
+  }, [fetchLeadersInBackground, fetchPhonesInBackground]);
 
   const handleSearch = (e?: React.FormEvent) => {
     e?.preventDefault();
@@ -273,22 +306,6 @@ export default function LeadsokPage() {
       addedDate: new Date().toISOString().split("T")[0],
     });
     setAddedIds(prev => new Set([...prev, e.organisasjonsnummer]));
-  };
-
-  const fetchPhone = async (enhet: BrregEnhet) => {
-    const orgnr = enhet.organisasjonsnummer;
-    if (enriched[orgnr]?.loading || enriched[orgnr]?.phone) return;
-    setEnriched(prev => ({ ...prev, [orgnr]: { loading: true, phone: null } }));
-    try {
-      const params = new URLSearchParams({ orgnr });
-      if (enhet.navn) params.set("name", enhet.navn);
-      if (enhet.forretningsadresse?.poststed) params.set("poststed", enhet.forretningsadresse.poststed);
-      const res = await fetch(`/api/enrich?${params}`);
-      const data = await res.json();
-      setEnriched(prev => ({ ...prev, [orgnr]: { loading: false, phone: data.phone ?? null } }));
-    } catch {
-      setEnriched(prev => ({ ...prev, [orgnr]: { loading: false, phone: null } }));
-    }
   };
 
   const SortBtn = ({ field, label }: { field: string; label: string }) => (
@@ -657,25 +674,10 @@ export default function LeadsokPage() {
                                 </a>
                               );
                             }
-                            if (en?.loading) {
-                              return <span style={{ color: "#9CA3AF", fontSize: 11, display: "flex", alignItems: "center", gap: 3 }}><Loader2 size={11} style={{ animation: "spin 1s linear infinite" }} />Henter…</span>;
+                            if (!en || en.loading) {
+                              return <span style={{ color: "#D1D5DB", fontSize: 11, display: "flex", alignItems: "center", gap: 3 }}><Loader2 size={11} style={{ animation: "spin 1s linear infinite" }} /></span>;
                             }
-                            if (en && !en.loading && !en.phone) {
-                              return <span style={{ color: "#D1D5DB", fontSize: 12 }}>Ikke funnet</span>;
-                            }
-                            return (
-                              <button
-                                onClick={() => fetchPhone(enhet)}
-                                style={{
-                                  background: "none", border: "1px solid #E5E7EB", borderRadius: 5,
-                                  padding: "2px 7px", fontSize: 11, fontWeight: 600, color: "#6B7280",
-                                  cursor: "pointer", fontFamily: "inherit", display: "flex", alignItems: "center", gap: 3,
-                                  whiteSpace: "nowrap",
-                                }}
-                              >
-                                <Phone size={10} />Hent tlf
-                              </button>
-                            );
+                            return <span style={{ color: "#E5E7EB", fontSize: 13 }}>—</span>;
                           })()}
                         </div>
 
