@@ -10,9 +10,11 @@ export async function POST(req: NextRequest) {
     if (!email) return NextResponse.json({ error: "E-post mangler" }, { status: 400 });
 
     if (!RESEND_API_KEY) {
-      // No API key configured — simulate success in dev
-      console.log(`[invite] Would send invite to ${email} from ${inviterName} at ${companyName}`);
-      return NextResponse.json({ success: true, simulated: true });
+      console.warn("[invite] RESEND_API_KEY is not configured — invite not sent");
+      return NextResponse.json(
+        { error: "E-postleverandøren er ikke konfigurert. Legg til RESEND_API_KEY i miljøvariabler." },
+        { status: 503 }
+      );
     }
 
     const inviteLink = `${APP_URL}/register?invite=${encodeURIComponent(email)}`;

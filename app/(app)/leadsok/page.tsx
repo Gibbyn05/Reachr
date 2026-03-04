@@ -4,8 +4,8 @@ import dynamic from "next/dynamic";
 import { TopBar } from "@/components/layout/top-bar";
 import {
   Search, MapPin, SlidersHorizontal, Plus, Check,
-  Phone, Globe, Users, Building2, X, ChevronUp, ChevronDown,
-  Loader2, AlertCircle, List, Map, ExternalLink,
+  Phone, Globe, Building2, X, ChevronUp, ChevronDown,
+  Loader2, AlertCircle, List, Map,
 } from "lucide-react";
 import { useAppStore } from "@/store/app-store";
 
@@ -69,19 +69,23 @@ function naceToCategory(kode: string | undefined, beskrivelse: string | undefine
 }
 
 const NACE_MAP: Record<string, string> = {
-  frisør: "96.021", frisørsalong: "96.021", hår: "96.021",
-  regnskap: "69.201", revisjon: "69.202", bokføring: "69.201",
+  // Use 2-digit codes for reliable prefix matching on Brreg
+  frisør: "96", frisørsalong: "96", hår: "96", negl: "96", skjønnhet: "96",
+  regnskap: "69", revisjon: "69", bokføring: "69", regnskapsfører: "69",
   bygg: "41", byggentreprenør: "41", entreprenør: "43",
-  it: "62", software: "62", teknologi: "62",
-  restaurant: "56.101", kafé: "56.102", kafe: "56.102",
-  transport: "49", frakt: "52",
-  elektro: "43.210", elektriker: "43.210",
-  advokat: "69.100", jus: "69.100",
-  eiendom: "68", bolig: "68.100",
-  helse: "86", lege: "86.210", tannlege: "86.230",
-  rengjøring: "81.210", vakt: "80.100",
-  markedsføring: "73.110", reklame: "73.110",
-  butikk: "47", handel: "46", import: "46",
+  it: "62", software: "62", teknologi: "62", dataprogrammering: "62",
+  restaurant: "56", kafé: "56", kafe: "56", catering: "56",
+  transport: "49", frakt: "52", logistikk: "52",
+  elektro: "43", elektriker: "43", rørlegger: "43", vvs: "43",
+  advokat: "69", jus: "69",
+  eiendom: "68", megling: "68",
+  helse: "86", lege: "86", tannlege: "86", fysioterapi: "86",
+  rengjøring: "81", renhold: "81", vakt: "80",
+  markedsføring: "73", reklame: "73",
+  butikk: "47", handel: "46", import: "46", grossist: "46",
+  industri: "25", produksjon: "25", maskin: "28",
+  finans: "64", bank: "64", forsikring: "65",
+  utdanning: "85", kurs: "85",
 };
 
 function guessNace(q: string): string | undefined {
@@ -281,10 +285,49 @@ export default function LeadsokPage() {
     }
   }, [fetchLeadersInBackground, fetchPhonesInBackground]);
 
-  // Auto-load Oslo businesses on first page open
+  // Auto-detect user city and load on first page open
   useEffect(() => {
-    doSearch("Oslo", "", { ansatte: "all", mva: false, bransje: "" }, 0, false);
-    setLocationQ("Oslo");
+    const KNOWN_CITIES = [
+      "Oslo", "Bergen", "Trondheim", "Stavanger", "Tromsø", "Drammen",
+      "Fredrikstad", "Kristiansand", "Sandnes", "Bodø", "Ålesund",
+      "Molde", "Haugesund", "Arendal", "Sarpsborg", "Sandefjord", "Porsgrunn",
+      "Tønsberg", "Skien", "Moss", "Hamar", "Gjøvik", "Lillehammer",
+      "Kongsberg", "Larvik", "Halden", "Harstad", "Narvik", "Alta",
+    ];
+
+    function matchCity(raw: string): string {
+      const lower = raw.toLowerCase().trim();
+      const match = KNOWN_CITIES.find(c => c.toLowerCase() === lower);
+      return match ?? "Oslo";
+    }
+
+    function fallback() {
+      setLocationQ("Oslo");
+      doSearch("Oslo", "", { ansatte: "all", mva: false, bransje: "" }, 0, false);
+    }
+
+    if (!navigator.geolocation) { fallback(); return; }
+
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        try {
+          const { latitude, longitude } = pos.coords;
+          const res = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&addressdetails=1`,
+            { headers: { "Accept-Language": "nb" } }
+          );
+          const data = await res.json();
+          const raw = data?.address?.city ?? data?.address?.town ?? data?.address?.municipality ?? "";
+          const city = matchCity(raw);
+          setLocationQ(city);
+          doSearch(city, "", { ansatte: "all", mva: false, bransje: "" }, 0, false);
+        } catch {
+          fallback();
+        }
+      },
+      () => fallback(),
+      { timeout: 5000, maximumAge: 600_000 }
+    );
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleSearch = (e?: React.FormEvent) => {
@@ -318,10 +361,9 @@ export default function LeadsokPage() {
     if (!sortField) return 0;
     let av: any, bv: any;
     if (sortField === "navn") { av = a.navn; bv = b.navn; }
-    else if (sortField === "ansatte") { av = a.antallAnsatte ?? 0; bv = b.antallAnsatte ?? 0; }
     else if (sortField === "sted") { av = a.forretningsadresse?.poststed ?? ""; bv = b.forretningsadresse?.poststed ?? ""; }
-    if (typeof av === "number") return sortDir === "asc" ? av - bv : bv - av;
-    return sortDir === "asc" ? String(av).localeCompare(String(bv)) : String(bv).localeCompare(String(av));
+    else if (sortField === "bransje") { av = naceToCategory(a.naeringskode1?.kode, a.naeringskode1?.beskrivelse); bv = naceToCategory(b.naeringskode1?.kode, b.naeringskode1?.beskrivelse); }
+    return sortDir === "asc" ? String(av).localeCompare(String(bv), "nb") : String(bv).localeCompare(String(av), "nb");
   });
 
   const handleAdd = (e: BrregEnhet) => {
@@ -666,7 +708,7 @@ export default function LeadsokPage() {
                 {/* Table header */}
                 <div style={{
                   display: "grid",
-                  gridTemplateColumns: "2fr 1.4fr 1fr 1fr 1.3fr 1.1fr 0.7fr 90px",
+                  gridTemplateColumns: "2fr 1.4fr 1fr 1fr 1.4fr 1.1fr 90px",
                   padding: "10px 16px",
                   backgroundColor: "#F9FAFB",
                   borderBottom: "1px solid #F3F4F6",
@@ -676,9 +718,8 @@ export default function LeadsokPage() {
                   <span style={{ fontSize: 11, fontWeight: 600, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.05em" }}>Daglig leder</span>
                   <span style={{ fontSize: 11, fontWeight: 600, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.05em" }}>Telefon</span>
                   <span style={{ fontSize: 11, fontWeight: 600, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.05em" }}>Nettside</span>
-                  <span style={{ fontSize: 11, fontWeight: 600, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.05em" }}>Bransje</span>
+                  <SortBtn field="bransje" label="Bransje" />
                   <SortBtn field="sted" label="Sted" />
-                  <SortBtn field="ansatte" label="Ansatte" />
                   <span />
                 </div>
 
@@ -699,7 +740,7 @@ export default function LeadsokPage() {
                     return (
                       <div key={enhet.organisasjonsnummer} style={{
                         display: "grid",
-                        gridTemplateColumns: "2fr 1.4fr 1fr 1fr 1.3fr 1.1fr 0.7fr 90px",
+                        gridTemplateColumns: "2fr 1.4fr 1fr 1fr 1.4fr 1.1fr 90px",
                         padding: "12px 16px",
                         borderBottom: idx < sorted.length - 1 ? "1px solid #F9FAFB" : "none",
                         alignItems: "center", gap: 8,
@@ -780,12 +821,6 @@ export default function LeadsokPage() {
                         <p style={{ fontSize: 13, color: "#374151", margin: 0, display: "flex", alignItems: "center", gap: 4 }}>
                           <MapPin size={11} color="#9CA3AF" style={{ flexShrink: 0 }} />
                           {poststed}
-                        </p>
-
-                        {/* Ansatte */}
-                        <p style={{ fontSize: 13, color: "#374151", margin: 0, display: "flex", alignItems: "center", gap: 4 }}>
-                          <Users size={11} color="#9CA3AF" />
-                          {enhet.antallAnsatte ?? "—"}
                         </p>
 
                         {/* CTA */}

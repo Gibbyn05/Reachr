@@ -132,7 +132,8 @@ export default function InnstillingerPage() {
         setInviteEmail("");
         setTimeout(() => setInviteSent(false), 4000);
       } else {
-        setInviteError("Kunne ikke sende invitasjon. Prøv igjen.");
+        const body = await res.json().catch(() => ({}));
+        setInviteError(body.error ?? "Kunne ikke sende invitasjon. Prøv igjen.");
       }
     } catch {
       setInviteError("Nettverksfeil. Sjekk tilkoblingen.");

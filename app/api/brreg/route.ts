@@ -9,6 +9,15 @@ const EXCLUDED_ORG_FORMS = new Set([
   "TVAM",  // Tingsrettslig sameie
   "BEDR",  // Bedrift (branch unit, not independent company)
   "BO",    // Enkeltpersonforetak under konkursbehandling
+  "SPA",   // Sparebank (not excluded but keep for reference)
+  "ANNA",  // Annen juridisk person — often non-commercial
+  "KF",    // Kommunalt foretak — public entity
+  "FKF",   // Fylkeskommunalt foretak
+  "SF",    // Statsforetak
+  "GFS",   // Gjensidige forsikringsselskaper (mutual insurance)
+  "PK",    // Pensjonskasse
+  "KIRK",  // Den norske kirke
+  "ORGL",  // Organisasjonsledd
 ]);
 
 // Name fragments that indicate non-business entities
@@ -20,6 +29,16 @@ const EXCLUDED_NAME_PATTERNS = [
   /huseierforening/i,
   /\bvelforening\b/i,
   /\bboliglag\b/i,
+  /\bboplass\b/i,
+  /\bboligeiendom\b/i,
+  /\bboligselskap\b/i,
+  /\bgrendelag\b/i,
+  /\bnabolag\b/i,
+  /\bstyret\b/i,            // e.g. "Styret i Langmyra ..."
+  // Address-named shells: "7 Langmyra AS", "Storgata 14 AS" — starts with digit(s) + single word + AS/DA
+  /^\d+\s+[A-ZÆØÅ][a-zæøå]{2,}\s+(AS|DA|ANS)$/,
+  // Street-address companies: "Langmyravegen 7 AS"
+  /[A-ZÆØÅ][a-zæøå]+(veien|vegen|vei|gata|gaten|gate|plass|bakke|stien|sti)\s+\d+\s+(AS|DA)$/i,
 ];
 
 export async function GET(request: NextRequest) {

@@ -37,7 +37,7 @@ export default function MapView({ enheter, addedIds, existingIds, onAdd, capital
   const [geocoded, setGeocoded] = useState<GeoEnhet[]>([]);
   const [failed, setFailed] = useState(0);
 
-  // Geocode all enheter
+  // Geocode all enheter — deduplicated by postnummer to minimise API calls
   useEffect(() => {
     if (enheter.length === 0) return;
     let cancelled = false;
@@ -47,41 +47,58 @@ export default function MapView({ enheter, addedIds, existingIds, onAdd, capital
       setGeocoded([]);
       setFailed(0);
 
-      const results: GeoEnhet[] = [];
-      let failCount = 0;
+      // Build a map of unique postnummer → one representative company
+      const uniquePnr = new Map<string, typeof enheter[0]>();
+      const noPnr: typeof enheter[0][] = [];
+      for (const e of enheter) {
+        const pnr = e.forretningsadresse?.postnummer;
+        if (pnr) {
+          if (!uniquePnr.has(pnr)) uniquePnr.set(pnr, e);
+        } else if (e.forretningsadresse?.poststed) {
+          noPnr.push(e); // geocode by poststed if no postnummer
+        }
+      }
 
-      // Geocode in batches of 5 to avoid rate limiting
-      for (let i = 0; i < enheter.length; i += 5) {
-        if (cancelled) break;
-        const batch = enheter.slice(i, i + 5);
+      // Geocode unique postnumre in batches of 10
+      const pnrCoords = new Map<string, { lat: number; lng: number }>();
+      const uniqueList = [...uniquePnr.entries()];
+      for (let i = 0; i < uniqueList.length; i += 10) {
+        if (cancelled) return;
         await Promise.all(
-          batch.map(async (e) => {
-            const adr = e.forretningsadresse;
-            if (!adr?.postnummer && !adr?.poststed) { failCount++; return; }
+          uniqueList.slice(i, i + 10).map(async ([pnr, e]) => {
             try {
-              const params = new URLSearchParams();
-              if (adr.adresse?.[0]) params.set("adresse", adr.adresse[0]);
-              if (adr.postnummer) params.set("postnummer", adr.postnummer);
-              if (adr.poststed) params.set("poststed", adr.poststed);
+              const params = new URLSearchParams({
+                postnummer: pnr,
+                poststed: e.forretningsadresse?.poststed ?? "",
+              });
               const res = await fetch(`/api/geocode?${params}`);
               const data = await res.json();
-              if (data.lat && data.lng) {
-                results.push({ ...e, lat: data.lat, lng: data.lng });
-              } else {
-                failCount++;
-              }
-            } catch {
-              failCount++;
-            }
+              if (data.lat && data.lng) pnrCoords.set(pnr, { lat: data.lat, lng: data.lng });
+            } catch {}
           })
         );
       }
 
-      if (!cancelled) {
-        setGeocoded(results);
-        setFailed(failCount);
-        setGeocoding(false);
+      if (cancelled) return;
+
+      // Map results back to all companies with small jitter to spread co-located pins
+      const jitter = () => (Math.random() - 0.5) * 0.004;
+      const results: GeoEnhet[] = [];
+      let failCount = 0;
+
+      for (const e of enheter) {
+        const pnr = e.forretningsadresse?.postnummer;
+        const coords = pnr ? pnrCoords.get(pnr) : undefined;
+        if (coords) {
+          results.push({ ...e, lat: coords.lat + jitter(), lng: coords.lng + jitter() });
+        } else {
+          failCount++;
+        }
       }
+
+      setGeocoded(results);
+      setFailed(failCount);
+      setGeocoding(false);
     }
 
     geocodeAll();
