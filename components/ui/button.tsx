@@ -7,11 +7,11 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const variantStyles = {
-  primary: "bg-green-500 hover:bg-green-600 text-white font-semibold shadow-sm",
+  primary: "bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-semibold shadow-sm",
   secondary: "bg-white hover:bg-gray-50 text-slate-900 border border-gray-200 font-semibold shadow-sm",
   ghost: "bg-transparent hover:bg-gray-100 text-slate-700 font-medium",
   danger: "bg-red-500 hover:bg-red-600 text-white font-semibold shadow-sm",
-  outline: "bg-transparent hover:bg-green-50 text-green-600 border border-green-500 font-semibold",
+  outline: "bg-transparent hover:bg-blue-50 text-[#2563EB] border border-[#2563EB] font-semibold",
 };
 
 const sizeStyles = {
