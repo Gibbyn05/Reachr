@@ -104,6 +104,38 @@ async function try1881(orgnr: string): Promise<string | null> {
   return html ? extractPhone(html) : null;
 }
 
+/** Proff.no — SSR page with JSON-LD and tel: links, good coverage for Norwegian businesses */
+async function tryProff(orgnr: string): Promise<string | null> {
+  // Proff canonical URL by orgnr (redirects to slug URL, still returns HTML)
+  const html = await fetchPage(`https://www.proff.no/selskap/-/-/-/${orgnr}/`);
+  if (!html) return null;
+
+  // 1. JSON-LD structured data: "telephone":"..."
+  const jsonLd = html.match(/"telephone"\s*:\s*"([+\d\s\-()]{7,20})"/i);
+  if (jsonLd) {
+    const p = formatNO(jsonLd[1].trim());
+    if (p) return p;
+  }
+
+  // 2. tel: href
+  const telHrefs = [...html.matchAll(/href=["']tel:([+\d\s\-().]{5,20})["']/gi)];
+  for (const m of telHrefs) {
+    const p = formatNO(m[1].trim());
+    if (p) return p;
+  }
+
+  // 3. data-phone / itemprop=telephone
+  const structured = html.match(
+    /(?:data-phone=["']|itemprop=["']telephone["'][^>]*content=["'])([+\d\s\-]{7,20})["']/i
+  );
+  if (structured) {
+    const p = formatNO(structured[1].trim());
+    if (p) return p;
+  }
+
+  return extractPhone(html);
+}
+
 async function tryGulesiderSearch(name: string, poststed: string): Promise<string | null> {
   const q = encodeURIComponent(name);
   const loc = encodeURIComponent(poststed);
@@ -128,13 +160,14 @@ export async function GET(request: NextRequest) {
   }
 
   // Run all direct-lookup sources in parallel for speed
-  const [fromBrreg, fromGulesider, from1881] = await Promise.all([
+  const [fromBrreg, fromProff, fromGulesider, from1881] = await Promise.all([
     tryBrreg(orgnr),
+    tryProff(orgnr),
     tryGulesider(orgnr),
     try1881(orgnr),
   ]);
 
-  let phone = fromBrreg ?? fromGulesider ?? from1881;
+  let phone = fromBrreg ?? fromProff ?? fromGulesider ?? from1881;
 
   // If direct lookups failed, try name-based search in parallel
   if (!phone && name) {
