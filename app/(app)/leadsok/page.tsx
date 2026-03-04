@@ -4,7 +4,7 @@ import dynamic from "next/dynamic";
 import { TopBar } from "@/components/layout/top-bar";
 import {
   Search, MapPin, SlidersHorizontal, Plus, Check,
-  Phone, Mail, Users, Building2, X, ChevronUp, ChevronDown,
+  Phone, Globe, Users, Building2, X, ChevronUp, ChevronDown,
   Loader2, AlertCircle, List, Map, ExternalLink,
 } from "lucide-react";
 import { useAppStore } from "@/store/app-store";
@@ -86,7 +86,9 @@ export default function LeadsokPage() {
   const [industryQ, setIndustryQ]   = useState("");
   const [results, setResults]       = useState<BrregEnhet[]>([]);
   const [total, setTotal]           = useState(0);
+  const [currentPage, setCurrentPage] = useState(0);
   const [loading, setLoading]       = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError]           = useState("");
   const [hasSearched, setHasSearched] = useState(false);
   const [addedIds, setAddedIds]     = useState<Set<string>>(new Set());
@@ -113,13 +115,8 @@ export default function LeadsokPage() {
 
   const activeFilterCount = (filters.ansatte !== "all" ? 1 : 0) + (filters.mva ? 1 : 0);
 
-  const doSearch = useCallback(async (loc: string, ind: string, f: Filters) => {
-    if (!loc && !ind) return;
-    setLoading(true);
-    setError("");
-    setHasSearched(true);
-
-    const params = new URLSearchParams({ size: "40" });
+  const buildParams = (loc: string, ind: string, f: Filters, page: number) => {
+    const params = new URLSearchParams({ size: "100", page: String(page) });
     if (loc) params.set("poststed", loc.trim().toUpperCase());
     if (ind) {
       const nace = guessNace(ind);
@@ -135,50 +132,93 @@ export default function LeadsokPage() {
       if (fra) params.set("fraAntallAnsatte", fra);
       if (til) params.set("tilAntallAnsatte", til);
     }
+    return params;
+  };
+
+  // Fetch leaders in background batches and update state incrementally
+  const fetchLeadersInBackground = useCallback((enheter: BrregEnhet[], isAppend: boolean) => {
+    const BATCH = 8;
+    let i = 0;
+    const run = async () => {
+      while (i < enheter.length) {
+        const batch = enheter.slice(i, i + BATCH);
+        i += BATCH;
+        await Promise.all(
+          batch.map(async (e) => {
+            if (e.dagligLeder) return; // already fetched
+            try {
+              const r = await fetch(`/api/brreg/roller?orgnr=${e.organisasjonsnummer}`);
+              const d = await r.json();
+              const groups: any[] = d?.rollegrupper ?? [];
+              const dagl = groups
+                .flatMap((g: any) => g.roller ?? [])
+                .find((r: any) => r.type?.kode === "DAGL" || r.type?.kode === "LEDE");
+              if (dagl?.person?.navn) {
+                const n = dagl.person.navn;
+                e.dagligLeder = capitalize(`${n.fornavn ?? ""} ${n.etternavn ?? ""}`).trim();
+              }
+            } catch {}
+          })
+        );
+        // Push incremental update to state
+        setResults((prev) => {
+          if (isAppend) {
+            // For load-more, keep existing and update the new batch
+            return [...prev];
+          }
+          return [...enheter]; // trigger re-render with updated leader names
+        });
+      }
+    };
+    run();
+  }, []);
+
+  const doSearch = useCallback(async (loc: string, ind: string, f: Filters, page = 0, append = false) => {
+    if (!loc && !ind) return;
+    if (append) setLoadingMore(true);
+    else { setLoading(true); setResults([]); }
+    setError("");
+    setHasSearched(true);
 
     try {
-      const res  = await fetch(`/api/brreg?${params}`);
+      const res  = await fetch(`/api/brreg?${buildParams(loc, ind, f, page)}`);
       const data = await res.json();
       const enheter: BrregEnhet[] = data?._embedded?.enheter ?? [];
       setTotal(data?.page?.totalElements ?? enheter.length);
+      setCurrentPage(page);
 
-      // Fetch daglig leder for first 15 in parallel
-      const withLeaders = await Promise.all(
-        enheter.slice(0, 15).map(async (e) => {
-          try {
-            const r = await fetch(`/api/brreg/roller?orgnr=${e.organisasjonsnummer}`);
-            const d = await r.json();
-            const groups: any[] = d?.rollegrupper ?? [];
-            const dagl = groups
-              .flatMap((g: any) => g.roller ?? [])
-              .find((r: any) => r.type?.kode === "DAGL" || r.type?.kode === "LEDE");
-            if (dagl?.person?.navn) {
-              const n = dagl.person.navn;
-              e.dagligLeder = capitalize(`${n.fornavn ?? ""} ${n.etternavn ?? ""}`).trim();
-            }
-          } catch {}
-          return e;
-        })
-      );
-      // rest without leader
-      setResults([...withLeaders, ...enheter.slice(15)]);
-    } catch (err) {
+      if (append) {
+        setResults((prev) => {
+          const newList = [...prev, ...enheter];
+          fetchLeadersInBackground(newList, true);
+          return newList;
+        });
+      } else {
+        setResults(enheter);
+        fetchLeadersInBackground(enheter, false);
+      }
+    } catch {
       setError("Kunne ikke laste data fra Brønnøysundregisteret. Sjekk nettilkoblingen.");
     } finally {
       setLoading(false);
+      setLoadingMore(false);
     }
-  }, []);
+  }, [fetchLeadersInBackground]);
 
   const handleSearch = (e?: React.FormEvent) => {
     e?.preventDefault();
     setFilters(pendingFilters);
-    doSearch(locationQ, industryQ, pendingFilters);
+    doSearch(locationQ, industryQ, pendingFilters, 0, false);
+  };
+
+  const handleLoadMore = () => {
+    doSearch(locationQ, industryQ, filters, currentPage + 1, true);
   };
 
   const applyFilters = () => {
     setFilters(pendingFilters);
     setFilterOpen(false);
-    if (hasSearched) doSearch(locationQ, industryQ, pendingFilters);
+    if (hasSearched) doSearch(locationQ, industryQ, pendingFilters, 0, false);
   };
 
   const handleSort = (field: string) => {
@@ -461,7 +501,7 @@ export default function LeadsokPage() {
             </p>
             <div style={{ display: "flex", gap: 8, marginTop: 8, flexWrap: "wrap", justifyContent: "center" }}>
               {[["Oslo", "frisør"], ["Bergen", "bygg"], ["Trondheim", "regnskap"], ["Stavanger", "elektro"]].map(([loc, ind]) => (
-                <button key={loc + ind} onClick={() => { setLocationQ(loc); setIndustryQ(ind); doSearch(loc, ind, filters); }}
+                <button key={loc + ind} onClick={() => { setLocationQ(loc); setIndustryQ(ind); doSearch(loc, ind, filters, 0, false); }}
                   style={{
                     padding: "6px 14px", borderRadius: 999, border: "1.5px solid #E5E7EB",
                     backgroundColor: "white", fontSize: 13, fontWeight: 500, color: "#374151",
@@ -521,7 +561,7 @@ export default function LeadsokPage() {
                 {/* Table header */}
                 <div style={{
                   display: "grid",
-                  gridTemplateColumns: "2fr 1.4fr 1fr 1.3fr 1.2fr 0.8fr 90px",
+                  gridTemplateColumns: "2fr 1.4fr 1fr 1fr 1.3fr 1.1fr 0.7fr 90px",
                   padding: "10px 16px",
                   backgroundColor: "#F9FAFB",
                   borderBottom: "1px solid #F3F4F6",
@@ -530,6 +570,7 @@ export default function LeadsokPage() {
                   <SortBtn field="navn" label="Bedriftsnavn" />
                   <span style={{ fontSize: 11, fontWeight: 600, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.05em" }}>Daglig leder</span>
                   <span style={{ fontSize: 11, fontWeight: 600, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.05em" }}>Telefon</span>
+                  <span style={{ fontSize: 11, fontWeight: 600, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.05em" }}>Nettside</span>
                   <span style={{ fontSize: 11, fontWeight: 600, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.05em" }}>Bransje</span>
                   <SortBtn field="sted" label="Sted" />
                   <SortBtn field="ansatte" label="Ansatte" />
@@ -553,7 +594,7 @@ export default function LeadsokPage() {
                     return (
                       <div key={enhet.organisasjonsnummer} style={{
                         display: "grid",
-                        gridTemplateColumns: "2fr 1.4fr 1fr 1.3fr 1.2fr 0.8fr 90px",
+                        gridTemplateColumns: "2fr 1.4fr 1fr 1fr 1.3fr 1.1fr 0.7fr 90px",
                         padding: "12px 16px",
                         borderBottom: idx < sorted.length - 1 ? "1px solid #F9FAFB" : "none",
                         alignItems: "center", gap: 8,
@@ -590,8 +631,24 @@ export default function LeadsokPage() {
                             <a href={`tel:${enhet.telefon}`} style={{ color: "#374151", textDecoration: "none", display: "flex", alignItems: "center", gap: 4 }}>
                               <Phone size={12} />{enhet.telefon}
                             </a>
-                          ) : <span style={{ color: "#D1D5DB" }}>—</span>}
+                          ) : <span style={{ color: "#E5E7EB" }}>—</span>}
                         </p>
+
+                        {/* Nettside */}
+                        <div style={{ minWidth: 0, overflow: "hidden" }}>
+                          {enhet.hjemmeside ? (
+                            <a
+                              href={enhet.hjemmeside.startsWith("http") ? enhet.hjemmeside : `https://${enhet.hjemmeside}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              onClick={e => e.stopPropagation()}
+                              style={{ fontSize: 12, color: "#2563EB", textDecoration: "none", display: "flex", alignItems: "center", gap: 4, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}
+                            >
+                              <Globe size={11} style={{ flexShrink: 0 }} />
+                              {enhet.hjemmeside.replace(/^https?:\/\//, "").replace(/\/$/, "").split("/")[0]}
+                            </a>
+                          ) : <span style={{ color: "#E5E7EB", fontSize: 13 }}>—</span>}
+                        </div>
 
                         {/* Bransje */}
                         <div style={{ minWidth: 0 }}>
@@ -643,6 +700,31 @@ export default function LeadsokPage() {
                 onAdd={handleAdd}
                 capitalize={capitalize}
               />
+            )}
+
+            {/* Load more */}
+            {results.length < total && (
+              <div style={{ display: "flex", justifyContent: "center", padding: "24px 0" }}>
+                <button
+                  onClick={handleLoadMore}
+                  disabled={loadingMore}
+                  style={{
+                    display: "inline-flex", alignItems: "center", gap: 8,
+                    padding: "11px 28px", borderRadius: 10,
+                    border: "1.5px solid #E5E7EB", backgroundColor: "white",
+                    fontSize: 14, fontWeight: 600, color: "#374151",
+                    cursor: loadingMore ? "default" : "pointer",
+                    fontFamily: "inherit", opacity: loadingMore ? 0.7 : 1,
+                    boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
+                  }}
+                >
+                  {loadingMore ? (
+                    <><Loader2 size={16} style={{ animation: "spin 1s linear infinite" }} /> Laster inn…</>
+                  ) : (
+                    <>Last inn flere bedrifter ({(total - results.length).toLocaleString("nb-NO")} gjenstår)</>
+                  )}
+                </button>
+              </div>
             )}
           </>
         )}
