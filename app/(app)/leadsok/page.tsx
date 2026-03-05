@@ -117,7 +117,7 @@ function toKommune(city: string) {
 
 /* ─── Component ───────────────────────────────────────────── */
 export default function LeadsokPage() {
-  const { leads, addLead, currentUser } = useAppStore();
+  const { leads, addLead, loadLeads, currentUser } = useAppStore();
   const existingIds = new Set(leads.map((l) => l.id));
 
   const [locationQ, setLocationQ]   = useState("");
@@ -142,6 +142,12 @@ export default function LeadsokPage() {
   const [pendingFilters, setPendingFilters] = useState<Filters>({ ansatte: "all", mva: false, bransje: "" });
 
   const filterRef = useRef<HTMLDivElement>(null);
+
+  // Load leads from DB on mount
+  useEffect(() => {
+    if (currentUser?.email) loadLeads(currentUser.email);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentUser?.email]);
 
   // Close filter on outside click
   useEffect(() => {

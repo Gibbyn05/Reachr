@@ -1,5 +1,5 @@
 "use client";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { TopBar } from "@/components/layout/top-bar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -541,8 +541,13 @@ function LeadRow({
 }
 
 export default function MineLeadsPage() {
-  const { leads, updateLeadStatus, updateLeadNotes, updateLeadAssigned, updateLeadLastContacted, removeLead, meetingDates, setMeetingDate } = useAppStore();
+  const { leads, loadLeads, updateLeadStatus, updateLeadNotes, updateLeadAssigned, updateLeadLastContacted, removeLead, meetingDates, setMeetingDate, currentUser } = useAppStore();
   const [search, setSearch] = useState("");
+
+  useEffect(() => {
+    if (currentUser?.email) loadLeads(currentUser.email);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentUser?.email]);
   const [statusFilter, setStatusFilter] = useState<string>("Alle");
 
   const assignedOptions = ["Alle", ...Array.from(new Set(leads.map((l) => l.assignedTo)))];
