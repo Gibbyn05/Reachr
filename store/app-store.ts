@@ -2,6 +2,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { Lead } from "@/lib/mock-data";
+import { createClient } from "@/lib/supabase/client";
 
 interface AppStore {
   leads: Lead[];
@@ -55,12 +56,40 @@ export const useAppStore = create<AppStore>()(
       leads: [],
 
       loadLeads: async (userEmail: string) => {
-        const res = await fetch(`/api/leads?user_email=${encodeURIComponent(userEmail)}`);
-        if (!res.ok) return;
-        const rows = await res.json();
-        const leads = (rows as Record<string, unknown>[]).map(dbRowToLead);
+        const supabase = createClient();
+
+        // Get team owner email from auth metadata (for members)
+        const { data: { user } } = await supabase.auth.getUser();
+        const teamOwnerEmail = user?.user_metadata?.team_owner as string | undefined;
+        const ownerEmail = teamOwnerEmail ?? userEmail;
+
+        // Fetch all member emails under this team
+        const { data: members } = await supabase
+          .from("team_members")
+          .select("member_email")
+          .eq("owner_email", ownerEmail);
+
+        const teamEmails = Array.from(new Set([
+          ownerEmail,
+          userEmail,
+          ...(members ?? []).map((m: { member_email: string }) => m.member_email),
+        ]));
+
+        const { data, error } = await supabase
+          .from("leads")
+          .select("*")
+          .in("user_email", teamEmails)
+          .order("created_at", { ascending: false });
+
+        if (error) {
+          console.error("[loadLeads] error:", error);
+          return;
+        }
+
+        const rows = data ?? [];
+        const leads = rows.map(dbRowToLead);
         const meetingDates: Record<string, string> = {};
-        (rows as Record<string, unknown>[]).forEach((r) => {
+        rows.forEach((r) => {
           if (r.meeting_date) meetingDates[r.id as string] = r.meeting_date as string;
         });
         set({ leads, meetingDates });
@@ -68,19 +97,38 @@ export const useAppStore = create<AppStore>()(
 
       addLead: async (lead: Lead, userEmail?: string) => {
         set((state) => ({ leads: [...state.leads, lead] }));
-        const email = userEmail ?? get().currentUser?.email ?? "";
-        try {
-          const res = await fetch("/api/leads", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ ...lead, user_email: email }),
+        const supabase = createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        const email = user?.email ?? userEmail ?? get().currentUser?.email ?? "";
+
+        const { error } = await supabase
+          .from("leads")
+          .upsert({
+            id: lead.id,
+            user_email: email,
+            name: lead.name,
+            org_number: lead.orgNumber,
+            contact_person: lead.contactPerson,
+            phone: lead.phone,
+            email: lead.email,
+            industry: lead.industry,
+            city: lead.city,
+            address: lead.address,
+            revenue: lead.revenue ?? 0,
+            employees: lead.employees ?? 0,
+            lat: lead.lat ?? 0,
+            lng: lead.lng ?? 0,
+            status: lead.status,
+            last_contacted: lead.lastContacted,
+            assigned_to: lead.assignedTo,
+            assigned_avatar: lead.assignedAvatar,
+            added_by: lead.addedBy,
+            notes: lead.notes ?? "",
+            added_date: lead.addedDate,
           });
-          if (!res.ok) {
-            const body = await res.json().catch(() => ({}));
-            console.error("[addLead] API error", res.status, body);
-          }
-        } catch (err) {
-          console.error("[addLead] Network error", err);
+
+        if (error) {
+          console.error("[addLead] upsert error:", error);
         }
       },
 

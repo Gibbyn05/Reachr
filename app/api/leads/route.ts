@@ -28,7 +28,10 @@ export async function GET(req: NextRequest) {
     .in("user_email", teamEmails)
     .order("created_at", { ascending: false });
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) {
+    console.error("[GET /api/leads] leads query error:", error);
+    return NextResponse.json({ error: error.message, details: error.details }, { status: 500 });
+  }
   return NextResponse.json(data ?? []);
 }
 
