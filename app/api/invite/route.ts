@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
 const FROM_EMAIL = process.env.RESEND_FROM_EMAIL ?? "noreply@reachr.no";
-// Normalize APP_URL to prevent deployment typos (e.g. wwww -> www or app)
-const APP_URL = (process.env.NEXT_PUBLIC_APP_URL ?? "https://app.reachr.no")
+// Normalize APP_URL to prevent deployment typos (e.g. wwww -> www)
+const APP_URL = (process.env.NEXT_PUBLIC_APP_URL ?? "https://www.reachr.no")
   .replace(/^(https?:\/\/)w{4,}\./, "$1www.");
 
 export async function POST(req: NextRequest) {
