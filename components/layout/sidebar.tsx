@@ -92,7 +92,7 @@ export function Sidebar() {
     .slice(0, 2);
 
   return (
-    <aside className="fixed left-0 top-0 h-full w-60 bg-[#0F1729] flex flex-col z-50">
+    <aside className="fixed left-0 top-0 h-full w-60 bg-[#0F1729] flex flex-col z-[1000]">
       {/* Logo */}
       <div className="p-6 border-b border-white/10">
         <Link href="/dashboard" className="flex items-center gap-2.5">
