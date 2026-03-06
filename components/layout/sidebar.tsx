@@ -16,6 +16,7 @@ import { cn } from "@/lib/utils";
 import { useState, useEffect } from "react";
 import { useAppStore } from "@/store/app-store";
 import { Lead } from "@/lib/mock-data";
+import { createClient } from "@/lib/supabase/client";
 
 const mainNavItems = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
@@ -46,7 +47,7 @@ function countNeedsFollowUp(leads: Lead[]): number {
 export function Sidebar() {
   const pathname = usePathname();
   const [dark, setDark] = useState(false);
-  const { currentUser, avatarUrl, leads } = useAppStore();
+  const { currentUser, setCurrentUser, loadLeads, avatarUrl, leads } = useAppStore();
 
   const notifCount = countNeedsFollowUp(leads);
 
@@ -56,6 +57,23 @@ export function Sidebar() {
       setDark(true);
       document.documentElement.classList.add("dark");
     }
+  }, []);
+
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data }) => {
+      const user = data?.user;
+      if (!user?.email) return;
+      if (!currentUser?.email) {
+        setCurrentUser({
+          name: user.user_metadata?.full_name ?? user.email,
+          email: user.email,
+          company: user.user_metadata?.company ?? "",
+        });
+      }
+      loadLeads(user.email);
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const toggleDark = () => {
