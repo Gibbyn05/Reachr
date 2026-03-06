@@ -3,13 +3,13 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
   const supabase = await createClient();
-  const userEmail = req.nextUrl.searchParams.get("user_email");
-  if (!userEmail) return NextResponse.json([], { status: 200 });
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user?.email) return NextResponse.json([], { status: 200 });
 
   const { data, error } = await supabase
     .from("leads")
     .select("*")
-    .eq("user_email", userEmail)
+    .eq("user_email", user.email)
     .order("created_at", { ascending: false });
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
@@ -18,13 +18,16 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user?.email) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
   const body = await req.json();
 
   const { data, error } = await supabase
     .from("leads")
     .upsert({
       id: body.id,
-      user_email: body.user_email,
+      user_email: user.email,
       name: body.name,
       org_number: body.orgNumber,
       contact_person: body.contactPerson,

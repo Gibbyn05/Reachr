@@ -1,5 +1,6 @@
 "use client";
 import { create } from "zustand";
+import { persist } from "zustand/middleware";
 import { Lead } from "@/lib/mock-data";
 
 interface AppStore {
@@ -48,106 +49,118 @@ function dbRowToLead(row: Record<string, unknown>): Lead {
   };
 }
 
-export const useAppStore = create<AppStore>((set, get) => ({
-  leads: [],
+export const useAppStore = create<AppStore>()(
+  persist(
+    (set, get) => ({
+      leads: [],
 
-  loadLeads: async (userEmail: string) => {
-    const res = await fetch(`/api/leads?user_email=${encodeURIComponent(userEmail)}`);
-    if (!res.ok) return;
-    const rows = await res.json();
-    const leads = (rows as Record<string, unknown>[]).map(dbRowToLead);
-    const meetingDates: Record<string, string> = {};
-    (rows as Record<string, unknown>[]).forEach((r) => {
-      if (r.meeting_date) meetingDates[r.id as string] = r.meeting_date as string;
-    });
-    set({ leads, meetingDates });
-  },
+      loadLeads: async (userEmail: string) => {
+        const res = await fetch(`/api/leads?user_email=${encodeURIComponent(userEmail)}`);
+        if (!res.ok) return;
+        const rows = await res.json();
+        const leads = (rows as Record<string, unknown>[]).map(dbRowToLead);
+        const meetingDates: Record<string, string> = {};
+        (rows as Record<string, unknown>[]).forEach((r) => {
+          if (r.meeting_date) meetingDates[r.id as string] = r.meeting_date as string;
+        });
+        set({ leads, meetingDates });
+      },
 
-  addLead: async (lead: Lead, userEmail?: string) => {
-    set((state) => ({ leads: [...state.leads, lead] }));
-    const email = userEmail ?? get().currentUser?.email ?? "";
-    await fetch("/api/leads", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...lead, user_email: email }),
-    });
-  },
+      addLead: async (lead: Lead, userEmail?: string) => {
+        set((state) => ({ leads: [...state.leads, lead] }));
+        const email = userEmail ?? get().currentUser?.email ?? "";
+        await fetch("/api/leads", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ...lead, user_email: email }),
+        });
+      },
 
-  removeLead: async (id: string) => {
-    set((state) => ({ leads: state.leads.filter((l) => l.id !== id) }));
-    await fetch(`/api/leads/${id}`, { method: "DELETE" });
-  },
+      removeLead: async (id: string) => {
+        set((state) => ({ leads: state.leads.filter((l) => l.id !== id) }));
+        await fetch(`/api/leads/${id}`, { method: "DELETE" });
+      },
 
-  updateLeadStatus: async (id: string, status: Lead["status"]) => {
-    set((state) => ({
-      leads: state.leads.map((l) => (l.id === id ? { ...l, status } : l)),
-    }));
-    await fetch(`/api/leads/${id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status }),
-    });
-  },
+      updateLeadStatus: async (id: string, status: Lead["status"]) => {
+        set((state) => ({
+          leads: state.leads.map((l) => (l.id === id ? { ...l, status } : l)),
+        }));
+        await fetch(`/api/leads/${id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status }),
+        });
+      },
 
-  updateLeadNotes: async (id: string, notes: string) => {
-    set((state) => ({
-      leads: state.leads.map((l) => (l.id === id ? { ...l, notes } : l)),
-    }));
-    await fetch(`/api/leads/${id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ notes }),
-    });
-  },
+      updateLeadNotes: async (id: string, notes: string) => {
+        set((state) => ({
+          leads: state.leads.map((l) => (l.id === id ? { ...l, notes } : l)),
+        }));
+        await fetch(`/api/leads/${id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ notes }),
+        });
+      },
 
-  updateLeadAssigned: async (id: string, assignedTo: string) => {
-    const assignedAvatar = assignedTo
-      .split(" ")
-      .map((w) => w[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2);
-    set((state) => ({
-      leads: state.leads.map((l) =>
-        l.id === id ? { ...l, assignedTo, assignedAvatar } : l
-      ),
-    }));
-    await fetch(`/api/leads/${id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ assigned_to: assignedTo, assigned_avatar: assignedAvatar }),
-    });
-  },
+      updateLeadAssigned: async (id: string, assignedTo: string) => {
+        const assignedAvatar = assignedTo
+          .split(" ")
+          .map((w) => w[0])
+          .join("")
+          .toUpperCase()
+          .slice(0, 2);
+        set((state) => ({
+          leads: state.leads.map((l) =>
+            l.id === id ? { ...l, assignedTo, assignedAvatar } : l
+          ),
+        }));
+        await fetch(`/api/leads/${id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ assigned_to: assignedTo, assigned_avatar: assignedAvatar }),
+        });
+      },
 
-  updateLeadLastContacted: async (id: string, date: string | null) => {
-    set((state) => ({
-      leads: state.leads.map((l) => (l.id === id ? { ...l, lastContacted: date } : l)),
-    }));
-    await fetch(`/api/leads/${id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ last_contacted: date }),
-    });
-  },
+      updateLeadLastContacted: async (id: string, date: string | null) => {
+        set((state) => ({
+          leads: state.leads.map((l) => (l.id === id ? { ...l, lastContacted: date } : l)),
+        }));
+        await fetch(`/api/leads/${id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ last_contacted: date }),
+        });
+      },
 
-  meetingDates: {},
-  setMeetingDate: async (leadId: string, datetime: string) => {
-    set((state) => ({
-      meetingDates: { ...state.meetingDates, [leadId]: datetime },
-    }));
-    await fetch(`/api/leads/${leadId}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ meeting_date: datetime }),
-    });
-  },
+      meetingDates: {},
+      setMeetingDate: async (leadId: string, datetime: string) => {
+        set((state) => ({
+          meetingDates: { ...state.meetingDates, [leadId]: datetime },
+        }));
+        await fetch(`/api/leads/${leadId}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ meeting_date: datetime }),
+        });
+      },
 
-  isLoggedIn: false,
-  setLoggedIn: (value) => set({ isLoggedIn: value }),
-  currentUser: null,
-  setCurrentUser: (user) => set({ currentUser: user }),
-  avatarUrl: null,
-  setAvatarUrl: (url) => set({ avatarUrl: url }),
-  profilePhone: "+47 22 11 22 33",
-  setProfilePhone: (phone) => set({ profilePhone: phone }),
-}));
+      isLoggedIn: false,
+      setLoggedIn: (value) => set({ isLoggedIn: value }),
+      currentUser: null,
+      setCurrentUser: (user) => set({ currentUser: user }),
+      avatarUrl: null,
+      setAvatarUrl: (url) => set({ avatarUrl: url }),
+      profilePhone: "+47 22 11 22 33",
+      setProfilePhone: (phone) => set({ profilePhone: phone }),
+    }),
+    {
+      name: "reachr-store",
+      partialize: (state) => ({
+        currentUser: state.currentUser,
+        avatarUrl: state.avatarUrl,
+        profilePhone: state.profilePhone,
+      }),
+    }
+  )
+);
