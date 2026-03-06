@@ -69,11 +69,19 @@ export const useAppStore = create<AppStore>()(
       addLead: async (lead: Lead, userEmail?: string) => {
         set((state) => ({ leads: [...state.leads, lead] }));
         const email = userEmail ?? get().currentUser?.email ?? "";
-        await fetch("/api/leads", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ...lead, user_email: email }),
-        });
+        try {
+          const res = await fetch("/api/leads", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ ...lead, user_email: email }),
+          });
+          if (!res.ok) {
+            const body = await res.json().catch(() => ({}));
+            console.error("[addLead] API error", res.status, body);
+          }
+        } catch (err) {
+          console.error("[addLead] Network error", err);
+        }
       },
 
       removeLead: async (id: string) => {

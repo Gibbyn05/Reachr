@@ -35,7 +35,10 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user?.email) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!user?.email) {
+    console.error("[POST /api/leads] No authenticated user found");
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
 
   const body = await req.json();
 
@@ -71,6 +74,9 @@ export async function POST(req: NextRequest) {
     .select()
     .single();
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) {
+    console.error("[POST /api/leads] upsert error:", error);
+    return NextResponse.json({ error: error.message, details: error.details, hint: error.hint }, { status: 500 });
+  }
   return NextResponse.json(data);
 }
