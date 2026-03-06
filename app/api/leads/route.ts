@@ -6,10 +6,14 @@ export async function GET(req: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user?.email) return NextResponse.json([], { status: 200 });
 
+  // Team members share the owner's lead pool
+  const teamOwnerEmail = user.user_metadata?.team_owner as string | undefined;
+  const queryEmail = teamOwnerEmail ?? user.email;
+
   const { data, error } = await supabase
     .from("leads")
     .select("*")
-    .eq("user_email", user.email)
+    .eq("user_email", queryEmail)
     .order("created_at", { ascending: false });
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
@@ -23,11 +27,15 @@ export async function POST(req: NextRequest) {
 
   const body = await req.json();
 
+  // Store under team owner's email so all team members share the same pool
+  const teamOwnerEmail = user.user_metadata?.team_owner as string | undefined;
+  const storeEmail = teamOwnerEmail ?? user.email;
+
   const { data, error } = await supabase
     .from("leads")
     .upsert({
       id: body.id,
-      user_email: user.email,
+      user_email: storeEmail,
       name: body.name,
       org_number: body.orgNumber,
       contact_person: body.contactPerson,

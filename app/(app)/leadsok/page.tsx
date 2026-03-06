@@ -5,7 +5,7 @@ import { TopBar } from "@/components/layout/top-bar";
 import {
   Search, MapPin, SlidersHorizontal, Plus, Check,
   Phone, Globe, Building2, X, ChevronUp, ChevronDown,
-  Loader2, AlertCircle, List, Map,
+  Loader2, AlertCircle, List, Map as MapIcon,
 } from "lucide-react";
 import { useAppStore } from "@/store/app-store";
 
@@ -130,9 +130,6 @@ export default function LeadsokPage() {
   const [error, setError]           = useState("");
   const [hasSearched, setHasSearched] = useState(false);
   const [addedIds, setAddedIds]     = useState<Set<string>>(new Set());
-  // Phone enrichment: orgnr → { loading, phone }
-  type EnrichEntry = { loading: boolean; phone: string | null };
-  const [enriched, setEnriched] = useState<Record<string, EnrichEntry>>({});
   const [view, setView]             = useState<"list" | "map">("list");
   const [filterOpen, setFilterOpen] = useState(false);
   const [sortField, setSortField]   = useState<string | null>(null);
@@ -188,37 +185,6 @@ export default function LeadsokPage() {
     return params;
   };
 
-  // Fetch phone numbers in background batches from Gulesider/1881
-  const fetchPhonesInBackground = useCallback((enheter: BrregEnhet[]) => {
-    const BATCH = 5;
-    const toFetch = enheter.filter(e => !e.telefon);
-    let i = 0;
-    const run = async () => {
-      while (i < toFetch.length) {
-        const batch = toFetch.slice(i, i + BATCH);
-        i += BATCH;
-        await Promise.all(batch.map(async (e) => {
-          const orgnr = e.organisasjonsnummer;
-          setEnriched(prev => {
-            if (prev[orgnr]) return prev; // already fetching or fetched
-            return { ...prev, [orgnr]: { loading: true, phone: null } };
-          });
-          try {
-            const params = new URLSearchParams({ orgnr });
-            if (e.navn) params.set("name", e.navn);
-            if (e.forretningsadresse?.poststed) params.set("poststed", e.forretningsadresse.poststed);
-            const res = await fetch(`/api/enrich?${params}`);
-            const data = await res.json();
-            setEnriched(prev => ({ ...prev, [orgnr]: { loading: false, phone: data.phone ?? null } }));
-          } catch {
-            setEnriched(prev => ({ ...prev, [orgnr]: { loading: false, phone: null } }));
-          }
-        }));
-      }
-    };
-    run();
-  }, []);
-
   // Fetch leaders in background batches and update state incrementally
   const fetchLeadersInBackground = useCallback((enheter: BrregEnhet[], isAppend: boolean) => {
     const BATCH = 8;
@@ -260,7 +226,7 @@ export default function LeadsokPage() {
   const doSearch = useCallback(async (loc: string, ind: string, f: Filters, page = 0, append = false) => {
     if (!loc && !ind && !f.bransje) return;
     if (append) setLoadingMore(true);
-    else { setLoading(true); setResults([]); setEnriched({}); }
+    else { setLoading(true); setResults([]); }
     setError("");
     setHasSearched(true);
 
@@ -277,19 +243,17 @@ export default function LeadsokPage() {
           fetchLeadersInBackground(newList, true);
           return newList;
         });
-        fetchPhonesInBackground(enheter);
       } else {
         setResults(enheter);
         fetchLeadersInBackground(enheter, false);
-        fetchPhonesInBackground(enheter);
       }
     } catch {
-      setError("Kunne ikke laste data fra Brønnøysundregisteret. Sjekk nettilkoblingen.");
+      setError("Kunne ikke laste data. Sjekk nettilkoblingen.");
     } finally {
       setLoading(false);
       setLoadingMore(false);
     }
-  }, [fetchLeadersInBackground, fetchPhonesInBackground]);
+  }, [fetchLeadersInBackground]);
 
   // Auto-detect user city and load on first page open
   useEffect(() => {
@@ -379,7 +343,7 @@ export default function LeadsokPage() {
       name: capitalize(e.navn),
       orgNumber: e.organisasjonsnummer,
       contactPerson: e.dagligLeder ?? "—",
-      phone: e.telefon ?? enriched[e.organisasjonsnummer]?.phone ?? "—",
+      phone: e.telefon ?? "—",
       email: "—",
       industry: naceToCategory(e.naeringskode1?.kode, e.naeringskode1?.beskrivelse),
       city: e.forretningsadresse?.poststed ? capitalize(e.forretningsadresse.poststed) : "—",
@@ -422,7 +386,7 @@ export default function LeadsokPage() {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100vh", overflow: "hidden" }}>
-      <TopBar title="Leadsøk" subtitle="Søk i Brønnøysundregisteret" />
+      <TopBar title="Leadsøk" />
 
       {/* ── Search bar ───────────────────────────────────── */}
       <div style={{ padding: "16px 24px", borderBottom: "1px solid #E5E7EB", backgroundColor: "white", flexShrink: 0 }}>
@@ -618,7 +582,7 @@ export default function LeadsokPage() {
 
           {/* View toggle */}
           <div style={{ display: "flex", backgroundColor: "#F3F4F6", borderRadius: 10, padding: 3, gap: 2, flexShrink: 0 }}>
-            {([["list", List], ["map", Map]] as const).map(([v, Icon]) => (
+            {([["list", List], ["map", MapIcon]] as const).map(([v, Icon]) => (
               <button
                 key={v}
                 type="button"
@@ -670,7 +634,7 @@ export default function LeadsokPage() {
         {loading && (
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "60%", gap: 12 }}>
             <Loader2 size={32} color="#22C55E" style={{ animation: "spin 1s linear infinite" }} />
-            <p style={{ fontSize: 14, color: "#6B7280", margin: 0 }}>Søker i Brønnøysundregisteret…</p>
+            <p style={{ fontSize: 14, color: "#6B7280", margin: 0 }}>Laster bedrifter…</p>
             <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
           </div>
         )}
@@ -779,22 +743,13 @@ export default function LeadsokPage() {
 
                         {/* Telefon */}
                         <div style={{ fontSize: 13, color: "#6B7280" }}>
-                          {(() => {
-                            const brreg = enhet.telefon;
-                            const en = enriched[enhet.organisasjonsnummer];
-                            const phone = brreg || en?.phone;
-                            if (phone) {
-                              return (
-                                <a href={`tel:${phone}`} style={{ color: "#374151", textDecoration: "none", display: "flex", alignItems: "center", gap: 4 }}>
-                                  <Phone size={12} />{phone}
-                                </a>
-                              );
-                            }
-                            if (!en || en.loading) {
-                              return <span style={{ color: "#D1D5DB", fontSize: 11, display: "flex", alignItems: "center", gap: 3 }}><Loader2 size={11} style={{ animation: "spin 1s linear infinite" }} /></span>;
-                            }
-                            return <span style={{ color: "#E5E7EB", fontSize: 13 }}>—</span>;
-                          })()}
+                          {enhet.telefon ? (
+                            <a href={`tel:${enhet.telefon}`} style={{ color: "#374151", textDecoration: "none", display: "flex", alignItems: "center", gap: 4 }}>
+                              <Phone size={12} />{enhet.telefon}
+                            </a>
+                          ) : (
+                            <span style={{ color: "#E5E7EB", fontSize: 13 }}>—</span>
+                          )}
                         </div>
 
                         {/* Nettside */}

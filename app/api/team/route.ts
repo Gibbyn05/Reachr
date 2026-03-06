@@ -65,3 +65,20 @@ export async function POST(req: NextRequest) {
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ success: true });
 }
+
+// PATCH /api/team — update current user's display name in team_members
+export async function PATCH(req: NextRequest) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user?.email) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const { member_name } = await req.json();
+  if (!member_name) return NextResponse.json({ error: "member_name mangler" }, { status: 400 });
+
+  await supabase
+    .from("team_members")
+    .update({ member_name })
+    .eq("member_email", user.email);
+
+  return NextResponse.json({ success: true });
+}

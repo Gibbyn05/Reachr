@@ -47,7 +47,7 @@ function NotificationToggle({
       </div>
       <button
         onClick={() => setEnabled(!enabled)}
-        className={`relative w-11 h-6 rounded-full transition-all ${enabled ? "bg-green-500" : "bg-gray-200"}`}
+        className={`relative w-11 h-6 rounded-full transition-all focus:outline-none ${enabled ? "bg-green-500" : "bg-gray-200"}`}
       >
         <span
           className="absolute top-0.5 w-5 h-5 bg-white rounded-full shadow"
@@ -67,7 +67,7 @@ const NOTIFICATION_ITEMS = [
 ];
 
 export default function InnstillingerPage() {
-  const { currentUser, setCurrentUser, leads, avatarUrl, setAvatarUrl, profilePhone, setProfilePhone } = useAppStore();
+  const { currentUser, setCurrentUser, leads, avatarUrl, setAvatarUrl } = useAppStore();
   const [activeTab, setActiveTab] = useState("profil");
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteSending, setInviteSending] = useState(false);
@@ -91,7 +91,6 @@ export default function InnstillingerPage() {
   const [profileForm, setProfileForm] = useState({
     name: currentUser?.name ?? "",
     email: currentUser?.email ?? "",
-    phone: profilePhone || "",
     company: currentUser?.company ?? "",
   });
 
@@ -124,13 +123,21 @@ export default function InnstillingerPage() {
     reader.readAsDataURL(file);
   };
 
-  const handleProfileSave = () => {
+  const handleProfileSave = async () => {
     setCurrentUser({
       name: profileForm.name,
       email: profileForm.email,
       company: profileForm.company,
     });
-    setProfilePhone(profileForm.phone);
+    // Sync name to Supabase auth metadata
+    const supabase = createClient();
+    await supabase.auth.updateUser({ data: { full_name: profileForm.name } });
+    // Sync name to team_members table so teammates see the updated name
+    await fetch("/api/team", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ member_name: profileForm.name }),
+    });
     setProfileSaved(true);
     setTimeout(() => setProfileSaved(false), 3000);
   };
@@ -301,13 +308,6 @@ export default function InnstillingerPage() {
                         icon={<Mail className="w-4 h-4" />}
                       />
                     </div>
-                    <div>
-                      <label className="block text-sm font-medium text-slate-700 mb-1.5">Telefon</label>
-                      <Input
-                        value={profileForm.phone}
-                        onChange={(e) => setProfileForm({ ...profileForm, phone: e.target.value })}
-                      />
-                    </div>
                     {teamRole === "owner" && (
                     <div>
                       <label className="block text-sm font-medium text-slate-700 mb-1.5">Bedriftsnavn</label>
@@ -466,7 +466,7 @@ export default function InnstillingerPage() {
                   <div className="grid grid-cols-1 gap-4">
                     <div className="border border-gray-200 rounded-xl p-4">
                       <p className="text-sm font-semibold text-slate-900 mb-1">Brukere</p>
-                      <p className="text-2xl font-extrabold text-[#0F1729]">1 / 5</p>
+                      <p className="text-2xl font-extrabold text-[#0F1729]">{1 + teamMembers.length} / 5</p>
                       <p className="text-xs text-gray-400">Maks 5 på Pro-planen</p>
                     </div>
                   </div>
