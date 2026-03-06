@@ -81,6 +81,7 @@ function LeadRow({
   onRemove,
   meetingDate,
   onMeetingDateSave,
+  teamMembers,
 }: {
   lead: Lead;
   onStatusChange: (id: string, status: LeadStatus) => void;
@@ -90,6 +91,7 @@ function LeadRow({
   onRemove: (id: string) => void;
   meetingDate?: string;
   onMeetingDateSave: (leadId: string, dt: string) => void;
+  teamMembers: string[];
 }) {
   const [expanded, setExpanded] = useState(false);
   const [editingNotes, setEditingNotes] = useState(false);
@@ -387,11 +389,39 @@ function LeadRow({
                     <UserCheck className="w-3.5 h-3.5" /> Ansvar og info
                   </p>
                   <div className="space-y-3">
-                    {/* Assigned to — editable */}
+                    {/* Assigned to — dropdown */}
                     <div>
                       <p className="text-xs text-gray-400 mb-1">Ansvarlig</p>
-                      {editingAssigned ? (
-                        <div className="flex gap-1.5">
+                      {teamMembers.length > 1 ? (
+                        <div className="relative">
+                          <select
+                            value={lead.assignedTo}
+                            onChange={(e) => onAssignedChange(lead.id, e.target.value)}
+                            className="w-full appearance-none pl-9 pr-8 py-1.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-green-500 bg-white cursor-pointer text-gray-700"
+                          >
+                            {teamMembers.map((name) => (
+                              <option key={name} value={name}>{name}</option>
+                            ))}
+                          </select>
+                          <div className="absolute left-2 top-1/2 -translate-y-1/2 w-5 h-5 bg-[#0F1729] rounded-full flex items-center justify-center text-white text-[9px] font-bold pointer-events-none">
+                            {lead.assignedAvatar}
+                          </div>
+                          <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => { setAssignedDraft(lead.assignedTo); setEditingAssigned(true); }}
+                          className="flex items-center gap-2 text-sm text-gray-700 hover:text-green-600 group"
+                        >
+                          <div className="w-6 h-6 bg-[#0F1729] rounded-full flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0">
+                            {lead.assignedAvatar}
+                          </div>
+                          {lead.assignedTo}
+                          <span className="text-xs text-gray-300 group-hover:text-green-500">(endre)</span>
+                        </button>
+                      )}
+                      {editingAssigned && (
+                        <div className="flex gap-1.5 mt-1.5">
                           <input
                             type="text"
                             value={assignedDraft}
@@ -419,17 +449,6 @@ function LeadRow({
                             OK
                           </button>
                         </div>
-                      ) : (
-                        <button
-                          onClick={() => { setAssignedDraft(lead.assignedTo); setEditingAssigned(true); }}
-                          className="flex items-center gap-2 text-sm text-gray-700 hover:text-green-600 group"
-                        >
-                          <div className="w-6 h-6 bg-[#0F1729] rounded-full flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0">
-                            {lead.assignedAvatar}
-                          </div>
-                          {lead.assignedTo}
-                          <span className="text-xs text-gray-300 group-hover:text-green-500">(endre)</span>
-                        </button>
                       )}
                     </div>
 
@@ -543,11 +562,28 @@ function LeadRow({
 export default function MineLeadsPage() {
   const { leads, loadLeads, updateLeadStatus, updateLeadNotes, updateLeadAssigned, updateLeadLastContacted, removeLead, meetingDates, setMeetingDate, currentUser } = useAppStore();
   const [search, setSearch] = useState("");
+  const [teamMembers, setTeamMembers] = useState<string[]>([]);
 
   useEffect(() => {
     if (currentUser?.email) loadLeads(currentUser.email);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentUser?.email]);
+
+  useEffect(() => {
+    fetch("/api/team")
+      .then((r) => r.json())
+      .then((data) => {
+        const names: string[] = (data.members ?? [])
+          .filter((m: { status: string }) => m.status === "active")
+          .map((m: { member_name: string; member_email: string }) => m.member_name || m.member_email);
+        if (currentUser?.name && !names.includes(currentUser.name)) {
+          names.unshift(currentUser.name);
+        }
+        if (names.length > 0) setTeamMembers(names);
+      })
+      .catch(() => {});
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentUser?.name]);
   const [statusFilter, setStatusFilter] = useState<string>("Alle");
 
   const assignedOptions = ["Alle", ...Array.from(new Set(leads.map((l) => l.assignedTo)))];
@@ -700,6 +736,7 @@ export default function MineLeadsPage() {
                     onRemove={removeLead}
                     meetingDate={meetingDates[lead.id]}
                     onMeetingDateSave={setMeetingDate}
+                    teamMembers={teamMembers}
                   />
                 ))}
               </tbody>
