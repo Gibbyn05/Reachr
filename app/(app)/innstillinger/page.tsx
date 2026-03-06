@@ -73,11 +73,17 @@ export default function InnstillingerPage() {
   const [inviteSent, setInviteSent] = useState(false);
   const [inviteError, setInviteError] = useState("");
   const [teamMembers, setTeamMembers] = useState<{ member_email: string; member_name: string; status: string }[]>([]);
+  const [teamRole, setTeamRole] = useState<"owner" | "member">("owner");
 
   useEffect(() => {
     fetch("/api/team")
       .then((r) => r.json())
-      .then((data) => { if (Array.isArray(data)) setTeamMembers(data); })
+      .then((data) => {
+        if (data && typeof data === "object" && !Array.isArray(data)) {
+          setTeamRole(data.role ?? "owner");
+          setTeamMembers(Array.isArray(data.members) ? data.members : []);
+        }
+      })
       .catch(() => {});
   }, [inviteSent]);
 
@@ -310,7 +316,8 @@ export default function InnstillingerPage() {
             {/* ── Team ── */}
             {activeTab === "team" && (
               <div className="space-y-6">
-                {/* Invite */}
+                {/* Invite — only shown to team owners */}
+                {teamRole === "owner" && (
                 <div className="bg-white rounded-xl border border-gray-200 p-6" style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.08)" }}>
                   <h2 className="text-base font-semibold text-slate-900 mb-4">Inviter teammedlem</h2>
                   <form onSubmit={handleInvite} className="flex gap-3">
@@ -345,6 +352,7 @@ export default function InnstillingerPage() {
                     Invitasjonen er gyldig i 7 dager. Ny bruker legges til planen din automatisk.
                   </p>
                 </div>
+                )}
 
                 {/* Team members */}
                 <div className="bg-white rounded-xl border border-gray-200 overflow-hidden" style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.08)" }}>
@@ -352,7 +360,7 @@ export default function InnstillingerPage() {
                     <h2 className="text-base font-semibold text-slate-900">Teammedlemmer ({1 + teamMembers.length})</h2>
                   </div>
                   <div className="divide-y divide-gray-50">
-                    {/* Current user (admin/owner) */}
+                    {/* Current user */}
                     <div className="flex items-center gap-4 px-6 py-4">
                       <div className="w-10 h-10 bg-[#0F1729] rounded-xl flex items-center justify-center text-white text-sm font-bold">
                         {initials}
@@ -360,14 +368,23 @@ export default function InnstillingerPage() {
                       <div className="flex-1">
                         <div className="flex items-center gap-2">
                           <p className="text-sm font-semibold text-slate-900">{profileForm.name}</p>
-                          <span className="bg-yellow-100 text-yellow-700 text-xs px-2 py-0.5 rounded-full font-semibold flex items-center gap-1">
-                            <Crown className="w-2.5 h-2.5" />
-                            Admin
-                          </span>
+                          {teamRole === "owner" ? (
+                            <span className="bg-yellow-100 text-yellow-700 text-xs px-2 py-0.5 rounded-full font-semibold flex items-center gap-1">
+                              <Crown className="w-2.5 h-2.5" />
+                              Admin
+                            </span>
+                          ) : (
+                            <span className="bg-blue-100 text-blue-700 text-xs px-2 py-0.5 rounded-full font-semibold flex items-center gap-1">
+                              <Users className="w-2.5 h-2.5" />
+                              Medlem
+                            </span>
+                          )}
                         </div>
                         <p className="text-xs text-gray-400">{profileForm.email} · Deg</p>
                       </div>
-                      <span className="text-xs text-gray-400 bg-gray-50 border border-gray-200 rounded-lg px-3 py-1.5">Admin</span>
+                      <span className="text-xs text-gray-400 bg-gray-50 border border-gray-200 rounded-lg px-3 py-1.5">
+                        {teamRole === "owner" ? "Admin" : "Medlem"}
+                      </span>
                     </div>
 
                     {/* Invited/joined team members */}
