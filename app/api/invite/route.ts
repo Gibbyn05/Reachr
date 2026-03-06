@@ -1,3 +1,4 @@
+import { createClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
@@ -8,8 +9,25 @@ const APP_URL = (process.env.NEXT_PUBLIC_APP_URL ?? "https://www.reachr.no")
 
 export async function POST(req: NextRequest) {
   try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user?.email) {
+      return NextResponse.json({ error: "Ikke innlogget" }, { status: 401 });
+    }
+
     const { email, inviterName, companyName } = await req.json();
     if (!email) return NextResponse.json({ error: "E-post mangler" }, { status: 400 });
+
+    // Store a pending team_members record
+    await supabase.from("team_members").upsert({
+      owner_email: user.email,
+      member_email: email,
+      member_name: "",
+      status: "pending",
+    }, { onConflict: "owner_email,member_email" });
+
+    // Build invite link with inviter info so register page can link the accounts
+    const inviteLink = `${APP_URL}/register?invite=${encodeURIComponent(email)}&inviter=${encodeURIComponent(user.email)}&company=${encodeURIComponent(companyName ?? "")}`;
 
     if (!RESEND_API_KEY) {
       console.warn("[invite] RESEND_API_KEY is not configured — invite not sent");
@@ -18,8 +36,6 @@ export async function POST(req: NextRequest) {
         { status: 503 }
       );
     }
-
-    const inviteLink = `${APP_URL}/register?invite=${encodeURIComponent(email)}`;
 
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",

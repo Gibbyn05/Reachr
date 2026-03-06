@@ -1,5 +1,5 @@
 "use client";
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { TopBar } from "@/components/layout/top-bar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -72,6 +72,14 @@ export default function InnstillingerPage() {
   const [inviteSending, setInviteSending] = useState(false);
   const [inviteSent, setInviteSent] = useState(false);
   const [inviteError, setInviteError] = useState("");
+  const [teamMembers, setTeamMembers] = useState<{ member_email: string; member_name: string; status: string }[]>([]);
+
+  useEffect(() => {
+    fetch("/api/team")
+      .then((r) => r.json())
+      .then((data) => { if (Array.isArray(data)) setTeamMembers(data); })
+      .catch(() => {});
+  }, [inviteSent]);
 
   const [profileForm, setProfileForm] = useState({
     name: currentUser?.name ?? "Ola Nordmann",
@@ -338,12 +346,13 @@ export default function InnstillingerPage() {
                   </p>
                 </div>
 
-                {/* Team members — only show current user (real auth data) */}
+                {/* Team members */}
                 <div className="bg-white rounded-xl border border-gray-200 overflow-hidden" style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.08)" }}>
                   <div className="px-6 py-4 border-b border-gray-100">
-                    <h2 className="text-base font-semibold text-slate-900">Teammedlemmer (1)</h2>
+                    <h2 className="text-base font-semibold text-slate-900">Teammedlemmer ({1 + teamMembers.length})</h2>
                   </div>
                   <div className="divide-y divide-gray-50">
+                    {/* Current user (admin/owner) */}
                     <div className="flex items-center gap-4 px-6 py-4">
                       <div className="w-10 h-10 bg-[#0F1729] rounded-xl flex items-center justify-center text-white text-sm font-bold">
                         {initials}
@@ -360,6 +369,29 @@ export default function InnstillingerPage() {
                       </div>
                       <span className="text-xs text-gray-400 bg-gray-50 border border-gray-200 rounded-lg px-3 py-1.5">Admin</span>
                     </div>
+
+                    {/* Invited/joined team members */}
+                    {teamMembers.map((m) => {
+                      const nameInitials = (m.member_name || m.member_email)
+                        .split(" ").map((w: string) => w[0]).join("").toUpperCase().slice(0, 2);
+                      const isPending = m.status === "pending";
+                      return (
+                        <div key={m.member_email} className="flex items-center gap-4 px-6 py-4">
+                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-white text-sm font-bold ${isPending ? "bg-gray-300" : "bg-[#2563EB]"}`}>
+                            {isPending ? <Mail className="w-4 h-4" /> : nameInitials}
+                          </div>
+                          <div className="flex-1">
+                            <p className="text-sm font-semibold text-slate-900">
+                              {m.member_name || m.member_email}
+                            </p>
+                            <p className="text-xs text-gray-400">{m.member_email}</p>
+                          </div>
+                          <span className={`text-xs px-3 py-1.5 rounded-lg border ${isPending ? "text-yellow-700 bg-yellow-50 border-yellow-200" : "text-green-700 bg-green-50 border-green-200"}`}>
+                            {isPending ? "Invitert" : "Aktiv"}
+                          </span>
+                        </div>
+                      );
+                    })}
                   </div>
                   <div className="px-6 py-4 bg-gray-50 border-t border-gray-100">
                     <p className="text-xs text-gray-400">

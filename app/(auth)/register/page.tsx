@@ -18,7 +18,9 @@ function RegisterForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const inviteEmail = searchParams.get("invite") ?? "";
-  const isInvited = !!inviteEmail;
+  const inviterEmail = searchParams.get("inviter") ?? "";
+  const inviteCompany = searchParams.get("company") ?? "";
+  const isInvited = !!inviteEmail && !!inviterEmail;
 
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -27,7 +29,7 @@ function RegisterForm() {
     name: "",
     email: inviteEmail,
     password: "",
-    company: "",
+    company: inviteCompany,
     userCount: "1",
   });
 
@@ -48,25 +50,34 @@ function RegisterForm() {
       const timeout = new Promise<never>((_, reject) =>
         setTimeout(() => reject(new Error("Tilkoblingen tok for lang tid. Sjekk internettforbindelsen og prøv igjen.")), 10000)
       );
-      const { error } = await Promise.race([
+      const { error: signUpError } = await Promise.race([
         supabase.auth.signUp({
           email: form.email,
           password: form.password,
           options: {
             data: {
               full_name: form.name,
-              company: form.company,
+              company: isInvited ? inviteCompany : form.company,
               user_count: isInvited ? "invited" : form.userCount,
-              invited_by: isInvited ? inviteEmail : undefined,
+              team_owner: isInvited ? inviterEmail : undefined,
             },
           },
         }),
         timeout,
       ]);
 
-      if (error) {
-        setError(error.message);
+      if (signUpError) {
+        setError(signUpError.message);
         return;
+      }
+
+      // If invited, link this user to the team owner
+      if (isInvited) {
+        await fetch("/api/team", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ owner_email: inviterEmail, member_name: form.name }),
+        });
       }
 
       router.push("/dashboard");
