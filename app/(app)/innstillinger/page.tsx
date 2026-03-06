@@ -4,6 +4,7 @@ import { TopBar } from "@/components/layout/top-bar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAppStore } from "@/store/app-store";
+import { createClient } from "@/lib/supabase/client";
 import {
   User,
   Users,
@@ -88,11 +89,29 @@ export default function InnstillingerPage() {
   }, [inviteSent]);
 
   const [profileForm, setProfileForm] = useState({
-    name: currentUser?.name ?? "Ola Nordmann",
-    email: currentUser?.email ?? "ola@bedrift.no",
-    phone: profilePhone || "+47 22 11 22 33",
-    company: currentUser?.company ?? "Demo Bedrift AS",
+    name: currentUser?.name ?? "",
+    email: currentUser?.email ?? "",
+    phone: profilePhone || "",
+    company: currentUser?.company ?? "",
   });
+
+  // Load actual Supabase user data on mount
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (!user) return;
+      const name = user.user_metadata?.full_name ?? currentUser?.name ?? "";
+      const email = user.email ?? "";
+      const company = user.user_metadata?.company ?? currentUser?.company ?? "";
+      setProfileForm((prev) => ({
+        ...prev,
+        name: name || prev.name,
+        email: email || prev.email,
+        company: company || prev.company,
+      }));
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const [profileSaved, setProfileSaved] = useState(false);
   const [showPlanModal, setShowPlanModal] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -289,6 +308,7 @@ export default function InnstillingerPage() {
                         onChange={(e) => setProfileForm({ ...profileForm, phone: e.target.value })}
                       />
                     </div>
+                    {teamRole === "owner" && (
                     <div>
                       <label className="block text-sm font-medium text-slate-700 mb-1.5">Bedriftsnavn</label>
                       <Input
@@ -297,6 +317,7 @@ export default function InnstillingerPage() {
                         icon={<Building2 className="w-4 h-4" />}
                       />
                     </div>
+                    )}
                   </div>
 
                   <div className="flex items-center justify-end gap-3 mt-6">
