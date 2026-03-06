@@ -1,7 +1,7 @@
 "use client";
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowRight, Check, Users, Building2, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,14 +14,18 @@ const userCountOptions = [
   { value: "10+", label: "10+ brukere", price: "Kontakt oss" },
 ];
 
-export default function RegisterPage() {
+function RegisterForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const inviteEmail = searchParams.get("invite") ?? "";
+  const isInvited = !!inviteEmail;
+
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [form, setForm] = useState({
     name: "",
-    email: "",
+    email: inviteEmail,
     password: "",
     company: "",
     userCount: "1",
@@ -29,7 +33,9 @@ export default function RegisterPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (step === 1) {
+
+    // Invited users skip step 2 entirely
+    if (!isInvited && step === 1) {
       setStep(2);
       return;
     }
@@ -50,7 +56,8 @@ export default function RegisterPage() {
             data: {
               full_name: form.name,
               company: form.company,
-              user_count: form.userCount,
+              user_count: isInvited ? "invited" : form.userCount,
+              invited_by: isInvited ? inviteEmail : undefined,
             },
           },
         }),
@@ -71,6 +78,82 @@ export default function RegisterPage() {
     }
   };
 
+  // ── Invited user: single-step form ──────────────────────────────────────
+  if (isInvited) {
+    return (
+      <div className="w-full max-w-md">
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-8">
+          <div className="text-center mb-8">
+            <div className="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Users className="w-6 h-6 text-blue-600" />
+            </div>
+            <h1 className="text-2xl font-bold text-[#0F1729] mb-2">Bli med i teamet</h1>
+            <p className="text-gray-500 text-sm">
+              Du er invitert til Reachr. Opprett kontoen din for å komme i gang.
+            </p>
+          </div>
+
+          {error && (
+            <div className="mb-4 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+              {error}
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1.5">Fullt navn</label>
+              <Input
+                type="text"
+                placeholder="Ola Nordmann"
+                icon={<User className="w-4 h-4" />}
+                value={form.name}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1.5">E-postadresse</label>
+              <Input
+                type="email"
+                value={form.email}
+                onChange={(e) => setForm({ ...form, email: e.target.value })}
+                required
+                readOnly={!!inviteEmail}
+                className={inviteEmail ? "bg-gray-50 text-gray-500" : ""}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1.5">Passord</label>
+              <Input
+                type="password"
+                placeholder="Minst 8 tegn"
+                value={form.password}
+                onChange={(e) => setForm({ ...form, password: e.target.value })}
+                required
+                minLength={8}
+              />
+            </div>
+
+            <Button type="submit" variant="primary" size="lg" className="w-full justify-center mt-2" disabled={loading}>
+              {loading ? "Oppretter konto..." : "Kom i gang"}
+              {!loading && <ArrowRight className="w-4 h-4" />}
+            </Button>
+          </form>
+
+          <p className="text-center text-sm text-gray-500 mt-4">
+            Har du allerede en konto?{" "}
+            <Link href="/login" className="text-blue-600 font-semibold hover:underline">
+              Logg inn her
+            </Link>
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Normal registration: two-step flow ──────────────────────────────────
   return (
     <div className="w-full max-w-md">
       {/* Progress steps */}
@@ -229,5 +312,13 @@ export default function RegisterPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function RegisterPage() {
+  return (
+    <Suspense fallback={<div className="w-full max-w-md h-96 bg-white rounded-2xl border border-gray-200 animate-pulse" />}>
+      <RegisterForm />
+    </Suspense>
   );
 }
