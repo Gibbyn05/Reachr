@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import {
   Users, TrendingUp, Calendar, Star, Search, ChevronDown,
   X, Phone, Mail, MessageSquare, ChevronRight, Trash2,
-  UserCheck, Clock, Building2, Bell, Check, Loader2,
+  UserCheck, Clock, Building2, Bell, Check, Loader2, Sparkles, Send, Copy,
 } from "lucide-react";
 import { useAppStore } from "@/store/app-store";
 import { Lead, LeadStatus } from "@/lib/mock-data";
@@ -54,6 +54,222 @@ function MeetingDateModal({
   );
 }
 
+/* ── AI Email modal ────────────────────────────────────────── */
+function AiEmailModal({
+  lead,
+  senderName,
+  onClose,
+}: {
+  lead: Lead;
+  senderName: string;
+  onClose: () => void;
+}) {
+  const [subject, setSubject] = useState("");
+  const [body, setBody] = useState("");
+  const [toEmail, setToEmail] = useState(lead.email || "");
+  const [generating, setGenerating] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [sentOk, setSentOk] = useState(false);
+  const [error, setError] = useState("");
+  const [copied, setCopied] = useState(false);
+  const [connections, setConnections] = useState<{ provider: string; email_address: string }[]>([]);
+  const [selectedProvider, setSelectedProvider] = useState<string>("");
+
+  useEffect(() => {
+    fetch("/api/email/connections")
+      .then((r) => r.json())
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) {
+          setConnections(data);
+          setSelectedProvider(data[0].provider);
+        }
+      })
+      .catch(() => {});
+    generateDraft();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const generateDraft = async () => {
+    setGenerating(true);
+    setError("");
+    try {
+      const res = await fetch("/api/email/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ lead, senderName }),
+      });
+      const data = await res.json();
+      if (data.error) { setError(data.error); return; }
+      setSubject(data.subject ?? "");
+      setBody(data.body ?? "");
+    } catch {
+      setError("Klarte ikke generere e-post. Sjekk ANTHROPIC_API_KEY.");
+    } finally {
+      setGenerating(false);
+    }
+  };
+
+  const handleSend = async () => {
+    if (!toEmail || !subject || !body || !selectedProvider) return;
+    setSending(true);
+    setError("");
+    try {
+      const res = await fetch("/api/email/send", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ provider: selectedProvider, to: toEmail, subject, body }),
+      });
+      const data = await res.json();
+      if (data.error) { setError(data.error); return; }
+      setSentOk(true);
+      setTimeout(onClose, 2000);
+    } catch {
+      setError("Sending feilet. Prøv igjen.");
+    } finally {
+      setSending(false);
+    }
+  };
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(`Emne: ${subject}\n\n${body}`);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40" onClick={onClose}>
+      <div className="bg-white rounded-2xl shadow-2xl w-[600px] max-w-[95vw] max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+        {/* Header */}
+        <div className="flex items-center justify-between p-5 border-b border-gray-100">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-purple-50 rounded-lg flex items-center justify-center">
+              <Sparkles className="w-4 h-4 text-purple-600" />
+            </div>
+            <div>
+              <h3 className="text-sm font-bold text-slate-900">AI-utkast til {lead.name}</h3>
+              <p className="text-xs text-gray-400">{lead.industry} · {lead.city}</p>
+            </div>
+          </div>
+          <button onClick={onClose} className="p-1.5 text-gray-400 hover:text-gray-600">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+
+        <div className="p-5 space-y-4">
+          {generating ? (
+            <div className="flex items-center justify-center py-12 gap-3 text-gray-500">
+              <Loader2 className="w-5 h-5 animate-spin text-purple-500" />
+              <span className="text-sm">Skriver e-post med AI…</span>
+            </div>
+          ) : sentOk ? (
+            <div className="flex items-center justify-center py-12 gap-2 text-green-600">
+              <Check className="w-5 h-5" />
+              <span className="text-sm font-medium">E-post sendt!</span>
+            </div>
+          ) : (
+            <>
+              {/* To */}
+              <div>
+                <label className="block text-xs font-semibold text-gray-500 mb-1">Til</label>
+                <input
+                  type="email"
+                  value={toEmail}
+                  onChange={(e) => setToEmail(e.target.value)}
+                  placeholder="mottaker@bedrift.no"
+                  className="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:border-purple-400 bg-white"
+                />
+              </div>
+
+              {/* Subject */}
+              <div>
+                <label className="block text-xs font-semibold text-gray-500 mb-1">Emne</label>
+                <input
+                  type="text"
+                  value={subject}
+                  onChange={(e) => setSubject(e.target.value)}
+                  className="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:border-purple-400 bg-white"
+                />
+              </div>
+
+              {/* Body */}
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="text-xs font-semibold text-gray-500">Innhold</label>
+                  <button
+                    onClick={generateDraft}
+                    className="flex items-center gap-1 text-xs text-purple-600 hover:text-purple-800 font-medium"
+                  >
+                    <Sparkles className="w-3 h-3" />
+                    Generer på nytt
+                  </button>
+                </div>
+                <textarea
+                  value={body}
+                  onChange={(e) => setBody(e.target.value)}
+                  rows={8}
+                  className="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:border-purple-400 bg-white resize-none"
+                />
+              </div>
+
+              {error && (
+                <p className="text-xs text-red-500 bg-red-50 border border-red-100 rounded-lg px-3 py-2">{error}</p>
+              )}
+
+              {/* Send via */}
+              <div className="flex items-center gap-3 pt-1">
+                {connections.length > 0 ? (
+                  <>
+                    {connections.length > 1 && (
+                      <select
+                        value={selectedProvider}
+                        onChange={(e) => setSelectedProvider(e.target.value)}
+                        className="text-xs border border-gray-200 rounded-lg px-2 py-1.5 focus:outline-none bg-white text-gray-700"
+                      >
+                        {connections.map((c) => (
+                          <option key={c.provider} value={c.provider}>
+                            {c.provider === "gmail" ? "Gmail" : "Outlook"} ({c.email_address})
+                          </option>
+                        ))}
+                      </select>
+                    )}
+                    {connections.length === 1 && (
+                      <span className="text-xs text-gray-500">
+                        Send via {connections[0].provider === "gmail" ? "Gmail" : "Outlook"} ({connections[0].email_address})
+                      </span>
+                    )}
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      onClick={handleSend}
+                      disabled={sending || !toEmail || !subject || !body}
+                      className="bg-purple-600 hover:bg-purple-700 ml-auto"
+                    >
+                      {sending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
+                      Send e-post
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <span className="text-xs text-gray-400">Ingen e-postkonto tilkoblet –</span>
+                    <a href="/innstillinger?tab=epost" className="text-xs text-purple-600 hover:underline font-medium">koble til her</a>
+                    <button
+                      onClick={handleCopy}
+                      className="ml-auto flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium border border-gray-200 rounded-lg hover:bg-gray-50 text-gray-600"
+                    >
+                      {copied ? <Check className="w-3 h-3 text-green-500" /> : <Copy className="w-3 h-3" />}
+                      {copied ? "Kopiert!" : "Kopier tekst"}
+                    </button>
+                  </>
+                )}
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 const statusOptions: LeadStatus[] = [
   "Ikke kontaktet",
   "Kontaktet",
@@ -82,6 +298,7 @@ function LeadRow({
   meetingDate,
   onMeetingDateSave,
   teamMembers,
+  senderName,
 }: {
   lead: Lead;
   onStatusChange: (id: string, status: LeadStatus) => void;
@@ -92,6 +309,7 @@ function LeadRow({
   meetingDate?: string;
   onMeetingDateSave: (leadId: string, dt: string) => void;
   teamMembers: string[];
+  senderName: string;
 }) {
   const [expanded, setExpanded] = useState(false);
   const [editingNotes, setEditingNotes] = useState(false);
@@ -103,6 +321,7 @@ function LeadRow({
   const [assignedDraft, setAssignedDraft] = useState(lead.assignedTo);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [meetingModalOpen, setMeetingModalOpen] = useState(false);
+  const [emailModalOpen, setEmailModalOpen] = useState(false);
   const [reminderOpen, setReminderOpen] = useState(false);
   const [reminderMsg, setReminderMsg] = useState("");
   const [reminderSending, setReminderSending] = useState(false);
@@ -302,6 +521,13 @@ function LeadRow({
                       <Building2 className="w-3.5 h-3.5" />{lead.address || "—"}
                     </p>
                   </div>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); setEmailModalOpen(true); }}
+                    className="mt-3 flex items-center gap-1.5 px-3 py-1.5 bg-purple-50 text-purple-700 text-xs font-semibold rounded-lg hover:bg-purple-100 transition-colors border border-purple-100"
+                  >
+                    <Sparkles className="w-3.5 h-3.5" />
+                    Skriv AI-e-post
+                  </button>
 
                   {/* Last contacted */}
                   <div className="mt-4">
@@ -555,6 +781,15 @@ function LeadRow({
           onClose={() => setMeetingModalOpen(false)}
         />
       )}
+
+      {/* AI email modal */}
+      {emailModalOpen && (
+        <AiEmailModal
+          lead={lead}
+          senderName={senderName}
+          onClose={() => setEmailModalOpen(false)}
+        />
+      )}
     </>
   );
 }
@@ -737,6 +972,7 @@ export default function MineLeadsPage() {
                     meetingDate={meetingDates[lead.id]}
                     onMeetingDateSave={setMeetingDate}
                     teamMembers={teamMembers}
+                    senderName={currentUser?.name ?? ""}
                   />
                 ))}
               </tbody>

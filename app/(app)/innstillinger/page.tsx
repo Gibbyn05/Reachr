@@ -18,11 +18,15 @@ import {
   Building2,
   Camera,
   Loader2,
+  Link2,
+  Unlink,
+  CheckCircle2,
 } from "lucide-react";
 
 const tabs = [
   { id: "profil", label: "Min profil", icon: User },
   { id: "team", label: "Team", icon: Users },
+  { id: "epost", label: "E-post", icon: Mail },
   { id: "fakturering", label: "Fakturering", icon: CreditCard },
   { id: "varsler", label: "Varsler", icon: Bell },
   { id: "sikkerhet", label: "Sikkerhet", icon: Shield },
@@ -75,6 +79,9 @@ export default function InnstillingerPage() {
   const [inviteError, setInviteError] = useState("");
   const [teamMembers, setTeamMembers] = useState<{ member_email: string; member_name: string; status: string }[]>([]);
   const [teamRole, setTeamRole] = useState<"owner" | "member">("owner");
+  const [emailConnections, setEmailConnections] = useState<{ provider: string; email_address: string }[]>([]);
+  const [emailConnecting, setEmailConnecting] = useState<string | null>(null);
+  const [emailDisconnecting, setEmailDisconnecting] = useState<string | null>(null);
 
   useEffect(() => {
     fetch("/api/team")
@@ -87,6 +94,23 @@ export default function InnstillingerPage() {
       })
       .catch(() => {});
   }, [inviteSent]);
+
+  const loadEmailConnections = () => {
+    fetch("/api/email/connections")
+      .then((r) => r.json())
+      .then((data) => Array.isArray(data) && setEmailConnections(data))
+      .catch(() => {});
+  };
+
+  useEffect(() => {
+    loadEmailConnections();
+    // Open epost tab if redirected back from OAuth
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("tab") === "epost") {
+      setActiveTab("epost");
+      window.history.replaceState({}, "", "/innstillinger");
+    }
+  }, []);
 
   const [profileForm, setProfileForm] = useState({
     name: currentUser?.name ?? "",
@@ -140,6 +164,17 @@ export default function InnstillingerPage() {
     });
     setProfileSaved(true);
     setTimeout(() => setProfileSaved(false), 3000);
+  };
+
+  const handleDisconnectEmail = async (provider: string) => {
+    setEmailDisconnecting(provider);
+    await fetch("/api/email/connections", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ provider }),
+    });
+    loadEmailConnections();
+    setEmailDisconnecting(null);
   };
 
   const handleInvoiceDownload = useCallback((date: string, amount: string) => {
@@ -441,6 +476,120 @@ export default function InnstillingerPage() {
             )}
 
             {/* ── Fakturering ── */}
+            {/* ── E-post ── */}
+            {activeTab === "epost" && (
+              <div className="space-y-6">
+                <div className="bg-white rounded-xl border border-gray-200 p-6" style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.08)" }}>
+                  <h2 className="text-base font-semibold text-slate-900 mb-1">E-posttilkoblinger</h2>
+                  <p className="text-sm text-gray-500 mb-6">Koble til Gmail eller Outlook for å sende AI-genererte e-poster direkte fra Reachr.</p>
+
+                  <div className="space-y-4">
+                    {/* Gmail */}
+                    {(() => {
+                      const conn = emailConnections.find((c) => c.provider === "gmail");
+                      return (
+                        <div className="flex items-center justify-between p-4 border border-gray-200 rounded-xl">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-red-50 rounded-xl flex items-center justify-center">
+                              <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none">
+                                <path d="M24 5.457v13.909c0 .904-.732 1.636-1.636 1.636h-3.819V11.73L12 16.64l-6.545-4.91v9.273H1.636A1.636 1.636 0 010 19.366V5.457c0-2.023 2.309-3.178 3.927-1.964L5.455 4.64 12 9.548l6.545-4.91 1.528-1.145C21.69 2.28 24 3.434 24 5.457z" fill="#EA4335"/>
+                              </svg>
+                            </div>
+                            <div>
+                              <p className="text-sm font-semibold text-slate-900">Gmail</p>
+                              {conn ? (
+                                <p className="text-xs text-green-600 flex items-center gap-1">
+                                  <CheckCircle2 className="w-3 h-3" /> {conn.email_address}
+                                </p>
+                              ) : (
+                                <p className="text-xs text-gray-400">Ikke tilkoblet</p>
+                              )}
+                            </div>
+                          </div>
+                          {conn ? (
+                            <button
+                              onClick={() => handleDisconnectEmail("gmail")}
+                              disabled={emailDisconnecting === "gmail"}
+                              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-red-600 border border-red-200 rounded-lg hover:bg-red-50 transition-colors disabled:opacity-50"
+                            >
+                              {emailDisconnecting === "gmail" ? <Loader2 className="w-3 h-3 animate-spin" /> : <Unlink className="w-3 h-3" />}
+                              Koble fra
+                            </button>
+                          ) : (
+                            <a
+                              href="/api/email/google/connect"
+                              onClick={() => setEmailConnecting("gmail")}
+                              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-blue-600 border border-blue-200 rounded-lg hover:bg-blue-50 transition-colors"
+                            >
+                              <Link2 className="w-3 h-3" />
+                              Koble til Gmail
+                            </a>
+                          )}
+                        </div>
+                      );
+                    })()}
+
+                    {/* Outlook */}
+                    {(() => {
+                      const conn = emailConnections.find((c) => c.provider === "outlook");
+                      return (
+                        <div className="flex items-center justify-between p-4 border border-gray-200 rounded-xl">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center">
+                              <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none">
+                                <path d="M7.88 12.04q0 .45-.11.87-.1.41-.33.74-.22.33-.58.52-.37.2-.87.2t-.85-.2q-.35-.21-.57-.55-.22-.33-.33-.75-.1-.42-.1-.86t.1-.87q.1-.43.34-.76.22-.34.59-.54.36-.2.87-.2t.86.2q.35.21.57.55.22.34.31.77.1.43.1.88zM24 12v9.38q0 .46-.33.8-.33.32-.8.32H7.13q-.46 0-.8-.33-.32-.33-.32-.8V18H1q-.41 0-.7-.3-.3-.29-.3-.7V7q0-.41.3-.7Q.58 6 1 6h6.1V2.55q0-.44.3-.75.3-.3.75-.3h12.5q.44 0 .75.3.3.3.3.75V10.85l1.24.72h.01q.1.07.14.18.04.1.01.21z" fill="#0078D4"/>
+                              </svg>
+                            </div>
+                            <div>
+                              <p className="text-sm font-semibold text-slate-900">Outlook</p>
+                              {conn ? (
+                                <p className="text-xs text-green-600 flex items-center gap-1">
+                                  <CheckCircle2 className="w-3 h-3" /> {conn.email_address}
+                                </p>
+                              ) : (
+                                <p className="text-xs text-gray-400">Ikke tilkoblet</p>
+                              )}
+                            </div>
+                          </div>
+                          {conn ? (
+                            <button
+                              onClick={() => handleDisconnectEmail("outlook")}
+                              disabled={emailDisconnecting === "outlook"}
+                              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-red-600 border border-red-200 rounded-lg hover:bg-red-50 transition-colors disabled:opacity-50"
+                            >
+                              {emailDisconnecting === "outlook" ? <Loader2 className="w-3 h-3 animate-spin" /> : <Unlink className="w-3 h-3" />}
+                              Koble fra
+                            </button>
+                          ) : (
+                            <a
+                              href="/api/email/microsoft/connect"
+                              onClick={() => setEmailConnecting("outlook")}
+                              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-blue-600 border border-blue-200 rounded-lg hover:bg-blue-50 transition-colors"
+                            >
+                              <Link2 className="w-3 h-3" />
+                              Koble til Outlook
+                            </a>
+                          )}
+                        </div>
+                      );
+                    })()}
+                  </div>
+                </div>
+
+                <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
+                  <p className="text-sm text-amber-800 font-medium mb-1">Oppsett kreves</p>
+                  <p className="text-xs text-amber-700">
+                    For å aktivere e-postintegrasjon må følgende miljøvariabler settes i <code className="bg-amber-100 px-1 rounded">.env.local</code>:{" "}
+                    <code className="bg-amber-100 px-1 rounded">GOOGLE_CLIENT_ID</code>,{" "}
+                    <code className="bg-amber-100 px-1 rounded">GOOGLE_CLIENT_SECRET</code>,{" "}
+                    <code className="bg-amber-100 px-1 rounded">MICROSOFT_CLIENT_ID</code>,{" "}
+                    <code className="bg-amber-100 px-1 rounded">MICROSOFT_CLIENT_SECRET</code> og{" "}
+                    <code className="bg-amber-100 px-1 rounded">ANTHROPIC_API_KEY</code>.
+                  </p>
+                </div>
+              </div>
+            )}
+
             {activeTab === "fakturering" && (
               <div className="space-y-6">
                 <div className="bg-white rounded-xl border border-gray-200 p-6" style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.08)" }}>
