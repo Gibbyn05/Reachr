@@ -22,6 +22,8 @@ export default function LoginPage() {
 
     try {
       const supabase = createClient();
+      // Sign out any existing session before logging in as a new user
+      await supabase.auth.signOut();
       const timeout = new Promise<never>((_, reject) =>
         setTimeout(() => reject(new Error("Tilkoblingen tok for lang tid. Sjekk internettforbindelsen og prøv igjen.")), 10000)
       );

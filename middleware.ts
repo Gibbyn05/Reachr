@@ -46,6 +46,14 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
+  // Redirect authenticated users away from auth pages
+  const isAuthPage = request.nextUrl.pathname.match(/^\/(login|register)/);
+  if (isAuthPage && user) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/dashboard";
+    return NextResponse.redirect(url);
+  }
+
   return supabaseResponse;
 }
 
