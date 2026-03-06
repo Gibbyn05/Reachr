@@ -6,14 +6,26 @@ export async function GET(req: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user?.email) return NextResponse.json([], { status: 200 });
 
-  // Team members share the owner's lead pool
+  // Build list of all team emails to load leads from
   const teamOwnerEmail = user.user_metadata?.team_owner as string | undefined;
-  const queryEmail = teamOwnerEmail ?? user.email;
+  const ownerEmail = teamOwnerEmail ?? user.email;
+
+  // Fetch all member emails under this team
+  const { data: members } = await supabase
+    .from("team_members")
+    .select("member_email")
+    .eq("owner_email", ownerEmail);
+
+  const teamEmails = Array.from(new Set([
+    ownerEmail,
+    user.email,
+    ...(members ?? []).map((m: { member_email: string }) => m.member_email),
+  ]));
 
   const { data, error } = await supabase
     .from("leads")
     .select("*")
-    .eq("user_email", queryEmail)
+    .in("user_email", teamEmails)
     .order("created_at", { ascending: false });
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
@@ -27,9 +39,8 @@ export async function POST(req: NextRequest) {
 
   const body = await req.json();
 
-  // Store under team owner's email so all team members share the same pool
-  const teamOwnerEmail = user.user_metadata?.team_owner as string | undefined;
-  const storeEmail = teamOwnerEmail ?? user.email;
+  // Always store under the authenticated user's own email (avoids RLS issues)
+  const storeEmail = user.email;
 
   const { data, error } = await supabase
     .from("leads")
