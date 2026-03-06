@@ -31,7 +31,7 @@ function countNeedsFollowUp(leads: Lead[]): number {
   const twoDaysAgo = new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000);
   const threeDaysAgo = new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000);
   return leads.filter((l) => {
-    if (l.status === "Ikke kontaktet") return new Date(l.addedDate) <= threeDaysAgo;
+    if (l.status === "Ikke kontaktet") return new Date(l.addedDate) <= twoDaysAgo;
     if (l.status === "Kontaktet - ikke svar") {
       if (!l.lastContacted) return true;
       return new Date(l.lastContacted) <= twoDaysAgo;

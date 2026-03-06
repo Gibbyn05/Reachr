@@ -24,7 +24,7 @@ function needsFollowUpReason(lead: Lead): string | null {
   // Not contacted at all
   if (lead.status === "Ikke kontaktet") {
     const addedDate = new Date(lead.addedDate);
-    if (addedDate <= threeDaysAgo) return "Ikke kontaktet på 3+ dager";
+    if (addedDate <= twoDaysAgo) return "Ikke kontaktet på 2+ dager";
     return null;
   }
 
