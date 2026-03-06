@@ -576,17 +576,6 @@ export default function InnstillingerPage() {
                   </div>
                 </div>
 
-                <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
-                  <p className="text-sm text-amber-800 font-medium mb-1">Oppsett kreves</p>
-                  <p className="text-xs text-amber-700">
-                    For å aktivere e-postintegrasjon må følgende miljøvariabler settes i <code className="bg-amber-100 px-1 rounded">.env.local</code>:{" "}
-                    <code className="bg-amber-100 px-1 rounded">GOOGLE_CLIENT_ID</code>,{" "}
-                    <code className="bg-amber-100 px-1 rounded">GOOGLE_CLIENT_SECRET</code>,{" "}
-                    <code className="bg-amber-100 px-1 rounded">MICROSOFT_CLIENT_ID</code>,{" "}
-                    <code className="bg-amber-100 px-1 rounded">MICROSOFT_CLIENT_SECRET</code> og{" "}
-                    <code className="bg-amber-100 px-1 rounded">ANTHROPIC_API_KEY</code>.
-                  </p>
-                </div>
               </div>
             )}
 
