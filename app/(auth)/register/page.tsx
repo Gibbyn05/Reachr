@@ -259,7 +259,7 @@ function RegisterForm() {
               </Button>
             </form>
           </>
-        ) : (
+        ) : step === 2 ? (
           <>
             <div className="text-center mb-8">
               <h1 className="text-2xl font-bold text-[#0F1729] mb-2">Sett opp bedriften din</h1>
