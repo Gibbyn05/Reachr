@@ -58,10 +58,12 @@ function MeetingDateModal({
 function AiEmailModal({
   lead,
   senderName,
+  salesPitch,
   onClose,
 }: {
   lead: Lead;
   senderName: string;
+  salesPitch?: string;
   onClose: () => void;
 }) {
   const [subject, setSubject] = useState("");
@@ -96,7 +98,7 @@ function AiEmailModal({
       const res = await fetch("/api/email/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ lead, senderName }),
+        body: JSON.stringify({ lead, senderName, salesPitch }),
       });
       const data = await res.json();
       if (data.error) { setError(data.error); return; }
@@ -299,6 +301,7 @@ function LeadRow({
   onMeetingDateSave,
   teamMembers,
   senderName,
+  salesPitch,
 }: {
   lead: Lead;
   onStatusChange: (id: string, status: LeadStatus) => void;
@@ -310,6 +313,7 @@ function LeadRow({
   onMeetingDateSave: (leadId: string, dt: string) => void;
   teamMembers: string[];
   senderName: string;
+  salesPitch?: string;
 }) {
   const [expanded, setExpanded] = useState(false);
   const [editingNotes, setEditingNotes] = useState(false);
@@ -787,6 +791,7 @@ function LeadRow({
         <AiEmailModal
           lead={lead}
           senderName={senderName}
+          salesPitch={salesPitch}
           onClose={() => setEmailModalOpen(false)}
         />
       )}
@@ -973,6 +978,7 @@ export default function MineLeadsPage() {
                     onMeetingDateSave={setMeetingDate}
                     teamMembers={teamMembers}
                     senderName={currentUser?.name ?? ""}
+                    salesPitch={currentUser?.salesPitch}
                   />
                 ))}
               </tbody>

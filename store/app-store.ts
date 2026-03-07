@@ -17,8 +17,8 @@ interface AppStore {
   setMeetingDate: (leadId: string, datetime: string) => Promise<void>;
   isLoggedIn: boolean;
   setLoggedIn: (value: boolean) => void;
-  currentUser: { name: string; email: string; company: string } | null;
-  setCurrentUser: (user: { name: string; email: string; company: string } | null) => void;
+  currentUser: { name: string; email: string; company: string; salesPitch?: string } | null;
+  setCurrentUser: (user: { name: string; email: string; company: string; salesPitch?: string } | null) => void;
   avatarUrl: string | null;
   setAvatarUrl: (url: string | null) => void;
   profilePhone: string;

@@ -116,6 +116,7 @@ export default function InnstillingerPage() {
     name: currentUser?.name ?? "",
     email: currentUser?.email ?? "",
     company: currentUser?.company ?? "",
+    salesPitch: currentUser?.salesPitch ?? "",
   });
 
   // Load actual Supabase user data on mount
@@ -126,11 +127,13 @@ export default function InnstillingerPage() {
       const name = user.user_metadata?.full_name ?? currentUser?.name ?? "";
       const email = user.email ?? "";
       const company = user.user_metadata?.company ?? currentUser?.company ?? "";
+      const salesPitch = user.user_metadata?.sales_pitch ?? currentUser?.salesPitch ?? "";
       setProfileForm((prev) => ({
         ...prev,
         name: name || prev.name,
         email: email || prev.email,
         company: company || prev.company,
+        salesPitch: salesPitch || prev.salesPitch,
       }));
     });
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -152,10 +155,13 @@ export default function InnstillingerPage() {
       name: profileForm.name,
       email: profileForm.email,
       company: profileForm.company,
+      salesPitch: profileForm.salesPitch,
     });
-    // Sync name to Supabase auth metadata
+    // Sync to Supabase auth metadata
     const supabase = createClient();
-    await supabase.auth.updateUser({ data: { full_name: profileForm.name } });
+    await supabase.auth.updateUser({
+      data: { full_name: profileForm.name, sales_pitch: profileForm.salesPitch },
+    });
     // Sync name to team_members table so teammates see the updated name
     await fetch("/api/team", {
       method: "PATCH",
@@ -353,6 +359,27 @@ export default function InnstillingerPage() {
                       />
                     </div>
                     )}
+                  </div>
+
+                  <div className="mt-4">
+                    <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                      Hva selger dere? <span className="text-gray-400 font-normal">(brukes av AI til å skrive relevante kalde e-poster)</span>
+                    </label>
+                    <textarea
+                      value={profileForm.salesPitch}
+                      onChange={(e) => setProfileForm({ ...profileForm, salesPitch: e.target.value })}
+                      placeholder="F.eks: Vi selger en AI-resepsjonist som svarer på anrop 24/7, booker avtaler og reduserer tapte henvendelser for små og mellomstore bedrifter."
+                      rows={3}
+                      style={{
+                        width: "100%", padding: "10px 12px",
+                        border: "1.5px solid #E5E7EB", borderRadius: 10,
+                        fontSize: 14, color: "#111827", outline: "none",
+                        fontFamily: "inherit", backgroundColor: "#FAFAFA",
+                        resize: "vertical", lineHeight: "1.5",
+                      }}
+                      onFocus={(e) => (e.currentTarget.style.borderColor = "#22C55E")}
+                      onBlur={(e) => (e.currentTarget.style.borderColor = "#E5E7EB")}
+                    />
                   </div>
 
                   <div className="flex items-center justify-end gap-3 mt-6">
