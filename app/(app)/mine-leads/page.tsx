@@ -60,11 +60,13 @@ function AiEmailModal({
   senderName,
   salesPitch,
   onClose,
+  onEmailSent,
 }: {
   lead: Lead;
   senderName: string;
   salesPitch?: string;
   onClose: () => void;
+  onEmailSent?: (subject: string, body: string) => void;
 }) {
   const [subject, setSubject] = useState("");
   const [body, setBody] = useState("");
@@ -123,6 +125,7 @@ function AiEmailModal({
       });
       const data = await res.json();
       if (data.error) { setError(data.error); return; }
+      onEmailSent?.(subject, body);
       setSentOk(true);
       setTimeout(onClose, 2000);
     } catch {
@@ -315,6 +318,19 @@ function LeadRow({
   senderName: string;
   salesPitch?: string;
 }) {
+  const handleEmailSent = (subject: string, emailBody: string) => {
+    const now = new Date();
+    const dateStr = now.toLocaleDateString("nb-NO", { day: "2-digit", month: "2-digit", year: "numeric" });
+    const timeStr = now.toLocaleTimeString("nb-NO", { hour: "2-digit", minute: "2-digit" });
+    const newNote = `E-post sendt ${dateStr} kl. ${timeStr}\nEmne: ${subject}\n\n${emailBody}`;
+    const combined = lead.notes && lead.notes !== "—" && lead.notes.trim()
+      ? `${newNote}\n\n---\n\n${lead.notes}`
+      : newNote;
+    onStatusChange(lead.id, "Kontaktet");
+    onLastContactedChange(lead.id, now.toISOString().split("T")[0]);
+    onNotesChange(lead.id, combined);
+    setNotes(combined);
+  };
   const [expanded, setExpanded] = useState(false);
   const [editingNotes, setEditingNotes] = useState(false);
   const [notes, setNotes] = useState(lead.notes);
@@ -793,6 +809,7 @@ function LeadRow({
           senderName={senderName}
           salesPitch={salesPitch}
           onClose={() => setEmailModalOpen(false)}
+          onEmailSent={handleEmailSent}
         />
       )}
     </>
