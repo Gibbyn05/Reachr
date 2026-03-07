@@ -31,7 +31,8 @@ Krav til e-posten:
 - Start med en personlig referanse til bedriften eller bransjen
 - Fokuser e-posten rundt det avsender selger – ikke finn på andre produkter eller tjenester
 - Avslutt med en enkel CTA (f.eks. be om et kort møte eller svar)
-- Naturlig, norsk tone – ikke selgende eller generisk
+- Naturlig, uformell og profesjonell norsk tone – ikke selgende eller generisk
+- Unngå bindestreker som pausetegn (ikke bruk " – " eller " - " midt i setninger). Bruk heller komma eller skriv om til to setninger.
 - Skriv BARE e-posten (emnelinjen og brødteksten), ingen forklaringer
 
 Format:
