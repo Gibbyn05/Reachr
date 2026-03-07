@@ -7,10 +7,9 @@ const EXCLUDED_ORG_FORMS = new Set([
   "ESEK",  // Eierseksjonssameie
   "SAM",   // Sameie
   "TVAM",  // Tingsrettslig sameie
-  "BEDR",  // Bedrift (branch unit, not independent company)
+  // "BEDR" removed — filiale/branch locations are real businesses worth contacting
+  // "ANNA" removed — for broad, catches many legitimate businesses
   "BO",    // Enkeltpersonforetak under konkursbehandling
-  "SPA",   // Sparebank (not excluded but keep for reference)
-  "ANNA",  // Annen juridisk person — often non-commercial
   "KF",    // Kommunalt foretak — public entity
   "FKF",   // Fylkeskommunalt foretak
   "SF",    // Statsforetak
@@ -54,7 +53,7 @@ export async function GET(request: NextRequest) {
   const page     = sp.get("page") || "0";
   // Fetch more than needed so we still have 100 after filtering
   const requestedSize = parseInt(sp.get("size") || "100", 10);
-  const fetchSize = Math.min(requestedSize + 40, 200); // overfetch to compensate for filtered items
+  const fetchSize = Math.min(requestedSize + 100, 500); // overfetch generously to compensate for filtered items
 
   if (poststed) params.set("forretningsadresse.poststed", poststed.toUpperCase());
   if (navn)     params.set("navn", navn);
