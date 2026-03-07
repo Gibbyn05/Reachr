@@ -28,10 +28,13 @@ ${productSection}
 
 Krav til e-posten:
 - Maks 4–5 setninger i brødteksten
-- Start med en personlig referanse til bedriften eller bransjen
-- Fokuser e-posten rundt det avsender selger – ikke finn på andre produkter eller tjenester
-- Avslutt med en enkel CTA (f.eks. be om et kort møte eller svar)
-- Naturlig, uformell og profesjonell norsk tone – ikke selgende eller generisk
+- Skriv til bedriften, ikke til kontaktpersonen spesifikt. Ikke bruk kontaktpersonens navn i hilsenen.
+- Start med "Hei," eller "Hei [bedriftsnavn]," – aldri "Kjære [navn]" eller lignende.
+- Start med en kort referanse til bransjen eller hva bedriften driver med.
+- Aldri skriv at du har fulgt med på bedriften, sett dem på sosiale medier, lagt merke til dem eller lignende. Det fremstår som falskt.
+- Fokuser e-posten rundt det avsender selger – ikke finn på andre produkter eller tjenester.
+- Avslutt med en enkel CTA (f.eks. be om et kort møte eller svar).
+- Naturlig, uformell og profesjonell norsk tone – ikke selgende eller generisk.
 - Unngå bindestreker som pausetegn (ikke bruk " – " eller " - " midt i setninger). Bruk heller komma eller skriv om til to setninger.
 - Ikke skriv som om avsender befinner seg i samme by som mottakeren. Avsender henvender seg utenfra, så unngå formuleringer som "her i [by]" eller "dere her i [by]".
 ${comment ? `- Tilleggsinstruksjoner fra avsender: ${comment}` : ""}
