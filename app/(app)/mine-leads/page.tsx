@@ -60,16 +60,19 @@ function AiSmsModal({
   senderName,
   salesPitch,
   onClose,
+  onSmsSent,
 }: {
   lead: Lead;
   senderName: string;
   salesPitch?: string;
   onClose: () => void;
+  onSmsSent?: (text: string) => void;
 }) {
   const [text, setText] = useState("");
   const [comment, setComment] = useState("");
   const [generating, setGenerating] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [sent, setSent] = useState(false);
   const [error, setError] = useState("");
 
   useEffect(() => { generateDraft(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -154,10 +157,18 @@ function AiSmsModal({
 
               {error && <p className="text-xs text-red-500 bg-red-50 border border-red-100 rounded-lg px-3 py-2">{error}</p>}
 
+              {sent && (
+                <div className="flex items-center gap-2 px-3 py-2 bg-green-50 border border-green-200 rounded-lg text-xs text-green-700 font-medium">
+                  <Check className="w-3.5 h-3.5" />
+                  SMS sendt — kontaktstatus oppdatert!
+                </div>
+              )}
+
               <div className="flex items-center gap-3 pt-1">
                 {phone ? (
                   <a
                     href={`sms:${phone}?body=${encodeURIComponent(text)}`}
+                    onClick={() => { onSmsSent?.(text); setSent(true); setTimeout(onClose, 1800); }}
                     className="flex items-center gap-1.5 px-3 py-2 bg-green-600 hover:bg-green-700 text-white text-xs font-semibold rounded-lg transition-colors"
                   >
                     <Phone className="w-3.5 h-3.5" />
@@ -167,7 +178,14 @@ function AiSmsModal({
                   <span className="text-xs text-gray-400">Ingen tlf — kopier teksten og send manuelt</span>
                 )}
                 <button
-                  onClick={() => { navigator.clipboard.writeText(text); setCopied(true); setTimeout(() => setCopied(false), 2000); }}
+                  onClick={() => {
+                    navigator.clipboard.writeText(text);
+                    setCopied(true);
+                    setTimeout(() => setCopied(false), 2000);
+                    onSmsSent?.(text);
+                    setSent(true);
+                    setTimeout(onClose, 1800);
+                  }}
                   className="ml-auto flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium border border-gray-200 rounded-lg hover:bg-gray-50 text-gray-600"
                 >
                   {copied ? <Check className="w-3 h-3 text-green-500" /> : <Copy className="w-3 h-3" />}
@@ -501,6 +519,20 @@ function LeadRow({
     const dateStr = now.toLocaleDateString("nb-NO", { day: "2-digit", month: "2-digit", year: "numeric" });
     const timeStr = now.toLocaleTimeString("nb-NO", { hour: "2-digit", minute: "2-digit" });
     const newNote = `E-post sendt ${dateStr} kl. ${timeStr}\nEmne: ${subject}\n\n${emailBody}`;
+    const combined = lead.notes && lead.notes !== "—" && lead.notes.trim()
+      ? `${newNote}\n\n---\n\n${lead.notes}`
+      : newNote;
+    onStatusChange(lead.id, "Kontaktet");
+    onLastContactedChange(lead.id, now.toISOString().split("T")[0]);
+    onNotesChange(lead.id, combined);
+    setNotes(combined);
+  };
+
+  const handleSmsSent = (smsText: string) => {
+    const now = new Date();
+    const dateStr = now.toLocaleDateString("nb-NO", { day: "2-digit", month: "2-digit", year: "numeric" });
+    const timeStr = now.toLocaleTimeString("nb-NO", { hour: "2-digit", minute: "2-digit" });
+    const newNote = `SMS sendt ${dateStr} kl. ${timeStr}\n\n${smsText}`;
     const combined = lead.notes && lead.notes !== "—" && lead.notes.trim()
       ? `${newNote}\n\n---\n\n${lead.notes}`
       : newNote;
@@ -1009,6 +1041,7 @@ function LeadRow({
           senderName={senderName}
           salesPitch={salesPitch}
           onClose={() => setSmsModalOpen(false)}
+          onSmsSent={handleSmsSent}
         />
       )}
     </>
