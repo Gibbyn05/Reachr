@@ -185,7 +185,7 @@ export default function LeadsokPage() {
     return params;
   };
 
-  // Fetch leaders in background batches and update state incrementally
+  // Fetch leaders and phone numbers in background batches and update state incrementally
   const fetchLeadersInBackground = useCallback((enheter: BrregEnhet[], isAppend: boolean) => {
     const BATCH = 8;
     let i = 0;
@@ -195,28 +195,49 @@ export default function LeadsokPage() {
         i += BATCH;
         await Promise.all(
           batch.map(async (e) => {
-            if (e.dagligLeder) return; // already fetched
-            try {
-              const r = await fetch(`/api/brreg/roller?orgnr=${e.organisasjonsnummer}`);
-              const d = await r.json();
-              const groups: any[] = d?.rollegrupper ?? [];
-              const dagl = groups
-                .flatMap((g: any) => g.roller ?? [])
-                .find((r: any) => r.type?.kode === "DAGL" || r.type?.kode === "LEDE");
-              if (dagl?.person?.navn) {
-                const n = dagl.person.navn;
-                e.dagligLeder = capitalize(`${n.fornavn ?? ""} ${n.etternavn ?? ""}`).trim();
-              }
-            } catch {}
+            const needsLeader = !e.dagligLeder;
+            const needsPhone = !e.telefon;
+
+            const tasks: Promise<void>[] = [];
+
+            if (needsLeader) {
+              tasks.push((async () => {
+                try {
+                  const r = await fetch(`/api/brreg/roller?orgnr=${e.organisasjonsnummer}`);
+                  const d = await r.json();
+                  const groups: any[] = d?.rollegrupper ?? [];
+                  const dagl = groups
+                    .flatMap((g: any) => g.roller ?? [])
+                    .find((r: any) => r.type?.kode === "DAGL" || r.type?.kode === "LEDE");
+                  if (dagl?.person?.navn) {
+                    const n = dagl.person.navn;
+                    e.dagligLeder = capitalize(`${n.fornavn ?? ""} ${n.etternavn ?? ""}`).trim();
+                  }
+                } catch {}
+              })());
+            }
+
+            if (needsPhone) {
+              tasks.push((async () => {
+                try {
+                  const poststed = e.forretningsadresse?.poststed ?? "";
+                  const params = new URLSearchParams({ orgnr: e.organisasjonsnummer, name: e.navn, poststed });
+                  const r = await fetch(`/api/enrich?${params}`);
+                  const d = await r.json();
+                  if (d?.phone) e.telefon = d.phone;
+                } catch {}
+              })());
+            }
+
+            await Promise.all(tasks);
           })
         );
         // Push incremental update to state
         setResults((prev) => {
           if (isAppend) {
-            // For load-more, keep existing and update the new batch
             return [...prev];
           }
-          return [...enheter]; // trigger re-render with updated leader names
+          return [...enheter]; // trigger re-render with updated data
         });
       }
     };
