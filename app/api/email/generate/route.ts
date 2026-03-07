@@ -4,14 +4,15 @@ import Anthropic from "@anthropic-ai/sdk";
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
 export async function POST(req: NextRequest) {
-  const { lead, senderName, senderCompany, salesPitch, comment } = await req.json();
+  const { lead, senderName, senderCompany, salesPitch, targetCustomers, comment } = await req.json();
 
   if (!process.env.ANTHROPIC_API_KEY) {
     return NextResponse.json({ error: "ANTHROPIC_API_KEY ikke konfigurert" }, { status: 500 });
   }
 
+  const targetLabel: Record<string, string> = { b2b: "bedrifter (B2B)", b2c: "privatpersoner (B2C)", begge: "både bedrifter og privatpersoner" };
   const productSection = salesPitch
-    ? `Hva avsender selger: ${salesPitch}`
+    ? `Hva avsender selger: ${salesPitch}${targetCustomers ? `\nMålgruppe: ${targetLabel[targetCustomers] ?? targetCustomers}` : ""}`
     : "Hva avsender selger: ukjent (finn et relevant verdiforslag basert på bransjen til mottaker)";
 
   const prompt = `Du er en norsk salgsprofesjonell. Skriv en kort, personlig og profesjonell kald e-post til følgende bedrift.

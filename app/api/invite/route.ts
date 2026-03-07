@@ -18,11 +18,12 @@ export async function POST(req: NextRequest) {
     const { email, inviterName, companyName } = await req.json();
     if (!email) return NextResponse.json({ error: "E-post mangler" }, { status: 400 });
 
-    // Store a pending team_members record
+    // Store a pending team_members record (with owner's display name so members can see it)
     await supabase.from("team_members").upsert({
       owner_email: user.email,
       member_email: email,
       member_name: "",
+      owner_name: inviterName ?? "",
       status: "pending",
     }, { onConflict: "owner_email,member_email" });
 

@@ -69,6 +69,8 @@ export function Sidebar() {
           name: user.user_metadata?.full_name ?? user.email,
           email: user.email,
           company: user.user_metadata?.company ?? "",
+          salesPitch: user.user_metadata?.sales_pitch ?? undefined,
+          targetCustomers: user.user_metadata?.target_customers ?? undefined,
         });
       }
       loadLeads(user.email);

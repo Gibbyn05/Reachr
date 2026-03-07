@@ -27,12 +27,16 @@ export async function GET() {
       .eq("owner_email", teamOwnerEmail)
       .order("invited_at", { ascending: true });
 
-    // Include the owner as a synthetic "active" entry so the member can see them
+    // Use stored owner_name from any row (they all share the same owner)
+    const ownerName = (teamData ?? []).find((m) => m.owner_name)?.owner_name ?? teamOwnerEmail;
+
+    // Include the owner as a synthetic entry so the member can see them
     const ownerEntry = {
       owner_email: teamOwnerEmail,
       member_email: teamOwnerEmail,
-      member_name: teamOwnerEmail,
+      member_name: ownerName,
       status: "active",
+      role: "owner",
     };
     // Filter out self from members list; owner entry comes first
     const otherMembers = (teamData ?? []).filter((m) => m.member_email !== user.email);
@@ -75,10 +79,17 @@ export async function PATCH(req: NextRequest) {
   const { member_name } = await req.json();
   if (!member_name) return NextResponse.json({ error: "member_name mangler" }, { status: 400 });
 
+  // Update as member (own row)
   await supabase
     .from("team_members")
     .update({ member_name })
     .eq("member_email", user.email);
+
+  // Also update as owner (so members see the correct owner name)
+  await supabase
+    .from("team_members")
+    .update({ owner_name: member_name })
+    .eq("owner_email", user.email);
 
   return NextResponse.json({ success: true });
 }

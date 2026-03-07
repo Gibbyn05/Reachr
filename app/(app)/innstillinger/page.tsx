@@ -77,7 +77,7 @@ export default function InnstillingerPage() {
   const [inviteSending, setInviteSending] = useState(false);
   const [inviteSent, setInviteSent] = useState(false);
   const [inviteError, setInviteError] = useState("");
-  const [teamMembers, setTeamMembers] = useState<{ member_email: string; member_name: string; status: string }[]>([]);
+  const [teamMembers, setTeamMembers] = useState<{ member_email: string; member_name: string; status: string; role?: string }[]>([]);
   const [teamRole, setTeamRole] = useState<"owner" | "member">("owner");
   const [emailConnections, setEmailConnections] = useState<{ provider: string; email_address: string }[]>([]);
   const [emailConnecting, setEmailConnecting] = useState<string | null>(null);
@@ -475,19 +475,28 @@ export default function InnstillingerPage() {
                       const nameInitials = (m.member_name || m.member_email)
                         .split(" ").map((w: string) => w[0]).join("").toUpperCase().slice(0, 2);
                       const isPending = m.status === "pending";
+                      const isOwner = m.role === "owner";
                       return (
                         <div key={m.member_email} className="flex items-center gap-4 px-6 py-4">
-                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-white text-sm font-bold ${isPending ? "bg-gray-300" : "bg-[#2563EB]"}`}>
+                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-white text-sm font-bold ${isPending ? "bg-gray-300" : isOwner ? "bg-[#0F1729]" : "bg-[#2563EB]"}`}>
                             {isPending ? <Mail className="w-4 h-4" /> : nameInitials}
                           </div>
                           <div className="flex-1">
-                            <p className="text-sm font-semibold text-slate-900">
-                              {m.member_name || m.member_email}
-                            </p>
+                            <div className="flex items-center gap-2">
+                              <p className="text-sm font-semibold text-slate-900">
+                                {m.member_name || m.member_email}
+                              </p>
+                              {isOwner && (
+                                <span className="bg-yellow-100 text-yellow-700 text-xs px-2 py-0.5 rounded-full font-semibold flex items-center gap-1">
+                                  <Crown className="w-2.5 h-2.5" />
+                                  Admin
+                                </span>
+                              )}
+                            </div>
                             <p className="text-xs text-gray-400">{m.member_email}</p>
                           </div>
-                          <span className={`text-xs px-3 py-1.5 rounded-lg border ${isPending ? "text-yellow-700 bg-yellow-50 border-yellow-200" : "text-green-700 bg-green-50 border-green-200"}`}>
-                            {isPending ? "Invitert" : "Aktiv"}
+                          <span className={`text-xs px-3 py-1.5 rounded-lg border ${isOwner ? "text-yellow-700 bg-yellow-50 border-yellow-200" : isPending ? "text-yellow-700 bg-yellow-50 border-yellow-200" : "text-green-700 bg-green-50 border-green-200"}`}>
+                            {isOwner ? "Admin" : isPending ? "Invitert" : "Aktiv"}
                           </span>
                         </div>
                       );

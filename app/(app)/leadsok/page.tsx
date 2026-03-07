@@ -350,6 +350,11 @@ export default function LeadsokPage() {
 
   const sorted = [...visible].sort((a, b) => {
     if (!sortField) return 0;
+    if (sortField === "ansatte") {
+      const av = a.antallAnsatte ?? 0;
+      const bv = b.antallAnsatte ?? 0;
+      return sortDir === "asc" ? av - bv : bv - av;
+    }
     let av: any, bv: any;
     if (sortField === "navn") { av = a.navn; bv = b.navn; }
     else if (sortField === "sted") { av = a.forretningsadresse?.poststed ?? ""; bv = b.forretningsadresse?.poststed ?? ""; }
@@ -699,7 +704,7 @@ export default function LeadsokPage() {
                 {/* Table header */}
                 <div style={{
                   display: "grid",
-                  gridTemplateColumns: "2fr 1.4fr 1fr 1fr 1.4fr 1.1fr 90px",
+                  gridTemplateColumns: "2fr 1.3fr 0.9fr 0.9fr 1.3fr 0.9fr 0.7fr 80px",
                   padding: "10px 16px",
                   backgroundColor: "#F9FAFB",
                   borderBottom: "1px solid #F3F4F6",
@@ -711,6 +716,7 @@ export default function LeadsokPage() {
                   <span style={{ fontSize: 11, fontWeight: 600, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.05em" }}>Nettside</span>
                   <SortBtn field="bransje" label="Bransje" />
                   <SortBtn field="sted" label="Sted" />
+                  <SortBtn field="ansatte" label="Ansatte" />
                   <span />
                 </div>
 
@@ -731,7 +737,7 @@ export default function LeadsokPage() {
                     return (
                       <div key={enhet.organisasjonsnummer} style={{
                         display: "grid",
-                        gridTemplateColumns: "2fr 1.4fr 1fr 1fr 1.4fr 1.1fr 90px",
+                        gridTemplateColumns: "2fr 1.3fr 0.9fr 0.9fr 1.3fr 0.9fr 0.7fr 80px",
                         padding: "12px 16px",
                         borderBottom: idx < sorted.length - 1 ? "1px solid #F9FAFB" : "none",
                         alignItems: "center", gap: 8,
@@ -803,6 +809,11 @@ export default function LeadsokPage() {
                         <p style={{ fontSize: 13, color: "#374151", margin: 0, display: "flex", alignItems: "center", gap: 4 }}>
                           <MapPin size={11} color="#9CA3AF" style={{ flexShrink: 0 }} />
                           {poststed}
+                        </p>
+
+                        {/* Ansatte */}
+                        <p style={{ fontSize: 13, color: "#374151", margin: 0 }}>
+                          {enhet.antallAnsatte != null ? enhet.antallAnsatte : <span style={{ color: "#E5E7EB" }}>—</span>}
                         </p>
 
                         {/* CTA */}
