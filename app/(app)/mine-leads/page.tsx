@@ -68,7 +68,7 @@ function AiEmailModal({
 }) {
   const [subject, setSubject] = useState("");
   const [body, setBody] = useState("");
-  const [toEmail, setToEmail] = useState(lead.email || "");
+  const [toEmail, setToEmail] = useState(lead.email && lead.email !== "—" ? lead.email : "");
   const [generating, setGenerating] = useState(false);
   const [sending, setSending] = useState(false);
   const [sentOk, setSentOk] = useState(false);
