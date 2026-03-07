@@ -71,6 +71,7 @@ function AiEmailModal({
   const [subject, setSubject] = useState("");
   const [body, setBody] = useState("");
   const [toEmail, setToEmail] = useState(lead.email && lead.email !== "—" ? lead.email : "");
+  const [comment, setComment] = useState("");
   const [generating, setGenerating] = useState(false);
   const [sending, setSending] = useState(false);
   const [sentOk, setSentOk] = useState(false);
@@ -100,7 +101,7 @@ function AiEmailModal({
       const res = await fetch("/api/email/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ lead, senderName, salesPitch }),
+        body: JSON.stringify({ lead, senderName, salesPitch, comment }),
       });
       const data = await res.json();
       if (data.error) { setError(data.error); return; }
@@ -198,22 +199,35 @@ function AiEmailModal({
 
               {/* Body */}
               <div>
-                <div className="flex items-center justify-between mb-1">
-                  <label className="text-xs font-semibold text-gray-500">Innhold</label>
-                  <button
-                    onClick={generateDraft}
-                    className="flex items-center gap-1 text-xs text-purple-600 hover:text-purple-800 font-medium"
-                  >
-                    <Sparkles className="w-3 h-3" />
-                    Generer på nytt
-                  </button>
-                </div>
+                <label className="block text-xs font-semibold text-gray-500 mb-1">Innhold</label>
                 <textarea
                   value={body}
                   onChange={(e) => setBody(e.target.value)}
                   rows={8}
                   className="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:border-purple-400 bg-white resize-none"
                 />
+              </div>
+
+              {/* AI comment / regenerate */}
+              <div>
+                <label className="block text-xs font-semibold text-gray-500 mb-1">Instruksjon til AI (valgfritt)</label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={comment}
+                    onChange={(e) => setComment(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && generateDraft()}
+                    placeholder="F.eks. «gjør den kortere», «mer uformell», «fremhev pris»"
+                    className="flex-1 text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:border-purple-400 bg-white"
+                  />
+                  <button
+                    onClick={generateDraft}
+                    className="flex items-center gap-1 text-xs text-purple-600 hover:text-purple-800 font-medium border border-purple-200 rounded-lg px-3 py-2 bg-purple-50 hover:bg-purple-100 whitespace-nowrap"
+                  >
+                    <Sparkles className="w-3 h-3" />
+                    Generer på nytt
+                  </button>
+                </div>
               </div>
 
               {error && (

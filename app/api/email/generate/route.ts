@@ -4,7 +4,7 @@ import Anthropic from "@anthropic-ai/sdk";
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
 export async function POST(req: NextRequest) {
-  const { lead, senderName, senderCompany, salesPitch } = await req.json();
+  const { lead, senderName, senderCompany, salesPitch, comment } = await req.json();
 
   if (!process.env.ANTHROPIC_API_KEY) {
     return NextResponse.json({ error: "ANTHROPIC_API_KEY ikke konfigurert" }, { status: 500 });
@@ -33,6 +33,8 @@ Krav til e-posten:
 - Avslutt med en enkel CTA (f.eks. be om et kort møte eller svar)
 - Naturlig, uformell og profesjonell norsk tone – ikke selgende eller generisk
 - Unngå bindestreker som pausetegn (ikke bruk " – " eller " - " midt i setninger). Bruk heller komma eller skriv om til to setninger.
+- Ikke skriv som om avsender befinner seg i samme by som mottakeren. Avsender henvender seg utenfra, så unngå formuleringer som "her i [by]" eller "dere her i [by]".
+${comment ? `- Tilleggsinstruksjoner fra avsender: ${comment}` : ""}
 - Skriv BARE e-posten (emnelinjen og brødteksten), ingen forklaringer
 
 Format:
