@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import {
   Users, TrendingUp, Calendar, Star, Search, ChevronDown,
   X, Phone, Mail, MessageSquare, ChevronRight, Trash2,
-  UserCheck, Clock, Building2, Bell, Check, Loader2, Sparkles, Send, Copy,
+  UserCheck, Clock, Building2, Bell, Check, Loader2, Sparkles, Send, Copy, ExternalLink,
 } from "lucide-react";
 import { useAppStore } from "@/store/app-store";
 import { Lead, LeadStatus } from "@/lib/mock-data";
@@ -48,6 +48,134 @@ function MeetingDateModal({
           <button onClick={onClose} className="px-4 py-2 border border-gray-200 text-sm rounded-lg hover:bg-gray-50">
             Avbryt
           </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── AI SMS modal ──────────────────────────────────────────── */
+function AiSmsModal({
+  lead,
+  senderName,
+  salesPitch,
+  onClose,
+}: {
+  lead: Lead;
+  senderName: string;
+  salesPitch?: string;
+  onClose: () => void;
+}) {
+  const [text, setText] = useState("");
+  const [comment, setComment] = useState("");
+  const [generating, setGenerating] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [error, setError] = useState("");
+
+  useEffect(() => { generateDraft(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const generateDraft = async () => {
+    setGenerating(true);
+    setError("");
+    try {
+      const res = await fetch("/api/sms/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ lead, senderName, salesPitch, comment }),
+      });
+      const data = await res.json();
+      if (data.error) { setError(data.error); return; }
+      setText(data.text ?? "");
+    } catch {
+      setError("Klarte ikke generere SMS. Sjekk ANTHROPIC_API_KEY.");
+    } finally {
+      setGenerating(false);
+    }
+  };
+
+  const phone = lead.phone && lead.phone !== "—" ? lead.phone.replace(/\s/g, "") : null;
+
+  return (
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40" onClick={onClose}>
+      <div className="bg-white rounded-2xl shadow-2xl w-[480px] max-w-[95vw]" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center justify-between p-5 border-b border-gray-100">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-green-50 rounded-lg flex items-center justify-center">
+              <Phone className="w-4 h-4 text-green-600" />
+            </div>
+            <div>
+              <h3 className="text-sm font-bold text-slate-900">AI-SMS til {lead.name}</h3>
+              <p className="text-xs text-gray-400">{phone ?? "Ingen tlf registrert"}</p>
+            </div>
+          </div>
+          <button onClick={onClose} className="p-1.5 text-gray-400 hover:text-gray-600">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+
+        <div className="p-5 space-y-4">
+          {generating ? (
+            <div className="flex items-center justify-center py-10 gap-3 text-gray-500">
+              <Loader2 className="w-5 h-5 animate-spin text-green-500" />
+              <span className="text-sm">Skriver SMS med AI…</span>
+            </div>
+          ) : (
+            <>
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block text-xs font-semibold text-gray-500">SMS-tekst</label>
+                  <span className={`text-xs ${text.length > 160 ? "text-red-500" : "text-gray-400"}`}>{text.length}/160 tegn</span>
+                </div>
+                <textarea
+                  value={text}
+                  onChange={(e) => setText(e.target.value)}
+                  rows={4}
+                  className="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:border-green-400 bg-white resize-none"
+                />
+              </div>
+
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={comment}
+                  onChange={(e) => setComment(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && generateDraft()}
+                  placeholder="F.eks. «kortere», «mer direkte»"
+                  className="flex-1 text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:border-green-400 bg-white"
+                />
+                <button
+                  onClick={generateDraft}
+                  className="flex items-center gap-1 text-xs text-green-600 hover:text-green-800 font-medium border border-green-200 rounded-lg px-3 py-2 bg-green-50 hover:bg-green-100 whitespace-nowrap"
+                >
+                  <Sparkles className="w-3 h-3" />
+                  Generer på nytt
+                </button>
+              </div>
+
+              {error && <p className="text-xs text-red-500 bg-red-50 border border-red-100 rounded-lg px-3 py-2">{error}</p>}
+
+              <div className="flex items-center gap-3 pt-1">
+                {phone ? (
+                  <a
+                    href={`sms:${phone}?body=${encodeURIComponent(text)}`}
+                    className="flex items-center gap-1.5 px-3 py-2 bg-green-600 hover:bg-green-700 text-white text-xs font-semibold rounded-lg transition-colors"
+                  >
+                    <Phone className="w-3.5 h-3.5" />
+                    Åpne i SMS-app
+                  </a>
+                ) : (
+                  <span className="text-xs text-gray-400">Ingen tlf — kopier teksten og send manuelt</span>
+                )}
+                <button
+                  onClick={() => { navigator.clipboard.writeText(text); setCopied(true); setTimeout(() => setCopied(false), 2000); }}
+                  className="ml-auto flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium border border-gray-200 rounded-lg hover:bg-gray-50 text-gray-600"
+                >
+                  {copied ? <Check className="w-3 h-3 text-green-500" /> : <Copy className="w-3 h-3" />}
+                  {copied ? "Kopiert!" : "Kopier tekst"}
+                </button>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>
@@ -186,6 +314,38 @@ function AiEmailModal({
                   placeholder="mottaker@bedrift.no"
                   className="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:border-purple-400 bg-white"
                 />
+                {!toEmail && (
+                  <div className="mt-2 p-3 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-800 space-y-1.5">
+                    <p className="font-semibold">Ingen e-post registrert for denne bedriften.</p>
+                    <p>Prøv å finne e-posten via:</p>
+                    <div className="flex flex-wrap gap-2 mt-1">
+                      <a
+                        href={`https://www.1881.no/firma/?query=${encodeURIComponent(lead.name)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-xs text-amber-700 underline hover:text-amber-900"
+                      >
+                        <ExternalLink className="w-3 h-3" /> 1881.no
+                      </a>
+                      <a
+                        href={`https://www.proff.no/søk?q=${encodeURIComponent(lead.name)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-xs text-amber-700 underline hover:text-amber-900"
+                      >
+                        <ExternalLink className="w-3 h-3" /> Proff.no
+                      </a>
+                      <a
+                        href={`https://www.google.com/search?q=${encodeURIComponent(lead.name + " e-post kontakt")}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-xs text-amber-700 underline hover:text-amber-900"
+                      >
+                        <ExternalLink className="w-3 h-3" /> Google
+                      </a>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Subject */}
@@ -360,6 +520,7 @@ function LeadRow({
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [meetingModalOpen, setMeetingModalOpen] = useState(false);
   const [emailModalOpen, setEmailModalOpen] = useState(false);
+  const [smsModalOpen, setSmsModalOpen] = useState(false);
   const [reminderOpen, setReminderOpen] = useState(false);
   const [reminderMsg, setReminderMsg] = useState("");
   const [reminderSending, setReminderSending] = useState(false);
@@ -559,13 +720,22 @@ function LeadRow({
                       <Building2 className="w-3.5 h-3.5" />{lead.address || "—"}
                     </p>
                   </div>
+                  <div className="mt-3 flex items-center gap-2">
                   <button
                     onClick={(e) => { e.stopPropagation(); setEmailModalOpen(true); }}
-                    className="mt-3 flex items-center gap-1.5 px-3 py-1.5 bg-purple-50 text-purple-700 text-xs font-semibold rounded-lg hover:bg-purple-100 transition-colors border border-purple-100"
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-purple-50 text-purple-700 text-xs font-semibold rounded-lg hover:bg-purple-100 transition-colors border border-purple-100"
                   >
                     <Sparkles className="w-3.5 h-3.5" />
                     Skriv AI-e-post
                   </button>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); setSmsModalOpen(true); }}
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-green-50 text-green-700 text-xs font-semibold rounded-lg hover:bg-green-100 transition-colors border border-green-100"
+                  >
+                    <Phone className="w-3.5 h-3.5" />
+                    Skriv AI-SMS
+                  </button>
+                  </div>
 
                   {/* Last contacted */}
                   <div className="mt-4">
@@ -829,6 +999,16 @@ function LeadRow({
           targetCustomers={targetCustomers}
           onClose={() => setEmailModalOpen(false)}
           onEmailSent={handleEmailSent}
+        />
+      )}
+
+      {/* AI SMS modal */}
+      {smsModalOpen && (
+        <AiSmsModal
+          lead={lead}
+          senderName={senderName}
+          salesPitch={salesPitch}
+          onClose={() => setSmsModalOpen(false)}
         />
       )}
     </>

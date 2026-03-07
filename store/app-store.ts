@@ -87,12 +87,15 @@ export const useAppStore = create<AppStore>()(
         }
 
         const rows = data ?? [];
-        const leads = rows.map(dbRowToLead);
+        const dbLeads = rows.map(dbRowToLead);
         const meetingDates: Record<string, string> = {};
         rows.forEach((r) => {
           if (r.meeting_date) meetingDates[r.id as string] = r.meeting_date as string;
         });
-        set({ leads, meetingDates });
+        // Merge: keep any locally-added leads not yet persisted to DB
+        const dbIds = new Set(dbLeads.map((l) => l.id));
+        const pendingLeads = get().leads.filter((l) => !dbIds.has(l.id));
+        set({ leads: [...dbLeads, ...pendingLeads], meetingDates });
       },
 
       addLead: async (lead: Lead, userEmail?: string) => {

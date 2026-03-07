@@ -21,6 +21,14 @@ export async function GET() {
   // Check if current user is a member of someone else's team
   const teamOwnerEmail: string | undefined = user.user_metadata?.team_owner;
   if (teamOwnerEmail) {
+    // Auto-activate pending invite once the member is authenticated and viewing team
+    await supabase
+      .from("team_members")
+      .update({ status: "active", joined_at: new Date().toISOString() })
+      .eq("owner_email", teamOwnerEmail)
+      .eq("member_email", user.email)
+      .eq("status", "pending");
+
     const { data: teamData } = await supabase
       .from("team_members")
       .select("*")
