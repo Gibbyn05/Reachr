@@ -98,8 +98,8 @@ export function Sidebar() {
       {/* Logo */}
       <div className="p-6 border-b border-white/10">
         <Link href="/dashboard" className="flex items-center gap-2.5">
-          <div className="w-8 h-8 bg-[#2563EB] rounded-lg flex items-center justify-center">
-            <Zap className="w-4 h-4 text-white fill-white" />
+          <div className="w-8 h-8 bg-[#09fe94] rounded-lg flex items-center justify-center">
+            <Zap className="w-4 h-4 text-[#171717] fill-[#171717]" />
           </div>
           <span className="text-white font-bold text-xl tracking-tight">Reachr</span>
         </Link>
@@ -121,12 +121,12 @@ export function Sidebar() {
               )}
             >
               <Icon
-                className={cn(isActive ? "text-blue-400" : "text-current")}
+                className={cn(isActive ? "text-[#09fe94]" : "text-current")}
                 style={{ width: "18px", height: "18px" }}
               />
               {label}
               {label === "Varsler" && notifCount > 0 && (
-                <span className="ml-auto bg-[#2563EB] text-white text-xs rounded-full min-w-5 h-5 flex items-center justify-center font-semibold px-1">
+                <span className="ml-auto bg-[#09fe94] text-[#171717] text-xs rounded-full min-w-5 h-5 flex items-center justify-center font-semibold px-1">
                   {notifCount}
                 </span>
               )}
@@ -159,7 +159,7 @@ export function Sidebar() {
           )}
         >
           <Settings
-            className={cn(pathname === "/innstillinger" ? "text-blue-400" : "text-current")}
+            className={cn(pathname === "/innstillinger" ? "text-[#09fe94]" : "text-current")}
             style={{ width: "18px", height: "18px" }}
           />
           Innstillinger
@@ -170,7 +170,7 @@ export function Sidebar() {
           {avatarUrl ? (
             <img src={avatarUrl} alt="Avatar" className="w-8 h-8 rounded-full object-cover flex-shrink-0" />
           ) : (
-            <div className="w-8 h-8 bg-[#2563EB] rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+            <div className="w-8 h-8 bg-[#09fe94] rounded-full flex items-center justify-center text-[#171717] text-xs font-bold flex-shrink-0">
               {initials}
             </div>
           )}

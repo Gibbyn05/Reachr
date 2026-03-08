@@ -1,17 +1,17 @@
 @import "tailwindcss";
 
 @theme {
-  --color-background: #F8F9FC;
-  --color-foreground: #0F1729;
-  --color-sidebar: #0F1729;
-  --color-accent: #2563EB;
-  --color-primary: #0F1729;
-  --color-muted: #F3F4F6;
-  --color-muted-foreground: #6B7280;
-  --color-card: #ffffff;
-  --color-card-foreground: #0F1729;
-  --color-border: #E5E7EB;
-  --color-ring: #2563EB;
+  --color-background: #f2efe3;
+  --color-foreground: #171717;
+  --color-sidebar: #171717;
+  --color-accent: #09fe94;
+  --color-primary: #171717;
+  --color-muted: #ede9da;
+  --color-muted-foreground: #6b6660;
+  --color-card: #faf8f2;
+  --color-card-foreground: #171717;
+  --color-border: #d8d3c5;
+  --color-ring: #09fe94;
   --font-family-sans: 'Inter', system-ui, sans-serif;
 
   /* Animations */
@@ -28,14 +28,14 @@ html {
 }
 
 body {
-  background-color: #ffffff;
-  color: #0F1729;
+  background-color: #f2efe3;
+  color: #171717;
 }
 
 /* CSS vars for Glow component radial gradients */
 :root {
-  --brand: 220 90% 56%;
-  --brand-foreground: 217 91% 70%;
+  --brand: 151 99% 52%;
+  --brand-foreground: 151 99% 70%;
 }
 
 /* Animation delay utilities */
@@ -71,19 +71,19 @@ body {
 }
 
 ::-webkit-scrollbar { width: 5px; height: 5px; }
-::-webkit-scrollbar-track { background: #F1F5F9; }
-::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 99px; }
-::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
+::-webkit-scrollbar-track { background: #ede9da; }
+::-webkit-scrollbar-thumb { background: #c4bfb2; border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: #a09b8f; }
 
 /* ── Dark mode ─────────────────────────────────────────────── */
 :root {
-  --bg-page: #F8F9FC;
-  --bg-card: #FFFFFF;
-  --bg-card-alt: #F9FAFB;
-  --text-primary: #0F1729;
-  --text-secondary: #374151;
-  --text-muted: #6B7280;
-  --rc-border: #E5E7EB;
+  --bg-page: #f2efe3;
+  --bg-card: #faf8f2;
+  --bg-card-alt: #f5f1e8;
+  --text-primary: #171717;
+  --text-secondary: #3d3a34;
+  --text-muted: #6b6660;
+  --rc-border: #d8d3c5;
 }
 
 html.dark {

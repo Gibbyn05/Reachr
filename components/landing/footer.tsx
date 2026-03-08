@@ -4,14 +4,14 @@ import { Zap } from "lucide-react";
 
 export function Footer() {
   return (
-    <footer style={{ backgroundColor: "#0F1729", color: "white", padding: "72px 24px 40px" }}>
+    <footer style={{ backgroundColor: "#171717", color: "white", padding: "72px 24px 40px" }}>
       <div style={{ maxWidth: 1200, margin: "0 auto" }}>
         <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr", gap: 48, marginBottom: 56 }}>
           {/* Brand */}
           <div>
             <Link href="/" style={{ display: "flex", alignItems: "center", gap: 10, textDecoration: "none", marginBottom: 16 }}>
-              <div style={{ width: 32, height: 32, backgroundColor: "#2563EB", borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <Zap size={15} color="white" fill="white" />
+              <div style={{ width: 32, height: 32, backgroundColor: "#09fe94", borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <Zap size={15} color="#171717" fill="#171717" />
               </div>
               <span style={{ fontWeight: 800, fontSize: 18, color: "white" }}>Reachr</span>
             </Link>
@@ -42,7 +42,7 @@ export function Footer() {
         </div>
 
         <div style={{ borderTop: "1px solid rgba(255,255,255,0.1)", paddingTop: 28, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
-          <p style={{ fontSize: 13, color: "rgba(255,255,255,0.35)", margin: 0 }}>© 2024 Reachr AS. Alle rettigheter forbeholdt.</p>
+          <p style={{ fontSize: 13, color: "rgba(255,255,255,0.35)", margin: 0 }}>© 2025 Reachr AS. Alle rettigheter forbeholdt.</p>
           <p style={{ fontSize: 13, color: "rgba(255,255,255,0.35)", margin: 0 }}>Org.nr: 123 456 789 · Oslo, Norge</p>
         </div>
       </div>
