@@ -1,10 +1,38 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
-import { ArrowRight, Lock, Check, Shield, Zap } from "lucide-react";
+import { ArrowRight, Lock, Check, Shield, Users, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
+const PLANS = [
+  {
+    id: "solo",
+    name: "Solo",
+    price: 249,
+    description: "For deg som selger alene",
+    icon: User,
+    features: [
+      "Ubegrenset leadsøk",
+      "AI-genererte e-poster og SMS",
+      "CRM-pipeline med oppfølgingsvarsler",
+    ],
+  },
+  {
+    id: "team",
+    name: "Team",
+    price: 199,
+    description: "Per bruker — 2–5 brukere",
+    icon: Users,
+    features: [
+      "Alt i Solo",
+      "Team-invitasjoner (opptil 5)",
+      "Delt pipeline og leads",
+    ],
+  },
+] as const;
+
 export default function BetalingPage() {
+  const [selected, setSelected] = useState<"solo" | "team">("solo");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -15,7 +43,7 @@ export default function BetalingPage() {
       const res = await fetch("/api/stripe/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ plan: "solo", interval: "monthly" }),
+        body: JSON.stringify({ plan: selected, interval: "monthly" }),
       });
       const data = await res.json();
       if (!res.ok || !data.url) {
@@ -31,7 +59,7 @@ export default function BetalingPage() {
   };
 
   return (
-    <div className="w-full max-w-md">
+    <div className="w-full max-w-lg">
       {/* Progress */}
       <div className="flex items-center justify-center gap-3 mb-8">
         <div className="flex items-center gap-2">
@@ -54,31 +82,52 @@ export default function BetalingPage() {
 
       <div className="bg-[#faf8f2] rounded-2xl border border-[#d8d3c5] shadow-sm p-8">
         {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-[#171717] mb-2">Start din prøveperiode</h1>
+        <div className="text-center mb-6">
+          <h1 className="text-2xl font-bold text-[#171717] mb-2">Velg din plan</h1>
           <p className="text-[#6b6660] text-sm">3 dager gratis — ingen binding, avslutt når som helst</p>
         </div>
 
-        {/* Plan summary */}
-        <div className="bg-[#f2efe3] rounded-xl p-4 mb-6 flex items-center justify-between">
-          <div>
-            <p className="text-sm font-semibold text-[#171717]">Reachr Pro</p>
-            <p className="text-xs text-[#6b6660] mt-0.5">3 dager gratis, deretter 249 kr/mnd</p>
-          </div>
-          <div className="text-right">
-            <p className="text-sm font-bold text-[#09fe94]">Gratis</p>
-            <p className="text-xs text-[#a09b8f]">i dag</p>
-          </div>
+        {/* Plan selector */}
+        <div className="grid grid-cols-2 gap-3 mb-6">
+          {PLANS.map((plan) => {
+            const Icon = plan.icon;
+            const isSelected = selected === plan.id;
+            return (
+              <button
+                key={plan.id}
+                onClick={() => setSelected(plan.id)}
+                className={`text-left p-4 rounded-xl border-2 transition-all ${
+                  isSelected
+                    ? "border-[#09fe94] bg-[#09fe94]/8"
+                    : "border-[#d8d3c5] bg-[#f2efe3] hover:border-[#a09b8f]"
+                }`}
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <Icon className={`w-4 h-4 ${isSelected ? "text-[#171717]" : "text-[#6b6660]"}`} />
+                  {isSelected && (
+                    <div className="w-4 h-4 rounded-full bg-[#09fe94] flex items-center justify-center">
+                      <Check className="w-2.5 h-2.5 text-[#171717]" />
+                    </div>
+                  )}
+                </div>
+                <p className={`text-sm font-bold mb-0.5 ${isSelected ? "text-[#171717]" : "text-[#3d3a34]"}`}>
+                  {plan.name}
+                </p>
+                <p className={`text-xs mb-2 ${isSelected ? "text-[#6b6660]" : "text-[#a09b8f]"}`}>
+                  {plan.description}
+                </p>
+                <p className={`text-lg font-extrabold ${isSelected ? "text-[#171717]" : "text-[#3d3a34]"}`}>
+                  {plan.price} kr
+                  <span className="text-xs font-normal text-[#a09b8f]">/mnd</span>
+                </p>
+              </button>
+            );
+          })}
         </div>
 
-        {/* What's included */}
-        <ul className="space-y-2.5 mb-6">
-          {[
-            "Ubegrenset leadsøk i Brønnøysundregistrene",
-            "AI-genererte e-poster og SMS",
-            "CRM-pipeline med oppfølgingsvarsler",
-            "Team-invitasjoner",
-          ].map((feature) => (
+        {/* Features for selected plan */}
+        <ul className="space-y-2 mb-5">
+          {PLANS.find(p => p.id === selected)!.features.map((feature) => (
             <li key={feature} className="flex items-center gap-2.5 text-sm text-[#3d3a34]">
               <div className="w-4 h-4 rounded-full bg-[#09fe94]/20 flex items-center justify-center shrink-0">
                 <Check className="w-2.5 h-2.5 text-[#171717]" />
