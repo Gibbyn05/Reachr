@@ -23,13 +23,13 @@ export function WordRotate({
   }, [index, words, duration])
 
   return (
-    <div className="overflow-hidden py-1">
+    <div style={{ overflow: "clip", paddingBottom: "0.15em", paddingTop: "0.05em" }}>
       <AnimatePresence mode="wait">
         <motion.span
           key={words[index]}
-          initial={{ opacity: 0, y: 40 }}
+          initial={{ opacity: 0, y: "60%" }}
           animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -40 }}
+          exit={{ opacity: 0, y: "-60%" }}
           transition={{ duration: 0.25, ease: "easeInOut" }}
           className={cn("inline-block", className)}
         >

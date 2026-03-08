@@ -77,18 +77,23 @@ export function Hero() {
           {/* Line 1 – upright serif */}
           <span className="block font-[700]">Finn kunder</span>
 
-          {/* Line 2 – italic "for" + rotating word in accent + cursor */}
+          {/* Line 2 – italic "for" + rotating word in accent + underline + cursor */}
           <span className="flex items-center gap-0 flex-nowrap">
             <span className="italic font-[500] text-[#171717] mr-3">for</span>
-            <WordRotate
-              words={industries}
-              duration={2000}
-              className="italic font-[600] text-[#ff470a]"
-            />
-            {/* blinking cursor like native.no */}
+            <span
+              className="border-b-2 border-[#ff470a] pb-0"
+              style={{ borderColor: "#ff470a" }}
+            >
+              <WordRotate
+                words={industries}
+                duration={2000}
+                className="italic font-[600] text-[#ff470a]"
+              />
+            </span>
+            {/* blinking cursor */}
             <motion.span
-              className="inline-block w-[3px] ml-1 rounded-sm bg-[#ff470a]"
-              style={{ height: "0.85em", verticalAlign: "middle" }}
+              className="inline-block w-[2px] ml-1.5 rounded-sm bg-[#ff470a]"
+              style={{ height: "0.8em", verticalAlign: "middle", marginBottom: "0.05em" }}
               animate={{ opacity: [1, 0, 1] }}
               transition={{ repeat: Infinity, duration: 0.9, ease: "linear", times: [0, 0.49, 0.5] }}
             />
@@ -136,11 +141,15 @@ export function Hero() {
         <div className="pointer-events-none absolute left-0 top-0 h-full w-28 z-10 bg-gradient-to-r from-[#f2efe3] to-transparent" />
         <div className="pointer-events-none absolute right-0 top-0 h-full w-28 z-10 bg-gradient-to-l from-[#f2efe3] to-transparent" />
 
-        <div className="flex" style={{ animation: "marquee 40s linear infinite" }}>
+        <motion.div
+          className="flex"
+          animate={{ x: ["0%", "-50%"] }}
+          transition={{ x: { duration: 40, ease: "linear", repeat: Infinity, repeatType: "loop" } }}
+        >
           {doubled.map((card, i) => (
             <LeadCard key={i} card={card} />
           ))}
-        </div>
+        </motion.div>
       </motion.div>
     </section>
   );
