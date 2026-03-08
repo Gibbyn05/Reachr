@@ -37,7 +37,7 @@ export function Navbar() {
           <div className="w-8 h-8 bg-[#09fe94] rounded-lg flex items-center justify-center shadow-[0_2px_8px_rgba(9,254,148,0.4)]">
             <Zap size={15} color="#171717" fill="#171717" />
           </div>
-          <span className="font-extrabold text-lg text-[#171717] tracking-tight">Reachr</span>
+          <span className="font-bold text-xl text-[#171717]" style={{ fontFamily: "'EB Garamond', Georgia, serif" }}>Reachr</span>
         </Link>
 
         {/* Pill nav */}

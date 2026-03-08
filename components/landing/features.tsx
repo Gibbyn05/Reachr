@@ -55,10 +55,10 @@ export function Features() {
           <p className="text-sm font-bold uppercase tracking-widest text-[#a09b8f] mb-4">
             Funksjoner
           </p>
-          <h2 className="text-[clamp(2.2rem,5vw,3.8rem)] font-extrabold leading-tight tracking-tight text-[#171717]">
+          <h2 className="font-display text-[clamp(2.5rem,5vw,4.5rem)] font-bold leading-[0.95] tracking-[-0.01em] text-[#171717]">
             Alt du trenger
             <br />
-            for B2B-salg.
+            <span className="italic">for B2B-salg.</span>
           </h2>
         </div>
 

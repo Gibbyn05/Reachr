@@ -108,10 +108,10 @@ export function HowItWorks() {
           <p className="text-sm font-bold uppercase tracking-widest text-[#a09b8f] mb-4">
             Slik fungerer det
           </p>
-          <h2 className="text-[clamp(2.5rem,5vw,4rem)] font-extrabold leading-tight tracking-tight text-[#171717]">
+          <h2 className="font-display text-[clamp(2.5rem,5vw,4.5rem)] font-bold leading-[0.95] tracking-[-0.01em] text-[#171717]">
             Tre steg til
             <br />
-            <span className="text-[#ff470a]">dine neste kunder.</span>
+            <span className="italic text-[#ff470a]">dine neste kunder.</span>
           </h2>
         </div>
 
@@ -130,7 +130,7 @@ export function HowItWorks() {
                 >
                   {step.number}
                 </div>
-                <h3 className="text-2xl sm:text-3xl font-extrabold text-[#171717] mb-4 tracking-tight">
+                <h3 className="font-display text-[2rem] sm:text-[2.4rem] font-bold text-[#171717] mb-4 leading-[1] tracking-[-0.01em]">
                   {step.title}
                 </h3>
                 <p className="text-base text-[#6b6660] leading-relaxed max-w-md">

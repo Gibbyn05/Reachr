@@ -30,10 +30,10 @@ export function Comparison() {
           <p className="text-sm font-bold uppercase tracking-widest text-[#6b6660] mb-4">
             Reachr vs. tradisjonelt salg
           </p>
-          <h2 className="text-[clamp(2.2rem,5vw,3.8rem)] font-extrabold leading-tight tracking-tight text-white">
+          <h2 className="font-display text-[clamp(2.5rem,5vw,4.5rem)] font-bold leading-[0.95] tracking-[-0.01em] text-white">
             Manuell prospektering
             <br />
-            <span className="text-[#09fe94]">er bortkastet tid.</span>
+            <span className="italic text-[#09fe94]" style={{ filter: "brightness(0.85)" }}>er bortkastet tid.</span>
           </h2>
         </div>
 

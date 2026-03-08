@@ -2,6 +2,18 @@
 import Link from "next/link";
 import { ArrowRight, MapPin, Users, TrendingUp, Building2 } from "lucide-react";
 import { motion } from "framer-motion";
+import { WordRotate } from "@/components/ui/word-rotate";
+
+const industries = [
+  "rørleggere",
+  "elektrikere",
+  "byggfirmaer",
+  "regnskapsbyråer",
+  "IT-selskaper",
+  "renholdsbyråer",
+  "advokater",
+  "eiendomsmeglere",
+];
 
 const leadCards = [
   { name: "Bjørnstad & Sønner AS", industry: "Rørlegger", city: "Oslo", employees: 12, revenue: "8,2 mill", status: "Ikke kontaktet", statusColor: "#e8e4d8", statusText: "#6b6660" },
@@ -25,7 +37,7 @@ function LeadCard({ card }: { card: typeof leadCards[0] }) {
             <Building2 size={16} className="text-[#6b6660]" />
           </div>
           <div>
-            <p className="text-xs font-bold text-[#171717] leading-tight">{card.name}</p>
+            <p className="text-xs font-bold text-[#171717] leading-tight" style={{ fontFamily: "'Inter', sans-serif" }}>{card.name}</p>
             <p className="text-[10px] text-[#a09b8f] mt-0.5">{card.industry}</p>
           </div>
         </div>
@@ -49,56 +61,80 @@ export function Hero() {
   const doubled = [...leadCards, ...leadCards];
 
   return (
-    <section className="bg-[#f2efe3] pt-28 pb-0 overflow-hidden">
+    <section className="bg-[#f2efe3] pt-32 pb-0 overflow-hidden">
       {/* Headline block */}
-      <div className="mx-auto max-w-5xl px-6 text-center mb-14">
-        <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, ease: "easeOut" }}
+      <motion.div
+        initial={{ opacity: 0, y: 28 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.7, ease: "easeOut" }}
+        className="mx-auto max-w-4xl px-6 mb-12"
+      >
+        {/* Native.no-style editorial headline */}
+        <h1
+          className="text-[clamp(3.5rem,9vw,7rem)] leading-[0.93] tracking-[-0.02em] text-[#171717]"
+          style={{ fontFamily: "'EB Garamond', Georgia, serif" }}
         >
-          <p className="text-sm font-semibold text-[#6b6660] mb-6 tracking-wide uppercase">
-            Norges B2B-verktøy for leadsøk og salg
-          </p>
-          <h1 className="text-[clamp(3rem,8vw,6rem)] font-extrabold leading-[0.95] tracking-tight text-[#171717] mb-8">
-            Finn kunder
-            <br />
-            <span className="text-[#ff470a]">på autopilot.</span>
-          </h1>
-          <p className="text-lg text-[#6b6660] max-w-lg mx-auto leading-relaxed mb-10">
-            Søk i 250 000+ norske bedrifter. Legg dem i pipeline.
-            La Reachr minne deg på oppfølging – alt på ett sted.
-          </p>
-          <div className="flex flex-wrap items-center justify-center gap-4">
-            <Link
-              href="/register"
-              className="inline-flex items-center gap-2 rounded-xl bg-[#09fe94] px-7 py-3.5 text-sm font-bold text-[#171717] shadow-[0_4px_20px_rgba(9,254,148,0.35)] transition-all duration-200 hover:bg-[#00e882] hover:-translate-y-0.5"
-            >
-              Start gratis i dag <ArrowRight size={16} />
-            </Link>
-            <Link
-              href="/login"
-              className="text-sm font-semibold text-[#6b6660] hover:text-[#171717] transition-colors"
-            >
-              Logg inn →
-            </Link>
-          </div>
-          <p className="mt-5 text-xs text-[#a09b8f]">
-            3 dagers gratis prøveperiode · Ingen kredittkort
-          </p>
-        </motion.div>
-      </div>
+          {/* Line 1 – upright serif */}
+          <span className="block font-[700]">Finn kunder</span>
+
+          {/* Line 2 – italic "for" + rotating word in accent + cursor */}
+          <span className="flex items-center gap-0 flex-wrap">
+            <span className="italic font-[500] text-[#171717] mr-3">for</span>
+            <WordRotate
+              words={industries}
+              duration={2000}
+              className="italic font-[600] text-[#ff470a]"
+            />
+            {/* blinking cursor like native.no */}
+            <motion.span
+              className="inline-block w-[3px] ml-1 rounded-sm bg-[#ff470a]"
+              style={{ height: "0.85em", verticalAlign: "middle" }}
+              animate={{ opacity: [1, 0, 1] }}
+              transition={{ repeat: Infinity, duration: 1, ease: "steps(1)" }}
+            />
+          </span>
+        </h1>
+
+        {/* Sub-text */}
+        <p
+          className="mt-6 text-[1.1rem] text-[#6b6660] max-w-md leading-relaxed"
+          style={{ fontFamily: "'Inter', sans-serif" }}
+        >
+          Søk i 250 000+ norske bedrifter. Legg dem i pipeline.
+          La Reachr minne deg på oppfølging.
+        </p>
+
+        {/* CTA */}
+        <div className="flex flex-wrap items-center gap-4 mt-9">
+          <Link
+            href="/register"
+            className="inline-flex items-center gap-2 rounded-xl bg-[#09fe94] px-7 py-3.5 text-sm font-bold text-[#171717] shadow-[0_4px_20px_rgba(9,254,148,0.35)] transition-all duration-200 hover:bg-[#00e882] hover:-translate-y-0.5"
+            style={{ fontFamily: "'Inter', sans-serif" }}
+          >
+            Start gratis i dag <ArrowRight size={16} />
+          </Link>
+          <Link
+            href="/login"
+            className="text-sm font-semibold text-[#6b6660] hover:text-[#171717] transition-colors"
+            style={{ fontFamily: "'Inter', sans-serif" }}
+          >
+            Logg inn →
+          </Link>
+        </div>
+        <p className="mt-4 text-xs text-[#a09b8f]" style={{ fontFamily: "'Inter', sans-serif" }}>
+          3 dagers gratis prøveperiode · Ingen kredittkort
+        </p>
+      </motion.div>
 
       {/* Scrolling marquee – lead cards */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ duration: 1, delay: 0.4 }}
-        className="relative w-full pb-12"
+        transition={{ duration: 1, delay: 0.5 }}
+        className="relative w-full pb-14"
       >
-        {/* Fade edges */}
-        <div className="pointer-events-none absolute left-0 top-0 h-full w-24 z-10 bg-gradient-to-r from-[#f2efe3] to-transparent" />
-        <div className="pointer-events-none absolute right-0 top-0 h-full w-24 z-10 bg-gradient-to-l from-[#f2efe3] to-transparent" />
+        <div className="pointer-events-none absolute left-0 top-0 h-full w-28 z-10 bg-gradient-to-r from-[#f2efe3] to-transparent" />
+        <div className="pointer-events-none absolute right-0 top-0 h-full w-28 z-10 bg-gradient-to-l from-[#f2efe3] to-transparent" />
 
         <div className="flex" style={{ animation: "marquee 40s linear infinite" }}>
           {doubled.map((card, i) => (

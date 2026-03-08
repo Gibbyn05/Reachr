@@ -9,10 +9,10 @@ export function CtaBanner() {
         <p className="text-sm font-bold uppercase tracking-widest text-[#6b6660] mb-6">
           Klar til å begynne?
         </p>
-        <h2 className="text-[clamp(2.8rem,6vw,5rem)] font-extrabold leading-[0.95] tracking-tight text-white mb-8">
+        <h2 className="font-display text-[clamp(3rem,7vw,6rem)] font-bold leading-[0.93] tracking-[-0.02em] text-white mb-8">
           Finn dine neste
           <br />
-          <span className="text-[#09fe94]">kunder i dag.</span>
+          <span className="italic text-[#09fe94]" style={{ filter: "brightness(0.85)" }}>kunder i dag.</span>
         </h2>
         <p className="text-base text-white/50 max-w-md mx-auto mb-10 leading-relaxed">
           Kom i gang på under 2 minutter. Ingen kredittkort, ingen bindingstid –

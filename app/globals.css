@@ -13,6 +13,8 @@
   --color-border: #d8d3c5;
   --color-ring: #09fe94;
   --font-family-sans: 'Inter', system-ui, sans-serif;
+  --font-family-serif: 'EB Garamond', 'Georgia', serif;
+  --font-family-serif-alt: 'IBM Plex Serif', 'Georgia', serif;
 
   /* Animations */
   --animate-float: float 5s ease-in-out infinite;
@@ -27,6 +29,11 @@
 html {
   font-family: 'Inter', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
+}
+
+/* Display heading utility – EB Garamond like native.no */
+.font-display {
+  font-family: 'EB Garamond', 'Georgia', serif;
 }
 
 body {
