@@ -35,9 +35,9 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Protect all app routes and onboarding routes
+  // Protect app routes (onboarding is accessible without auth since user may not yet have a confirmed session)
   const isProtected = request.nextUrl.pathname.match(
-    /^\/(dashboard|leadsok|mine-leads|varsler|innstillinger|onboarding)/,
+    /^\/(dashboard|leadsok|mine-leads|varsler|innstillinger)/,
   );
 
   if (isProtected && !user) {

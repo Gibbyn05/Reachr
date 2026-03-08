@@ -63,7 +63,7 @@ export function Sidebar() {
     supabase.auth.getUser().then(({ data }) => {
       const user = data?.user;
       if (!user?.email) return;
-      // Always sync from Supabase so stale persisted data from a previous session is replaced
+      // Always sync from Supabase; clear stale data if a different user logged in
       if (currentUser?.email !== user.email) {
         setCurrentUser({
           name: user.user_metadata?.full_name ?? user.email,
@@ -72,6 +72,9 @@ export function Sidebar() {
           salesPitch: user.user_metadata?.sales_pitch ?? undefined,
           targetCustomers: user.user_metadata?.target_customers ?? undefined,
         });
+        // Clear avatar and phone so previous user's data doesn't bleed through
+        useAppStore.getState().setAvatarUrl(null);
+        useAppStore.getState().setProfilePhone("");
       }
       loadLeads(user.email);
     });
