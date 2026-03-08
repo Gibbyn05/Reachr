@@ -41,6 +41,7 @@ export async function POST(req: NextRequest) {
         ...(user?.id && { userId: user.id }),
       },
       subscription_data: {
+        trial_period_days: 3,
         metadata: {
           plan,
           ...(user?.id && { userId: user.id }),
