@@ -1,21 +1,16 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
-import { ArrowRight, Building2, Users, Check } from "lucide-react";
+import { ArrowRight, Building2, User, Briefcase, Target, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { createClient } from "@/lib/supabase/client";
 
-const userCountOptions = [
-  { value: "1", label: "1 bruker", price: "249 kr/mnd" },
-  { value: "2-5", label: "2–5 brukere", price: "199 kr/bruker/mnd" },
-  { value: "6-10", label: "6–10 brukere", price: "169 kr/bruker/mnd" },
-  { value: "10+", label: "10+ brukere", price: "Kontakt oss" },
-];
-
 export default function OnboardingPage() {
   const [company, setCompany] = useState("");
-  const [userCount, setUserCount] = useState("1");
+  const [role, setRole] = useState("");
+  const [salesPitch, setSalesPitch] = useState("");
+  const [targetCustomers, setTargetCustomers] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -24,7 +19,7 @@ export default function OnboardingPage() {
     try {
       const supabase = createClient();
       await supabase.auth.updateUser({
-        data: { company, user_count: userCount },
+        data: { company, role, salesPitch, targetCustomers },
       });
       window.location.href = "/dashboard";
     } catch {
@@ -62,7 +57,7 @@ export default function OnboardingPage() {
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-2xl font-bold text-[#171717] mb-2">Sett opp bedriften din</h1>
-          <p className="text-[#6b6660] text-sm">Velg plan basert på antall brukere</p>
+          <p className="text-[#6b6660] text-sm">Litt info slik at AI-en kan hjelpe deg bedre</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">
@@ -79,45 +74,42 @@ export default function OnboardingPage() {
             />
           </div>
 
-          {/* User count grid */}
+          {/* Role */}
           <div>
-            <label className="block text-sm font-medium text-[#3d3a34] mb-3">Antall brukere</label>
-            <div className="grid grid-cols-2 gap-3">
-              {userCountOptions.map((opt) => {
-                const isSelected = userCount === opt.value;
-                return (
-                  <button
-                    key={opt.value}
-                    type="button"
-                    onClick={() => setUserCount(opt.value)}
-                    className={`p-4 rounded-xl border-2 text-left transition-all ${
-                      isSelected
-                        ? "border-[#09fe94] bg-[#09fe94]/8"
-                        : "border-[#d8d3c5] hover:border-[#a09b8f]"
-                    }`}
-                  >
-                    <div className="flex items-center gap-2 mb-1">
-                      <Users className={`w-4 h-4 ${isSelected ? "text-[#05c472]" : "text-[#a09b8f]"}`} />
-                      <span className="text-sm font-semibold text-[#3d3a34]">{opt.label}</span>
-                    </div>
-                    <span className={`text-xs ${isSelected ? "text-[#05c472]" : "text-[#a09b8f]"}`}>
-                      {opt.price}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
+            <label className="block text-sm font-medium text-[#3d3a34] mb-1.5">Din rolle</label>
+            <Input
+              type="text"
+              placeholder="f.eks. Daglig leder, Salgssjef"
+              icon={<User className="w-4 h-4" />}
+              value={role}
+              onChange={(e) => setRole(e.target.value)}
+            />
           </div>
 
-          {/* Trial banner */}
-          <div className="bg-[#09fe94]/8 border border-[#09fe94]/30 rounded-xl p-4 flex items-start gap-3">
-            <div className="w-5 h-5 bg-[#09fe94] rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-              <Check className="w-3 h-3 text-[#171717]" />
-            </div>
-            <div>
-              <p className="text-sm font-semibold text-[#171717]">3 dager gratis prøveperiode</p>
-              <p className="text-xs text-[#3d3a34] mt-0.5">Ingen kredittkort nødvendig. Du kan avbestille når som helst.</p>
-            </div>
+          {/* Sales pitch */}
+          <div>
+            <label className="block text-sm font-medium text-[#3d3a34] mb-1.5">Hva selger dere?</label>
+            <textarea
+              placeholder="Kort beskrivelse av produktet/tjenesten din..."
+              value={salesPitch}
+              onChange={(e) => setSalesPitch(e.target.value)}
+              rows={3}
+              className="w-full px-3 py-2.5 rounded-lg border border-[#d8d3c5] bg-[#faf8f2] text-sm text-[#171717] placeholder:text-[#a09b8f] focus:outline-none focus:ring-2 focus:ring-[#09fe94] resize-none"
+            />
+            <p className="text-xs text-[#a09b8f] mt-1">Brukes av AI for å skrive salgsmails og SMS på dine vegne</p>
+          </div>
+
+          {/* Target customers */}
+          <div>
+            <label className="block text-sm font-medium text-[#3d3a34] mb-1.5">Hvem er målkundene dine?</label>
+            <Input
+              type="text"
+              placeholder="f.eks. Norske restauranter med 5–50 ansatte"
+              icon={<Target className="w-4 h-4" />}
+              value={targetCustomers}
+              onChange={(e) => setTargetCustomers(e.target.value)}
+            />
+            <p className="text-xs text-[#a09b8f] mt-1">Hjelper AI-en å tilpasse innholdet riktig</p>
           </div>
 
           {/* Buttons */}
@@ -127,8 +119,8 @@ export default function OnboardingPage() {
                 Tilbake
               </Button>
             </Link>
-            <Button type="submit" variant="primary" size="lg" className="flex-1 justify-center" disabled={loading}>
-              {loading ? "Lagrer..." : "Neste"}
+            <Button type="submit" variant="primary" size="lg" className="flex-1 justify-center" disabled={loading || !company}>
+              {loading ? "Lagrer..." : "Kom i gang"}
               {!loading && <ArrowRight className="w-4 h-4" />}
             </Button>
           </div>
