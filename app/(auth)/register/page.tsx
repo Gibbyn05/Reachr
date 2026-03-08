@@ -48,7 +48,18 @@ function RegisterForm() {
       ]);
 
       if (signUpError) {
-        setError(signUpError.message);
+        const msg = signUpError.message.toLowerCase();
+        if (msg.includes("rate limit") || msg.includes("email rate")) {
+          setError("For mange registreringsforsøk. Vent noen minutter og prøv igjen, eller kontakt support.");
+        } else if (msg.includes("already registered") || msg.includes("user already exists")) {
+          setError("Denne e-postadressen er allerede registrert. Prøv å logge inn i stedet.");
+        } else if (msg.includes("invalid email")) {
+          setError("Ugyldig e-postadresse. Sjekk at den er riktig skrevet.");
+        } else if (msg.includes("password")) {
+          setError("Passordet er for svakt. Bruk minst 8 tegn.");
+        } else {
+          setError(signUpError.message);
+        }
         return;
       }
 
