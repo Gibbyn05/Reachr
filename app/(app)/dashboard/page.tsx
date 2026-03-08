@@ -116,9 +116,9 @@ export default function DashboardPage() {
     <div>
       <TopBar title="Dashboard" subtitle="Oversikt over din salgspipeline" />
 
-      <div className="p-8 space-y-8">
+      <div className="p-4 sm:p-8 space-y-6 sm:space-y-8">
         {/* Welcome banner */}
-        <div className="bg-[#171717] rounded-2xl p-6 text-white flex items-center justify-between">
+        <div className="bg-[#171717] rounded-2xl p-5 sm:p-6 text-white flex flex-col sm:flex-row sm:items-center gap-4 sm:justify-between">
           <div>
             <h2 className="text-xl font-bold mb-1">Velkommen til Reachr 👋</h2>
             <p className="text-white/70 text-sm">
@@ -129,8 +129,8 @@ export default function DashboardPage() {
                   : "Alt er oppdatert – pipeline ser bra ut!"}
             </p>
           </div>
-          <Link href="/varsler">
-            <Button variant="secondary" size="md" className="bg-white/10 border-white/20 text-white hover:bg-white/20">
+          <Link href="/varsler" className="shrink-0">
+            <Button variant="secondary" size="md" className="bg-white/10 border-white/20 text-white hover:bg-white/20 w-full sm:w-auto">
               Se varsler
               <ArrowRight className="w-4 h-4" />
             </Button>

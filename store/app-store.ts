@@ -23,6 +23,8 @@ interface AppStore {
   setAvatarUrl: (url: string | null) => void;
   profilePhone: string;
   setProfilePhone: (phone: string) => void;
+  sidebarOpen: boolean;
+  setSidebarOpen: (open: boolean) => void;
 }
 
 function dbRowToLead(row: Record<string, unknown>): Lead {
@@ -212,6 +214,8 @@ export const useAppStore = create<AppStore>()(
       setAvatarUrl: (url) => set({ avatarUrl: url }),
       profilePhone: "+47 22 11 22 33",
       setProfilePhone: (phone) => set({ profilePhone: phone }),
+      sidebarOpen: false,
+      setSidebarOpen: (open) => set({ sidebarOpen: open }),
     }),
     {
       name: "reachr-store",

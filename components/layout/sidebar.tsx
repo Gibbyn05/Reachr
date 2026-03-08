@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard,
   Search,
@@ -8,9 +8,9 @@ import {
   Bell,
   Settings,
   LogOut,
-  Zap,
   Moon,
   Sun,
+  X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState, useEffect } from "react";
@@ -25,7 +25,6 @@ const mainNavItems = [
   { href: "/varsler", icon: Bell, label: "Varsler" },
 ];
 
-/** Compute how many leads need follow-up (mirrors dashboard logic) */
 function countNeedsFollowUp(leads: Lead[]): number {
   const now = new Date();
   const twoDaysAgo = new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000);
@@ -46,8 +45,9 @@ function countNeedsFollowUp(leads: Lead[]): number {
 
 export function Sidebar() {
   const pathname = usePathname();
+  const router = useRouter();
   const [dark, setDark] = useState(false);
-  const { currentUser, setCurrentUser, loadLeads, avatarUrl, leads } = useAppStore();
+  const { currentUser, setCurrentUser, loadLeads, avatarUrl, leads, sidebarOpen, setSidebarOpen } = useAppStore();
 
   const notifCount = countNeedsFollowUp(leads);
 
@@ -78,11 +78,22 @@ export function Sidebar() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Close sidebar on route change (mobile)
+  useEffect(() => {
+    setSidebarOpen(false);
+  }, [pathname, setSidebarOpen]);
+
   const toggleDark = () => {
     const next = !dark;
     setDark(next);
     document.documentElement.classList.toggle("dark", next);
     localStorage.setItem("reachr-dark", next ? "1" : "0");
+  };
+
+  const handleLogout = async () => {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    router.push("/login");
   };
 
   const displayName = currentUser?.name ?? "Ola Nordmann";
@@ -94,13 +105,26 @@ export function Sidebar() {
     .slice(0, 2);
 
   return (
-    <aside className="fixed left-0 top-0 h-full w-60 bg-[#171717] flex flex-col z-[1000]">
+    <aside
+      className={cn(
+        "fixed left-0 top-0 h-full w-60 bg-[#171717] flex flex-col z-[1000]",
+        "transition-transform duration-300 ease-in-out",
+        "md:translate-x-0",
+        sidebarOpen ? "translate-x-0" : "-translate-x-full"
+      )}
+    >
       {/* Logo */}
-      <div className="p-6 border-b border-white/10">
+      <div className="p-6 border-b border-white/10 flex items-center justify-between">
         <Link href="/dashboard" className="flex items-center gap-2.5">
           <img src="/logo.svg" alt="Reachr" className="w-9 h-9" />
           <span className="text-white font-bold text-xl" style={{ fontFamily: "'EB Garamond', Georgia, serif" }}>Reachr</span>
         </Link>
+        <button
+          onClick={() => setSidebarOpen(false)}
+          className="md:hidden p-1.5 rounded-lg text-white/50 hover:text-white hover:bg-white/10 transition-colors"
+        >
+          <X className="w-5 h-5" />
+        </button>
       </div>
 
       {/* Main Nav */}
@@ -135,7 +159,6 @@ export function Sidebar() {
 
       {/* Bottom section */}
       <div className="p-4 border-t border-white/10 space-y-1">
-        {/* Dark mode toggle */}
         <button
           onClick={toggleDark}
           className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-white/60 hover:text-white hover:bg-white/10 transition-all duration-200"
@@ -146,7 +169,6 @@ export function Sidebar() {
           {dark ? "Lyst tema" : "Mørkt tema"}
         </button>
 
-        {/* Settings */}
         <Link
           href="/innstillinger"
           className={cn(
@@ -163,7 +185,6 @@ export function Sidebar() {
           Innstillinger
         </Link>
 
-        {/* User profile */}
         <Link href="/innstillinger" className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-white/10 transition-colors mt-1">
           {avatarUrl ? (
             <img src={avatarUrl} alt="Avatar" className="w-8 h-8 rounded-full object-cover flex-shrink-0" />
@@ -178,13 +199,13 @@ export function Sidebar() {
           </div>
         </Link>
 
-        <Link
-          href="/"
-          className="flex items-center gap-3 px-3 py-2 rounded-lg text-white/50 hover:text-white/80 text-sm transition-colors"
+        <button
+          onClick={handleLogout}
+          className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-white/50 hover:text-white/80 hover:bg-white/10 text-sm transition-colors"
         >
           <LogOut className="w-4 h-4" />
           Logg ut
-        </Link>
+        </button>
       </div>
     </aside>
   );
