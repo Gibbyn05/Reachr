@@ -680,14 +680,16 @@ export default function InnstillingerPage() {
                         setCancellingSubscription(true);
                         try {
                           const res = await fetch("/api/stripe/cancel", { method: "POST" });
+                          const text = await res.text();
+                          let data: any = {};
+                          try { data = JSON.parse(text); } catch { data = { error: text }; }
                           if (res.ok) {
                             alert("Abonnementet er avbestilt. Du beholder tilgang til slutten av perioden.");
                           } else {
-                            const data = await res.json();
-                            alert("Feil: " + (data.error || "Kunne ikke avbestille abonnementet."));
+                            alert("Feil (" + res.status + "): " + (data.error || text || "Ukjent feil"));
                           }
-                        } catch {
-                          alert("Noe gikk galt. Prøv igjen.");
+                        } catch (err: any) {
+                          alert("Nettverksfeil: " + err.message);
                         } finally {
                           setCancellingSubscription(false);
                         }
