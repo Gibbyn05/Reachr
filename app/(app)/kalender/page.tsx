@@ -86,9 +86,8 @@ export default function KalenderPage() {
 
       <div className="p-4 sm:p-8 space-y-6">
 
-        {/* Top row: stats + meeting list */}
+        {/* Stats row */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          {/* Stats */}
           <div className="bg-[#faf8f2] rounded-xl border border-[#d8d3c5] p-5 flex items-center gap-4" style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.08)" }}>
             <div className="w-10 h-10 bg-[#ffad0a]/15 rounded-lg flex items-center justify-center shrink-0">
               <Calendar className="w-5 h-5 text-[#c47e00]" />
@@ -118,7 +117,7 @@ export default function KalenderPage() {
           </div>
         </div>
 
-        {/* Middle row: upcoming meetings list */}
+        {/* Meeting list */}
         {monthMeetings.length > 0 && (
           <div className="bg-[#faf8f2] rounded-xl border border-[#d8d3c5] overflow-hidden" style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.08)" }}>
             <div className="px-6 py-3 border-b border-[#e8e4d8]">
@@ -158,9 +157,9 @@ export default function KalenderPage() {
           </div>
         )}
 
-        {/* Calendar grid — below */}
+        {/* Calendar grid */}
         <div className="bg-[#faf8f2] rounded-xl border border-[#d8d3c5]" style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.08)" }}>
-          {/* Header */}
+          {/* Month nav */}
           <div className="flex items-center justify-between px-6 py-4 border-b border-[#e8e4d8]">
             <button onClick={prevMonth} className="p-1.5 rounded-lg hover:bg-[#e8e4d8] transition-colors">
               <ChevronLeft className="w-4 h-4 text-[#6b6660]" />
@@ -172,18 +171,28 @@ export default function KalenderPage() {
           </div>
 
           {/* Day headers */}
-          <div className="grid grid-cols-7 px-4 pt-3 pb-1">
+          <div className="grid grid-cols-7 border-b border-[#e8e4d8]">
             {DAYS_NO.map(d => (
-              <div key={d} className="text-center text-xs font-semibold text-[#a09b8f] py-1">{d}</div>
+              <div key={d} className="text-center text-xs font-semibold text-[#a09b8f] py-2">{d}</div>
             ))}
           </div>
 
-          {/* Day cells */}
-          <div className="grid grid-cols-7 px-4 pb-5 gap-1">
+          {/* Day cells — full-width grid with visible borders */}
+          <div className="grid grid-cols-7">
             {Array.from({ length: totalCells }).map((_, i) => {
               const dayNum = i - firstDay + 1;
               const isValid = dayNum >= 1 && dayNum <= daysInMonth;
-              if (!isValid) return <div key={i} />;
+
+              // Right border for all except last column, bottom border for all except last row
+              const col = i % 7;
+              const row = Math.floor(i / 7);
+              const totalRows = totalCells / 7;
+              const borderRight = col < 6 ? "border-r border-[#e8e4d8]" : "";
+              const borderBottom = row < totalRows - 1 ? "border-b border-[#e8e4d8]" : "";
+
+              if (!isValid) {
+                return <div key={i} className={`min-h-[110px] ${borderRight} ${borderBottom} bg-[#f7f4ec]`} />;
+              }
 
               const dateKey = `${viewYear}-${String(viewMonth + 1).padStart(2, "0")}-${String(dayNum).padStart(2, "0")}`;
               const meetings = meetingMap.get(dateKey) ?? [];
@@ -194,42 +203,68 @@ export default function KalenderPage() {
                 <button
                   key={i}
                   onClick={() => setSelectedDay(isSelected ? null : dayNum)}
-                  className={`relative flex flex-col items-center justify-start p-2 rounded-lg min-h-[56px] transition-all ${
-                    isSelected
-                      ? "bg-[#171717] text-white"
-                      : isToday
-                        ? "bg-[#09fe94]/20"
-                        : "hover:bg-[#f0ece0]"
-                  }`}
+                  className={`
+                    min-h-[110px] p-2 flex flex-col items-start text-left transition-colors
+                    ${borderRight} ${borderBottom}
+                    ${isSelected ? "bg-[#171717]" : isToday ? "bg-[#09fe94]/15" : "hover:bg-[#f0ece0]"}
+                  `}
                 >
-                  <span className={`text-sm font-semibold leading-none ${
-                    isSelected ? "text-white" : isToday ? "text-[#05c472]" : "text-[#3d3a34]"
-                  }`}>
+                  {/* Day number */}
+                  <span className={`
+                    text-sm font-bold leading-none mb-2 w-7 h-7 flex items-center justify-center rounded-full
+                    ${isSelected ? "bg-[#09fe94] text-[#171717]" : isToday ? "bg-[#09fe94] text-[#171717]" : "text-[#3d3a34]"}
+                  `}>
                     {dayNum}
                   </span>
-                  {meetings.length > 0 && (
-                    <div className="flex flex-wrap gap-1 mt-1.5 justify-center">
-                      {meetings.slice(0, 3).map((m, mi) => (
-                        <span key={mi} className={`w-1.5 h-1.5 rounded-full ${isSelected ? "bg-[#09fe94]" : "bg-[#ffad0a]"}`} />
-                      ))}
-                    </div>
-                  )}
-                  {/* Selected day: show names */}
-                  {isSelected && selectedMeetings.length > 0 && (
-                    <div className="mt-1.5 w-full space-y-0.5">
-                      {selectedMeetings.slice(0, 2).map(lead => (
-                        <p key={lead.id} className="text-[9px] text-[#09fe94] truncate text-center leading-tight">
-                          {lead.name.split(" ")[0]}
-                        </p>
-                      ))}
-                    </div>
-                  )}
+
+                  {/* Meeting chips */}
+                  <div className="flex flex-col gap-1 w-full">
+                    {meetings.slice(0, 3).map((lead, mi) => {
+                      const dt = meetingDates[lead.id];
+                      const time = dt
+                        ? new Date(dt).toLocaleTimeString("nb-NO", { hour: "2-digit", minute: "2-digit" })
+                        : null;
+                      const shortName = lead.name.split(" ").slice(0, 2).join(" ");
+                      const contact = lead.contactPerson && lead.contactPerson !== "—"
+                        ? lead.contactPerson.split(" ")[0]
+                        : null;
+
+                      return (
+                        <div
+                          key={mi}
+                          className={`
+                            w-full rounded px-1.5 py-1 text-left
+                            ${isSelected ? "bg-[#09fe94]/20" : "bg-[#ffad0a]/15"}
+                          `}
+                        >
+                          {time && (
+                            <p className={`text-[10px] font-bold leading-tight ${isSelected ? "text-[#09fe94]" : "text-[#c47e00]"}`}>
+                              kl. {time}
+                            </p>
+                          )}
+                          <p className={`text-[11px] font-semibold leading-tight truncate ${isSelected ? "text-white" : "text-[#171717]"}`}>
+                            {shortName}
+                          </p>
+                          {contact && (
+                            <p className={`text-[10px] leading-tight truncate ${isSelected ? "text-[#a09b8f]" : "text-[#6b6660]"}`}>
+                              {contact}
+                            </p>
+                          )}
+                        </div>
+                      );
+                    })}
+                    {meetings.length > 3 && (
+                      <p className={`text-[10px] font-medium pl-1 ${isSelected ? "text-[#a09b8f]" : "text-[#a09b8f]"}`}>
+                        +{meetings.length - 3} til
+                      </p>
+                    )}
+                  </div>
                 </button>
               );
             })}
           </div>
 
-          {/* Selected day detail */}
+          {/* Selected day detail panel */}
           {selectedDay && selectedMeetings.length > 0 && (
             <div className="border-t border-[#e8e4d8] px-6 py-4 space-y-3">
               <h4 className="text-sm font-semibold text-[#171717]">
@@ -247,12 +282,21 @@ export default function KalenderPage() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-bold text-[#171717]">{lead.name}</p>
-                      <p className="text-xs text-[#6b6660]">{time !== "—" ? `kl. ${time}` : lead.city}</p>
+                      <p className="text-xs text-[#6b6660]">
+                        {time !== "—" ? `kl. ${time}` : ""}
+                        {time !== "—" && lead.contactPerson && lead.contactPerson !== "—" ? " · " : ""}
+                        {lead.contactPerson && lead.contactPerson !== "—" ? lead.contactPerson : ""}
+                      </p>
                     </div>
                     <div className="flex gap-2">
                       {lead.phone && lead.phone !== "—" && (
                         <a href={`tel:${lead.phone}`} className="p-1.5 rounded-lg bg-[#e8e4d8] hover:bg-[#d8d3c5] text-[#6b6660]">
                           <Phone className="w-3.5 h-3.5" />
+                        </a>
+                      )}
+                      {lead.email && lead.email !== "—" && (
+                        <a href={`mailto:${lead.email}`} className="p-1.5 rounded-lg bg-[#e8e4d8] hover:bg-[#d8d3c5] text-[#6b6660]">
+                          <Mail className="w-3.5 h-3.5" />
                         </a>
                       )}
                     </div>
