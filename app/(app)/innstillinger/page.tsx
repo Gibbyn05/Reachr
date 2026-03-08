@@ -142,6 +142,21 @@ export default function InnstillingerPage() {
   const [showPlanModal, setShowPlanModal] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState("Pro");
   const [cancellingSubscription, setCancellingSubscription] = useState(false);
+  const [stripeSubscription, setStripeSubscription] = useState<{
+    id: string;
+    status: string;
+    plan: string;
+    interval: string;
+    current_period_end: string;
+    cancel_at_period_end: boolean;
+  } | null | "loading">("loading");
+
+  useEffect(() => {
+    fetch("/api/stripe/subscription")
+      .then((r) => r.json())
+      .then((data) => setStripeSubscription(data.subscription ?? null))
+      .catch(() => setStripeSubscription(null));
+  }, []);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -645,86 +660,94 @@ export default function InnstillingerPage() {
               <div className="space-y-6">
                 <div className="bg-[#faf8f2] rounded-xl border border-[#d8d3c5] p-6" style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.08)" }}>
                   <h2 className="text-base font-semibold text-[#171717] mb-6">Nåværende plan</h2>
-                  <div className="bg-[#171717] rounded-xl p-6 text-white mb-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <div>
-                        <p className="text-white/60 text-sm">Aktiv plan</p>
-                        <p className="text-2xl font-bold">Pro-plan</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-white/60 text-sm">Månedlig kostnad</p>
-                        <p className="text-2xl font-bold">199 kr</p>
-                        <p className="text-white/60 text-xs">per bruker</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center justify-between pt-4 border-t border-white/20">
-                      <p className="text-white/60 text-sm">Neste faktura: 1. april 2026</p>
-                      <span className="bg-[#09fe94] text-white text-xs px-3 py-1 rounded-full font-semibold">Aktiv</span>
-                    </div>
-                  </div>
 
-                  <div className="grid grid-cols-1 gap-4">
-                    <div className="border border-[#d8d3c5] rounded-xl p-4">
-                      <p className="text-sm font-semibold text-[#171717] mb-1">Brukere</p>
-                      <p className="text-2xl font-extrabold text-[#171717]">{1 + teamMembers.length} / 5</p>
-                      <p className="text-xs text-[#a09b8f]">Maks 5 på Pro-planen</p>
+                  {stripeSubscription === "loading" ? (
+                    <div className="flex items-center gap-2 text-[#6b6660] py-4">
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span className="text-sm">Laster abonnementsinfo...</span>
                     </div>
-                  </div>
+                  ) : stripeSubscription === null ? (
+                    <div className="bg-[#f2efe3] rounded-xl p-6 border border-[#d8d3c5]">
+                      <p className="text-sm font-semibold text-[#171717] mb-1">Ingen aktiv plan</p>
+                      <p className="text-sm text-[#6b6660] mb-4">Du har ikke et aktivt abonnement. Start en prøveperiode for å få tilgang til alle funksjoner.</p>
+                      <Button variant="primary" size="md" onClick={() => window.location.href = "/onboarding/betaling"}>Kom i gang</Button>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="bg-[#171717] rounded-xl p-6 text-white mb-6">
+                        <div className="flex items-center justify-between mb-4">
+                          <div>
+                            <p className="text-white/60 text-sm">Aktiv plan</p>
+                            <p className="text-2xl font-bold capitalize">{stripeSubscription.plan}-plan</p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-white/60 text-sm">Fakturering</p>
+                            <p className="text-lg font-bold capitalize">{stripeSubscription.interval === "yearly" ? "Årlig" : "Månedlig"}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between pt-4 border-t border-white/20">
+                          <p className="text-white/60 text-sm">
+                            {stripeSubscription.cancel_at_period_end
+                              ? "Avbestilt — tilgang til: " + new Date(stripeSubscription.current_period_end).toLocaleDateString("nb-NO", { day: "numeric", month: "long", year: "numeric" })
+                              : "Fornyes: " + new Date(stripeSubscription.current_period_end).toLocaleDateString("nb-NO", { day: "numeric", month: "long", year: "numeric" })}
+                          </p>
+                          <span className={`text-xs px-3 py-1 rounded-full font-semibold ${stripeSubscription.cancel_at_period_end ? "bg-yellow-400 text-[#171717]" : stripeSubscription.status === "trialing" ? "bg-blue-400 text-white" : "bg-[#09fe94] text-[#171717]"}`}>
+                            {stripeSubscription.cancel_at_period_end ? "Avbestilt" : stripeSubscription.status === "trialing" ? "Prøveperiode" : "Aktiv"}
+                          </span>
+                        </div>
+                      </div>
 
-                  <div className="flex gap-3 mt-6">
-                    <Button variant="secondary" size="md" onClick={() => setShowPlanModal(true)}>Endre plan</Button>
-                    <Button variant="ghost" size="md" className="text-red-500 hover:text-red-600 hover:bg-red-50"
-                      disabled={cancellingSubscription}
-                      onClick={async () => {
-                        if (!confirm("Er du sikker på at du vil avbestille abonnementet? Du beholder tilgang til slutten av perioden.")) return;
-                        setCancellingSubscription(true);
-                        try {
-                          const res = await fetch("/api/stripe/cancel", { method: "POST" });
-                          const text = await res.text();
-                          let data: any = {};
-                          try { data = JSON.parse(text); } catch { data = { error: text }; }
-                          if (res.ok) {
-                            alert("Abonnementet er avbestilt. Du beholder tilgang til slutten av perioden.");
-                          } else {
-                            alert("Feil (" + res.status + "): " + (data.error || text || "Ukjent feil"));
-                          }
-                        } catch (err: any) {
-                          alert("Nettverksfeil: " + err.message);
-                        } finally {
-                          setCancellingSubscription(false);
-                        }
-                      }}>
-                      {cancellingSubscription ? "Avbestiller..." : "Avbestill abonnement"}
-                    </Button>
-                  </div>
+                      <div className="grid grid-cols-1 gap-4">
+                        <div className="border border-[#d8d3c5] rounded-xl p-4">
+                          <p className="text-sm font-semibold text-[#171717] mb-1">Brukere</p>
+                          <p className="text-2xl font-extrabold text-[#171717]">{1 + teamMembers.length} / {stripeSubscription.plan === "team" ? 5 : 1}</p>
+                          <p className="text-xs text-[#a09b8f]">Maks {stripeSubscription.plan === "team" ? "5 på Team-planen" : "1 på Solo-planen"}</p>
+                        </div>
+                      </div>
+
+                      {!stripeSubscription.cancel_at_period_end && (
+                        <div className="flex gap-3 mt-6">
+                          <Button variant="secondary" size="md" onClick={() => setShowPlanModal(true)}>Endre plan</Button>
+                          <Button variant="ghost" size="md" className="text-red-500 hover:text-red-600 hover:bg-red-50"
+                            disabled={cancellingSubscription}
+                            onClick={async () => {
+                              if (!confirm("Er du sikker på at du vil avbestille abonnementet? Du beholder tilgang til slutten av perioden.")) return;
+                              setCancellingSubscription(true);
+                              try {
+                                const res = await fetch("/api/stripe/cancel", { method: "POST" });
+                                const text = await res.text();
+                                let data: any = {};
+                                try { data = JSON.parse(text); } catch { data = { error: text }; }
+                                if (res.ok) {
+                                  alert("Abonnementet er avbestilt. Du beholder tilgang til slutten av perioden.");
+                                  setStripeSubscription((prev) => prev && prev !== "loading" ? { ...prev, cancel_at_period_end: true } : prev);
+                                } else {
+                                  alert("Feil (" + res.status + "): " + (data.error || text || "Ukjent feil"));
+                                }
+                              } catch (err: any) {
+                                alert("Nettverksfeil: " + err.message);
+                              } finally {
+                                setCancellingSubscription(false);
+                              }
+                            }}>
+                            {cancellingSubscription ? "Avbestiller..." : "Avbestill abonnement"}
+                          </Button>
+                        </div>
+                      )}
+                    </>
+                  )}
                 </div>
 
-                <div className="bg-[#faf8f2] rounded-xl border border-[#d8d3c5] overflow-hidden" style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.08)" }}>
-                  <div className="px-6 py-4 border-b border-gray-100">
-                    <h2 className="text-base font-semibold text-[#171717]">Fakturahistorikk</h2>
+                {stripeSubscription && stripeSubscription !== "loading" && (
+                  <div className="bg-[#faf8f2] rounded-xl border border-[#d8d3c5] overflow-hidden" style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.08)" }}>
+                    <div className="px-6 py-4 border-b border-[#d8d3c5]">
+                      <h2 className="text-base font-semibold text-[#171717]">Fakturahistorikk</h2>
+                    </div>
+                    <div className="px-6 py-4 text-sm text-[#6b6660]">
+                      Fakturahistorikk er tilgjengelig i Stripe-portalen. Ta kontakt med support for å få tilsendt fakturaer.
+                    </div>
                   </div>
-                  <div className="divide-y divide-[#e8e4d8]">
-                    {[
-                      { date: "1. mar 2026", amount: "199 kr", status: "Betalt" },
-                      { date: "1. feb 2026", amount: "199 kr", status: "Betalt" },
-                      { date: "1. jan 2026", amount: "199 kr", status: "Betalt" },
-                    ].map((invoice, i) => (
-                      <div key={i} className="flex items-center justify-between px-6 py-3.5">
-                        <p className="text-sm text-gray-600">{invoice.date}</p>
-                        <p className="text-sm font-semibold text-[#171717]">{invoice.amount}</p>
-                        <span className="text-xs bg-green-100 text-green-700 px-2.5 py-1 rounded-full font-semibold">
-                          {invoice.status}
-                        </span>
-                        <button
-                          className="text-sm text-[#05c472] hover:underline font-medium"
-                          onClick={() => handleInvoiceDownload(invoice.date, invoice.amount)}
-                        >
-                          Last ned
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+                )}
               </div>
             )}
 
