@@ -3,19 +3,27 @@ import Stripe from "stripe";
 import { createClient } from "@/lib/supabase/server";
 
 export async function POST() {
-  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-    apiVersion: "2026-02-25.clover",
-  });
-
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-
-  if (!user) {
-    return NextResponse.json({ error: "Ikke logget inn" }, { status: 401 });
-  }
-
+  let step = "init";
   try {
-    // Prøv å hente subscription_id fra Supabase først
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+      apiVersion: "2026-02-25.clover",
+    });
+
+    step = "supabase-client";
+    const supabase = await createClient();
+
+    step = "get-user";
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+    if (userError || !user) {
+      return NextResponse.json({ error: "Ikke logget inn: " + (userError?.message ?? "ingen bruker") }, { status: 401 });
+    }
+
+    if (!user.email) {
+      return NextResponse.json({ error: "Bruker mangler e-post" }, { status: 400 });
+    }
+
+    step = "supabase-lookup";
     const { data: subscription } = await supabase
       .from("subscriptions")
       .select("stripe_subscription_id, stripe_customer_id")
@@ -24,44 +32,34 @@ export async function POST() {
 
     let subscriptionId = subscription?.stripe_subscription_id;
 
-    // Fallback: finn via Stripe customer-søk på e-post
     if (!subscriptionId) {
-      const customers = await stripe.customers.list({ email: user.email!, limit: 1 });
+      step = "stripe-customer-lookup";
+      const customers = await stripe.customers.list({ email: user.email, limit: 1 });
       const customer = customers.data[0];
 
       if (!customer) {
-        return NextResponse.json({ error: "Fant ikke kunde i Stripe" }, { status: 404 });
+        return NextResponse.json({ error: "Fant ikke kunde i Stripe for " + user.email }, { status: 404 });
       }
 
-      const subscriptions = await stripe.subscriptions.list({
-        customer: customer.id,
-        status: "active",
-        limit: 1,
-      });
+      step = "stripe-subscription-lookup";
+      const [active, trialing] = await Promise.all([
+        stripe.subscriptions.list({ customer: customer.id, status: "active", limit: 1 }),
+        stripe.subscriptions.list({ customer: customer.id, status: "trialing", limit: 1 }),
+      ]);
 
-      // Også sjekk trialing
-      if (subscriptions.data.length === 0) {
-        const trialing = await stripe.subscriptions.list({
-          customer: customer.id,
-          status: "trialing",
-          limit: 1,
-        });
-        subscriptionId = trialing.data[0]?.id;
-      } else {
-        subscriptionId = subscriptions.data[0]?.id;
-      }
+      subscriptionId = active.data[0]?.id ?? trialing.data[0]?.id;
     }
 
     if (!subscriptionId) {
-      return NextResponse.json({ error: "Fant ikke aktivt abonnement" }, { status: 404 });
+      return NextResponse.json({ error: "Fant ikke aktivt abonnement i Stripe" }, { status: 404 });
     }
 
-    // Kanseller ved slutten av perioden
+    step = "stripe-cancel";
     await stripe.subscriptions.update(subscriptionId, {
       cancel_at_period_end: true,
     });
 
-    // Oppdater Supabase
+    step = "supabase-update";
     await supabase
       .from("subscriptions")
       .upsert({
@@ -72,8 +70,9 @@ export async function POST() {
       }, { onConflict: "user_id" });
 
     return NextResponse.json({ success: true });
-  } catch (err: any) {
-    console.error("Stripe cancel error:", err);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : String(err);
+    console.error(`Stripe cancel error at step [${step}]:`, err);
+    return NextResponse.json({ error: `[${step}] ${message}` }, { status: 500 });
   }
 }
