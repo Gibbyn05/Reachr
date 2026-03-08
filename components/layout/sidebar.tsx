@@ -12,12 +12,15 @@ import {
   Sun,
   X,
   BarChart2,
+  ShieldCheck,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState, useEffect } from "react";
 import { useAppStore } from "@/store/app-store";
 import { Lead } from "@/lib/mock-data";
 import { createClient } from "@/lib/supabase/client";
+
+const ADMIN_EMAILS = ["fredriik8@gmail.com", "fredrik.nerlandsrem@gmail.com"];
 
 const mainNavItems = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
@@ -51,6 +54,7 @@ export function Sidebar() {
   const { currentUser, setCurrentUser, loadLeads, avatarUrl, leads, sidebarOpen, setSidebarOpen } = useAppStore();
 
   const notifCount = countNeedsFollowUp(leads);
+  const userIsAdmin = ADMIN_EMAILS.includes(currentUser?.email?.toLowerCase() ?? "");
 
   useEffect(() => {
     const saved = localStorage.getItem("reachr-dark");
@@ -137,7 +141,7 @@ export function Sidebar() {
 
       {/* Main Nav */}
       <nav className="flex-1 p-4 space-y-1">
-        {mainNavItems.map(({ href, icon: Icon, label }) => {
+        {[...mainNavItems, ...(userIsAdmin ? [{ href: "/admin", icon: ShieldCheck, label: "Admin" }] : [])].map(({ href, icon: Icon, label }) => {
           const isActive = pathname === href || pathname.startsWith(href + "/");
           return (
             <Link

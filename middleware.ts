@@ -37,7 +37,7 @@ export async function middleware(request: NextRequest) {
 
   // Protect app routes (onboarding is accessible without auth since user may not yet have a confirmed session)
   const isProtected = request.nextUrl.pathname.match(
-    /^\/(dashboard|leadsok|mine-leads|varsler|innstillinger)/,
+    /^\/(dashboard|leadsok|mine-leads|varsler|innstillinger|rapporter|admin)/,
   );
 
   if (isProtected && !user) {
