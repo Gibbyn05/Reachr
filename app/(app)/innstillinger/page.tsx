@@ -442,10 +442,10 @@ export default function InnstillingerPage() {
                   <div className="px-6 py-4 border-b border-gray-100">
                     <h2 className="text-base font-semibold text-[#171717]">Teammedlemmer ({1 + teamMembers.length})</h2>
                   </div>
-                  <div className="divide-y divide-gray-50">
+                  <div className="divide-y divide-[#e8e4d8]">
                     {/* Current user */}
                     <div className="flex items-center gap-4 px-6 py-4">
-                      <div className="w-10 h-10 bg-[#0F1729] rounded-xl flex items-center justify-center text-white text-sm font-bold">
+                      <div className="w-10 h-10 bg-[#09fe94]/20 rounded-xl flex items-center justify-center text-[#065c3a] text-sm font-bold">
                         {initials}
                       </div>
                       <div className="flex-1">
@@ -478,7 +478,13 @@ export default function InnstillingerPage() {
                       const isOwner = m.role === "owner";
                       return (
                         <div key={m.member_email} className="flex items-center gap-4 px-6 py-4">
-                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-white text-sm font-bold ${isPending ? "bg-gray-300" : isOwner ? "bg-[#0F1729]" : "bg-[#2563EB]"}`}>
+                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold ${
+                            isPending
+                              ? "bg-[#e8e4d8] text-[#a09b8f]"
+                              : isOwner
+                                ? "bg-[#ff470a]/15 text-[#ff470a]"
+                                : "bg-[#09fe94]/20 text-[#065c3a]"
+                          }`}>
                             {isPending ? <Mail className="w-4 h-4" /> : nameInitials}
                           </div>
                           <div className="flex-1">
@@ -619,7 +625,7 @@ export default function InnstillingerPage() {
               <div className="space-y-6">
                 <div className="bg-[#faf8f2] rounded-xl border border-[#d8d3c5] p-6" style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.08)" }}>
                   <h2 className="text-base font-semibold text-[#171717] mb-6">Nåværende plan</h2>
-                  <div className="bg-gradient-to-r from-[#0F1729] to-[#1E3A5F] rounded-xl p-6 text-white mb-6">
+                  <div className="bg-[#171717] rounded-xl p-6 text-white mb-6">
                     <div className="flex items-center justify-between mb-4">
                       <div>
                         <p className="text-white/60 text-sm">Aktiv plan</p>
@@ -658,7 +664,7 @@ export default function InnstillingerPage() {
                   <div className="px-6 py-4 border-b border-gray-100">
                     <h2 className="text-base font-semibold text-[#171717]">Fakturahistorikk</h2>
                   </div>
-                  <div className="divide-y divide-gray-50">
+                  <div className="divide-y divide-[#e8e4d8]">
                     {[
                       { date: "1. mar 2026", amount: "199 kr", status: "Betalt" },
                       { date: "1. feb 2026", amount: "199 kr", status: "Betalt" },

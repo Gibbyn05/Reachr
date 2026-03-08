@@ -1,7 +1,8 @@
 "use client";
 import Link from "next/link";
 import { ArrowRight, MapPin, Users, TrendingUp, Building2 } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion, useMotionValue, useAnimationFrame } from "framer-motion";
+import { useRef } from "react";
 import { WordRotate } from "@/components/ui/word-rotate";
 
 const industries = [
@@ -59,6 +60,15 @@ function LeadCard({ card }: { card: typeof leadCards[0] }) {
 
 export function Hero() {
   const doubled = [...leadCards, ...leadCards];
+  const trackRef = useRef<HTMLDivElement>(null);
+  const x = useMotionValue(0);
+
+  useAnimationFrame((_, delta) => {
+    if (!trackRef.current) return;
+    const halfW = trackRef.current.scrollWidth / 2;
+    const next = x.get() - (halfW / 40000) * delta;
+    x.set(next <= -halfW ? next + halfW : next);
+  });
 
   return (
     <section className="bg-[#f2efe3] pt-32 pb-0 overflow-hidden">
@@ -142,9 +152,9 @@ export function Hero() {
         <div className="pointer-events-none absolute right-0 top-0 h-full w-28 z-10 bg-gradient-to-l from-[#f2efe3] to-transparent" />
 
         <motion.div
+          ref={trackRef}
           className="flex"
-          animate={{ x: ["0%", "-50%"] }}
-          transition={{ x: { duration: 40, ease: "linear", repeat: Infinity, repeatType: "loop" } }}
+          style={{ x, willChange: "transform" }}
         >
           {doubled.map((card, i) => (
             <LeadCard key={i} card={card} />

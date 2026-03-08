@@ -46,7 +46,7 @@ function buildNotifications(leads: Lead[]): ComputedNotif[] {
     const addedDate = new Date(lead.addedDate);
     const lastContact = lead.lastContacted ? new Date(lead.lastContacted) : null;
 
-    if (lead.status === "Ikke kontaktet" && addedDate <= threeDaysAgo) {
+    if (lead.status === "Ikke kontaktet" && addedDate <= twoDaysAgo) {
       notifs.push({ id: `nc-${lead.id}`, company: lead.name, type: "follow-up", leadId: lead.id, date: lead.addedDate,
         message: `${lead.name} er ikke kontaktet ennå — lagt til ${addedDate.toLocaleDateString("nb-NO")}` });
     }
