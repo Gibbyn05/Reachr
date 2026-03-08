@@ -90,7 +90,7 @@ export function Hero() {
               className="inline-block w-[3px] ml-1 rounded-sm bg-[#ff470a]"
               style={{ height: "0.85em", verticalAlign: "middle" }}
               animate={{ opacity: [1, 0, 1] }}
-              transition={{ repeat: Infinity, duration: 1, ease: "steps(1)" }}
+              transition={{ repeat: Infinity, duration: 0.9, ease: "linear", times: [0, 0.49, 0.5] }}
             />
           </span>
         </h1>
