@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
   Search,
@@ -45,7 +45,6 @@ function countNeedsFollowUp(leads: Lead[]): number {
 
 export function Sidebar() {
   const pathname = usePathname();
-  const router = useRouter();
   const [dark, setDark] = useState(false);
   const { currentUser, setCurrentUser, loadLeads, avatarUrl, leads, sidebarOpen, setSidebarOpen } = useAppStore();
 
@@ -93,7 +92,10 @@ export function Sidebar() {
   const handleLogout = async () => {
     const supabase = createClient();
     await supabase.auth.signOut();
-    router.push("/login");
+    // Clear persisted user state so stale data isn't shown on next login
+    setCurrentUser(null);
+    // Hard redirect ensures cookies are cleared before middleware runs
+    window.location.href = "/login";
   };
 
   const displayName = currentUser?.name ?? "Ola Nordmann";
