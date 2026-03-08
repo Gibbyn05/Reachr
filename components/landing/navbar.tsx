@@ -8,8 +8,8 @@ import { cn } from "@/lib/utils";
 const navLinks = [
   { name: "Funksjoner", href: "#features" },
   { name: "Priser", href: "#pricing" },
-  { name: "Om oss", href: "#" },
-  { name: "Kontakt", href: "#" },
+  { name: "Om oss", href: "#om-oss" },
+  { name: "Kontakt", href: "#kontakt" },
 ];
 
 export function Navbar() {

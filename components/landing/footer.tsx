@@ -21,19 +21,19 @@ export function Footer() {
           </div>
 
           {[
-            { title: "Produkt", links: ["Funksjoner", "Priser", "Integrasjoner", "Oppdateringer"] },
-            { title: "Selskap", links: ["Om oss", "Blogg", "Karriere", "Kontakt"] },
-            { title: "Juridisk", links: ["Personvern", "Vilkår", "Cookies", "GDPR"] },
+            { title: "Produkt", links: [["Funksjoner", "#features"], ["Priser", "#pricing"], ["Integrasjoner", "#"], ["Oppdateringer", "#"]] },
+            { title: "Selskap", links: [["Om oss", "#om-oss"], ["Blogg", "#"], ["Karriere", "#"], ["Kontakt", "#kontakt"]] },
+            { title: "Juridisk", links: [["Personvern", "#"], ["Vilkår", "#"], ["Cookies", "#"], ["GDPR", "#"]] },
           ].map(({ title, links }) => (
             <div key={title}>
               <p style={{ fontSize: 13, fontWeight: 700, color: "white", marginBottom: 16, textTransform: "uppercase", letterSpacing: "0.06em" }}>{title}</p>
               <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 10 }}>
-                {links.map(l => (
-                  <li key={l}>
-                    <a href="#" style={{ fontSize: 14, color: "rgba(255,255,255,0.45)", textDecoration: "none", transition: "color 0.15s" }}
+                {links.map(([label, href]) => (
+                  <li key={label}>
+                    <a href={href} style={{ fontSize: 14, color: "rgba(255,255,255,0.45)", textDecoration: "none", transition: "color 0.15s" }}
                       onMouseEnter={e => (e.currentTarget.style.color = "white")}
                       onMouseLeave={e => (e.currentTarget.style.color = "rgba(255,255,255,0.45)")}
-                    >{l}</a>
+                    >{label}</a>
                   </li>
                 ))}
               </ul>

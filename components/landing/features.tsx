@@ -24,14 +24,14 @@ const bentoItems = [
     description: "6 statusnivåer med farger. Tildel leads til teammedlemmer og legg til notater og historikk.",
   },
   {
-    span: "lg:col-span-1",
+    span: "lg:col-span-2",
     icon: Bell,
     accent: "#09fe94",
     title: "Automatiske varsler",
     description: "Reachr minner deg på oppfølging basert på siste aktivitet. Aldri la et lead bli glemt.",
   },
   {
-    span: "lg:col-span-1",
+    span: "lg:col-span-2",
     icon: Zap,
     accent: "#ff470a",
     title: "AI-genererte e-poster",
