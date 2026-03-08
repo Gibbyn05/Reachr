@@ -140,6 +140,7 @@ export default function InnstillingerPage() {
   }, []);
   const [profileSaved, setProfileSaved] = useState(false);
   const [showPlanModal, setShowPlanModal] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState("Pro");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -243,23 +244,41 @@ export default function InnstillingerPage() {
             <div className="space-y-3">
               {[
                 { name: "Starter", price: "99 kr/mnd", desc: "1 bruker · 50 leads · Leadsøk" },
-                { name: "Pro", price: "199 kr/mnd", desc: "5 brukere · Ubegrenset leads · Alt i Starter + e-postintegrasjon", current: true },
+                { name: "Pro", price: "199 kr/mnd", desc: "5 brukere · Ubegrenset leads · Alt i Starter + e-postintegrasjon" },
                 { name: "Team", price: "499 kr/mnd", desc: "15 brukere · Prioritert support · Alt i Pro + API-tilgang" },
-              ].map((plan) => (
-                <div key={plan.name} className={`border-2 rounded-xl p-4 cursor-pointer transition-all ${plan.current ? "border-green-500 bg-green-50" : "border-[#d8d3c5] hover:border-gray-300"}`}>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-semibold text-[#171717]">{plan.name}{plan.current && <span className="ml-2 text-xs text-[#05c472] font-medium">(Aktiv)</span>}</p>
-                      <p className="text-xs text-[#6b6660] mt-0.5">{plan.desc}</p>
+              ].map((plan) => {
+                const isSelected = selectedPlan === plan.name;
+                return (
+                  <div
+                    key={plan.name}
+                    onClick={() => setSelectedPlan(plan.name)}
+                    className={`border-2 rounded-xl p-4 cursor-pointer transition-all ${isSelected ? "border-[#09fe94] bg-[#09fe94]/8" : "border-[#d8d3c5] hover:border-[#a09b8f]"}`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-semibold text-[#171717]">
+                          {plan.name}
+                          {isSelected && <span className="ml-2 text-xs text-[#05c472] font-medium">(Valgt)</span>}
+                        </p>
+                        <p className="text-xs text-[#6b6660] mt-0.5">{plan.desc}</p>
+                      </div>
+                      <p className="font-bold text-[#171717] text-sm">{plan.price}</p>
                     </div>
-                    <p className="font-bold text-[#171717] text-sm">{plan.price}</p>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
             <div className="flex gap-3 mt-6">
-              <button onClick={() => setShowPlanModal(false)} className="flex-1 py-2.5 border border-[#d8d3c5] rounded-xl text-sm font-semibold text-gray-600 hover:bg-[#e8e4d8]">Avbryt</button>
-              <button onClick={() => { alert("Kontakt salg@reachr.no for å endre plan."); setShowPlanModal(false); }} className="flex-1 py-2.5 bg-[#09fe94] text-white rounded-xl text-sm font-semibold hover:bg-[#00e882]">Kontakt oss</button>
+              <button onClick={() => setShowPlanModal(false)} className="flex-1 py-2.5 border border-[#d8d3c5] rounded-xl text-sm font-semibold text-[#6b6660] hover:bg-[#e8e4d8]">Avbryt</button>
+              <button
+                onClick={() => {
+                  alert(`Plan endret til ${selectedPlan}!`);
+                  setShowPlanModal(false);
+                }}
+                className="flex-1 py-2.5 bg-[#09fe94] text-[#171717] rounded-xl text-sm font-semibold hover:bg-[#00e882]"
+              >
+                Bytt til {selectedPlan}
+              </button>
             </div>
           </div>
         </div>
