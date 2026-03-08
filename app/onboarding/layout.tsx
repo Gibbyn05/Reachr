@@ -1,9 +1,8 @@
 import Link from "next/link";
 
-export default function AuthLayout({ children }: { children: React.ReactNode }) {
+export default function OnboardingLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-[#f2efe3] flex flex-col">
-      {/* Simple auth navbar */}
       <nav className="bg-[#faf8f2] border-b border-[#d8d3c5] px-6 py-4">
         <Link href="/" className="flex items-center gap-2 w-fit">
           <img src="/logo.svg" alt="Reachr" className="w-8 h-8" />

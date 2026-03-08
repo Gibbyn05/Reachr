@@ -35,9 +35,9 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Protect all /dashboard, /leadsok, /mine-leads, /varsler, /innstillinger routes
+  // Protect all app routes and onboarding routes
   const isProtected = request.nextUrl.pathname.match(
-    /^\/(dashboard|leadsok|mine-leads|varsler|innstillinger)/,
+    /^\/(dashboard|leadsok|mine-leads|varsler|innstillinger|onboarding)/,
   );
 
   if (isProtected && !user) {
