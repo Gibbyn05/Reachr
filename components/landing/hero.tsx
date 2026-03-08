@@ -71,14 +71,14 @@ export function Hero() {
       >
         {/* Native.no-style editorial headline */}
         <h1
-          className="text-[clamp(3.5rem,9vw,7rem)] leading-[0.93] tracking-[-0.02em] text-[#171717]"
+          className="text-[clamp(2rem,4vw,3rem)] leading-[1.05] tracking-[-0.01em] text-[#171717]"
           style={{ fontFamily: "'EB Garamond', Georgia, serif" }}
         >
           {/* Line 1 – upright serif */}
           <span className="block font-[700]">Finn kunder</span>
 
           {/* Line 2 – italic "for" + rotating word in accent + cursor */}
-          <span className="flex items-center gap-0 flex-wrap">
+          <span className="flex items-center gap-0 flex-nowrap">
             <span className="italic font-[500] text-[#171717] mr-3">for</span>
             <WordRotate
               words={industries}
