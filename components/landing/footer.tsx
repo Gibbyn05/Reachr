@@ -40,7 +40,7 @@ export function Footer() {
 
         <div style={{ borderTop: "1px solid rgba(255,255,255,0.1)", paddingTop: 28, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
           <p style={{ fontSize: 13, color: "rgba(255,255,255,0.35)", margin: 0 }}>© 2025 Reachr AS. Alle rettigheter forbeholdt.</p>
-          <p style={{ fontSize: 13, color: "rgba(255,255,255,0.35)", margin: 0 }}>Org.nr: 123 456 789 · Oslo, Norge</p>
+          <p style={{ fontSize: 13, color: "rgba(255,255,255,0.35)", margin: 0 }}>Org.nr: 123 456 789</p>
         </div>
       </div>
     </footer>

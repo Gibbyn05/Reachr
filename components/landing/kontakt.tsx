@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { Mail, MapPin, MessageSquare, ArrowRight } from "lucide-react";
+import { Mail, MessageSquare, ArrowRight } from "lucide-react";
 
 export function Kontakt() {
   const [sent, setSent] = useState(false);
@@ -40,12 +40,6 @@ export function Kontakt() {
                   label: "E-post",
                   value: "hei@reachr.no",
                   accent: "#ff470a",
-                },
-                {
-                  icon: MapPin,
-                  label: "Adresse",
-                  value: "Majorstuen, Oslo",
-                  accent: "#ffad0a",
                 },
                 {
                   icon: MessageSquare,

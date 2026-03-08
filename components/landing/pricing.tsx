@@ -1,6 +1,5 @@
 "use client";
-import Link from "next/link";
-import { Check } from "lucide-react";
+import { Check, Loader2 } from "lucide-react";
 import { useState } from "react";
 
 const features = [
@@ -16,11 +15,32 @@ const features = [
 
 const platforms = ["Facebook", "Instagram", "LinkedIn"];
 
+async function startCheckout(plan: string, interval: string) {
+  const res = await fetch("/api/stripe/checkout", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ plan, interval }),
+  });
+  const data = await res.json();
+  if (data.url) window.location.href = data.url;
+}
+
 export function Pricing() {
   const [yearly, setYearly] = useState(false);
+  const [loading, setLoading] = useState<string | null>(null);
 
   const soloPrice = yearly ? 199 : 249;
   const teamPrice = yearly ? 159 : 199;
+  const interval = yearly ? "yearly" : "monthly";
+
+  async function handleCheckout(plan: string) {
+    setLoading(plan);
+    try {
+      await startCheckout(plan, interval);
+    } finally {
+      setLoading(null);
+    }
+  }
 
   return (
     <section id="pricing" className="bg-[#ede9da] py-28 px-6">
@@ -75,12 +95,14 @@ export function Pricing() {
               <span className="text-lg text-[#a09b8f] mb-1">kr</span>
               <span className="text-xs text-[#a09b8f] mb-1.5">/mnd</span>
             </div>
-            <Link
-              href="/register"
-              className="block text-center py-3 rounded-xl border border-[#d8d3c5] text-sm font-bold text-[#171717] hover:bg-[#e8e4d8] transition-colors mb-8"
+            <button
+              onClick={() => handleCheckout("solo")}
+              disabled={loading === "solo"}
+              className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border border-[#d8d3c5] text-sm font-bold text-[#171717] hover:bg-[#e8e4d8] transition-colors mb-8 disabled:opacity-60"
             >
+              {loading === "solo" ? <Loader2 size={14} className="animate-spin" /> : null}
               Start gratis
-            </Link>
+            </button>
             <ul className="flex flex-col gap-3">
               {features.slice(0, 5).map((f) => (
                 <li key={f} className="flex items-center gap-2.5 text-sm text-[#3d3a34]">
@@ -103,12 +125,14 @@ export function Pricing() {
               <span className="text-lg text-[#a09b8f] mb-1">kr</span>
               <span className="text-xs text-[#a09b8f] mb-1.5">/bruker/mnd</span>
             </div>
-            <Link
-              href="/register"
-              className="block text-center py-3 rounded-xl bg-[#09fe94] text-sm font-bold text-[#171717] hover:bg-[#00e882] transition-colors mb-8 shadow-[0_4px_16px_rgba(9,254,148,0.3)]"
+            <button
+              onClick={() => handleCheckout("team")}
+              disabled={loading === "team"}
+              className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-[#09fe94] text-sm font-bold text-[#171717] hover:bg-[#00e882] transition-colors mb-8 shadow-[0_4px_16px_rgba(9,254,148,0.3)] disabled:opacity-60"
             >
+              {loading === "team" ? <Loader2 size={14} className="animate-spin" /> : null}
               Start gratis
-            </Link>
+            </button>
             <ul className="flex flex-col gap-3">
               {features.map((f) => (
                 <li key={f} className="flex items-center gap-2.5 text-sm text-[#3d3a34]">
@@ -126,12 +150,12 @@ export function Pricing() {
             <div className="flex items-end gap-1 mb-6">
               <span className="text-3xl font-extrabold text-[#171717] leading-none">Pris etter avtale</span>
             </div>
-            <Link
-              href="#"
+            <a
+              href="#kontakt"
               className="block text-center py-3 rounded-xl border border-[#d8d3c5] text-sm font-bold text-[#171717] hover:bg-[#e8e4d8] transition-colors mb-8"
             >
               Kontakt oss
-            </Link>
+            </a>
             <ul className="flex flex-col gap-3">
               {[...features, "Dedikert kundehåndterer", "API-tilgang", "SLA-garanti"].map((f) => (
                 <li key={f} className="flex items-center gap-2.5 text-sm text-[#3d3a34]">

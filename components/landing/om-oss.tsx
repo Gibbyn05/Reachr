@@ -65,7 +65,7 @@ export function OmOss() {
               Vi kombinerte direkte tilgang til Brønnøysundregistrene med et moderne salgspipeline-verktøy – og laget noe vi selv ville brukt. I dag hjelper vi hundrevis av norske bedrifter finne og lukke nye kunder raskere enn noensinne.
             </p>
             <p className="text-base text-[#6b6660] leading-relaxed">
-              Vi er et lite, dedikert team med base i Oslo. Vi elsker salg, produktdesign og å gjøre det enkelt å drive business i Norge.
+              Vi er et lite, dedikert team. Vi elsker salg, produktdesign og å gjøre det enkelt å drive business i Norge.
             </p>
           </div>
 
@@ -75,7 +75,7 @@ export function OmOss() {
               { value: "2024", label: "Grunnlagt" },
               { value: "500+", label: "Aktive brukere" },
               { value: "250 000+", label: "Bedrifter tilgjengelig" },
-              { value: "Oslo", label: "Hvor vi holder til" },
+              { value: "4.9/5", label: "Brukervurdering" },
             ].map(({ value, label }) => (
               <div
                 key={label}
