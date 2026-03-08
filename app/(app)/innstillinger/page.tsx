@@ -55,11 +55,11 @@ function NotificationToggle({
       </div>
       <button
         onClick={() => setEnabled(!enabled)}
-        className={`relative w-11 h-6 rounded-full transition-all focus:outline-none ${enabled ? "bg-[#09fe94]" : "bg-[#d8d3c5]"}`}
+        className={`relative w-12 h-6 rounded-full transition-colors focus:outline-none shrink-0 ${enabled ? "bg-[#09fe94]" : "bg-[#d8d3c5]"}`}
       >
         <span
-          className="absolute top-0.5 w-5 h-5 bg-white rounded-full shadow"
-          style={{ transform: enabled ? "translateX(20px)" : "translateX(2px)", transition: "transform 0.2s" }}
+          className="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-sm transition-transform duration-200"
+          style={{ transform: enabled ? "translateX(24px)" : "translateX(0)" }}
         />
       </button>
     </div>
