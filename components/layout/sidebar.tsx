@@ -94,14 +94,14 @@ export function Sidebar() {
     .slice(0, 2);
 
   return (
-    <aside className="fixed left-0 top-0 h-full w-60 bg-[#0F1729] flex flex-col z-[1000]">
+    <aside className="fixed left-0 top-0 h-full w-60 bg-[#171717] flex flex-col z-[1000]">
       {/* Logo */}
       <div className="p-6 border-b border-white/10">
         <Link href="/dashboard" className="flex items-center gap-2.5">
           <div className="w-8 h-8 bg-[#09fe94] rounded-lg flex items-center justify-center">
             <Zap className="w-4 h-4 text-[#171717] fill-[#171717]" />
           </div>
-          <span className="text-white font-bold text-xl tracking-tight">Reachr</span>
+          <span className="text-white font-bold text-xl" style={{ fontFamily: "'EB Garamond', Georgia, serif" }}>Reachr</span>
         </Link>
       </div>
 

@@ -44,14 +44,14 @@ function NotificationToggle({
 }) {
   const [enabled, setEnabled] = useState(defaultEnabled);
   return (
-    <div className="flex items-center justify-between py-3 border-b border-gray-50 last:border-0">
+    <div className="flex items-center justify-between py-3 border-b border-[#e8e4d8] last:border-0">
       <div>
-        <p className="text-sm font-medium text-slate-900">{label}</p>
-        <p className="text-xs text-gray-400 mt-0.5">{desc}</p>
+        <p className="text-sm font-medium text-[#171717]">{label}</p>
+        <p className="text-xs text-[#a09b8f] mt-0.5">{desc}</p>
       </div>
       <button
         onClick={() => setEnabled(!enabled)}
-        className={`relative w-11 h-6 rounded-full transition-all focus:outline-none ${enabled ? "bg-green-500" : "bg-gray-200"}`}
+        className={`relative w-11 h-6 rounded-full transition-all focus:outline-none ${enabled ? "bg-[#09fe94]" : "bg-[#d8d3c5]"}`}
       >
         <span
           className="absolute top-0.5 w-5 h-5 bg-white rounded-full shadow"
@@ -237,29 +237,29 @@ export default function InnstillingerPage() {
       {/* Plan change modal */}
       {showPlanModal && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50" onClick={() => setShowPlanModal(false)}>
-          <div className="bg-white rounded-2xl shadow-2xl p-8 w-[480px] max-w-full" onClick={(e) => e.stopPropagation()}>
-            <h2 className="text-lg font-bold text-slate-900 mb-2">Velg plan</h2>
-            <p className="text-sm text-gray-500 mb-6">Velg planen som passer din bedrift.</p>
+          <div className="bg-[#faf8f2] rounded-2xl shadow-2xl p-8 w-[480px] max-w-full" onClick={(e) => e.stopPropagation()}>
+            <h2 className="text-lg font-bold text-[#171717] mb-2">Velg plan</h2>
+            <p className="text-sm text-[#6b6660] mb-6">Velg planen som passer din bedrift.</p>
             <div className="space-y-3">
               {[
                 { name: "Starter", price: "99 kr/mnd", desc: "1 bruker · 50 leads · Leadsøk" },
                 { name: "Pro", price: "199 kr/mnd", desc: "5 brukere · Ubegrenset leads · Alt i Starter + e-postintegrasjon", current: true },
                 { name: "Team", price: "499 kr/mnd", desc: "15 brukere · Prioritert support · Alt i Pro + API-tilgang" },
               ].map((plan) => (
-                <div key={plan.name} className={`border-2 rounded-xl p-4 cursor-pointer transition-all ${plan.current ? "border-green-500 bg-green-50" : "border-gray-200 hover:border-gray-300"}`}>
+                <div key={plan.name} className={`border-2 rounded-xl p-4 cursor-pointer transition-all ${plan.current ? "border-green-500 bg-green-50" : "border-[#d8d3c5] hover:border-gray-300"}`}>
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="font-semibold text-slate-900">{plan.name}{plan.current && <span className="ml-2 text-xs text-green-600 font-medium">(Aktiv)</span>}</p>
-                      <p className="text-xs text-gray-500 mt-0.5">{plan.desc}</p>
+                      <p className="font-semibold text-[#171717]">{plan.name}{plan.current && <span className="ml-2 text-xs text-[#05c472] font-medium">(Aktiv)</span>}</p>
+                      <p className="text-xs text-[#6b6660] mt-0.5">{plan.desc}</p>
                     </div>
-                    <p className="font-bold text-slate-900 text-sm">{plan.price}</p>
+                    <p className="font-bold text-[#171717] text-sm">{plan.price}</p>
                   </div>
                 </div>
               ))}
             </div>
             <div className="flex gap-3 mt-6">
-              <button onClick={() => setShowPlanModal(false)} className="flex-1 py-2.5 border border-gray-200 rounded-xl text-sm font-semibold text-gray-600 hover:bg-gray-50">Avbryt</button>
-              <button onClick={() => { alert("Kontakt salg@reachr.no for å endre plan."); setShowPlanModal(false); }} className="flex-1 py-2.5 bg-green-500 text-white rounded-xl text-sm font-semibold hover:bg-green-600">Kontakt oss</button>
+              <button onClick={() => setShowPlanModal(false)} className="flex-1 py-2.5 border border-[#d8d3c5] rounded-xl text-sm font-semibold text-gray-600 hover:bg-[#e8e4d8]">Avbryt</button>
+              <button onClick={() => { alert("Kontakt salg@reachr.no for å endre plan."); setShowPlanModal(false); }} className="flex-1 py-2.5 bg-[#09fe94] text-white rounded-xl text-sm font-semibold hover:bg-[#00e882]">Kontakt oss</button>
             </div>
           </div>
         </div>
@@ -276,8 +276,8 @@ export default function InnstillingerPage() {
                   onClick={() => setActiveTab(id)}
                   className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all text-left ${
                     activeTab === id
-                      ? "bg-green-50 text-green-700"
-                      : "text-gray-600 hover:bg-gray-100 hover:text-slate-900"
+                      ? "bg-[#09fe94]/10 text-[#05c472]"
+                      : "text-[#6b6660] hover:bg-[#e8e4d8] hover:text-[#171717]"
                   }`}
                 >
                   <Icon className="w-4 h-4" />
@@ -292,8 +292,8 @@ export default function InnstillingerPage() {
             {/* ── Profil ── */}
             {activeTab === "profil" && (
               <div className="space-y-6">
-                <div className="bg-white rounded-xl border border-gray-200 p-6" style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.08)" }}>
-                  <h2 className="text-base font-semibold text-slate-900 mb-6">Personlig informasjon</h2>
+                <div className="bg-[#faf8f2] rounded-xl border border-[#d8d3c5] p-6" style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.08)" }}>
+                  <h2 className="text-base font-semibold text-[#171717] mb-6">Personlig informasjon</h2>
 
                   {/* Avatar */}
                   <div className="flex items-center gap-4 mb-6">
@@ -305,15 +305,15 @@ export default function InnstillingerPage() {
                           className="w-16 h-16 rounded-2xl object-cover"
                         />
                       ) : (
-                        <div className="w-16 h-16 bg-[#0F1729] rounded-2xl flex items-center justify-center text-white text-xl font-bold">
+                        <div className="w-16 h-16 bg-[#171717] rounded-2xl flex items-center justify-center text-white text-xl font-bold">
                           {initials}
                         </div>
                       )}
                       <button
                         onClick={() => fileInputRef.current?.click()}
-                        className="absolute -bottom-1.5 -right-1.5 w-7 h-7 bg-white border border-gray-200 rounded-full flex items-center justify-center shadow-sm hover:bg-gray-50 transition-colors"
+                        className="absolute -bottom-1.5 -right-1.5 w-7 h-7 bg-white border border-[#d8d3c5] rounded-full flex items-center justify-center shadow-sm hover:bg-[#e8e4d8] transition-colors"
                       >
-                        <Camera className="w-3.5 h-3.5 text-gray-500" />
+                        <Camera className="w-3.5 h-3.5 text-[#6b6660]" />
                       </button>
                       <input
                         ref={fileInputRef}
@@ -327,7 +327,7 @@ export default function InnstillingerPage() {
                       <Button variant="secondary" size="sm" onClick={() => fileInputRef.current?.click()}>
                         Endre profilbilde
                       </Button>
-                      <p className="text-xs text-gray-400 mt-1">JPG, PNG maks 2MB</p>
+                      <p className="text-xs text-[#a09b8f] mt-1">JPG, PNG maks 2MB</p>
                     </div>
                   </div>
 
@@ -363,7 +363,7 @@ export default function InnstillingerPage() {
 
                   <div className="mt-4">
                     <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                      Hva selger dere? <span className="text-gray-400 font-normal">(brukes av AI til å skrive relevante kalde e-poster)</span>
+                      Hva selger dere? <span className="text-[#a09b8f] font-normal">(brukes av AI til å skrive relevante kalde e-poster)</span>
                     </label>
                     <textarea
                       value={profileForm.salesPitch}
@@ -384,7 +384,7 @@ export default function InnstillingerPage() {
 
                   <div className="flex items-center justify-end gap-3 mt-6">
                     {profileSaved && (
-                      <span className="flex items-center gap-1.5 text-sm text-green-600 font-medium">
+                      <span className="flex items-center gap-1.5 text-sm text-[#05c472] font-medium">
                         <Check className="w-4 h-4" /> Lagret!
                       </span>
                     )}
@@ -401,8 +401,8 @@ export default function InnstillingerPage() {
               <div className="space-y-6">
                 {/* Invite — only shown to team owners */}
                 {teamRole === "owner" && (
-                <div className="bg-white rounded-xl border border-gray-200 p-6" style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.08)" }}>
-                  <h2 className="text-base font-semibold text-slate-900 mb-4">Inviter teammedlem</h2>
+                <div className="bg-[#faf8f2] rounded-xl border border-[#d8d3c5] p-6" style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.08)" }}>
+                  <h2 className="text-base font-semibold text-[#171717] mb-4">Inviter teammedlem</h2>
                   <form onSubmit={handleInvite} className="flex gap-3">
                     <Input
                       type="email"
@@ -427,20 +427,20 @@ export default function InnstillingerPage() {
                     <p className="text-xs text-red-500 mt-2">{inviteError}</p>
                   )}
                   {inviteSent && (
-                    <p className="text-xs text-green-600 mt-2 flex items-center gap-1">
+                    <p className="text-xs text-[#05c472] mt-2 flex items-center gap-1">
                       <Check className="w-3 h-3" /> Invitasjon sendt til {inviteEmail || "kollega"}!
                     </p>
                   )}
-                  <p className="text-xs text-gray-400 mt-2">
+                  <p className="text-xs text-[#a09b8f] mt-2">
                     Invitasjonen er gyldig i 7 dager. Ny bruker legges til planen din automatisk.
                   </p>
                 </div>
                 )}
 
                 {/* Team members */}
-                <div className="bg-white rounded-xl border border-gray-200 overflow-hidden" style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.08)" }}>
+                <div className="bg-[#faf8f2] rounded-xl border border-[#d8d3c5] overflow-hidden" style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.08)" }}>
                   <div className="px-6 py-4 border-b border-gray-100">
-                    <h2 className="text-base font-semibold text-slate-900">Teammedlemmer ({1 + teamMembers.length})</h2>
+                    <h2 className="text-base font-semibold text-[#171717]">Teammedlemmer ({1 + teamMembers.length})</h2>
                   </div>
                   <div className="divide-y divide-gray-50">
                     {/* Current user */}
@@ -450,7 +450,7 @@ export default function InnstillingerPage() {
                       </div>
                       <div className="flex-1">
                         <div className="flex items-center gap-2">
-                          <p className="text-sm font-semibold text-slate-900">{profileForm.name}</p>
+                          <p className="text-sm font-semibold text-[#171717]">{profileForm.name}</p>
                           {teamRole === "owner" ? (
                             <span className="bg-yellow-100 text-yellow-700 text-xs px-2 py-0.5 rounded-full font-semibold flex items-center gap-1">
                               <Crown className="w-2.5 h-2.5" />
@@ -463,9 +463,9 @@ export default function InnstillingerPage() {
                             </span>
                           )}
                         </div>
-                        <p className="text-xs text-gray-400">{profileForm.email} · Deg</p>
+                        <p className="text-xs text-[#a09b8f]">{profileForm.email} · Deg</p>
                       </div>
-                      <span className="text-xs text-gray-400 bg-gray-50 border border-gray-200 rounded-lg px-3 py-1.5">
+                      <span className="text-xs text-[#a09b8f] bg-gray-50 border border-[#d8d3c5] rounded-lg px-3 py-1.5">
                         {teamRole === "owner" ? "Admin" : "Medlem"}
                       </span>
                     </div>
@@ -483,7 +483,7 @@ export default function InnstillingerPage() {
                           </div>
                           <div className="flex-1">
                             <div className="flex items-center gap-2">
-                              <p className="text-sm font-semibold text-slate-900">
+                              <p className="text-sm font-semibold text-[#171717]">
                                 {m.member_name || m.member_email}
                               </p>
                               {isOwner && (
@@ -493,7 +493,7 @@ export default function InnstillingerPage() {
                                 </span>
                               )}
                             </div>
-                            <p className="text-xs text-gray-400">{m.member_email}</p>
+                            <p className="text-xs text-[#a09b8f]">{m.member_email}</p>
                           </div>
                           <span className={`text-xs px-3 py-1.5 rounded-lg border ${isOwner ? "text-yellow-700 bg-yellow-50 border-yellow-200" : isPending ? "text-yellow-700 bg-yellow-50 border-yellow-200" : "text-green-700 bg-green-50 border-green-200"}`}>
                             {isOwner ? "Admin" : isPending ? "Invitert" : "Aktiv"}
@@ -503,7 +503,7 @@ export default function InnstillingerPage() {
                     })}
                   </div>
                   <div className="px-6 py-4 bg-gray-50 border-t border-gray-100">
-                    <p className="text-xs text-gray-400">
+                    <p className="text-xs text-[#a09b8f]">
                       Inviter kolleger via skjemaet over for å gi dem tilgang til Reachr.
                     </p>
                   </div>
@@ -515,16 +515,16 @@ export default function InnstillingerPage() {
             {/* ── E-post ── */}
             {activeTab === "epost" && (
               <div className="space-y-6">
-                <div className="bg-white rounded-xl border border-gray-200 p-6" style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.08)" }}>
-                  <h2 className="text-base font-semibold text-slate-900 mb-1">E-posttilkoblinger</h2>
-                  <p className="text-sm text-gray-500 mb-6">Koble til Gmail eller Outlook for å sende AI-genererte e-poster direkte fra Reachr.</p>
+                <div className="bg-[#faf8f2] rounded-xl border border-[#d8d3c5] p-6" style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.08)" }}>
+                  <h2 className="text-base font-semibold text-[#171717] mb-1">E-posttilkoblinger</h2>
+                  <p className="text-sm text-[#6b6660] mb-6">Koble til Gmail eller Outlook for å sende AI-genererte e-poster direkte fra Reachr.</p>
 
                   <div className="space-y-4">
                     {/* Gmail */}
                     {(() => {
                       const conn = emailConnections.find((c) => c.provider === "gmail");
                       return (
-                        <div className="flex items-center justify-between p-4 border border-gray-200 rounded-xl">
+                        <div className="flex items-center justify-between p-4 border border-[#d8d3c5] rounded-xl">
                           <div className="flex items-center gap-3">
                             <div className="w-10 h-10 bg-red-50 rounded-xl flex items-center justify-center">
                               <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none">
@@ -532,13 +532,13 @@ export default function InnstillingerPage() {
                               </svg>
                             </div>
                             <div>
-                              <p className="text-sm font-semibold text-slate-900">Gmail</p>
+                              <p className="text-sm font-semibold text-[#171717]">Gmail</p>
                               {conn ? (
-                                <p className="text-xs text-green-600 flex items-center gap-1">
+                                <p className="text-xs text-[#05c472] flex items-center gap-1">
                                   <CheckCircle2 className="w-3 h-3" /> {conn.email_address}
                                 </p>
                               ) : (
-                                <p className="text-xs text-gray-400">Ikke tilkoblet</p>
+                                <p className="text-xs text-[#a09b8f]">Ikke tilkoblet</p>
                               )}
                             </div>
                           </div>
@@ -569,7 +569,7 @@ export default function InnstillingerPage() {
                     {(() => {
                       const conn = emailConnections.find((c) => c.provider === "outlook");
                       return (
-                        <div className="flex items-center justify-between p-4 border border-gray-200 rounded-xl">
+                        <div className="flex items-center justify-between p-4 border border-[#d8d3c5] rounded-xl">
                           <div className="flex items-center gap-3">
                             <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center">
                               <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none">
@@ -577,13 +577,13 @@ export default function InnstillingerPage() {
                               </svg>
                             </div>
                             <div>
-                              <p className="text-sm font-semibold text-slate-900">Outlook</p>
+                              <p className="text-sm font-semibold text-[#171717]">Outlook</p>
                               {conn ? (
-                                <p className="text-xs text-green-600 flex items-center gap-1">
+                                <p className="text-xs text-[#05c472] flex items-center gap-1">
                                   <CheckCircle2 className="w-3 h-3" /> {conn.email_address}
                                 </p>
                               ) : (
-                                <p className="text-xs text-gray-400">Ikke tilkoblet</p>
+                                <p className="text-xs text-[#a09b8f]">Ikke tilkoblet</p>
                               )}
                             </div>
                           </div>
@@ -617,8 +617,8 @@ export default function InnstillingerPage() {
 
             {activeTab === "fakturering" && (
               <div className="space-y-6">
-                <div className="bg-white rounded-xl border border-gray-200 p-6" style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.08)" }}>
-                  <h2 className="text-base font-semibold text-slate-900 mb-6">Nåværende plan</h2>
+                <div className="bg-[#faf8f2] rounded-xl border border-[#d8d3c5] p-6" style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.08)" }}>
+                  <h2 className="text-base font-semibold text-[#171717] mb-6">Nåværende plan</h2>
                   <div className="bg-gradient-to-r from-[#0F1729] to-[#1E3A5F] rounded-xl p-6 text-white mb-6">
                     <div className="flex items-center justify-between mb-4">
                       <div>
@@ -633,15 +633,15 @@ export default function InnstillingerPage() {
                     </div>
                     <div className="flex items-center justify-between pt-4 border-t border-white/20">
                       <p className="text-white/60 text-sm">Neste faktura: 1. april 2026</p>
-                      <span className="bg-green-500 text-white text-xs px-3 py-1 rounded-full font-semibold">Aktiv</span>
+                      <span className="bg-[#09fe94] text-white text-xs px-3 py-1 rounded-full font-semibold">Aktiv</span>
                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 gap-4">
-                    <div className="border border-gray-200 rounded-xl p-4">
-                      <p className="text-sm font-semibold text-slate-900 mb-1">Brukere</p>
-                      <p className="text-2xl font-extrabold text-[#0F1729]">{1 + teamMembers.length} / 5</p>
-                      <p className="text-xs text-gray-400">Maks 5 på Pro-planen</p>
+                    <div className="border border-[#d8d3c5] rounded-xl p-4">
+                      <p className="text-sm font-semibold text-[#171717] mb-1">Brukere</p>
+                      <p className="text-2xl font-extrabold text-[#171717]">{1 + teamMembers.length} / 5</p>
+                      <p className="text-xs text-[#a09b8f]">Maks 5 på Pro-planen</p>
                     </div>
                   </div>
 
@@ -654,9 +654,9 @@ export default function InnstillingerPage() {
                   </div>
                 </div>
 
-                <div className="bg-white rounded-xl border border-gray-200 overflow-hidden" style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.08)" }}>
+                <div className="bg-[#faf8f2] rounded-xl border border-[#d8d3c5] overflow-hidden" style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.08)" }}>
                   <div className="px-6 py-4 border-b border-gray-100">
-                    <h2 className="text-base font-semibold text-slate-900">Fakturahistorikk</h2>
+                    <h2 className="text-base font-semibold text-[#171717]">Fakturahistorikk</h2>
                   </div>
                   <div className="divide-y divide-gray-50">
                     {[
@@ -666,12 +666,12 @@ export default function InnstillingerPage() {
                     ].map((invoice, i) => (
                       <div key={i} className="flex items-center justify-between px-6 py-3.5">
                         <p className="text-sm text-gray-600">{invoice.date}</p>
-                        <p className="text-sm font-semibold text-slate-900">{invoice.amount}</p>
+                        <p className="text-sm font-semibold text-[#171717]">{invoice.amount}</p>
                         <span className="text-xs bg-green-100 text-green-700 px-2.5 py-1 rounded-full font-semibold">
                           {invoice.status}
                         </span>
                         <button
-                          className="text-sm text-green-600 hover:underline font-medium"
+                          className="text-sm text-[#05c472] hover:underline font-medium"
                           onClick={() => handleInvoiceDownload(invoice.date, invoice.amount)}
                         >
                           Last ned
@@ -685,8 +685,8 @@ export default function InnstillingerPage() {
 
             {/* ── Varsler ── */}
             {activeTab === "varsler" && (
-              <div className="bg-white rounded-xl border border-gray-200 p-6" style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.08)" }}>
-                <h2 className="text-base font-semibold text-slate-900 mb-6">Varslingsinnstillinger</h2>
+              <div className="bg-[#faf8f2] rounded-xl border border-[#d8d3c5] p-6" style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.08)" }}>
+                <h2 className="text-base font-semibold text-[#171717] mb-6">Varslingsinnstillinger</h2>
                 <div className="space-y-1">
                   {NOTIFICATION_ITEMS.map((item) => (
                     <NotificationToggle key={item.label} {...item} />
@@ -699,8 +699,8 @@ export default function InnstillingerPage() {
             {/* ── Sikkerhet ── */}
             {activeTab === "sikkerhet" && (
               <div className="space-y-6">
-                <div className="bg-white rounded-xl border border-gray-200 p-6" style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.08)" }}>
-                  <h2 className="text-base font-semibold text-slate-900 mb-6">Endre passord</h2>
+                <div className="bg-[#faf8f2] rounded-xl border border-[#d8d3c5] p-6" style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.08)" }}>
+                  <h2 className="text-base font-semibold text-[#171717] mb-6">Endre passord</h2>
                   <div className="space-y-4 max-w-md">
                     <div>
                       <label className="block text-sm font-medium text-slate-700 mb-1.5">Nåværende passord</label>

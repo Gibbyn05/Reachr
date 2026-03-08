@@ -71,8 +71,8 @@ export default function DashboardPage() {
       change: `${leads.filter((l) => l.addedDate >= thisWeek).length} denne uken`,
       positive: true,
       icon: Users,
-      color: "bg-blue-50",
-      iconColor: "text-blue-600",
+      color: "bg-[#09fe94]/10",
+      iconColor: "text-[#05c472]",
     },
     {
       title: "Nye denne uken",
@@ -80,8 +80,8 @@ export default function DashboardPage() {
       change: "Lagt til via leadsøk",
       positive: true,
       icon: TrendingUp,
-      color: "bg-green-50",
-      iconColor: "text-green-600",
+      color: "bg-[#09fe94]/10",
+      iconColor: "text-[#05c472]",
     },
     {
       title: "Bookede møter",
@@ -89,8 +89,8 @@ export default function DashboardPage() {
       change: "Aktive møtebookinger",
       positive: true,
       icon: Calendar,
-      color: "bg-purple-50",
-      iconColor: "text-purple-600",
+      color: "bg-[#ffad0a]/12",
+      iconColor: "text-[#c47e00]",
     },
     {
       title: "Kunder",
@@ -98,18 +98,18 @@ export default function DashboardPage() {
       change: "Konverterte leads",
       positive: true,
       icon: Star,
-      color: "bg-yellow-50",
-      iconColor: "text-yellow-600",
+      color: "bg-[#ff470a]/10",
+      iconColor: "text-[#ff470a]",
     },
   ];
 
   const pipelineCounts = [
-    { label: "Ikke kontaktet", count: leads.filter((l) => l.status === "Ikke kontaktet").length, color: "bg-gray-200", textColor: "text-gray-600" },
-    { label: "Kontaktet", count: leads.filter((l) => l.status === "Kontaktet").length, color: "bg-blue-200", textColor: "text-blue-700" },
-    { label: "Ikke svar", count: leads.filter((l) => l.status === "Kontaktet - ikke svar").length, color: "bg-yellow-200", textColor: "text-yellow-700" },
-    { label: "Booket møte", count: leads.filter((l) => l.status === "Booket møte").length, color: "bg-purple-200", textColor: "text-purple-700" },
-    { label: "Avslått", count: leads.filter((l) => l.status === "Avslått").length, color: "bg-red-200", textColor: "text-red-700" },
-    { label: "Kunde", count: leads.filter((l) => l.status === "Kunde").length, color: "bg-green-200", textColor: "text-green-700" },
+    { label: "Ikke kontaktet", count: leads.filter((l) => l.status === "Ikke kontaktet").length, color: "bg-[#e8e4d8]", textColor: "text-[#6b6660]" },
+    { label: "Kontaktet", count: leads.filter((l) => l.status === "Kontaktet").length, color: "bg-[#09fe94]/20", textColor: "text-[#05c472]" },
+    { label: "Ikke svar", count: leads.filter((l) => l.status === "Kontaktet - ikke svar").length, color: "bg-[#ffad0a]/20", textColor: "text-[#c47e00]" },
+    { label: "Booket møte", count: leads.filter((l) => l.status === "Booket møte").length, color: "bg-[#ffad0a]/30", textColor: "text-[#a06000]" },
+    { label: "Avslått", count: leads.filter((l) => l.status === "Avslått").length, color: "bg-[#ff470a]/15", textColor: "text-[#ff470a]" },
+    { label: "Kunde", count: leads.filter((l) => l.status === "Kunde").length, color: "bg-[#171717]", textColor: "text-[#09fe94]" },
   ];
 
   return (
@@ -118,7 +118,7 @@ export default function DashboardPage() {
 
       <div className="p-8 space-y-8">
         {/* Welcome banner */}
-        <div className="bg-gradient-to-r from-[#0F1729] to-[#1E3A5F] rounded-2xl p-6 text-white flex items-center justify-between">
+        <div className="bg-[#171717] rounded-2xl p-6 text-white flex items-center justify-between">
           <div>
             <h2 className="text-xl font-bold mb-1">Velkommen til Reachr 👋</h2>
             <p className="text-white/70 text-sm">
@@ -140,15 +140,15 @@ export default function DashboardPage() {
         {/* Stats grid */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
           {stats.map(({ title, value, change, positive, icon: Icon, color, iconColor }) => (
-            <div key={title} className="bg-white rounded-xl border border-gray-200 p-6" style={{boxShadow: "0 1px 3px rgba(0,0,0,0.08)"}}>
+            <div key={title} className="bg-[#faf8f2] rounded-xl border border-[#d8d3c5] p-6" style={{boxShadow: "0 1px 3px rgba(0,0,0,0.08)"}}>
               <div className="flex items-start justify-between mb-4">
                 <div className={`w-10 h-10 ${color} rounded-lg flex items-center justify-center`}>
                   <Icon className={`w-5 h-5 ${iconColor}`} />
                 </div>
                 <ArrowUpRight className="w-4 h-4 text-gray-300" />
               </div>
-              <p className="text-3xl font-extrabold text-[#0F1729] mb-1">{value}</p>
-              <p className="text-sm text-gray-500">{title}</p>
+              <p className="text-3xl font-extrabold text-[#171717] mb-1">{value}</p>
+              <p className="text-sm text-[#6b6660]">{title}</p>
               <p className={`text-xs mt-2 font-medium ${positive ? "text-green-600" : "text-red-500"}`}>
                 {change}
               </p>
@@ -157,38 +157,38 @@ export default function DashboardPage() {
         </div>
 
         {/* Needs follow-up */}
-        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden" style={{boxShadow: "0 1px 3px rgba(0,0,0,0.08)"}}>
-          <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+        <div className="bg-[#faf8f2] rounded-xl border border-[#d8d3c5] overflow-hidden" style={{boxShadow: "0 1px 3px rgba(0,0,0,0.08)"}}>
+          <div className="flex items-center justify-between px-6 py-4 border-b border-[#e8e4d8]">
             <div className="flex items-center gap-2">
-              <h3 className="font-semibold text-slate-900">Trenger oppfølging</h3>
+              <h3 className="font-semibold text-[#171717]">Trenger oppfølging</h3>
               {needsFollowUp.length > 0 && (
                 <span className="bg-orange-100 text-orange-600 text-xs font-semibold px-2 py-0.5 rounded-full">
                   {needsFollowUp.length}
                 </span>
               )}
             </div>
-            <Link href="/mine-leads" className="text-sm text-blue-600 font-medium hover:underline flex items-center gap-1">
+            <Link href="/mine-leads" className="text-sm text-[#ff470a] font-medium hover:underline flex items-center gap-1">
               Se alle <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>
           {needsFollowUp.length === 0 ? (
-            <div className="text-center py-12 text-gray-400">
+            <div className="text-center py-12 text-[#a09b8f]">
               <Users className="w-10 h-10 mx-auto mb-3 text-gray-200" />
-              <p className="text-sm font-medium text-gray-500">Ingen leads trenger oppfølging akkurat nå</p>
+              <p className="text-sm font-medium text-[#6b6660]">Ingen leads trenger oppfølging akkurat nå</p>
               <p className="text-xs mt-1">
                 <Link href="/leadsok" className="text-green-600 hover:underline font-medium">Søk etter leads</Link> for å komme i gang.
               </p>
             </div>
           ) : (
-            <div className="divide-y divide-gray-50">
+            <div className="divide-y divide-[#e8e4d8]">
               {needsFollowUp.map(({ lead, reason }) => (
-                <div key={lead.id} className="flex items-center gap-4 px-6 py-3.5 hover:bg-gray-50 transition-colors">
-                  <div className="w-9 h-9 bg-slate-100 rounded-lg flex items-center justify-center text-xs font-bold text-slate-600 flex-shrink-0">
+                <div key={lead.id} className="flex items-center gap-4 px-6 py-3.5 hover:bg-[#f0ece0] transition-colors">
+                  <div className="w-9 h-9 bg-[#e8e4d8] rounded-lg flex items-center justify-center text-xs font-bold text-[#6b6660] flex-shrink-0">
                     {lead.name.substring(0, 2).toUpperCase()}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-slate-900 truncate">{lead.name}</p>
-                    <p className="text-xs text-gray-400 truncate">{lead.industry} · {lead.city}</p>
+                    <p className="text-sm font-semibold text-[#171717] truncate">{lead.name}</p>
+                    <p className="text-xs text-[#a09b8f] truncate">{lead.industry} · {lead.city}</p>
                   </div>
                   <div className="flex items-center gap-2 flex-shrink-0">
                     <Badge variant={statusColors[lead.status]}>{lead.status}</Badge>
@@ -214,15 +214,15 @@ export default function DashboardPage() {
         </div>
 
         {/* Pipeline overview */}
-        <div className="bg-white rounded-xl border border-gray-200 p-6" style={{boxShadow: "0 1px 3px rgba(0,0,0,0.08)"}}>
-          <h3 className="font-semibold text-slate-900 mb-6">Pipeline-oversikt</h3>
+        <div className="bg-[#faf8f2] rounded-xl border border-[#d8d3c5] p-6" style={{boxShadow: "0 1px 3px rgba(0,0,0,0.08)"}}>
+          <h3 className="font-semibold text-[#171717] mb-6">Pipeline-oversikt</h3>
           <div className="grid grid-cols-3 md:grid-cols-6 gap-4">
             {pipelineCounts.map(({ label, count, color, textColor }) => (
               <div key={label} className="text-center">
                 <div className={`w-16 h-16 ${color} rounded-xl flex items-center justify-center mx-auto mb-2`}>
                   <span className={`text-2xl font-extrabold ${textColor}`}>{count}</span>
                 </div>
-                <p className="text-xs text-gray-500 leading-tight">{label}</p>
+                <p className="text-xs text-[#6b6660] leading-tight">{label}</p>
               </div>
             ))}
           </div>

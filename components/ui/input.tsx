@@ -16,7 +16,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
           <input
             ref={ref}
             className={cn(
-              "w-full pl-10 pr-4 py-2.5 rounded-lg border border-gray-200 bg-white text-slate-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500 transition-all duration-200 text-sm",
+              "w-full pl-10 pr-4 py-2.5 rounded-lg border border-[#d8d3c5] bg-[#faf8f2] text-[#171717] placeholder:text-[#a09b8f] focus:outline-none focus:ring-2 focus:ring-[#09fe94]/20 focus:border-[#09fe94]/60 transition-all duration-200 text-sm",
               className
             )}
             {...props}
@@ -28,7 +28,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
       <input
         ref={ref}
         className={cn(
-          "w-full px-4 py-2.5 rounded-lg border border-gray-200 bg-white text-slate-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500 transition-all duration-200 text-sm",
+          "w-full px-4 py-2.5 rounded-lg border border-[#d8d3c5] bg-[#faf8f2] text-[#171717] placeholder:text-[#a09b8f] focus:outline-none focus:ring-2 focus:ring-[#09fe94]/20 focus:border-[#09fe94]/60 transition-all duration-200 text-sm",
           className
         )}
         {...props}

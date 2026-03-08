@@ -398,14 +398,14 @@ export default function LeadsokPage() {
       style={{
         display: "inline-flex", alignItems: "center", gap: 4,
         background: "none", border: "none", cursor: "pointer",
-        fontSize: 11, fontWeight: 600, color: "#6B7280",
+        fontSize: 11, fontWeight: 600, color: "#6b6660",
         textTransform: "uppercase", letterSpacing: "0.05em", padding: 0,
       }}
     >
       {label}
       <span style={{ display: "flex", flexDirection: "column", gap: 1 }}>
-        <ChevronUp size={9} color={sortField === field && sortDir === "asc" ? "#22C55E" : "#D1D5DB"} />
-        <ChevronDown size={9} color={sortField === field && sortDir === "desc" ? "#22C55E" : "#D1D5DB"} />
+        <ChevronUp size={9} color={sortField === field && sortDir === "asc" ? "#09fe94" : "#c5bfb0"} />
+        <ChevronDown size={9} color={sortField === field && sortDir === "desc" ? "#09fe94" : "#c5bfb0"} />
       </span>
     </button>
   );
@@ -415,7 +415,7 @@ export default function LeadsokPage() {
       <TopBar title="Leadsøk" />
 
       {/* ── Search bar ───────────────────────────────────── */}
-      <div style={{ padding: "16px 24px", borderBottom: "1px solid #E5E7EB", backgroundColor: "white", flexShrink: 0 }}>
+      <div style={{ padding: "16px 24px", borderBottom: "1px solid #d8d3c5", backgroundColor: "#faf8f2", flexShrink: 0 }}>
         <form onSubmit={handleSearch} style={{ display: "flex", gap: 10, alignItems: "center" }}>
 
           {/* Location */}
@@ -427,12 +427,12 @@ export default function LeadsokPage() {
               placeholder="By eller kommune (f.eks. Oslo, Bergen)"
               style={{
                 width: "100%", padding: "10px 12px 10px 36px",
-                border: "1.5px solid #E5E7EB", borderRadius: 10,
-                fontSize: 14, color: "#111827", outline: "none",
-                fontFamily: "inherit", backgroundColor: "#FAFAFA",
+                border: "1.5px solid #d8d3c5", borderRadius: 10,
+                fontSize: 14, color: "#171717", outline: "none",
+                fontFamily: "inherit", backgroundColor: "#faf8f2",
               }}
-              onFocus={e => (e.currentTarget.style.borderColor = "#22C55E")}
-              onBlur={e => (e.currentTarget.style.borderColor = "#E5E7EB")}
+              onFocus={e => (e.currentTarget.style.borderColor = "#09fe94")}
+              onBlur={e => (e.currentTarget.style.borderColor = "#d8d3c5")}
             />
           </div>
 
@@ -445,19 +445,19 @@ export default function LeadsokPage() {
               placeholder="Bransje (f.eks. frisør, bygg, regnskap)"
               style={{
                 width: "100%", padding: "10px 12px 10px 36px",
-                border: "1.5px solid #E5E7EB", borderRadius: 10,
-                fontSize: 14, color: "#111827", outline: "none",
-                fontFamily: "inherit", backgroundColor: "#FAFAFA",
+                border: "1.5px solid #d8d3c5", borderRadius: 10,
+                fontSize: 14, color: "#171717", outline: "none",
+                fontFamily: "inherit", backgroundColor: "#faf8f2",
               }}
-              onFocus={e => (e.currentTarget.style.borderColor = "#22C55E")}
-              onBlur={e => (e.currentTarget.style.borderColor = "#E5E7EB")}
+              onFocus={e => (e.currentTarget.style.borderColor = "#09fe94")}
+              onBlur={e => (e.currentTarget.style.borderColor = "#d8d3c5")}
             />
           </div>
 
           {/* Search button */}
           <button type="submit" style={{
             display: "inline-flex", alignItems: "center", gap: 7,
-            backgroundColor: "#22C55E", color: "white",
+            backgroundColor: "#09fe94", color: "#171717",
             fontWeight: 700, fontSize: 14, padding: "10px 20px",
             borderRadius: 10, border: "none", cursor: "pointer",
             flexShrink: 0, fontFamily: "inherit",
@@ -476,7 +476,7 @@ export default function LeadsokPage() {
                 backgroundColor: filterOpen ? "#F0FDF4" : "white",
                 color: activeFilterCount > 0 ? "#15803D" : "#374151",
                 fontWeight: 600, fontSize: 14, padding: "10px 16px",
-                borderRadius: 10, border: `1.5px solid ${activeFilterCount > 0 ? "#22C55E" : "#E5E7EB"}`,
+                borderRadius: 10, border: `1.5px solid ${activeFilterCount > 0 ? "#09fe94" : "#d8d3c5"}`,
                 cursor: "pointer", fontFamily: "inherit",
               }}
             >
@@ -484,7 +484,7 @@ export default function LeadsokPage() {
               Filtre
               {activeFilterCount > 0 && (
                 <span style={{
-                  backgroundColor: "#22C55E", color: "white",
+                  backgroundColor: "#09fe94", color: "#171717",
                   fontSize: 11, fontWeight: 700, width: 18, height: 18,
                   borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center",
                 }}>{activeFilterCount}</span>
@@ -494,21 +494,21 @@ export default function LeadsokPage() {
             {filterOpen && (
               <div style={{
                 position: "absolute", top: "calc(100% + 8px)", right: 0,
-                backgroundColor: "white", borderRadius: 16,
-                border: "1px solid #E5E7EB",
+                backgroundColor: "#faf8f2", borderRadius: 16,
+                border: "1px solid #d8d3c5",
                 boxShadow: "0 16px 48px rgba(0,0,0,0.14)", zIndex: 50,
                 width: 320, padding: 20,
               }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-                  <p style={{ fontWeight: 700, fontSize: 14, color: "#111827", margin: 0 }}>Filtre</p>
-                  <button onClick={() => setFilterOpen(false)} style={{ background: "none", border: "none", cursor: "pointer", color: "#9CA3AF" }}>
+                  <p style={{ fontWeight: 700, fontSize: 14, color: "#171717", margin: 0 }}>Filtre</p>
+                  <button onClick={() => setFilterOpen(false)} style={{ background: "none", border: "none", cursor: "pointer", color: "#a09b8f" }}>
                     <X size={16} />
                   </button>
                 </div>
 
                 {/* Ansatte */}
                 <div style={{ marginBottom: 20 }}>
-                  <p style={{ fontSize: 12, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 10 }}>
+                  <p style={{ fontSize: 12, fontWeight: 700, color: "#6b6660", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 10 }}>
                     Antall ansatte
                   </p>
                   <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
@@ -519,15 +519,15 @@ export default function LeadsokPage() {
                       { v: "51-200", l: "51–200 ansatte" },
                       { v: "200+", l: "200+ ansatte" },
                     ].map(({ v, l }) => (
-                      <label key={v} style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer", fontSize: 14, color: "#374151" }}>
+                      <label key={v} style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer", fontSize: 14, color: "#3d3a34" }}>
                         <div onClick={() => setPendingFilters(f => ({ ...f, ansatte: v }))} style={{
                           width: 18, height: 18, borderRadius: "50%", border: "2px solid",
-                          borderColor: pendingFilters.ansatte === v ? "#22C55E" : "#D1D5DB",
-                          backgroundColor: pendingFilters.ansatte === v ? "#22C55E" : "white",
+                          borderColor: pendingFilters.ansatte === v ? "#09fe94" : "#c5bfb0",
+                          backgroundColor: pendingFilters.ansatte === v ? "#09fe94" : "white",
                           display: "flex", alignItems: "center", justifyContent: "center",
                           flexShrink: 0, cursor: "pointer",
                         }}>
-                          {pendingFilters.ansatte === v && <div style={{ width: 6, height: 6, borderRadius: "50%", backgroundColor: "white" }} />}
+                          {pendingFilters.ansatte === v && <div style={{ width: 6, height: 6, borderRadius: "50%", backgroundColor: "#faf8f2" }} />}
                         </div>
                         {l}
                       </label>
@@ -537,22 +537,22 @@ export default function LeadsokPage() {
 
                 {/* MVA */}
                 <div style={{ marginBottom: 20 }}>
-                  <p style={{ fontSize: 12, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 10 }}>
+                  <p style={{ fontSize: 12, fontWeight: 700, color: "#6b6660", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 10 }}>
                     MVA-registrert
                   </p>
-                  <label style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer", fontSize: 14, color: "#374151" }}>
+                  <label style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer", fontSize: 14, color: "#3d3a34" }}>
                     <div
                       onClick={() => setPendingFilters(f => ({ ...f, mva: !f.mva }))}
                       style={{
                         width: 38, height: 22, borderRadius: 11,
-                        backgroundColor: pendingFilters.mva ? "#22C55E" : "#E5E7EB",
+                        backgroundColor: pendingFilters.mva ? "#09fe94" : "#d8d3c5",
                         position: "relative", cursor: "pointer", transition: "background-color 0.2s",
                         flexShrink: 0,
                       }}
                     >
                       <div style={{
                         position: "absolute", top: 3, left: pendingFilters.mva ? 19 : 3,
-                        width: 16, height: 16, borderRadius: "50%", backgroundColor: "white",
+                        width: 16, height: 16, borderRadius: "50%", backgroundColor: "#faf8f2",
                         boxShadow: "0 1px 4px rgba(0,0,0,0.2)", transition: "left 0.2s",
                       }} />
                     </div>
@@ -562,7 +562,7 @@ export default function LeadsokPage() {
 
                 {/* Bransje kategori */}
                 <div style={{ marginBottom: 20 }}>
-                  <p style={{ fontSize: 12, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 10 }}>
+                  <p style={{ fontSize: 12, fontWeight: 700, color: "#6b6660", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 10 }}>
                     Bransje-kategori
                   </p>
                   <select
@@ -570,12 +570,12 @@ export default function LeadsokPage() {
                     onChange={(e) => setPendingFilters(f => ({ ...f, bransje: e.target.value }))}
                     style={{
                       width: "100%", padding: "8px 12px", borderRadius: 8,
-                      border: "1.5px solid #E5E7EB", fontSize: 13, color: "#374151",
-                      fontFamily: "inherit", outline: "none", backgroundColor: "white",
+                      border: "1.5px solid #d8d3c5", fontSize: 13, color: "#3d3a34",
+                      fontFamily: "inherit", outline: "none", backgroundColor: "#faf8f2",
                       cursor: "pointer",
                     }}
-                    onFocus={(e) => (e.currentTarget.style.borderColor = "#22C55E")}
-                    onBlur={(e) => (e.currentTarget.style.borderColor = "#E5E7EB")}
+                    onFocus={(e) => (e.currentTarget.style.borderColor = "#09fe94")}
+                    onBlur={(e) => (e.currentTarget.style.borderColor = "#d8d3c5")}
                   >
                     {INDUSTRY_CATEGORIES.map(({ label, nace }) => (
                       <option key={nace} value={nace}>{label}</option>
@@ -589,15 +589,15 @@ export default function LeadsokPage() {
                     onClick={() => setPendingFilters({ ansatte: "all", mva: false, bransje: "" })}
                     style={{
                       flex: 1, padding: "9px 0", borderRadius: 8,
-                      border: "1.5px solid #E5E7EB", backgroundColor: "white",
-                      fontSize: 13, fontWeight: 600, cursor: "pointer", color: "#374151", fontFamily: "inherit",
+                      border: "1.5px solid #d8d3c5", backgroundColor: "#faf8f2",
+                      fontSize: 13, fontWeight: 600, cursor: "pointer", color: "#3d3a34", fontFamily: "inherit",
                     }}
                   >Nullstill</button>
                   <button
                     onClick={applyFilters}
                     style={{
                       flex: 2, padding: "9px 0", borderRadius: 8,
-                      border: "none", backgroundColor: "#22C55E",
+                      border: "none", backgroundColor: "#09fe94",
                       fontSize: 13, fontWeight: 700, cursor: "pointer", color: "white", fontFamily: "inherit",
                     }}
                   >Bruk filtre</button>
@@ -607,7 +607,7 @@ export default function LeadsokPage() {
           </div>
 
           {/* View toggle */}
-          <div style={{ display: "flex", backgroundColor: "#F3F4F6", borderRadius: 10, padding: 3, gap: 2, flexShrink: 0 }}>
+          <div style={{ display: "flex", backgroundColor: "#f2efe3", borderRadius: 10, padding: 3, gap: 2, flexShrink: 0 }}>
             {([["list", List], ["map", MapIcon]] as const).map(([v, Icon]) => (
               <button
                 key={v}
@@ -634,11 +634,11 @@ export default function LeadsokPage() {
         {/* Empty state */}
         {!hasSearched && !loading && (
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100%", gap: 12 }}>
-            <div style={{ width: 64, height: 64, backgroundColor: "#F0FDF4", borderRadius: 20, display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <Search size={28} color="#22C55E" />
+            <div style={{ width: 64, height: 64, backgroundColor: "#09fe9414", borderRadius: 20, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <Search size={28} color="#09fe94" />
             </div>
-            <p style={{ fontSize: 16, fontWeight: 600, color: "#374151", margin: 0 }}>Søk for å finne bedrifter</p>
-            <p style={{ fontSize: 14, color: "#9CA3AF", margin: 0, textAlign: "center", maxWidth: 380 }}>
+            <p style={{ fontSize: 16, fontWeight: 600, color: "#3d3a34", margin: 0 }}>Søk for å finne bedrifter</p>
+            <p style={{ fontSize: 14, color: "#a09b8f", margin: 0, textAlign: "center", maxWidth: 380 }}>
               Skriv inn by og bransje over for å søke i Brønnøysundregisteret (Brreg).
               Over 600 000 norske bedrifter tilgjengelig.
             </p>
@@ -646,8 +646,8 @@ export default function LeadsokPage() {
               {[["Oslo", "frisør"], ["Bergen", "bygg"], ["Trondheim", "regnskap"], ["Stavanger", "elektro"]].map(([loc, ind]) => (
                 <button key={loc + ind} onClick={() => { setLocationQ(loc); setIndustryQ(ind); doSearch(loc, ind, filters, 0, false); }}
                   style={{
-                    padding: "6px 14px", borderRadius: 999, border: "1.5px solid #E5E7EB",
-                    backgroundColor: "white", fontSize: 13, fontWeight: 500, color: "#374151",
+                    padding: "6px 14px", borderRadius: 999, border: "1.5px solid #d8d3c5",
+                    backgroundColor: "#faf8f2", fontSize: 13, fontWeight: 500, color: "#3d3a34",
                     cursor: "pointer", fontFamily: "inherit",
                   }}
                 >{loc} · {ind}</button>
@@ -659,8 +659,8 @@ export default function LeadsokPage() {
         {/* Loading */}
         {loading && (
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "60%", gap: 12 }}>
-            <Loader2 size={32} color="#22C55E" style={{ animation: "spin 1s linear infinite" }} />
-            <p style={{ fontSize: 14, color: "#6B7280", margin: 0 }}>Laster bedrifter…</p>
+            <Loader2 size={32} color="#09fe94" style={{ animation: "spin 1s linear infinite" }} />
+            <p style={{ fontSize: 14, color: "#6b6660", margin: 0 }}>Laster bedrifter…</p>
             <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
           </div>
         )}
@@ -679,13 +679,13 @@ export default function LeadsokPage() {
             {/* Result meta row */}
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                <p style={{ fontSize: 13, color: "#6B7280", margin: 0 }}>
-                  Viser <strong style={{ color: "#111827" }}>{sorted.length}</strong> av{" "}
-                  <strong style={{ color: "#111827" }}>{total.toLocaleString("nb-NO")}</strong> treff fra Brreg
+                <p style={{ fontSize: 13, color: "#6b6660", margin: 0 }}>
+                  Viser <strong style={{ color: "#171717" }}>{sorted.length}</strong> av{" "}
+                  <strong style={{ color: "#171717" }}>{total.toLocaleString("nb-NO")}</strong> treff fra Brreg
                 </p>
                 {hiddenCount > 0 && (
                   <span style={{
-                    fontSize: 12, color: "#16A34A", backgroundColor: "#F0FDF4",
+                    fontSize: 12, color: "#16A34A", backgroundColor: "#09fe9414",
                     border: "1px solid #BBF7D0", borderRadius: 6,
                     padding: "2px 8px", fontWeight: 500,
                   }}>
@@ -694,13 +694,13 @@ export default function LeadsokPage() {
                 )}
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                <div style={{ width: 6, height: 6, backgroundColor: "#22C55E", borderRadius: "50%" }} />
-                <span style={{ fontSize: 12, color: "#6B7280" }}>Live data</span>
+                <div style={{ width: 6, height: 6, backgroundColor: "#09fe94", borderRadius: "50%" }} />
+                <span style={{ fontSize: 12, color: "#6b6660" }}>Live data</span>
               </div>
             </div>
 
             {view === "list" ? (
-              <div style={{ backgroundColor: "white", borderRadius: 14, border: "1px solid #E5E7EB", overflow: "hidden", boxShadow: "0 1px 4px rgba(0,0,0,0.05)" }}>
+              <div style={{ backgroundColor: "#faf8f2", borderRadius: 14, border: "1px solid #d8d3c5", overflow: "hidden", boxShadow: "0 1px 4px rgba(0,0,0,0.05)" }}>
                 {/* Table header */}
                 <div style={{
                   display: "grid",
@@ -711,9 +711,9 @@ export default function LeadsokPage() {
                   gap: 8,
                 }}>
                   <SortBtn field="navn" label="Bedriftsnavn" />
-                  <span style={{ fontSize: 11, fontWeight: 600, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.05em" }}>Daglig leder</span>
-                  <span style={{ fontSize: 11, fontWeight: 600, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.05em" }}>Telefon</span>
-                  <span style={{ fontSize: 11, fontWeight: 600, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.05em" }}>Nettside</span>
+                  <span style={{ fontSize: 11, fontWeight: 600, color: "#6b6660", textTransform: "uppercase", letterSpacing: "0.05em" }}>Daglig leder</span>
+                  <span style={{ fontSize: 11, fontWeight: 600, color: "#6b6660", textTransform: "uppercase", letterSpacing: "0.05em" }}>Telefon</span>
+                  <span style={{ fontSize: 11, fontWeight: 600, color: "#6b6660", textTransform: "uppercase", letterSpacing: "0.05em" }}>Nettside</span>
                   <SortBtn field="bransje" label="Bransje" />
                   <SortBtn field="sted" label="Sted" />
                   <SortBtn field="ansatte" label="Ansatte" />
@@ -723,8 +723,8 @@ export default function LeadsokPage() {
                 {/* Rows */}
                 {sorted.length === 0 ? (
                   <div style={{ padding: "48px 24px", textAlign: "center" }}>
-                    <p style={{ fontSize: 15, color: "#9CA3AF", margin: 0 }}>Ingen bedrifter funnet med disse søkekriteriene.</p>
-                    <p style={{ fontSize: 13, color: "#D1D5DB", margin: "6px 0 0" }}>Prøv et annet stedsnavn eller en annen bransje.</p>
+                    <p style={{ fontSize: 15, color: "#a09b8f", margin: 0 }}>Ingen bedrifter funnet med disse søkekriteriene.</p>
+                    <p style={{ fontSize: 13, color: "#c5bfb0", margin: "6px 0 0" }}>Prøv et annet stedsnavn eller en annen bransje.</p>
                   </div>
                 ) : (
                   sorted.map((enhet, idx) => {
@@ -742,7 +742,7 @@ export default function LeadsokPage() {
                         borderBottom: idx < sorted.length - 1 ? "1px solid #F9FAFB" : "none",
                         alignItems: "center", gap: 8,
                         transition: "background-color 0.1s",
-                        backgroundColor: "white",
+                        backgroundColor: "#faf8f2",
                       }}
                         onMouseEnter={e => (e.currentTarget.style.backgroundColor = "#FAFAFA")}
                         onMouseLeave={e => (e.currentTarget.style.backgroundColor = "white")}
@@ -751,31 +751,31 @@ export default function LeadsokPage() {
                         <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0 }}>
                           <div style={{
                             width: 34, height: 34, borderRadius: 8,
-                            backgroundColor: "#F1F5F9", flexShrink: 0,
+                            backgroundColor: "#f0ece0", flexShrink: 0,
                             display: "flex", alignItems: "center", justifyContent: "center",
                             fontSize: 11, fontWeight: 700, color: "#475569",
                           }}>{initials}</div>
                           <div style={{ minWidth: 0 }}>
-                            <p style={{ fontSize: 13, fontWeight: 600, color: "#111827", margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                            <p style={{ fontSize: 13, fontWeight: 600, color: "#171717", margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                               {capitalize(enhet.navn)}
                             </p>
-                            <p style={{ fontSize: 11, color: "#9CA3AF", margin: 0 }}>{enhet.organisasjonsnummer}</p>
+                            <p style={{ fontSize: 11, color: "#a09b8f", margin: 0 }}>{enhet.organisasjonsnummer}</p>
                           </div>
                         </div>
 
                         {/* Daglig leder */}
-                        <p style={{ fontSize: 13, color: "#374151", margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                          {enhet.dagligLeder ?? <span style={{ color: "#D1D5DB" }}>—</span>}
+                        <p style={{ fontSize: 13, color: "#3d3a34", margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                          {enhet.dagligLeder ?? <span style={{ color: "#c5bfb0" }}>—</span>}
                         </p>
 
                         {/* Telefon */}
-                        <div style={{ fontSize: 13, color: "#6B7280" }}>
+                        <div style={{ fontSize: 13, color: "#6b6660" }}>
                           {enhet.telefon ? (
-                            <a href={`tel:${enhet.telefon}`} style={{ color: "#374151", textDecoration: "none", display: "flex", alignItems: "center", gap: 4 }}>
+                            <a href={`tel:${enhet.telefon}`} style={{ color: "#3d3a34", textDecoration: "none", display: "flex", alignItems: "center", gap: 4 }}>
                               <Phone size={12} />{enhet.telefon}
                             </a>
                           ) : (
-                            <span style={{ color: "#E5E7EB", fontSize: 13 }}>—</span>
+                            <span style={{ color: "#d8d3c5", fontSize: 13 }}>—</span>
                           )}
                         </div>
 
@@ -787,33 +787,33 @@ export default function LeadsokPage() {
                               target="_blank"
                               rel="noopener noreferrer"
                               onClick={e => e.stopPropagation()}
-                              style={{ fontSize: 12, color: "#2563EB", textDecoration: "none", display: "flex", alignItems: "center", gap: 4, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}
+                              style={{ fontSize: 12, color: "#ff470a", textDecoration: "none", display: "flex", alignItems: "center", gap: 4, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}
                             >
                               <Globe size={11} style={{ flexShrink: 0 }} />
                               {enhet.hjemmeside.replace(/^https?:\/\//, "").replace(/\/$/, "").split("/")[0]}
                             </a>
-                          ) : <span style={{ color: "#E5E7EB", fontSize: 13 }}>—</span>}
+                          ) : <span style={{ color: "#d8d3c5", fontSize: 13 }}>—</span>}
                         </div>
 
                         {/* Bransje */}
                         <div style={{ minWidth: 0 }}>
                           <span style={{
                             fontSize: 11, fontWeight: 500, padding: "3px 8px",
-                            borderRadius: 6, backgroundColor: "#F1F5F9", color: "#475569",
+                            borderRadius: 6, backgroundColor: "#f0ece0", color: "#475569",
                             whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
                             display: "inline-block", maxWidth: "100%",
                           }}>{bransje}</span>
                         </div>
 
                         {/* Sted */}
-                        <p style={{ fontSize: 13, color: "#374151", margin: 0, display: "flex", alignItems: "center", gap: 4 }}>
+                        <p style={{ fontSize: 13, color: "#3d3a34", margin: 0, display: "flex", alignItems: "center", gap: 4 }}>
                           <MapPin size={11} color="#9CA3AF" style={{ flexShrink: 0 }} />
                           {poststed}
                         </p>
 
                         {/* Ansatte */}
-                        <p style={{ fontSize: 13, color: "#374151", margin: 0 }}>
-                          {enhet.antallAnsatte != null ? enhet.antallAnsatte : <span style={{ color: "#E5E7EB" }}>—</span>}
+                        <p style={{ fontSize: 13, color: "#3d3a34", margin: 0 }}>
+                          {enhet.antallAnsatte != null ? enhet.antallAnsatte : <span style={{ color: "#d8d3c5" }}>—</span>}
                         </p>
 
                         {/* CTA */}
@@ -823,8 +823,8 @@ export default function LeadsokPage() {
                           style={{
                             display: "inline-flex", alignItems: "center", gap: 5,
                             padding: "7px 12px", borderRadius: 8, border: "none",
-                            backgroundColor: alreadyAdded ? "#F0FDF4" : "#22C55E",
-                            color: alreadyAdded ? "#16A34A" : "white",
+                            backgroundColor: alreadyAdded ? "#e8e4d8" : "#09fe94",
+                            color: alreadyAdded ? "#6b6660" : "#171717",
                             fontSize: 12, fontWeight: 600, cursor: alreadyAdded ? "default" : "pointer",
                             fontFamily: "inherit", flexShrink: 0,
                           }}
@@ -855,8 +855,8 @@ export default function LeadsokPage() {
                   style={{
                     display: "inline-flex", alignItems: "center", gap: 8,
                     padding: "11px 28px", borderRadius: 10,
-                    border: "1.5px solid #E5E7EB", backgroundColor: "white",
-                    fontSize: 14, fontWeight: 600, color: "#374151",
+                    border: "1.5px solid #d8d3c5", backgroundColor: "#faf8f2",
+                    fontSize: 14, fontWeight: 600, color: "#3d3a34",
                     cursor: loadingMore ? "default" : "pointer",
                     fontFamily: "inherit", opacity: loadingMore ? 0.7 : 1,
                     boxShadow: "0 1px 3px rgba(0,0,0,0.06)",

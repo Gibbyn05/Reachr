@@ -101,13 +101,13 @@ function RegisterForm() {
   if (isInvited) {
     return (
       <div className="w-full max-w-md">
-        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-8">
+        <div className="bg-[#faf8f2] rounded-2xl border border-[#d8d3c5] shadow-sm p-8">
           <div className="text-center mb-8">
             <div className="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Users className="w-6 h-6 text-blue-600" />
+              <Users className="w-6 h-6 text-[#05c472]" />
             </div>
-            <h1 className="text-2xl font-bold text-[#0F1729] mb-2">Bli med i teamet</h1>
-            <p className="text-gray-500 text-sm">
+            <h1 className="text-2xl font-bold text-[#171717] mb-2">Bli med i teamet</h1>
+            <p className="text-[#6b6660] text-sm">
               Du er invitert til Reachr. Opprett kontoen din for å komme i gang.
             </p>
           </div>
@@ -120,7 +120,7 @@ function RegisterForm() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1.5">Fullt navn</label>
+              <label className="block text-sm font-medium text-[#3d3a34] mb-1.5">Fullt navn</label>
               <Input
                 type="text"
                 placeholder="Ola Nordmann"
@@ -132,19 +132,19 @@ function RegisterForm() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1.5">E-postadresse</label>
+              <label className="block text-sm font-medium text-[#3d3a34] mb-1.5">E-postadresse</label>
               <Input
                 type="email"
                 value={form.email}
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
                 required
                 readOnly={!!inviteEmail}
-                className={inviteEmail ? "bg-gray-50 text-gray-500" : ""}
+                className={inviteEmail ? "bg-gray-50 text-[#6b6660]" : ""}
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1.5">Passord</label>
+              <label className="block text-sm font-medium text-[#3d3a34] mb-1.5">Passord</label>
               <Input
                 type="password"
                 placeholder="Minst 8 tegn"
@@ -161,9 +161,9 @@ function RegisterForm() {
             </Button>
           </form>
 
-          <p className="text-center text-sm text-gray-500 mt-4">
+          <p className="text-center text-sm text-[#6b6660] mt-4">
             Har du allerede en konto?{" "}
-            <Link href="/login" className="text-blue-600 font-semibold hover:underline">
+            <Link href="/login" className="text-[#ff470a] font-semibold hover:underline">
               Logg inn her
             </Link>
           </p>
@@ -183,23 +183,23 @@ function RegisterForm() {
             <div
               className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold transition-all ${
                 s < step
-                  ? "bg-[#2563EB] text-white"
+                  ? "bg-[#09fe94] text-white"
                   : s === step
-                  ? "bg-[#0F1729] text-white"
-                  : "bg-gray-200 text-gray-500"
+                  ? "bg-[#171717] text-white"
+                  : "bg-gray-200 text-[#6b6660]"
               }`}
             >
               {s < step ? <Check className="w-4 h-4" /> : s}
             </div>
-            <span className={`text-sm font-medium ${s === step ? "text-slate-900" : "text-gray-400"}`}>
+            <span className={`text-sm font-medium ${s === step ? "text-[#171717]" : "text-[#a09b8f]"}`}>
               {stepLabels[s - 1]}
             </span>
-            {s < 3 && <div className="w-6 h-px bg-gray-200" />}
+            {s < 3 && <div className="w-6 h-px bg-[#d8d3c5]" />}
           </div>
         ))}
       </div>
 
-      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-8">
+      <div className="bg-[#faf8f2] rounded-2xl border border-[#d8d3c5] shadow-sm p-8">
         {error && (
           <div className="mb-4 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
             {error}
@@ -209,10 +209,10 @@ function RegisterForm() {
         {step === 1 ? (
           <>
             <div className="text-center mb-8">
-              <h1 className="text-2xl font-bold text-[#0F1729] mb-2">Opprett konto</h1>
-              <p className="text-gray-500 text-sm">
+              <h1 className="text-2xl font-bold text-[#171717] mb-2">Opprett konto</h1>
+              <p className="text-[#6b6660] text-sm">
                 Allerede registrert?{" "}
-                <Link href="/login" className="text-blue-600 font-semibold hover:underline">
+                <Link href="/login" className="text-[#ff470a] font-semibold hover:underline">
                   Logg inn her
                 </Link>
               </p>
@@ -220,7 +220,7 @@ function RegisterForm() {
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">Fullt navn</label>
+                <label className="block text-sm font-medium text-[#3d3a34] mb-1.5">Fullt navn</label>
                 <Input
                   type="text"
                   placeholder="Ola Nordmann"
@@ -232,7 +232,7 @@ function RegisterForm() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">E-postadresse</label>
+                <label className="block text-sm font-medium text-[#3d3a34] mb-1.5">E-postadresse</label>
                 <Input
                   type="email"
                   placeholder="du@bedrift.no"
@@ -243,7 +243,7 @@ function RegisterForm() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">Passord</label>
+                <label className="block text-sm font-medium text-[#3d3a34] mb-1.5">Passord</label>
                 <Input
                   type="password"
                   placeholder="Minst 8 tegn"
@@ -262,13 +262,13 @@ function RegisterForm() {
         ) : step === 2 ? (
           <>
             <div className="text-center mb-8">
-              <h1 className="text-2xl font-bold text-[#0F1729] mb-2">Sett opp bedriften din</h1>
-              <p className="text-gray-500 text-sm">Velg plan basert på antall brukere</p>
+              <h1 className="text-2xl font-bold text-[#171717] mb-2">Sett opp bedriften din</h1>
+              <p className="text-[#6b6660] text-sm">Velg plan basert på antall brukere</p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-5">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">Bedriftsnavn</label>
+                <label className="block text-sm font-medium text-[#3d3a34] mb-1.5">Bedriftsnavn</label>
                 <Input
                   type="text"
                   placeholder="Bedrift AS"
@@ -280,7 +280,7 @@ function RegisterForm() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-3">Antall brukere</label>
+                <label className="block text-sm font-medium text-[#3d3a34] mb-3">Antall brukere</label>
                 <div className="grid grid-cols-2 gap-3">
                   {userCountOptions.map((opt) => (
                     <button
@@ -289,17 +289,17 @@ function RegisterForm() {
                       onClick={() => setForm({ ...form, userCount: opt.value })}
                       className={`p-4 rounded-xl border-2 text-left transition-all ${
                         form.userCount === opt.value
-                          ? "border-blue-600 bg-blue-50"
-                          : "border-gray-200 hover:border-gray-300"
+                          ? "border-[#09fe94] bg-[#09fe94]/8"
+                          : "border-[#d8d3c5] hover:border-[#a09b8f]"
                       }`}
                     >
                       <div className="flex items-center gap-2 mb-1">
-                        <Users className={`w-4 h-4 ${form.userCount === opt.value ? "text-blue-600" : "text-gray-400"}`} />
-                        <span className={`text-sm font-semibold ${form.userCount === opt.value ? "text-blue-700" : "text-slate-700"}`}>
+                        <Users className={`w-4 h-4 ${form.userCount === opt.value ? "text-[#05c472]" : "text-[#a09b8f]"}`} />
+                        <span className={`text-sm font-semibold ${form.userCount === opt.value ? "text-[#3d3a34]" : "text-[#3d3a34]"}`}>
                           {opt.label}
                         </span>
                       </div>
-                      <span className={`text-xs ${form.userCount === opt.value ? "text-blue-600" : "text-gray-400"}`}>
+                      <span className={`text-xs ${form.userCount === opt.value ? "text-[#05c472]" : "text-[#a09b8f]"}`}>
                         {opt.price}
                       </span>
                     </button>
@@ -308,13 +308,13 @@ function RegisterForm() {
               </div>
 
               {/* Trial banner */}
-              <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 flex items-start gap-3">
-                <div className="w-5 h-5 bg-[#2563EB] rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+              <div className="bg-[#09fe94]/8 border border-[#09fe94]/30 rounded-xl p-4 flex items-start gap-3">
+                <div className="w-5 h-5 bg-[#09fe94] rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                   <Check className="w-3 h-3 text-white" />
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-blue-800">3 dager gratis prøveperiode</p>
-                  <p className="text-xs text-blue-700 mt-0.5">Ingen kredittkort nødvendig. Du kan avbestille når som helst.</p>
+                  <p className="text-sm font-semibold text-[#171717]">3 dager gratis prøveperiode</p>
+                  <p className="text-xs text-[#3d3a34] mt-0.5">Ingen kredittkort nødvendig. Du kan avbestille når som helst.</p>
                 </div>
               </div>
 
@@ -334,14 +334,14 @@ function RegisterForm() {
               <div className="w-12 h-12 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Target className="w-6 h-6 text-green-600" />
               </div>
-              <h1 className="text-2xl font-bold text-[#0F1729] mb-2">Om bedriften din</h1>
-              <p className="text-gray-500 text-sm">Hjelper AI-en med å skrive relevante e-poster</p>
+              <h1 className="text-2xl font-bold text-[#171717] mb-2">Om bedriften din</h1>
+              <p className="text-[#6b6660] text-sm">Hjelper AI-en med å skrive relevante e-poster</p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-5">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                  Hva selger dere? <span className="text-gray-400 font-normal">(kort beskrivelse)</span>
+                <label className="block text-sm font-medium text-[#3d3a34] mb-1.5">
+                  Hva selger dere? <span className="text-[#a09b8f] font-normal">(kort beskrivelse)</span>
                 </label>
                 <textarea
                   value={form.salesPitch}
@@ -351,18 +351,18 @@ function RegisterForm() {
                   required
                   style={{
                     width: "100%", padding: "10px 12px",
-                    border: "1.5px solid #E5E7EB", borderRadius: 10,
-                    fontSize: 14, color: "#111827", outline: "none",
-                    fontFamily: "inherit", backgroundColor: "#FAFAFA",
+                    border: "1.5px solid #d8d3c5", borderRadius: 10,
+                    fontSize: 14, color: "#171717", outline: "none",
+                    fontFamily: "inherit", backgroundColor: "#faf8f2",
                     resize: "vertical", lineHeight: "1.5",
                   }}
-                  onFocus={(e) => (e.currentTarget.style.borderColor = "#2563EB")}
-                  onBlur={(e) => (e.currentTarget.style.borderColor = "#E5E7EB")}
+                  onFocus={(e) => (e.currentTarget.style.borderColor = "#09fe94")}
+                  onBlur={(e) => (e.currentTarget.style.borderColor = "#d8d3c5")}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-3">Hvem er kundene deres?</label>
+                <label className="block text-sm font-medium text-[#3d3a34] mb-3">Hvem er kundene deres?</label>
                 <div className="space-y-2">
                   {targetOptions.map((opt) => (
                     <button
@@ -371,14 +371,14 @@ function RegisterForm() {
                       onClick={() => setForm({ ...form, targetCustomers: opt.value })}
                       className={`w-full p-3 rounded-xl border-2 text-left transition-all ${
                         form.targetCustomers === opt.value
-                          ? "border-blue-600 bg-blue-50"
-                          : "border-gray-200 hover:border-gray-300"
+                          ? "border-[#09fe94] bg-[#09fe94]/8"
+                          : "border-[#d8d3c5] hover:border-[#a09b8f]"
                       }`}
                     >
-                      <span className={`text-sm font-semibold ${form.targetCustomers === opt.value ? "text-blue-700" : "text-slate-700"}`}>
+                      <span className={`text-sm font-semibold ${form.targetCustomers === opt.value ? "text-[#3d3a34]" : "text-[#3d3a34]"}`}>
                         {opt.label}
                       </span>
-                      <span className={`block text-xs mt-0.5 ${form.targetCustomers === opt.value ? "text-blue-600" : "text-gray-400"}`}>
+                      <span className={`block text-xs mt-0.5 ${form.targetCustomers === opt.value ? "text-[#05c472]" : "text-[#a09b8f]"}`}>
                         {opt.desc}
                       </span>
                     </button>

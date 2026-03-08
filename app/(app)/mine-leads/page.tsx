@@ -27,25 +27,25 @@ function MeetingDateModal({
   const [dt, setDt] = useState(existing ?? "");
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40" onClick={onClose}>
-      <div className="bg-white rounded-2xl shadow-2xl p-6 w-80" onClick={(e) => e.stopPropagation()}>
-        <h3 className="text-sm font-bold text-slate-900 mb-1">Dato og tid for møtet</h3>
-        <p className="text-xs text-gray-400 mb-4">{leadName}</p>
+      <div className="bg-[#faf8f2] rounded-2xl shadow-xl p-6 w-80" onClick={(e) => e.stopPropagation()}>
+        <h3 className="text-sm font-bold text-[#171717] mb-1">Dato og tid for møtet</h3>
+        <p className="text-xs text-[#a09b8f] mb-4">{leadName}</p>
         <input
           type="datetime-local"
           value={dt}
           onChange={(e) => setDt(e.target.value)}
-          className="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:border-green-500 bg-white"
+          className="w-full text-sm border border-[#d8d3c5] rounded-lg px-3 py-2 focus:outline-none focus:border-[#09fe94]/60 bg-[#faf8f2]"
           autoFocus
         />
         <div className="flex gap-2 mt-4">
           <button
             onClick={() => { if (dt) onSave(dt); }}
             disabled={!dt}
-            className="flex-1 py-2 bg-green-500 text-white text-sm font-semibold rounded-lg hover:bg-green-600 disabled:opacity-40"
+            className="flex-1 py-2 bg-[#09fe94] text-[#171717] text-sm font-semibold rounded-lg hover:bg-[#00e882] disabled:opacity-40"
           >
             Lagre møtetid
           </button>
-          <button onClick={onClose} className="px-4 py-2 border border-gray-200 text-sm rounded-lg hover:bg-gray-50">
+          <button onClick={onClose} className="px-4 py-2 border border-[#d8d3c5] text-sm rounded-lg hover:bg-[#f0ece0]">
             Avbryt
           </button>
         </div>
@@ -100,25 +100,25 @@ function AiSmsModal({
 
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40" onClick={onClose}>
-      <div className="bg-white rounded-2xl shadow-2xl w-[480px] max-w-[95vw]" onClick={(e) => e.stopPropagation()}>
-        <div className="flex items-center justify-between p-5 border-b border-gray-100">
+      <div className="bg-[#faf8f2] rounded-2xl shadow-xl w-[480px] max-w-[95vw]" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center justify-between p-5 border-b border-[#e8e4d8]">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-green-50 rounded-lg flex items-center justify-center">
+            <div className="w-8 h-8 bg-[#09fe94]/10 rounded-lg flex items-center justify-center">
               <Phone className="w-4 h-4 text-green-600" />
             </div>
             <div>
-              <h3 className="text-sm font-bold text-slate-900">AI-SMS til {lead.name}</h3>
-              <p className="text-xs text-gray-400">{phone ?? "Ingen tlf registrert"}</p>
+              <h3 className="text-sm font-bold text-[#171717]">AI-SMS til {lead.name}</h3>
+              <p className="text-xs text-[#a09b8f]">{phone ?? "Ingen tlf registrert"}</p>
             </div>
           </div>
-          <button onClick={onClose} className="p-1.5 text-gray-400 hover:text-gray-600">
+          <button onClick={onClose} className="p-1.5 text-[#a09b8f] hover:text-[#6b6660]">
             <X className="w-4 h-4" />
           </button>
         </div>
 
         <div className="p-5 space-y-4">
           {generating ? (
-            <div className="flex items-center justify-center py-10 gap-3 text-gray-500">
+            <div className="flex items-center justify-center py-10 gap-3 text-[#6b6660]">
               <Loader2 className="w-5 h-5 animate-spin text-green-500" />
               <span className="text-sm">Skriver SMS med AI…</span>
             </div>
@@ -126,14 +126,14 @@ function AiSmsModal({
             <>
               <div>
                 <div className="flex items-center justify-between mb-1">
-                  <label className="block text-xs font-semibold text-gray-500">SMS-tekst</label>
-                  <span className={`text-xs ${text.length > 160 ? "text-red-500" : "text-gray-400"}`}>{text.length}/160 tegn</span>
+                  <label className="block text-xs font-semibold text-[#6b6660]">SMS-tekst</label>
+                  <span className={`text-xs ${text.length > 160 ? "text-red-500" : "text-[#a09b8f]"}`}>{text.length}/160 tegn</span>
                 </div>
                 <textarea
                   value={text}
                   onChange={(e) => setText(e.target.value)}
                   rows={4}
-                  className="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:border-green-400 bg-white resize-none"
+                  className="w-full text-sm border border-[#d8d3c5] rounded-lg px-3 py-2 focus:outline-none focus:border-[#09fe94]/60 bg-[#faf8f2] resize-none"
                 />
               </div>
 
@@ -144,11 +144,11 @@ function AiSmsModal({
                   onChange={(e) => setComment(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && generateDraft()}
                   placeholder="F.eks. «kortere», «mer direkte»"
-                  className="flex-1 text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:border-green-400 bg-white"
+                  className="flex-1 text-sm border border-[#d8d3c5] rounded-lg px-3 py-2 focus:outline-none focus:border-[#09fe94]/60 bg-[#faf8f2]"
                 />
                 <button
                   onClick={generateDraft}
-                  className="flex items-center gap-1 text-xs text-green-600 hover:text-green-800 font-medium border border-green-200 rounded-lg px-3 py-2 bg-green-50 hover:bg-green-100 whitespace-nowrap"
+                  className="flex items-center gap-1 text-xs text-[#05c472] hover:text-[#03a05a] font-medium border border-[#09fe94]/30 rounded-lg px-3 py-2 bg-[#09fe94]/8 hover:bg-[#09fe94]/15 whitespace-nowrap"
                 >
                   <Sparkles className="w-3 h-3" />
                   Generer på nytt
@@ -158,7 +158,7 @@ function AiSmsModal({
               {error && <p className="text-xs text-red-500 bg-red-50 border border-red-100 rounded-lg px-3 py-2">{error}</p>}
 
               {sent && (
-                <div className="flex items-center gap-2 px-3 py-2 bg-green-50 border border-green-200 rounded-lg text-xs text-green-700 font-medium">
+                <div className="flex items-center gap-2 px-3 py-2 bg-[#09fe94]/8 border border-[#09fe94]/30 rounded-lg text-xs text-[#05c472] font-medium">
                   <Check className="w-3.5 h-3.5" />
                   SMS sendt — kontaktstatus oppdatert!
                 </div>
@@ -175,7 +175,7 @@ function AiSmsModal({
                     Åpne i SMS-app
                   </a>
                 ) : (
-                  <span className="text-xs text-gray-400">Ingen tlf — kopier teksten og send manuelt</span>
+                  <span className="text-xs text-[#a09b8f]">Ingen tlf — kopier teksten og send manuelt</span>
                 )}
                 <button
                   onClick={() => {
@@ -186,7 +186,7 @@ function AiSmsModal({
                     setSent(true);
                     setTimeout(onClose, 1800);
                   }}
-                  className="ml-auto flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium border border-gray-200 rounded-lg hover:bg-gray-50 text-gray-600"
+                  className="ml-auto flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium border border-[#d8d3c5] rounded-lg hover:bg-[#f0ece0] text-[#6b6660]"
                 >
                   {copied ? <Check className="w-3 h-3 text-green-500" /> : <Copy className="w-3 h-3" />}
                   {copied ? "Kopiert!" : "Kopier tekst"}
@@ -292,26 +292,26 @@ function AiEmailModal({
 
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40" onClick={onClose}>
-      <div className="bg-white rounded-2xl shadow-2xl w-[600px] max-w-[95vw] max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+      <div className="bg-[#faf8f2] rounded-2xl shadow-xl w-[600px] max-w-[95vw] max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
         {/* Header */}
-        <div className="flex items-center justify-between p-5 border-b border-gray-100">
+        <div className="flex items-center justify-between p-5 border-b border-[#e8e4d8]">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 bg-purple-50 rounded-lg flex items-center justify-center">
               <Sparkles className="w-4 h-4 text-purple-600" />
             </div>
             <div>
-              <h3 className="text-sm font-bold text-slate-900">AI-utkast til {lead.name}</h3>
-              <p className="text-xs text-gray-400">{lead.industry} · {lead.city}</p>
+              <h3 className="text-sm font-bold text-[#171717]">AI-utkast til {lead.name}</h3>
+              <p className="text-xs text-[#a09b8f]">{lead.industry} · {lead.city}</p>
             </div>
           </div>
-          <button onClick={onClose} className="p-1.5 text-gray-400 hover:text-gray-600">
+          <button onClick={onClose} className="p-1.5 text-[#a09b8f] hover:text-[#6b6660]">
             <X className="w-4 h-4" />
           </button>
         </div>
 
         <div className="p-5 space-y-4">
           {generating ? (
-            <div className="flex items-center justify-center py-12 gap-3 text-gray-500">
+            <div className="flex items-center justify-center py-12 gap-3 text-[#6b6660]">
               <Loader2 className="w-5 h-5 animate-spin text-purple-500" />
               <span className="text-sm">Skriver e-post med AI…</span>
             </div>
@@ -324,13 +324,13 @@ function AiEmailModal({
             <>
               {/* To */}
               <div>
-                <label className="block text-xs font-semibold text-gray-500 mb-1">Til</label>
+                <label className="block text-xs font-semibold text-[#6b6660] mb-1">Til</label>
                 <input
                   type="email"
                   value={toEmail}
                   onChange={(e) => setToEmail(e.target.value)}
                   placeholder="mottaker@bedrift.no"
-                  className="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:border-purple-400 bg-white"
+                  className="w-full text-sm border border-[#d8d3c5] rounded-lg px-3 py-2 focus:outline-none focus:border-purple-400 bg-[#faf8f2]"
                 />
                 {!toEmail && (
                   <div className="mt-2 p-3 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-800 space-y-1.5">
@@ -368,29 +368,29 @@ function AiEmailModal({
 
               {/* Subject */}
               <div>
-                <label className="block text-xs font-semibold text-gray-500 mb-1">Emne</label>
+                <label className="block text-xs font-semibold text-[#6b6660] mb-1">Emne</label>
                 <input
                   type="text"
                   value={subject}
                   onChange={(e) => setSubject(e.target.value)}
-                  className="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:border-purple-400 bg-white"
+                  className="w-full text-sm border border-[#d8d3c5] rounded-lg px-3 py-2 focus:outline-none focus:border-purple-400 bg-[#faf8f2]"
                 />
               </div>
 
               {/* Body */}
               <div>
-                <label className="block text-xs font-semibold text-gray-500 mb-1">Innhold</label>
+                <label className="block text-xs font-semibold text-[#6b6660] mb-1">Innhold</label>
                 <textarea
                   value={body}
                   onChange={(e) => setBody(e.target.value)}
                   rows={8}
-                  className="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:border-purple-400 bg-white resize-none"
+                  className="w-full text-sm border border-[#d8d3c5] rounded-lg px-3 py-2 focus:outline-none focus:border-purple-400 bg-[#faf8f2] resize-none"
                 />
               </div>
 
               {/* AI comment / regenerate */}
               <div>
-                <label className="block text-xs font-semibold text-gray-500 mb-1">Instruksjon til AI (valgfritt)</label>
+                <label className="block text-xs font-semibold text-[#6b6660] mb-1">Instruksjon til AI (valgfritt)</label>
                 <div className="flex gap-2">
                   <input
                     type="text"
@@ -398,7 +398,7 @@ function AiEmailModal({
                     onChange={(e) => setComment(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && generateDraft()}
                     placeholder="F.eks. «gjør den kortere», «mer uformell», «fremhev pris»"
-                    className="flex-1 text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:border-purple-400 bg-white"
+                    className="flex-1 text-sm border border-[#d8d3c5] rounded-lg px-3 py-2 focus:outline-none focus:border-purple-400 bg-[#faf8f2]"
                   />
                   <button
                     onClick={generateDraft}
@@ -422,7 +422,7 @@ function AiEmailModal({
                       <select
                         value={selectedProvider}
                         onChange={(e) => setSelectedProvider(e.target.value)}
-                        className="text-xs border border-gray-200 rounded-lg px-2 py-1.5 focus:outline-none bg-white text-gray-700"
+                        className="text-xs border border-[#d8d3c5] rounded-lg px-2 py-1.5 focus:outline-none bg-[#faf8f2] text-gray-700"
                       >
                         {connections.map((c) => (
                           <option key={c.provider} value={c.provider}>
@@ -432,7 +432,7 @@ function AiEmailModal({
                       </select>
                     )}
                     {connections.length === 1 && (
-                      <span className="text-xs text-gray-500">
+                      <span className="text-xs text-[#6b6660]">
                         Send via {connections[0].provider === "gmail" ? "Gmail" : "Outlook"} ({connections[0].email_address})
                       </span>
                     )}
@@ -449,11 +449,11 @@ function AiEmailModal({
                   </>
                 ) : (
                   <>
-                    <span className="text-xs text-gray-400">Ingen e-postkonto tilkoblet –</span>
+                    <span className="text-xs text-[#a09b8f]">Ingen e-postkonto tilkoblet –</span>
                     <a href="/innstillinger?tab=epost" className="text-xs text-purple-600 hover:underline font-medium">koble til her</a>
                     <button
                       onClick={handleCopy}
-                      className="ml-auto flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium border border-gray-200 rounded-lg hover:bg-gray-50 text-gray-600"
+                      className="ml-auto flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium border border-[#d8d3c5] rounded-lg hover:bg-[#f0ece0] text-[#6b6660]"
                     >
                       {copied ? <Check className="w-3 h-3 text-green-500" /> : <Copy className="w-3 h-3" />}
                       {copied ? "Kopiert!" : "Kopier tekst"}
@@ -592,27 +592,27 @@ function LeadRow({
   return (
     <>
       <tr
-        className="hover:bg-gray-50 transition-colors cursor-pointer"
+        className="hover:bg-[#f0ece0] transition-colors cursor-pointer"
         onClick={() => setExpanded(!expanded)}
       >
         {/* Name */}
         <td className="px-4 py-3.5">
           <div className="flex items-center gap-3">
             <ChevronRight
-              className={`w-4 h-4 text-gray-400 transition-transform flex-shrink-0 ${expanded ? "rotate-90" : ""}`}
+              className={`w-4 h-4 text-[#a09b8f] transition-transform flex-shrink-0 ${expanded ? "rotate-90" : ""}`}
             />
-            <div className="w-8 h-8 bg-slate-100 rounded-lg flex items-center justify-center text-xs font-bold text-slate-600 flex-shrink-0">
+            <div className="w-8 h-8 bg-[#e8e4d8] rounded-lg flex items-center justify-center text-xs font-bold text-[#6b6660] flex-shrink-0">
               {lead.name.substring(0, 2).toUpperCase()}
             </div>
             <div className="min-w-0">
-              <p className="text-sm font-semibold text-slate-900 truncate">{lead.name}</p>
-              <p className="text-xs text-gray-400">{lead.industry}</p>
+              <p className="text-sm font-semibold text-[#171717] truncate">{lead.name}</p>
+              <p className="text-xs text-[#a09b8f]">{lead.industry}</p>
             </div>
           </div>
         </td>
 
         {/* Contact */}
-        <td className="px-4 py-3.5 text-sm text-gray-600 whitespace-nowrap">{lead.contactPerson}</td>
+        <td className="px-4 py-3.5 text-sm text-[#6b6660] whitespace-nowrap">{lead.contactPerson}</td>
 
         {/* Status — uses fixed dropdown to avoid table overflow clipping */}
         <td className="px-4 py-3.5" onClick={(e) => e.stopPropagation()}>
@@ -623,13 +623,13 @@ function LeadRow({
               className="flex items-center gap-1.5"
             >
               <Badge variant={statusColors[lead.status]}>{lead.status}</Badge>
-              <ChevronDown className="w-3 h-3 text-gray-400" />
+              <ChevronDown className="w-3 h-3 text-[#a09b8f]" />
             </button>
           </div>
         </td>
 
         {/* Last contacted / Meeting date */}
-        <td className="px-4 py-3.5 text-sm text-gray-500 whitespace-nowrap">
+        <td className="px-4 py-3.5 text-sm text-[#6b6660] whitespace-nowrap">
           {lead.status === "Booket møte" && meetingDate ? (
             <span className="flex items-center gap-1 text-purple-600 font-medium text-xs">
               <Calendar className="w-3 h-3" />
@@ -646,12 +646,12 @@ function LeadRow({
             <div className="w-6 h-6 bg-[#0F1729] rounded-full flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0">
               {lead.assignedAvatar}
             </div>
-            <span className="text-sm text-gray-600 whitespace-nowrap">{lead.assignedTo}</span>
+            <span className="text-sm text-[#6b6660] whitespace-nowrap">{lead.assignedTo}</span>
           </div>
         </td>
 
         {/* Notes preview */}
-        <td className="px-4 py-3.5 text-sm text-gray-400 max-w-xs truncate">
+        <td className="px-4 py-3.5 text-sm text-[#a09b8f] max-w-xs truncate">
           {lead.notes || <span className="text-gray-300 italic">Ingen notater</span>}
         </td>
       </tr>
@@ -667,13 +667,13 @@ function LeadRow({
                 onClick={() => setStatusDropdown(false)}
               />
               <div
-                className="fixed bg-white rounded-xl border border-gray-200 shadow-xl z-[999] py-1 w-52"
+                className="fixed bg-[#faf8f2] rounded-xl border border-[#d8d3c5] shadow-xl z-[999] py-1 w-52"
                 style={{ top: dropdownCoords.top, left: dropdownCoords.left }}
               >
                 {statusOptions.map((s) => (
                   <button
                     key={s}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 hover:bg-gray-50 text-left"
+                    className="w-full flex items-center gap-2.5 px-3 py-2 hover:bg-[#f0ece0] text-left"
                     onClick={() => {
                       onStatusChange(lead.id, s);
                       setStatusDropdown(false);
@@ -692,12 +692,12 @@ function LeadRow({
       {/* Expanded detail panel */}
       {expanded && (
         <tr>
-          <td colSpan={6} className="bg-slate-50 border-b border-gray-100" onClick={(e) => e.stopPropagation()}>
+          <td colSpan={6} className="bg-slate-50 border-b border-[#e8e4d8]" onClick={(e) => e.stopPropagation()}>
             <div className="px-6 py-5 space-y-5">
 
               {/* Quick status buttons */}
               <div>
-                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Status</p>
+                <p className="text-xs font-semibold text-[#a09b8f] uppercase tracking-wider mb-2">Status</p>
                 <div className="flex flex-wrap gap-2">
                   {statusOptions.map((s) => (
                     <button
@@ -706,7 +706,7 @@ function LeadRow({
                       className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${
                         lead.status === s
                           ? "border-transparent ring-2 ring-offset-1"
-                          : "border-gray-200 bg-white hover:border-gray-300"
+                          : "border-[#d8d3c5] bg-[#faf8f2] hover:border-[#a09b8f]"
                       }`}
                       style={lead.status === s ? {
                         backgroundColor: {
@@ -730,25 +730,25 @@ function LeadRow({
               <div className="grid grid-cols-3 gap-6">
                 {/* Contact info */}
                 <div>
-                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                  <p className="text-xs font-semibold text-[#a09b8f] uppercase tracking-wider mb-3 flex items-center gap-1.5">
                     <Phone className="w-3.5 h-3.5" /> Kontaktinformasjon
                   </p>
                   <div className="space-y-2">
                     <a
                       href={`tel:${lead.phone}`}
-                      className="flex items-center gap-2 text-sm text-gray-600 hover:text-green-600"
+                      className="flex items-center gap-2 text-sm text-[#6b6660] hover:text-green-600"
                     >
-                      <Phone className="w-4 h-4 text-gray-400" />
+                      <Phone className="w-4 h-4 text-[#a09b8f]" />
                       {lead.phone !== "—" ? lead.phone : <span className="text-gray-300 italic">Ingen telefon</span>}
                     </a>
                     <a
                       href={`mailto:${lead.email}`}
-                      className="flex items-center gap-2 text-sm text-gray-600 hover:text-green-600"
+                      className="flex items-center gap-2 text-sm text-[#6b6660] hover:text-green-600"
                     >
-                      <Mail className="w-4 h-4 text-gray-400" />
+                      <Mail className="w-4 h-4 text-[#a09b8f]" />
                       {lead.email !== "—" ? lead.email : <span className="text-gray-300 italic">Ingen e-post</span>}
                     </a>
-                    <p className="text-xs text-gray-400 flex items-center gap-2">
+                    <p className="text-xs text-[#a09b8f] flex items-center gap-2">
                       <Building2 className="w-3.5 h-3.5" />{lead.address || "—"}
                     </p>
                   </div>
@@ -762,7 +762,7 @@ function LeadRow({
                   </button>
                   <button
                     onClick={(e) => { e.stopPropagation(); setSmsModalOpen(true); }}
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-green-50 text-green-700 text-xs font-semibold rounded-lg hover:bg-green-100 transition-colors border border-green-100"
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-[#09fe94]/10 text-[#05c472] text-xs font-semibold rounded-lg hover:bg-[#09fe94]/20 transition-colors border border-[#09fe94]/20"
                   >
                     <Phone className="w-3.5 h-3.5" />
                     Skriv AI-SMS
@@ -771,19 +771,19 @@ function LeadRow({
 
                   {/* Last contacted */}
                   <div className="mt-4">
-                    <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                    <p className="text-xs font-semibold text-[#a09b8f] uppercase tracking-wider mb-2 flex items-center gap-1.5">
                       <Clock className="w-3.5 h-3.5" /> Sist kontaktet
                     </p>
                     <input
                       type="date"
                       value={lead.lastContacted ?? ""}
                       onChange={(e) => onLastContactedChange(lead.id, e.target.value || null)}
-                      className="text-sm border border-gray-200 rounded-lg px-2 py-1.5 text-gray-700 focus:outline-none focus:border-green-500 bg-white w-full"
+                      className="text-sm border border-[#d8d3c5] rounded-lg px-2 py-1.5 text-gray-700 focus:outline-none focus:border-[#09fe94]/60 bg-[#faf8f2] w-full"
                     />
                     {lead.lastContacted && (
                       <button
                         onClick={() => onLastContactedChange(lead.id, null)}
-                        className="text-xs text-gray-400 hover:text-gray-600 mt-1 underline"
+                        className="text-xs text-[#a09b8f] hover:text-[#6b6660] mt-1 underline"
                       >
                         Nullstill dato
                       </button>
@@ -794,13 +794,13 @@ function LeadRow({
                 {/* Notes */}
                 <div>
                   <div className="flex items-center justify-between mb-3">
-                    <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
+                    <p className="text-xs font-semibold text-[#a09b8f] uppercase tracking-wider flex items-center gap-1.5">
                       <MessageSquare className="w-3.5 h-3.5" /> Notater
                     </p>
                     {!editingNotes && (
                       <button
                         onClick={() => setEditingNotes(true)}
-                        className="text-xs text-blue-600 hover:underline font-medium"
+                        className="text-xs text-[#ff470a] hover:underline font-medium"
                       >
                         Rediger
                       </button>
@@ -811,7 +811,7 @@ function LeadRow({
                       <textarea
                         value={notes}
                         onChange={(e) => setNotes(e.target.value)}
-                        className="w-full p-3 border border-gray-200 rounded-lg text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500 resize-none bg-white"
+                        className="w-full p-3 border border-[#d8d3c5] rounded-lg text-sm text-[#3d3a34] focus:outline-none focus:ring-2 focus:ring-[#09fe94]/20 focus:border-[#09fe94]/60 resize-none bg-[#faf8f2]"
                         rows={5}
                         placeholder="Legg til notater om dette leadet..."
                         autoFocus
@@ -841,7 +841,7 @@ function LeadRow({
                     </div>
                   ) : (
                     <div
-                      className="text-sm text-gray-600 bg-white border border-gray-100 rounded-lg p-3 min-h-[80px] cursor-text"
+                      className="text-sm text-[#6b6660] bg-[#faf8f2] border border-gray-100 rounded-lg p-3 min-h-[80px] cursor-text"
                       onClick={() => setEditingNotes(true)}
                     >
                       {notes || <span className="italic text-gray-300">Klikk for å legge til notater…</span>}
@@ -851,19 +851,19 @@ function LeadRow({
 
                 {/* Meta info */}
                 <div>
-                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                  <p className="text-xs font-semibold text-[#a09b8f] uppercase tracking-wider mb-3 flex items-center gap-1.5">
                     <UserCheck className="w-3.5 h-3.5" /> Ansvar og info
                   </p>
                   <div className="space-y-3">
                     {/* Assigned to — dropdown */}
                     <div>
-                      <p className="text-xs text-gray-400 mb-1">Ansvarlig</p>
+                      <p className="text-xs text-[#a09b8f] mb-1">Ansvarlig</p>
                       {teamMembers.length > 1 ? (
                         <div className="relative">
                           <select
                             value={lead.assignedTo}
                             onChange={(e) => onAssignedChange(lead.id, e.target.value)}
-                            className="w-full appearance-none pl-9 pr-8 py-1.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-green-500 bg-white cursor-pointer text-gray-700"
+                            className="w-full appearance-none pl-9 pr-8 py-1.5 text-sm border border-[#d8d3c5] rounded-lg focus:outline-none focus:border-[#09fe94]/60 bg-[#faf8f2] cursor-pointer text-gray-700"
                           >
                             {teamMembers.map((name) => (
                               <option key={name} value={name}>{name}</option>
@@ -872,7 +872,7 @@ function LeadRow({
                           <div className="absolute left-2 top-1/2 -translate-y-1/2 w-5 h-5 bg-[#0F1729] rounded-full flex items-center justify-center text-white text-[9px] font-bold pointer-events-none">
                             {lead.assignedAvatar}
                           </div>
-                          <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                          <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-[#a09b8f] pointer-events-none" />
                         </div>
                       ) : (
                         <button
@@ -902,7 +902,7 @@ function LeadRow({
                                 setEditingAssigned(false);
                               }
                             }}
-                            className="flex-1 text-sm border border-gray-200 rounded-lg px-2 py-1.5 focus:outline-none focus:border-green-500 bg-white"
+                            className="flex-1 text-sm border border-[#d8d3c5] rounded-lg px-2 py-1.5 focus:outline-none focus:border-[#09fe94]/60 bg-[#faf8f2]"
                             autoFocus
                           />
                           <button
@@ -923,7 +923,7 @@ function LeadRow({
                       {!reminderOpen ? (
                         <button
                           onClick={() => setReminderOpen(true)}
-                          className="flex items-center gap-1.5 text-xs text-blue-600 hover:text-blue-700 font-medium"
+                          className="flex items-center gap-1.5 text-xs text-[#ff470a] hover:text-[#d63b08] font-medium"
                         >
                           <Bell className="w-3.5 h-3.5" />
                           Send påminnelse til {lead.assignedTo}
@@ -934,12 +934,12 @@ function LeadRow({
                         </p>
                       ) : (
                         <div className="space-y-2">
-                          <p className="text-xs text-gray-500 font-medium">Melding til {lead.assignedTo}:</p>
+                          <p className="text-xs text-[#6b6660] font-medium">Melding til {lead.assignedTo}:</p>
                           <textarea
                             value={reminderMsg}
                             onChange={(e) => setReminderMsg(e.target.value)}
                             placeholder={`Husk å følge opp ${lead.name}...`}
-                            className="w-full text-xs border border-gray-200 rounded-lg px-2 py-1.5 focus:outline-none focus:border-blue-400 resize-none bg-white"
+                            className="w-full text-xs border border-[#d8d3c5] rounded-lg px-2 py-1.5 focus:outline-none focus:border-blue-400 resize-none bg-[#faf8f2]"
                             rows={2}
                             autoFocus
                           />
@@ -954,7 +954,7 @@ function LeadRow({
                             </button>
                             <button
                               onClick={() => { setReminderOpen(false); setReminderMsg(""); }}
-                              className="px-2 py-1 border border-gray-200 rounded text-xs text-gray-500 hover:bg-gray-50"
+                              className="px-2 py-1 border border-[#d8d3c5] rounded text-xs text-[#6b6660] hover:bg-[#f0ece0]"
                             >
                               Avbryt
                             </button>
@@ -965,15 +965,15 @@ function LeadRow({
 
                     {/* Added by — read only */}
                     <div>
-                      <p className="text-xs text-gray-400 mb-1">Lagt til av</p>
+                      <p className="text-xs text-[#a09b8f] mb-1">Lagt til av</p>
                       <p className="text-sm text-gray-700">{lead.addedBy || "—"}</p>
                     </div>
 
                     {/* Other meta */}
-                    <div className="space-y-1.5 text-sm text-gray-600 pt-2 border-t border-gray-100">
-                      <p><span className="text-gray-400">Org.nr:</span> {lead.orgNumber}</p>
-                      <p><span className="text-gray-400">Ansatte:</span> {lead.employees || "—"}</p>
-                      <p><span className="text-gray-400">La til:</span> {new Date(lead.addedDate).toLocaleDateString("nb-NO")}</p>
+                    <div className="space-y-1.5 text-sm text-[#6b6660] pt-2 border-t border-gray-100">
+                      <p><span className="text-[#a09b8f]">Org.nr:</span> {lead.orgNumber}</p>
+                      <p><span className="text-[#a09b8f]">Ansatte:</span> {lead.employees || "—"}</p>
+                      <p><span className="text-[#a09b8f]">La til:</span> {new Date(lead.addedDate).toLocaleDateString("nb-NO")}</p>
                     </div>
 
                     {/* Remove lead */}
@@ -989,7 +989,7 @@ function LeadRow({
                           </button>
                           <button
                             onClick={() => setConfirmDelete(false)}
-                            className="px-2 py-1 border border-gray-200 rounded text-xs text-gray-500 hover:bg-gray-50"
+                            className="px-2 py-1 border border-[#d8d3c5] rounded text-xs text-[#6b6660] hover:bg-[#f0ece0]"
                           >
                             Avbryt
                           </button>
@@ -997,7 +997,7 @@ function LeadRow({
                       ) : (
                         <button
                           onClick={() => setConfirmDelete(true)}
-                          className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-red-500 transition-colors"
+                          className="flex items-center gap-1.5 text-xs text-[#a09b8f] hover:text-red-500 transition-colors"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                           Fjern fra pipeline
@@ -1092,13 +1092,13 @@ export default function MineLeadsPage() {
   const thisWeek = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
 
   const stats = [
-    { label: "Totalt leads", value: leads.length, icon: Users, color: "text-blue-600", bg: "bg-blue-50" },
+    { label: "Totalt leads", value: leads.length, icon: Users, color: "text-[#05c472]", bg: "bg-[#09fe94]/10" },
     {
       label: "Nye denne uken",
       value: leads.filter((l) => l.addedDate >= thisWeek).length,
       icon: TrendingUp,
       color: "text-green-600",
-      bg: "bg-green-50",
+      bg: "bg-[#09fe94]/10",
     },
     {
       label: "Booket møte",
@@ -1124,14 +1124,14 @@ export default function MineLeadsPage() {
         {/* Stats */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {stats.map(({ label, value, icon: Icon, color, bg }) => (
-            <div key={label} className="bg-white rounded-xl border border-gray-200 p-5" style={{boxShadow: "0 1px 3px rgba(0,0,0,0.08)"}}>
+            <div key={label} className="bg-[#faf8f2] rounded-xl border border-[#d8d3c5] p-5" style={{boxShadow: "0 1px 3px rgba(0,0,0,0.08)"}}>
               <div className="flex items-center gap-3">
                 <div className={`w-9 h-9 ${bg} rounded-lg flex items-center justify-center`}>
                   <Icon className={`${color}`} style={{ width: "18px", height: "18px" }} />
                 </div>
                 <div>
                   <p className="text-2xl font-extrabold text-[#0F1729]">{value}</p>
-                  <p className="text-xs text-gray-500">{label}</p>
+                  <p className="text-xs text-[#6b6660]">{label}</p>
                 </div>
               </div>
             </div>
@@ -1139,7 +1139,7 @@ export default function MineLeadsPage() {
         </div>
 
         {/* Filters */}
-        <div className="bg-white rounded-xl border border-gray-200 p-4" style={{boxShadow: "0 1px 3px rgba(0,0,0,0.08)"}}>
+        <div className="bg-[#faf8f2] rounded-xl border border-[#d8d3c5] p-4" style={{boxShadow: "0 1px 3px rgba(0,0,0,0.08)"}}>
           <div className="flex flex-wrap items-center gap-3">
             <div className="flex-1 min-w-48">
               <Input
@@ -1159,7 +1159,7 @@ export default function MineLeadsPage() {
                   className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
                     statusFilter === s
                       ? "bg-[#0F1729] text-white"
-                      : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                      : "bg-[#e8e4d8] text-[#6b6660] hover:bg-[#d8d3c5]"
                   }`}
                 >
                   {s}
@@ -1173,13 +1173,13 @@ export default function MineLeadsPage() {
                 <select
                   value={assignedFilter}
                   onChange={(e) => setAssignedFilter(e.target.value)}
-                  className="appearance-none pl-3 pr-8 py-1.5 rounded-lg border border-gray-200 text-sm text-gray-600 focus:outline-none focus:border-green-500 cursor-pointer bg-white"
+                  className="appearance-none pl-3 pr-8 py-1.5 rounded-lg border border-[#d8d3c5] text-sm text-[#6b6660] focus:outline-none focus:border-[#09fe94]/60 cursor-pointer bg-[#faf8f2]"
                 >
                   {assignedOptions.map((m) => (
                     <option key={m}>{m}</option>
                   ))}
                 </select>
-                <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-[#a09b8f] pointer-events-none" />
               </div>
             )}
 
@@ -1190,7 +1190,7 @@ export default function MineLeadsPage() {
                   setAssignedFilter("Alle");
                   setSearch("");
                 }}
-                className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-gray-700"
+                className="flex items-center gap-1.5 text-xs text-[#6b6660] hover:text-gray-700"
               >
                 <X className="w-3.5 h-3.5" />
                 Nullstill filtre
@@ -1200,17 +1200,17 @@ export default function MineLeadsPage() {
         </div>
 
         {/* Table */}
-        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden" style={{boxShadow: "0 1px 3px rgba(0,0,0,0.08)"}}>
+        <div className="bg-[#faf8f2] rounded-xl border border-[#d8d3c5] overflow-hidden" style={{boxShadow: "0 1px 3px rgba(0,0,0,0.08)"}}>
           <div className="overflow-x-auto">
             <table className="w-full" style={{ borderCollapse: "separate", borderSpacing: 0 }}>
               <thead>
-                <tr className="bg-gray-50 border-b border-gray-100">
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Bedriftsnavn</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Kontaktperson</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Sist kontaktet</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Ansvarlig</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Notater</th>
+                <tr className="bg-[#f0ece0] border-b border-[#e8e4d8]">
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-[#6b6660] uppercase tracking-wider">Bedriftsnavn</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-[#6b6660] uppercase tracking-wider">Kontaktperson</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-[#6b6660] uppercase tracking-wider">Status</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-[#6b6660] uppercase tracking-wider">Sist kontaktet</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-[#6b6660] uppercase tracking-wider">Ansvarlig</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-[#6b6660] uppercase tracking-wider">Notater</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
@@ -1237,10 +1237,10 @@ export default function MineLeadsPage() {
             {filteredLeads.length === 0 && (
               <div className="text-center py-16">
                 <Users className="w-10 h-10 text-gray-300 mx-auto mb-3" />
-                <p className="text-gray-500 font-medium">
+                <p className="text-[#6b6660] font-medium">
                   {leads.length === 0 ? "Ingen leads ennå" : "Ingen leads matcher filteret"}
                 </p>
-                <p className="text-sm text-gray-400 mt-1">
+                <p className="text-sm text-[#a09b8f] mt-1">
                   {leads.length === 0 ? (
                     <>
                       Gå til{" "}

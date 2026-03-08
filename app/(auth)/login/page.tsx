@@ -48,26 +48,26 @@ export default function LoginPage() {
 
   return (
     <div className="w-full max-w-md">
-      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-8">
+      <div className="bg-[#faf8f2] rounded-2xl border border-[#d8d3c5] shadow-sm p-8">
         <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-[#0F1729] mb-2">Logg inn på Reachr</h1>
-          <p className="text-gray-500 text-sm">
+          <h1 className="text-2xl font-bold text-[#171717] mb-2">Logg inn på Reachr</h1>
+          <p className="text-[#6b6660] text-sm">
             Har du ikke konto?{" "}
-            <Link href="/register" className="text-blue-600 font-semibold hover:underline">
+            <Link href="/register" className="text-[#ff470a] font-semibold hover:underline">
               Registrer deg gratis
             </Link>
           </p>
         </div>
 
         {error && (
-          <div className="mb-4 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+          <div className="mb-4 rounded-lg bg-[#ff470a]/8 border border-[#ff470a]/20 px-4 py-3 text-sm text-[#ff470a]">
             {error}
           </div>
         )}
 
         <form onSubmit={handleLogin} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">
+            <label className="block text-sm font-medium text-[#3d3a34] mb-1.5">
               E-postadresse
             </label>
             <Input
@@ -81,8 +81,8 @@ export default function LoginPage() {
 
           <div>
             <div className="flex items-center justify-between mb-1.5">
-              <label className="block text-sm font-medium text-slate-700">Passord</label>
-              <Link href="#" className="text-xs text-blue-600 hover:underline">
+              <label className="block text-sm font-medium text-[#3d3a34]">Passord</label>
+              <Link href="#" className="text-xs text-[#ff470a] hover:underline">
                 Glemt passord?
               </Link>
             </div>
@@ -98,7 +98,7 @@ export default function LoginPage() {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#a09b8f] hover:text-[#6b6660]"
               >
                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
@@ -117,8 +117,8 @@ export default function LoginPage() {
           </Button>
         </form>
 
-        <div className="mt-6 pt-6 border-t border-gray-100">
-          <p className="text-center text-xs text-gray-400">
+        <div className="mt-6 pt-6 border-t border-[#e8e4d8]">
+          <p className="text-center text-xs text-[#a09b8f]">
             Ved å logge inn godtar du våre{" "}
             <Link href="#" className="underline">vilkår</Link> og{" "}
             <Link href="#" className="underline">personvernreglene</Link>.
