@@ -141,6 +141,7 @@ export default function InnstillingerPage() {
   const [profileSaved, setProfileSaved] = useState(false);
   const [showPlanModal, setShowPlanModal] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState("Pro");
+  const [cancellingSubscription, setCancellingSubscription] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -673,8 +674,25 @@ export default function InnstillingerPage() {
                   <div className="flex gap-3 mt-6">
                     <Button variant="secondary" size="md" onClick={() => setShowPlanModal(true)}>Endre plan</Button>
                     <Button variant="ghost" size="md" className="text-red-500 hover:text-red-600 hover:bg-red-50"
-                      onClick={() => { if (confirm("Er du sikker på at du vil avbestille abonnementet?")) alert("Abonnement avbestilt. Du beholder tilgang til slutten av perioden."); }}>
-                      Avbestill abonnement
+                      disabled={cancellingSubscription}
+                      onClick={async () => {
+                        if (!confirm("Er du sikker på at du vil avbestille abonnementet? Du beholder tilgang til slutten av perioden.")) return;
+                        setCancellingSubscription(true);
+                        try {
+                          const res = await fetch("/api/stripe/cancel", { method: "POST" });
+                          if (res.ok) {
+                            alert("Abonnementet er avbestilt. Du beholder tilgang til slutten av perioden.");
+                          } else {
+                            const data = await res.json();
+                            alert("Feil: " + (data.error || "Kunne ikke avbestille abonnementet."));
+                          }
+                        } catch {
+                          alert("Noe gikk galt. Prøv igjen.");
+                        } finally {
+                          setCancellingSubscription(false);
+                        }
+                      }}>
+                      {cancellingSubscription ? "Avbestiller..." : "Avbestill abonnement"}
                     </Button>
                   </div>
                 </div>
