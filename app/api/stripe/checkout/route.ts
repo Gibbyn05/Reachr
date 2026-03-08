@@ -1,8 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { createClient } from "@/lib/supabase/server";
+import { isAdmin } from "@/lib/admin";
 
 export async function POST(req: NextRequest) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  // Admin bypass — skip Stripe entirely
+  if (isAdmin(user?.email)) {
+    return NextResponse.json({ url: `${process.env.NEXT_PUBLIC_APP_URL}/onboarding?payment=success` });
+  }
+
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
     apiVersion: "2026-02-25.clover",
   });
@@ -24,14 +33,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Ugyldig plan" }, { status: 400 });
     }
 
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",
       payment_method_types: ["card"],
       line_items: [{ price: priceId, quantity: 1 }],
-      // Onboarding flow → go to setup step after payment; landing page pricing → go to dashboard
       success_url: `${process.env.NEXT_PUBLIC_APP_URL}/onboarding?payment=success`,
       cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/onboarding/betaling`,
       ...(user?.email && { customer_email: user.email }),

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { createClient } from "@/lib/supabase/server";
+import { isAdmin } from "@/lib/admin";
 
 export async function GET() {
   try {
@@ -9,6 +10,20 @@ export async function GET() {
 
     if (userError || !user) {
       return NextResponse.json({ error: "Ikke logget inn" }, { status: 401 });
+    }
+
+    // Admin bypass — full access, no payment required
+    if (isAdmin(user.email)) {
+      return NextResponse.json({
+        subscription: {
+          id: "admin",
+          status: "active",
+          plan: "team",
+          interval: "yearly",
+          current_period_end: "2099-01-01T00:00:00.000Z",
+          cancel_at_period_end: false,
+        },
+      });
     }
 
     // Check Supabase subscriptions table first
