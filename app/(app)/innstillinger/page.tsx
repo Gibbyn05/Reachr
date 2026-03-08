@@ -21,6 +21,9 @@ import {
   Link2,
   Unlink,
   CheckCircle2,
+  GitBranch,
+  Trash2,
+  GripVertical,
 } from "lucide-react";
 
 const tabs = [
@@ -28,6 +31,7 @@ const tabs = [
   { id: "team", label: "Team", icon: Users },
   { id: "epost", label: "E-post", icon: Mail },
   { id: "fakturering", label: "Fakturering", icon: CreditCard },
+  { id: "pipeline", label: "Pipeline", icon: GitBranch },
   { id: "varsler", label: "Varsler", icon: Bell },
   { id: "sikkerhet", label: "Sikkerhet", icon: Shield },
 ];
@@ -70,8 +74,109 @@ const NOTIFICATION_ITEMS = [
   { label: "Teamaktivitet", desc: "Varsler når teammedlemmer oppdaterer leads", defaultEnabled: false },
 ];
 
+const DEFAULT_STAGES = ["Ikke kontaktet", "Kontaktet", "Kontaktet - ikke svar", "Booket møte", "Avslått", "Kunde"];
+
+function PipelineTab({ stages, onSave }: { stages: string[]; onSave: (s: string[]) => void }) {
+  const [local, setLocal] = useState<string[]>(stages);
+  const [newStage, setNewStage] = useState("");
+  const [saved, setSaved] = useState(false);
+
+  const add = () => {
+    const trimmed = newStage.trim();
+    if (!trimmed || local.includes(trimmed)) return;
+    setLocal(prev => [...prev, trimmed]);
+    setNewStage("");
+  };
+
+  const remove = (idx: number) => setLocal(prev => prev.filter((_, i) => i !== idx));
+  const moveUp = (idx: number) => {
+    if (idx === 0) return;
+    setLocal(prev => { const a = [...prev]; [a[idx - 1], a[idx]] = [a[idx], a[idx - 1]]; return a; });
+  };
+  const moveDown = (idx: number) => {
+    if (idx === local.length - 1) return;
+    setLocal(prev => { const a = [...prev]; [a[idx], a[idx + 1]] = [a[idx + 1], a[idx]]; return a; });
+  };
+
+  const save = () => {
+    onSave(local);
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2500);
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="bg-[#faf8f2] rounded-xl border border-[#d8d3c5] p-6" style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.08)" }}>
+        <div className="flex items-center justify-between mb-1">
+          <h2 className="text-base font-semibold text-[#171717]">Pipeline-statuser</h2>
+          <button
+            onClick={() => setLocal(DEFAULT_STAGES)}
+            className="text-xs text-[#a09b8f] hover:text-[#ff470a] transition-colors"
+          >
+            Tilbakestill til standard
+          </button>
+        </div>
+        <p className="text-sm text-[#6b6660] mb-6">
+          Definer egne salgssteg. Rekkefølgen bestemmer visningen i pipeline-filteret.
+        </p>
+
+        <div className="space-y-2 mb-5">
+          {local.map((stage, idx) => (
+            <div key={stage + idx} className="flex items-center gap-2 group">
+              <div className="flex flex-col gap-0.5">
+                <button onClick={() => moveUp(idx)} disabled={idx === 0} className="text-[#d8d3c5] hover:text-[#6b6660] disabled:opacity-30 transition-colors leading-none">
+                  <span style={{ fontSize: 10 }}>▲</span>
+                </button>
+                <button onClick={() => moveDown(idx)} disabled={idx === local.length - 1} className="text-[#d8d3c5] hover:text-[#6b6660] disabled:opacity-30 transition-colors leading-none">
+                  <span style={{ fontSize: 10 }}>▼</span>
+                </button>
+              </div>
+              <GripVertical className="w-4 h-4 text-[#d8d3c5] shrink-0" />
+              <div className="flex-1 flex items-center gap-2 px-3 py-2 bg-[#f2efe3] border border-[#d8d3c5] rounded-lg">
+                <span className="text-sm text-[#171717]">{stage}</span>
+                {DEFAULT_STAGES.includes(stage) && (
+                  <span className="ml-auto text-xs text-[#a09b8f]">standard</span>
+                )}
+              </div>
+              <button
+                onClick={() => remove(idx)}
+                disabled={local.length <= 1}
+                className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded-lg hover:bg-[#ff470a]/10 text-[#a09b8f] hover:text-[#ff470a] disabled:pointer-events-none"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          ))}
+        </div>
+
+        {/* Add new stage */}
+        <div className="flex gap-2">
+          <input
+            value={newStage}
+            onChange={e => setNewStage(e.target.value)}
+            onKeyDown={e => e.key === "Enter" && add()}
+            placeholder="Legg til nytt steg, f.eks. «Prøveperiode»"
+            className="flex-1 text-sm px-3 py-2 border border-[#d8d3c5] rounded-lg bg-[#faf8f2] focus:outline-none focus:border-[#09fe94] text-[#171717] placeholder:text-[#a09b8f]"
+          />
+          <Button type="button" variant="secondary" size="md" onClick={add}>
+            <Plus className="w-4 h-4" />
+            Legg til
+          </Button>
+        </div>
+
+        <div className="flex items-center justify-end gap-3 mt-6">
+          {saved && <span className="text-sm text-[#09fe94] flex items-center gap-1"><Check className="w-3.5 h-3.5" /> Lagret</span>}
+          <Button type="button" variant="primary" size="md" onClick={save}>
+            Lagre endringer
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function InnstillingerPage() {
-  const { currentUser, setCurrentUser, leads, avatarUrl, setAvatarUrl } = useAppStore();
+  const { currentUser, setCurrentUser, leads, avatarUrl, setAvatarUrl, pipelineStages, setPipelineStages } = useAppStore();
   const [activeTab, setActiveTab] = useState("profil");
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteSending, setInviteSending] = useState(false);
@@ -762,6 +867,11 @@ export default function InnstillingerPage() {
                 </div>
                 <Button variant="primary" size="md" className="mt-6">Lagre innstillinger</Button>
               </div>
+            )}
+
+            {/* ── Pipeline ── */}
+            {activeTab === "pipeline" && (
+              <PipelineTab stages={pipelineStages} onSave={setPipelineStages} />
             )}
 
             {/* ── Sikkerhet ── */}

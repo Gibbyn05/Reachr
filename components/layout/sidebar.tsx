@@ -11,6 +11,7 @@ import {
   Moon,
   Sun,
   X,
+  BarChart2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState, useEffect } from "react";
@@ -23,6 +24,7 @@ const mainNavItems = [
   { href: "/leadsok", icon: Search, label: "Leadsøk" },
   { href: "/mine-leads", icon: Users, label: "Mine Leads" },
   { href: "/varsler", icon: Bell, label: "Varsler" },
+  { href: "/rapporter", icon: BarChart2, label: "Rapporter" },
 ];
 
 function countNeedsFollowUp(leads: Lead[]): number {

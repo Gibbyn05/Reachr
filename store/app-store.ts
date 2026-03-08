@@ -1,7 +1,7 @@
 "use client";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { Lead } from "@/lib/mock-data";
+import { Lead, DEFAULT_PIPELINE_STAGES } from "@/lib/mock-data";
 import { createClient } from "@/lib/supabase/client";
 
 interface AppStore {
@@ -9,7 +9,7 @@ interface AppStore {
   loadLeads: (userEmail: string) => Promise<void>;
   addLead: (lead: Lead, userEmail?: string) => Promise<void>;
   removeLead: (id: string) => Promise<void>;
-  updateLeadStatus: (id: string, status: Lead["status"]) => Promise<void>;
+  updateLeadStatus: (id: string, status: string) => Promise<void>;
   updateLeadNotes: (id: string, notes: string) => Promise<void>;
   updateLeadAssigned: (id: string, assignedTo: string) => Promise<void>;
   updateLeadLastContacted: (id: string, date: string | null) => Promise<void>;
@@ -25,6 +25,8 @@ interface AppStore {
   setProfilePhone: (phone: string) => void;
   sidebarOpen: boolean;
   setSidebarOpen: (open: boolean) => void;
+  pipelineStages: string[];
+  setPipelineStages: (stages: string[]) => void;
 }
 
 function dbRowToLead(row: Record<string, unknown>): Lead {
@@ -142,7 +144,7 @@ export const useAppStore = create<AppStore>()(
         await fetch(`/api/leads/${id}`, { method: "DELETE" });
       },
 
-      updateLeadStatus: async (id: string, status: Lead["status"]) => {
+      updateLeadStatus: async (id: string, status: string) => {
         set((state) => ({
           leads: state.leads.map((l) => (l.id === id ? { ...l, status } : l)),
         }));
@@ -216,6 +218,8 @@ export const useAppStore = create<AppStore>()(
       setProfilePhone: (phone) => set({ profilePhone: phone }),
       sidebarOpen: false,
       setSidebarOpen: (open) => set({ sidebarOpen: open }),
+      pipelineStages: DEFAULT_PIPELINE_STAGES,
+      setPipelineStages: (stages) => set({ pipelineStages: stages }),
     }),
     {
       name: "reachr-store",
@@ -223,6 +227,7 @@ export const useAppStore = create<AppStore>()(
         currentUser: state.currentUser,
         avatarUrl: state.avatarUrl,
         profilePhone: state.profilePhone,
+        pipelineStages: state.pipelineStages,
       }),
     }
   )

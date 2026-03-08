@@ -5,7 +5,7 @@ import { TopBar } from "@/components/layout/top-bar";
 import {
   Search, MapPin, SlidersHorizontal, Plus, Check,
   Phone, Globe, Building2, X, ChevronUp, ChevronDown,
-  Loader2, AlertCircle, List, Map as MapIcon,
+  Loader2, AlertCircle, List, Map as MapIcon, Mail, Copy, UserCheck,
 } from "lucide-react";
 import { useAppStore } from "@/store/app-store";
 
@@ -119,6 +119,7 @@ function toKommune(city: string) {
 export default function LeadsokPage() {
   const { leads, addLead, loadLeads, currentUser } = useAppStore();
   const existingIds = new Set(leads.map((l) => l.id));
+  const existingLeadMap = new Map(leads.map((l) => [l.id, l]));
 
   const [locationQ, setLocationQ]   = useState("");
   const [industryQ, setIndustryQ]   = useState("");
@@ -134,6 +135,12 @@ export default function LeadsokPage() {
   const [filterOpen, setFilterOpen] = useState(false);
   const [sortField, setSortField]   = useState<string | null>(null);
   const [sortDir, setSortDir]       = useState<"asc" | "desc">("asc");
+
+  // Hunter.io contact lookup state
+  const [hunterOpen, setHunterOpen] = useState<string | null>(null);
+  const [hunterData, setHunterData] = useState<Record<string, { email: string; firstName: string; lastName: string; position: string; confidence: number }[]>>({});
+  const [hunterLoading, setHunterLoading] = useState<Set<string>>(new Set());
+  const [copiedEmail, setCopiedEmail] = useState<string | null>(null);
 
   const [filters, setFilters] = useState<Filters>({ ansatte: "all", mva: false, bransje: "" });
   const [pendingFilters, setPendingFilters] = useState<Filters>({ ansatte: "all", mva: false, bransje: "" });
@@ -321,6 +328,20 @@ export default function LeadsokPage() {
     );
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const fetchHunter = async (orgnr: string, domain: string) => {
+    if (hunterData[orgnr] !== undefined || hunterLoading.has(orgnr)) return;
+    setHunterLoading(prev => new Set([...prev, orgnr]));
+    try {
+      const res = await fetch(`/api/hunter?domain=${encodeURIComponent(domain)}`);
+      const data = await res.json();
+      setHunterData(prev => ({ ...prev, [orgnr]: data.contacts ?? [] }));
+    } catch {
+      setHunterData(prev => ({ ...prev, [orgnr]: [] }));
+    } finally {
+      setHunterLoading(prev => { const s = new Set(prev); s.delete(orgnr); return s; });
+    }
+  };
+
   const handleSearch = (e?: React.FormEvent) => {
     e?.preventDefault();
     setFilters(pendingFilters);
@@ -342,13 +363,7 @@ export default function LeadsokPage() {
     else { setSortField(field); setSortDir("asc"); }
   };
 
-  // Hide leads that are already in the pipeline
-  const visible = results.filter(
-    (e) => !existingIds.has(e.organisasjonsnummer) && !addedIds.has(e.organisasjonsnummer)
-  );
-  const hiddenCount = results.length - visible.length;
-
-  const sorted = [...visible].sort((a, b) => {
+  const sorted = [...results].sort((a, b) => {
     if (!sortField) return 0;
     if (sortField === "ansatte") {
       const av = a.antallAnsatte ?? 0;
@@ -683,13 +698,13 @@ export default function LeadsokPage() {
                   Viser <strong style={{ color: "#171717" }}>{sorted.length}</strong> av{" "}
                   <strong style={{ color: "#171717" }}>{total.toLocaleString("nb-NO")}</strong> treff fra Brreg
                 </p>
-                {hiddenCount > 0 && (
+                {[...existingIds].filter(id => results.some(r => r.organisasjonsnummer === id)).length > 0 && (
                   <span style={{
                     fontSize: 12, color: "#16A34A", backgroundColor: "#09fe9414",
                     border: "1px solid #BBF7D0", borderRadius: 6,
                     padding: "2px 8px", fontWeight: 500,
                   }}>
-                    {hiddenCount} allerede lagt til (skjult)
+                    {[...existingIds].filter(id => results.some(r => r.organisasjonsnummer === id)).length} allerede i pipeline
                   </span>
                 )}
               </div>
@@ -704,7 +719,7 @@ export default function LeadsokPage() {
                 {/* Table header */}
                 <div style={{
                   display: "grid",
-                  gridTemplateColumns: "2fr 1.3fr 0.9fr 0.9fr 1.3fr 0.9fr 0.7fr 80px",
+                  gridTemplateColumns: "2fr 1.3fr 0.9fr 0.9fr 1.3fr 0.9fr 0.7fr 150px",
                   padding: "10px 16px",
                   backgroundColor: "#F9FAFB",
                   borderBottom: "1px solid #F3F4F6",
@@ -728,7 +743,9 @@ export default function LeadsokPage() {
                   </div>
                 ) : (
                   sorted.map((enhet, idx) => {
-                    const alreadyAdded = existingIds.has(enhet.organisasjonsnummer) || addedIds.has(enhet.organisasjonsnummer);
+                    const existingLead = existingLeadMap.get(enhet.organisasjonsnummer);
+                    const freshlyAdded = addedIds.has(enhet.organisasjonsnummer);
+                    const alreadyAdded = !!existingLead || freshlyAdded;
                     const adr = enhet.forretningsadresse;
                     const poststed = adr?.poststed ? capitalize(adr.poststed) : "—";
                     const bransje = naceToCategory(enhet.naeringskode1?.kode, enhet.naeringskode1?.beskrivelse);
@@ -737,7 +754,7 @@ export default function LeadsokPage() {
                     return (
                       <div key={enhet.organisasjonsnummer} style={{
                         display: "grid",
-                        gridTemplateColumns: "2fr 1.3fr 0.9fr 0.9fr 1.3fr 0.9fr 0.7fr 80px",
+                        gridTemplateColumns: "2fr 1.3fr 0.9fr 0.9fr 1.3fr 0.9fr 0.7fr 150px",
                         padding: "12px 16px",
                         borderBottom: idx < sorted.length - 1 ? "1px solid #F9FAFB" : "none",
                         alignItems: "center", gap: 8,
@@ -817,20 +834,96 @@ export default function LeadsokPage() {
                         </p>
 
                         {/* CTA */}
-                        <button
-                          onClick={() => handleAdd(enhet)}
-                          disabled={alreadyAdded}
-                          style={{
-                            display: "inline-flex", alignItems: "center", gap: 5,
-                            padding: "7px 12px", borderRadius: 8, border: "none",
-                            backgroundColor: alreadyAdded ? "#e8e4d8" : "#09fe94",
-                            color: alreadyAdded ? "#6b6660" : "#171717",
-                            fontSize: 12, fontWeight: 600, cursor: alreadyAdded ? "default" : "pointer",
-                            fontFamily: "inherit", flexShrink: 0,
-                          }}
-                        >
-                          {alreadyAdded ? <><Check size={12} /> Lagt til</> : <><Plus size={12} /> Legg til</>}
-                        </button>
+                        <div style={{ display: "flex", alignItems: "center", gap: 4, flexShrink: 0, position: "relative" }}>
+                          {/* Hunter.io email lookup */}
+                          {enhet.hjemmeside && (
+                            <div style={{ position: "relative" }}>
+                              <button
+                                onClick={() => {
+                                  const orgnr = enhet.organisasjonsnummer;
+                                  if (hunterOpen === orgnr) { setHunterOpen(null); return; }
+                                  setHunterOpen(orgnr);
+                                  fetchHunter(orgnr, enhet.hjemmeside!);
+                                }}
+                                title="Finn e-post via Hunter.io"
+                                style={{
+                                  display: "inline-flex", alignItems: "center", justifyContent: "center",
+                                  width: 30, height: 30, borderRadius: 7, border: "1.5px solid #d8d3c5",
+                                  backgroundColor: hunterOpen === enhet.organisasjonsnummer ? "#09fe9420" : "#faf8f2",
+                                  color: "#6b6660", cursor: "pointer", flexShrink: 0,
+                                }}
+                              >
+                                {hunterLoading.has(enhet.organisasjonsnummer)
+                                  ? <Loader2 size={12} style={{ animation: "spin 1s linear infinite" }} />
+                                  : <Mail size={12} />}
+                              </button>
+                              {hunterOpen === enhet.organisasjonsnummer && (
+                                <div style={{
+                                  position: "absolute", bottom: "calc(100% + 6px)", right: 0,
+                                  backgroundColor: "#faf8f2", border: "1px solid #d8d3c5",
+                                  borderRadius: 10, boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
+                                  zIndex: 100, minWidth: 260, padding: 12,
+                                }}>
+                                  <p style={{ fontSize: 11, fontWeight: 700, color: "#6b6660", textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 8px" }}>
+                                    Kontakter via Hunter.io
+                                  </p>
+                                  {(hunterData[enhet.organisasjonsnummer] ?? []).length === 0 ? (
+                                    <p style={{ fontSize: 12, color: "#a09b8f", margin: 0 }}>
+                                      {hunterLoading.has(enhet.organisasjonsnummer) ? "Søker…" : "Ingen e-poster funnet"}
+                                    </p>
+                                  ) : (
+                                    <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                                      {hunterData[enhet.organisasjonsnummer].map((c) => (
+                                        <div key={c.email} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
+                                          <div style={{ minWidth: 0 }}>
+                                            <p style={{ fontSize: 12, fontWeight: 600, color: "#171717", margin: 0 }}>
+                                              {[c.firstName, c.lastName].filter(Boolean).join(" ") || "—"}
+                                            </p>
+                                            <p style={{ fontSize: 11, color: "#6b6660", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.email}</p>
+                                            {c.position && <p style={{ fontSize: 10, color: "#a09b8f", margin: 0 }}>{c.position}</p>}
+                                          </div>
+                                          <button
+                                            onClick={() => { navigator.clipboard.writeText(c.email); setCopiedEmail(c.email); setTimeout(() => setCopiedEmail(null), 2000); }}
+                                            style={{ background: "none", border: "none", cursor: "pointer", color: copiedEmail === c.email ? "#09fe94" : "#a09b8f", flexShrink: 0, padding: 2 }}
+                                          >
+                                            {copiedEmail === c.email ? <Check size={13} /> : <Copy size={13} />}
+                                          </button>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          )}
+
+                          {/* Add to pipeline / duplicate indicator */}
+                          {existingLead ? (
+                            <div style={{
+                              display: "inline-flex", alignItems: "center", gap: 4,
+                              padding: "5px 8px", borderRadius: 7, backgroundColor: "#f0ece0",
+                              fontSize: 11, fontWeight: 600, color: "#6b6660",
+                            }}>
+                              <UserCheck size={11} />
+                              {existingLead.assignedTo.split(" ")[0]}
+                            </div>
+                          ) : (
+                            <button
+                              onClick={() => handleAdd(enhet)}
+                              disabled={freshlyAdded}
+                              style={{
+                                display: "inline-flex", alignItems: "center", gap: 5,
+                                padding: "7px 10px", borderRadius: 8, border: "none",
+                                backgroundColor: freshlyAdded ? "#e8e4d8" : "#09fe94",
+                                color: freshlyAdded ? "#6b6660" : "#171717",
+                                fontSize: 12, fontWeight: 600, cursor: freshlyAdded ? "default" : "pointer",
+                                fontFamily: "inherit", flexShrink: 0,
+                              }}
+                            >
+                              {freshlyAdded ? <><Check size={12} /> Lagt til</> : <><Plus size={12} /> Legg til</>}
+                            </button>
+                          )}
+                        </div>
                       </div>
                     );
                   })

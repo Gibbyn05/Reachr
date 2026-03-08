@@ -6,6 +6,15 @@ export type LeadStatus =
   | "Avslått"
   | "Kunde";
 
+export const DEFAULT_PIPELINE_STAGES: string[] = [
+  "Ikke kontaktet",
+  "Kontaktet",
+  "Kontaktet - ikke svar",
+  "Booket møte",
+  "Avslått",
+  "Kunde",
+];
+
 export interface Company {
   id: string;
   name: string;
@@ -23,7 +32,7 @@ export interface Company {
 }
 
 export interface Lead extends Company {
-  status: LeadStatus;
+  status: string;
   lastContacted: string | null;
   assignedTo: string;
   assignedAvatar: string;

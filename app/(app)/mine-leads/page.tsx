@@ -469,16 +469,7 @@ function AiEmailModal({
   );
 }
 
-const statusOptions: LeadStatus[] = [
-  "Ikke kontaktet",
-  "Kontaktet",
-  "Kontaktet - ikke svar",
-  "Booket møte",
-  "Avslått",
-  "Kunde",
-];
-
-const statusColors: Record<LeadStatus, "gray" | "blue" | "yellow" | "purple" | "red" | "green"> = {
+const DEFAULT_STATUS_COLORS: Record<string, "gray" | "blue" | "yellow" | "purple" | "red" | "green"> = {
   "Ikke kontaktet": "gray",
   "Kontaktet": "blue",
   "Kontaktet - ikke svar": "yellow",
@@ -486,6 +477,10 @@ const statusColors: Record<LeadStatus, "gray" | "blue" | "yellow" | "purple" | "
   "Avslått": "red",
   "Kunde": "green",
 };
+
+function getStatusColor(status: string): "gray" | "blue" | "yellow" | "purple" | "red" | "green" {
+  return DEFAULT_STATUS_COLORS[status] ?? "gray";
+}
 
 function LeadRow({
   lead,
@@ -502,7 +497,7 @@ function LeadRow({
   targetCustomers,
 }: {
   lead: Lead;
-  onStatusChange: (id: string, status: LeadStatus) => void;
+  onStatusChange: (id: string, status: string) => void;
   onNotesChange: (id: string, notes: string) => void;
   onAssignedChange: (id: string, val: string) => void;
   onLastContactedChange: (id: string, date: string | null) => void;
@@ -514,6 +509,8 @@ function LeadRow({
   salesPitch?: string;
   targetCustomers?: string;
 }) {
+  const statusOptions = useAppStore(s => s.pipelineStages);
+
   const handleEmailSent = (subject: string, emailBody: string) => {
     const now = new Date();
     const dateStr = now.toLocaleDateString("nb-NO", { day: "2-digit", month: "2-digit", year: "numeric" });
@@ -622,7 +619,7 @@ function LeadRow({
               onClick={openStatusDropdown}
               className="flex items-center gap-1.5"
             >
-              <Badge variant={statusColors[lead.status]}>{lead.status}</Badge>
+              <Badge variant={getStatusColor(lead.status)}>{lead.status}</Badge>
               <ChevronDown className="w-3 h-3 text-[#a09b8f]" />
             </button>
           </div>
@@ -680,7 +677,7 @@ function LeadRow({
                       if (s === "Booket møte") setMeetingModalOpen(true);
                     }}
                   >
-                    <Badge variant={statusColors[s]}>{s}</Badge>
+                    <Badge variant={getStatusColor(s)}>{s}</Badge>
                   </button>
                 ))}
               </div>
@@ -1049,7 +1046,7 @@ function LeadRow({
 }
 
 export default function MineLeadsPage() {
-  const { leads, loadLeads, updateLeadStatus, updateLeadNotes, updateLeadAssigned, updateLeadLastContacted, removeLead, meetingDates, setMeetingDate, currentUser } = useAppStore();
+  const { leads, loadLeads, updateLeadStatus, updateLeadNotes, updateLeadAssigned, updateLeadLastContacted, removeLead, meetingDates, setMeetingDate, currentUser, pipelineStages } = useAppStore();
   const [search, setSearch] = useState("");
   const [teamMembers, setTeamMembers] = useState<string[]>([]);
 
@@ -1152,7 +1149,7 @@ export default function MineLeadsPage() {
 
             {/* Status filter */}
             <div className="flex flex-wrap gap-1.5">
-              {["Alle", ...statusOptions].map((s) => (
+              {["Alle", ...pipelineStages].map((s) => (
                 <button
                   key={s}
                   onClick={() => setStatusFilter(s)}
