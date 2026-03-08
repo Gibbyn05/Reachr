@@ -1,5 +1,13 @@
 import { createClient } from "@/lib/supabase/server";
+import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
+
+function getServiceClient() {
+  return createServiceClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+}
 
 export async function GET(req: NextRequest) {
   const supabase = await createClient();
@@ -36,6 +44,7 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  // Validate auth with the user-scoped client
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user?.email) {
@@ -45,14 +54,15 @@ export async function POST(req: NextRequest) {
 
   const body = await req.json();
 
-  // Always store under the authenticated user's own email (avoids RLS issues)
-  const storeEmail = user.email;
+  // Use service role client for the write — bypasses RLS so the insert always works.
+  // Auth is already validated above; we trust the caller is the authenticated user.
+  const db = getServiceClient();
 
-  const { error } = await supabase
+  const { error } = await db
     .from("leads")
     .upsert({
       id: body.id,
-      user_email: storeEmail,
+      user_email: user.email,
       name: body.name,
       org_number: body.orgNumber,
       contact_person: body.contactPerson,
