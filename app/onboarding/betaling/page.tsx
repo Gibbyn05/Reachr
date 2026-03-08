@@ -8,7 +8,9 @@ const PLANS = [
   {
     id: "solo",
     name: "Solo",
-    price: 249,
+    monthlyPrice: 249,
+    yearlyMonthly: 207,
+    yearlyTotal: 2490,
     description: "For deg som selger alene",
     icon: User,
     features: [
@@ -20,7 +22,9 @@ const PLANS = [
   {
     id: "team",
     name: "Team",
-    price: 199,
+    monthlyPrice: 199,
+    yearlyMonthly: 166,
+    yearlyTotal: 1990,
     description: "Per bruker — 2–5 brukere",
     icon: Users,
     features: [
@@ -33,6 +37,7 @@ const PLANS = [
 
 export default function BetalingPage() {
   const [selected, setSelected] = useState<"solo" | "team">("solo");
+  const [interval, setInterval] = useState<"monthly" | "yearly">("monthly");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -43,7 +48,7 @@ export default function BetalingPage() {
       const res = await fetch("/api/stripe/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ plan: selected, interval: "monthly" }),
+        body: JSON.stringify({ plan: selected, interval }),
       });
       const data = await res.json();
       if (!res.ok || !data.url) {
@@ -57,6 +62,8 @@ export default function BetalingPage() {
       setLoading(false);
     }
   };
+
+  const selectedPlan = PLANS.find(p => p.id === selected)!;
 
   return (
     <div className="w-full max-w-lg">
@@ -87,11 +94,41 @@ export default function BetalingPage() {
           <p className="text-[#6b6660] text-sm">3 dager gratis — ingen binding, avslutt når som helst</p>
         </div>
 
+        {/* Interval toggle */}
+        <div className="flex items-center justify-center mb-6">
+          <div className="flex items-center bg-[#ede9da] rounded-full p-1 gap-1">
+            <button
+              onClick={() => setInterval("monthly")}
+              className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${
+                interval === "monthly"
+                  ? "bg-[#faf8f2] text-[#171717] shadow-sm"
+                  : "text-[#6b6660] hover:text-[#171717]"
+              }`}
+            >
+              Månedlig
+            </button>
+            <button
+              onClick={() => setInterval("yearly")}
+              className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-medium transition-all ${
+                interval === "yearly"
+                  ? "bg-[#faf8f2] text-[#171717] shadow-sm"
+                  : "text-[#6b6660] hover:text-[#171717]"
+              }`}
+            >
+              Årlig
+              <span className="bg-[#09fe94] text-[#171717] text-xs font-bold px-1.5 py-0.5 rounded-full">
+                -17%
+              </span>
+            </button>
+          </div>
+        </div>
+
         {/* Plan selector */}
         <div className="grid grid-cols-2 gap-3 mb-6">
           {PLANS.map((plan) => {
             const Icon = plan.icon;
             const isSelected = selected === plan.id;
+            const price = interval === "yearly" ? plan.yearlyMonthly : plan.monthlyPrice;
             return (
               <button
                 key={plan.id}
@@ -117,17 +154,22 @@ export default function BetalingPage() {
                   {plan.description}
                 </p>
                 <p className={`text-lg font-extrabold ${isSelected ? "text-[#171717]" : "text-[#3d3a34]"}`}>
-                  {plan.price} kr
+                  {price} kr
                   <span className="text-xs font-normal text-[#a09b8f]">/mnd</span>
                 </p>
+                {interval === "yearly" && (
+                  <p className="text-xs text-[#6b6660] mt-0.5">
+                    {plan.yearlyTotal} kr/år
+                  </p>
+                )}
               </button>
             );
           })}
         </div>
 
-        {/* Features for selected plan */}
+        {/* Features */}
         <ul className="space-y-2 mb-5">
-          {PLANS.find(p => p.id === selected)!.features.map((feature) => (
+          {selectedPlan.features.map((feature) => (
             <li key={feature} className="flex items-center gap-2.5 text-sm text-[#3d3a34]">
               <div className="w-4 h-4 rounded-full bg-[#09fe94]/20 flex items-center justify-center shrink-0">
                 <Check className="w-2.5 h-2.5 text-[#171717]" />
@@ -136,6 +178,12 @@ export default function BetalingPage() {
             </li>
           ))}
         </ul>
+
+        {interval === "yearly" && (
+          <div className="mb-4 rounded-lg bg-[#09fe94]/10 border border-[#09fe94]/30 px-4 py-2.5 text-sm text-[#171717]">
+            Du sparer <strong>{(selectedPlan.monthlyPrice - selectedPlan.yearlyMonthly) * 12} kr</strong> i året med årlig fakturering
+          </div>
+        )}
 
         {error && (
           <div className="mb-4 rounded-lg bg-[#ff470a]/8 border border-[#ff470a]/20 px-4 py-3 text-sm text-[#ff470a]">
