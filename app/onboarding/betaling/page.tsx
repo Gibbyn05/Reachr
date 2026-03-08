@@ -1,34 +1,33 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
-import { ArrowRight, Lock, CreditCard, Check, Shield } from "lucide-react";
+import { ArrowRight, Lock, Check, Shield, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-function formatCardNumber(val: string) {
-  return val.replace(/\D/g, "").slice(0, 16).replace(/(.{4})/g, "$1 ").trim();
-}
-
-function formatExpiry(val: string) {
-  const digits = val.replace(/\D/g, "").slice(0, 4);
-  if (digits.length >= 3) return digits.slice(0, 2) + "/" + digits.slice(2);
-  return digits;
-}
-
 export default function BetalingPage() {
-  const [form, setForm] = useState({
-    cardNumber: "",
-    expiry: "",
-    cvc: "",
-    name: "",
-  });
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleStart = async () => {
     setLoading(true);
-    // Simulate payment processing
-    await new Promise((r) => setTimeout(r, 1200));
-    window.location.href = "/onboarding";
+    setError(null);
+    try {
+      const res = await fetch("/api/stripe/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ plan: "solo", interval: "monthly" }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.url) {
+        setError(data.error ?? "Kunne ikke starte betaling. Prøv igjen.");
+        return;
+      }
+      window.location.href = data.url;
+    } catch {
+      setError("Noe gikk galt. Sjekk internettforbindelsen og prøv igjen.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -72,100 +71,67 @@ export default function BetalingPage() {
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Card number */}
-          <div>
-            <label className="block text-sm font-medium text-[#3d3a34] mb-1.5">Kortnummer</label>
-            <div className="relative">
-              <div className="absolute left-3 top-1/2 -translate-y-1/2">
-                <CreditCard className="w-4 h-4 text-[#a09b8f]" />
+        {/* What's included */}
+        <ul className="space-y-2.5 mb-6">
+          {[
+            "Ubegrenset leadsøk i Brønnøysundregistrene",
+            "AI-genererte e-poster og SMS",
+            "CRM-pipeline med oppfølgingsvarsler",
+            "Team-invitasjoner",
+          ].map((feature) => (
+            <li key={feature} className="flex items-center gap-2.5 text-sm text-[#3d3a34]">
+              <div className="w-4 h-4 rounded-full bg-[#09fe94]/20 flex items-center justify-center shrink-0">
+                <Check className="w-2.5 h-2.5 text-[#171717]" />
               </div>
-              <input
-                type="text"
-                inputMode="numeric"
-                placeholder="1234 5678 9012 3456"
-                value={form.cardNumber}
-                onChange={(e) => setForm({ ...form, cardNumber: formatCardNumber(e.target.value) })}
-                required
-                className="w-full pl-10 pr-4 py-2.5 text-sm bg-[#faf8f2] border border-[#d8d3c5] rounded-lg focus:outline-none focus:border-[#09fe94] text-[#171717] placeholder:text-[#a09b8f] transition-colors"
-              />
-            </div>
-          </div>
+              {feature}
+            </li>
+          ))}
+        </ul>
 
-          {/* Expiry + CVC */}
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-sm font-medium text-[#3d3a34] mb-1.5">Utløpsdato</label>
-              <input
-                type="text"
-                inputMode="numeric"
-                placeholder="MM/ÅÅ"
-                value={form.expiry}
-                onChange={(e) => setForm({ ...form, expiry: formatExpiry(e.target.value) })}
-                required
-                className="w-full px-3 py-2.5 text-sm bg-[#faf8f2] border border-[#d8d3c5] rounded-lg focus:outline-none focus:border-[#09fe94] text-[#171717] placeholder:text-[#a09b8f] transition-colors"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-[#3d3a34] mb-1.5">CVC</label>
-              <input
-                type="text"
-                inputMode="numeric"
-                placeholder="123"
-                maxLength={4}
-                value={form.cvc}
-                onChange={(e) => setForm({ ...form, cvc: e.target.value.replace(/\D/g, "").slice(0, 4) })}
-                required
-                className="w-full px-3 py-2.5 text-sm bg-[#faf8f2] border border-[#d8d3c5] rounded-lg focus:outline-none focus:border-[#09fe94] text-[#171717] placeholder:text-[#a09b8f] transition-colors"
-              />
-            </div>
+        {error && (
+          <div className="mb-4 rounded-lg bg-[#ff470a]/8 border border-[#ff470a]/20 px-4 py-3 text-sm text-[#ff470a]">
+            {error}
           </div>
+        )}
 
-          {/* Cardholder name */}
-          <div>
-            <label className="block text-sm font-medium text-[#3d3a34] mb-1.5">Navn på kortet</label>
-            <input
-              type="text"
-              placeholder="Ola Nordmann"
-              value={form.name}
-              onChange={(e) => setForm({ ...form, name: e.target.value })}
-              required
-              className="w-full px-3 py-2.5 text-sm bg-[#faf8f2] border border-[#d8d3c5] rounded-lg focus:outline-none focus:border-[#09fe94] text-[#171717] placeholder:text-[#a09b8f] transition-colors"
-            />
-          </div>
+        {/* Security note */}
+        <div className="flex items-center gap-2 mb-5">
+          <Shield className="w-4 h-4 text-[#a09b8f] shrink-0" />
+          <p className="text-xs text-[#a09b8f]">Sikker betaling via Stripe — kortdata lagres aldri på våre servere</p>
+        </div>
 
-          {/* Security note */}
-          <div className="flex items-center gap-2 py-2">
-            <Shield className="w-4 h-4 text-[#a09b8f] shrink-0" />
-            <p className="text-xs text-[#a09b8f]">Kortinformasjonen din krypteres og lagres sikkert</p>
-          </div>
-
-          {/* Buttons */}
-          <div className="flex gap-3 pt-1">
-            <Link href="/register" className="flex-1">
-              <Button type="button" variant="secondary" size="lg" className="w-full justify-center">
-                Tilbake
-              </Button>
-            </Link>
-            <Button type="submit" variant="primary" size="lg" className="flex-1 justify-center" disabled={loading}>
-              {loading ? (
-                <span className="flex items-center gap-2">
-                  <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
-                  </svg>
-                  Behandler...
-                </span>
-              ) : (
-                <>
-                  <Lock className="w-4 h-4" />
-                  Start prøveperiode
-                  <ArrowRight className="w-4 h-4" />
-                </>
-              )}
+        {/* Buttons */}
+        <div className="flex gap-3">
+          <Link href="/register" className="flex-1">
+            <Button type="button" variant="secondary" size="lg" className="w-full justify-center">
+              Tilbake
             </Button>
-          </div>
-        </form>
+          </Link>
+          <Button
+            type="button"
+            variant="primary"
+            size="lg"
+            className="flex-1 justify-center"
+            disabled={loading}
+            onClick={handleStart}
+          >
+            {loading ? (
+              <span className="flex items-center gap-2">
+                <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                </svg>
+                Kobler til Stripe...
+              </span>
+            ) : (
+              <>
+                <Lock className="w-4 h-4" />
+                Start prøveperiode
+                <ArrowRight className="w-4 h-4" />
+              </>
+            )}
+          </Button>
+        </div>
 
         <p className="text-center text-xs text-[#a09b8f] mt-6">
           Du belastes ikke før prøveperioden er over. Avslutt gratis innen 3 dager.

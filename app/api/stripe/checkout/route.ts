@@ -31,8 +31,9 @@ export async function POST(req: NextRequest) {
       mode: "subscription",
       payment_method_types: ["card"],
       line_items: [{ price: priceId, quantity: 1 }],
-      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?payment=success`,
-      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/#pricing`,
+      // Onboarding flow → go to setup step after payment; landing page pricing → go to dashboard
+      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/onboarding?payment=success`,
+      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/onboarding/betaling`,
       ...(user?.email && { customer_email: user.email }),
       metadata: {
         plan,
