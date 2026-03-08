@@ -63,7 +63,8 @@ export function Sidebar() {
     supabase.auth.getUser().then(({ data }) => {
       const user = data?.user;
       if (!user?.email) return;
-      if (!currentUser?.email) {
+      // Always sync from Supabase so stale persisted data from a previous session is replaced
+      if (currentUser?.email !== user.email) {
         setCurrentUser({
           name: user.user_metadata?.full_name ?? user.email,
           email: user.email,
