@@ -5,7 +5,7 @@ import { TopBar } from "@/components/layout/top-bar";
 import {
   Search, MapPin, SlidersHorizontal, Plus, Check,
   Phone, Globe, Building2, X, ChevronUp, ChevronDown,
-  Loader2, AlertCircle, List, Map as MapIcon, Mail, Copy, UserCheck,
+  Loader2, AlertCircle, List, Map as MapIcon, UserCheck,
 } from "lucide-react";
 import { useAppStore } from "@/store/app-store";
 
@@ -135,12 +135,6 @@ export default function LeadsokPage() {
   const [filterOpen, setFilterOpen] = useState(false);
   const [sortField, setSortField]   = useState<string | null>(null);
   const [sortDir, setSortDir]       = useState<"asc" | "desc">("asc");
-
-  // Hunter.io contact lookup state
-  const [hunterOpen, setHunterOpen] = useState<string | null>(null);
-  const [hunterData, setHunterData] = useState<Record<string, { email: string; firstName: string; lastName: string; position: string; confidence: number }[]>>({});
-  const [hunterLoading, setHunterLoading] = useState<Set<string>>(new Set());
-  const [copiedEmail, setCopiedEmail] = useState<string | null>(null);
 
   const [filters, setFilters] = useState<Filters>({ ansatte: "all", mva: false, bransje: "" });
   const [pendingFilters, setPendingFilters] = useState<Filters>({ ansatte: "all", mva: false, bransje: "" });
@@ -327,20 +321,6 @@ export default function LeadsokPage() {
       { timeout: 5000, maximumAge: 600_000 }
     );
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-  const fetchHunter = async (orgnr: string, domain: string) => {
-    if (hunterData[orgnr] !== undefined || hunterLoading.has(orgnr)) return;
-    setHunterLoading(prev => new Set([...prev, orgnr]));
-    try {
-      const res = await fetch(`/api/hunter?domain=${encodeURIComponent(domain)}`);
-      const data = await res.json();
-      setHunterData(prev => ({ ...prev, [orgnr]: data.contacts ?? [] }));
-    } catch {
-      setHunterData(prev => ({ ...prev, [orgnr]: [] }));
-    } finally {
-      setHunterLoading(prev => { const s = new Set(prev); s.delete(orgnr); return s; });
-    }
-  };
 
   const handleSearch = (e?: React.FormEvent) => {
     e?.preventDefault();
@@ -834,69 +814,7 @@ export default function LeadsokPage() {
                         </p>
 
                         {/* CTA */}
-                        <div style={{ display: "flex", alignItems: "center", gap: 4, flexShrink: 0, position: "relative" }}>
-                          {/* Hunter.io email lookup */}
-                          {enhet.hjemmeside && (
-                            <div style={{ position: "relative" }}>
-                              <button
-                                onClick={() => {
-                                  const orgnr = enhet.organisasjonsnummer;
-                                  if (hunterOpen === orgnr) { setHunterOpen(null); return; }
-                                  setHunterOpen(orgnr);
-                                  fetchHunter(orgnr, enhet.hjemmeside!);
-                                }}
-                                title="Finn e-post via Hunter.io"
-                                style={{
-                                  display: "inline-flex", alignItems: "center", justifyContent: "center",
-                                  width: 30, height: 30, borderRadius: 7, border: "1.5px solid #d8d3c5",
-                                  backgroundColor: hunterOpen === enhet.organisasjonsnummer ? "#09fe9420" : "#faf8f2",
-                                  color: "#6b6660", cursor: "pointer", flexShrink: 0,
-                                }}
-                              >
-                                {hunterLoading.has(enhet.organisasjonsnummer)
-                                  ? <Loader2 size={12} style={{ animation: "spin 1s linear infinite" }} />
-                                  : <Mail size={12} />}
-                              </button>
-                              {hunterOpen === enhet.organisasjonsnummer && (
-                                <div style={{
-                                  position: "absolute", bottom: "calc(100% + 6px)", right: 0,
-                                  backgroundColor: "#faf8f2", border: "1px solid #d8d3c5",
-                                  borderRadius: 10, boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
-                                  zIndex: 100, minWidth: 260, padding: 12,
-                                }}>
-                                  <p style={{ fontSize: 11, fontWeight: 700, color: "#6b6660", textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 8px" }}>
-                                    Kontakter via Hunter.io
-                                  </p>
-                                  {(hunterData[enhet.organisasjonsnummer] ?? []).length === 0 ? (
-                                    <p style={{ fontSize: 12, color: "#a09b8f", margin: 0 }}>
-                                      {hunterLoading.has(enhet.organisasjonsnummer) ? "Søker…" : "Ingen e-poster funnet"}
-                                    </p>
-                                  ) : (
-                                    <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                                      {hunterData[enhet.organisasjonsnummer].map((c) => (
-                                        <div key={c.email} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
-                                          <div style={{ minWidth: 0 }}>
-                                            <p style={{ fontSize: 12, fontWeight: 600, color: "#171717", margin: 0 }}>
-                                              {[c.firstName, c.lastName].filter(Boolean).join(" ") || "—"}
-                                            </p>
-                                            <p style={{ fontSize: 11, color: "#6b6660", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.email}</p>
-                                            {c.position && <p style={{ fontSize: 10, color: "#a09b8f", margin: 0 }}>{c.position}</p>}
-                                          </div>
-                                          <button
-                                            onClick={() => { navigator.clipboard.writeText(c.email); setCopiedEmail(c.email); setTimeout(() => setCopiedEmail(null), 2000); }}
-                                            style={{ background: "none", border: "none", cursor: "pointer", color: copiedEmail === c.email ? "#09fe94" : "#a09b8f", flexShrink: 0, padding: 2 }}
-                                          >
-                                            {copiedEmail === c.email ? <Check size={13} /> : <Copy size={13} />}
-                                          </button>
-                                        </div>
-                                      ))}
-                                    </div>
-                                  )}
-                                </div>
-                              )}
-                            </div>
-                          )}
-
+                        <div style={{ display: "flex", alignItems: "center", gap: 4, flexShrink: 0, justifyContent: "flex-end" }}>
                           {/* Add to pipeline / duplicate indicator */}
                           {existingLead ? (
                             <div style={{

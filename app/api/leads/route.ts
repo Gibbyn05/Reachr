@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
   // Always store under the authenticated user's own email (avoids RLS issues)
   const storeEmail = user.email;
 
-  const { data, error } = await supabase
+  const { error } = await supabase
     .from("leads")
     .upsert({
       id: body.id,
@@ -73,13 +73,11 @@ export async function POST(req: NextRequest) {
       notes: body.notes ?? "",
       added_date: body.addedDate,
       meeting_date: body.meetingDate ?? null,
-    })
-    .select()
-    .single();
+    }, { onConflict: "id" });
 
   if (error) {
-    console.error("[POST /api/leads] upsert error:", error);
+    console.error("[POST /api/leads] upsert error:", error.message, error.details, error.hint);
     return NextResponse.json({ error: error.message, details: error.details, hint: error.hint }, { status: 500 });
   }
-  return NextResponse.json(data);
+  return NextResponse.json({ ok: true });
 }

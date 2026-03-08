@@ -115,7 +115,13 @@ export const useAppStore = create<AppStore>()(
 
         if (!res.ok) {
           const data = await res.json().catch(() => ({}));
-          console.error("[addLead] error:", data);
+          console.error("[addLead] API error:", data);
+        } else {
+          // Refresh leads from DB to confirm persistence
+          const userEmail = get().currentUser?.email;
+          if (userEmail) {
+            await get().loadLeads(userEmail);
+          }
         }
       },
 
