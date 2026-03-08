@@ -102,40 +102,20 @@ export const useAppStore = create<AppStore>()(
         set({ leads: [...dbLeads, ...pendingLeads], meetingDates });
       },
 
-      addLead: async (lead: Lead, userEmail?: string) => {
+      addLead: async (lead: Lead, _userEmail?: string) => {
+        // Optimistically add to local state immediately
         set((state) => ({ leads: [...state.leads, lead] }));
-        const supabase = createClient();
-        const { data: { user } } = await supabase.auth.getUser();
-        const email = user?.email ?? userEmail ?? get().currentUser?.email ?? "";
 
-        const { error } = await supabase
-          .from("leads")
-          .upsert({
-            id: lead.id,
-            user_email: email,
-            name: lead.name,
-            org_number: lead.orgNumber,
-            contact_person: lead.contactPerson,
-            phone: lead.phone,
-            email: lead.email,
-            industry: lead.industry,
-            city: lead.city,
-            address: lead.address,
-            revenue: lead.revenue ?? 0,
-            employees: lead.employees ?? 0,
-            lat: lead.lat ?? 0,
-            lng: lead.lng ?? 0,
-            status: lead.status,
-            last_contacted: lead.lastContacted,
-            assigned_to: lead.assignedTo,
-            assigned_avatar: lead.assignedAvatar,
-            added_by: lead.addedBy,
-            notes: lead.notes ?? "",
-            added_date: lead.addedDate,
-          });
+        // Persist via server-side API (reads auth from cookie — more reliable than client-side upsert)
+        const res = await fetch("/api/leads", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(lead),
+        });
 
-        if (error) {
-          console.error("[addLead] upsert error:", error);
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          console.error("[addLead] error:", data);
         }
       },
 
