@@ -98,9 +98,7 @@ export function Sidebar() {
       {/* Logo */}
       <div className="p-6 border-b border-white/10">
         <Link href="/dashboard" className="flex items-center gap-2.5">
-          <div className="w-8 h-8 bg-[#09fe94] rounded-lg flex items-center justify-center">
-            <Zap className="w-4 h-4 text-[#171717] fill-[#171717]" />
-          </div>
+          <img src="/logo.svg" alt="Reachr" className="w-9 h-9" />
           <span className="text-white font-bold text-xl" style={{ fontFamily: "'EB Garamond', Georgia, serif" }}>Reachr</span>
         </Link>
       </div>

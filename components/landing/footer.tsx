@@ -1,6 +1,5 @@
 "use client";
 import Link from "next/link";
-import { Zap } from "lucide-react";
 
 export function Footer() {
   return (
@@ -10,9 +9,7 @@ export function Footer() {
           {/* Brand */}
           <div>
             <Link href="/" style={{ display: "flex", alignItems: "center", gap: 10, textDecoration: "none", marginBottom: 16 }}>
-              <div style={{ width: 32, height: 32, backgroundColor: "#09fe94", borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <Zap size={15} color="#171717" fill="#171717" />
-              </div>
+              <img src="/logo.svg" alt="Reachr" style={{ width: 36, height: 36 }} />
               <span style={{ fontWeight: 800, fontSize: 18, color: "white" }}>Reachr</span>
             </Link>
             <p style={{ fontSize: 14, color: "rgba(255,255,255,0.45)", lineHeight: 1.7, maxWidth: 260, margin: 0 }}>

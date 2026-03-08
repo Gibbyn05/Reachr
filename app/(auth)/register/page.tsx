@@ -103,8 +103,8 @@ function RegisterForm() {
       <div className="w-full max-w-md">
         <div className="bg-[#faf8f2] rounded-2xl border border-[#d8d3c5] shadow-sm p-8">
           <div className="text-center mb-8">
-            <div className="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Users className="w-6 h-6 text-[#05c472]" />
+            <div className="flex justify-center mb-4">
+              <img src="/logo.svg" alt="Reachr" className="w-14 h-14" />
             </div>
             <h1 className="text-2xl font-bold text-[#171717] mb-2">Bli med i teamet</h1>
             <p className="text-[#6b6660] text-sm">

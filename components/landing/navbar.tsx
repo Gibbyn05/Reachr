@@ -2,7 +2,6 @@
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navLinks = [
@@ -34,9 +33,7 @@ export function Navbar() {
       <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2.5 shrink-0 no-underline">
-          <div className="w-8 h-8 bg-[#09fe94] rounded-lg flex items-center justify-center shadow-[0_2px_8px_rgba(9,254,148,0.4)]">
-            <Zap size={15} color="#171717" fill="#171717" />
-          </div>
+          <img src="/logo.svg" alt="Reachr" className="w-9 h-9" />
           <span className="font-bold text-xl text-[#171717]" style={{ fontFamily: "'EB Garamond', Georgia, serif" }}>Reachr</span>
         </Link>
 
