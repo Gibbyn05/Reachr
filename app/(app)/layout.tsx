@@ -1,14 +1,41 @@
 "use client";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useAppStore } from "@/store/app-store";
 import { Sidebar } from "@/components/layout/sidebar";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { sidebarOpen, setSidebarOpen } = useAppStore();
+  const router = useRouter();
+  const [subChecked, setSubChecked] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/stripe/subscription")
+      .then((r) => r.json())
+      .then((data) => {
+        if (!data.subscription) {
+          router.replace("/onboarding/betaling");
+        } else {
+          setSubChecked(true);
+        }
+      })
+      .catch(() => {
+        // On error, allow through — don't block the user
+        setSubChecked(true);
+      });
+  }, [router]);
+
+  if (!subChecked) {
+    return (
+      <div className="min-h-screen bg-[#f2efe3] flex items-center justify-center">
+        <div className="w-6 h-6 border-2 border-[#09fe94] border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#f2efe3]">
       <Sidebar />
-      {/* Mobile overlay backdrop */}
       {sidebarOpen && (
         <div
           className="fixed inset-0 bg-black/50 z-[999] md:hidden"
