@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { isAdmin } from "@/lib/admin";
 
 export async function GET() {
@@ -37,7 +37,8 @@ export async function GET() {
       if (sub) return NextResponse.json({ subscription: sub });
       // Check team membership (metadata OR direct DB lookup)
       const metaOwner: string | undefined = user.user_metadata?.team_owner;
-      const { data: mRow } = await supabase
+      const serviceClient = createServiceClient();
+      const { data: mRow } = await serviceClient
         .from("team_members")
         .select("owner_email")
         .eq("member_email", user.email)
@@ -96,8 +97,9 @@ export async function GET() {
     //    b) direct team_members table lookup (covers existing accounts added to a team)
     const metaOwnerEmail: string | undefined = user.user_metadata?.team_owner;
 
-    // Direct DB lookup: find any team this user is a member of
-    const { data: memberRow } = await supabase
+    // Direct DB lookup: find any team this user is a member of (service role bypasses RLS)
+    const serviceClient = createServiceClient();
+    const { data: memberRow } = await serviceClient
       .from("team_members")
       .select("owner_email")
       .eq("member_email", user.email)
