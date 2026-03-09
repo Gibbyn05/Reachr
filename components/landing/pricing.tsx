@@ -30,7 +30,7 @@ export function Pricing() {
   const [loading, setLoading] = useState<string | null>(null);
 
   const soloPrice = yearly ? 199 : 249;
-  const teamPrice = yearly ? 159 : 199;
+  const teamPrice = yearly ? 399 : 499;
   const interval = yearly ? "yearly" : "monthly";
 
   async function handleCheckout(plan: string) {

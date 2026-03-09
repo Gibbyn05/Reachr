@@ -9,8 +9,8 @@ const PLANS = [
     id: "solo",
     name: "Solo",
     monthlyPrice: 249,
-    yearlyMonthly: 207,
-    yearlyTotal: 2490,
+    yearlyMonthly: 199,
+    yearlyTotal: 2388,
     description: "For deg som selger alene",
     icon: User,
     features: [
@@ -22,9 +22,9 @@ const PLANS = [
   {
     id: "team",
     name: "Team",
-    monthlyPrice: 199,
-    yearlyMonthly: 166,
-    yearlyTotal: 1990,
+    monthlyPrice: 499,
+    yearlyMonthly: 399,
+    yearlyTotal: 4788,
     description: "Per bruker — 2–5 brukere",
     icon: Users,
     features: [
@@ -117,7 +117,7 @@ export default function BetalingPage() {
             >
               Årlig
               <span className="bg-[#09fe94] text-[#171717] text-xs font-bold px-1.5 py-0.5 rounded-full">
-                -17%
+                -20%
               </span>
             </button>
           </div>
