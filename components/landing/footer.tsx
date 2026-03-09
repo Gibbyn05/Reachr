@@ -18,9 +18,9 @@ export function Footer() {
           </div>
 
           {[
-            { title: "Produkt", links: [["Funksjoner", "#features"], ["Priser", "#pricing"], ["Integrasjoner", "#"], ["Oppdateringer", "#"]] },
-            { title: "Selskap", links: [["Om oss", "#om-oss"], ["Blogg", "#"], ["Karriere", "#"], ["Kontakt", "#kontakt"]] },
-            { title: "Juridisk", links: [["Personvern", "#"], ["Vilkår", "#"], ["Cookies", "#"], ["GDPR", "#"]] },
+            { title: "Produkt", links: [["Funksjoner", "#features"], ["Priser", "#pricing"], ["Oppdateringer", "/oppdateringer"]] },
+            { title: "Selskap", links: [["Om oss", "#om-oss"], ["Kontakt", "#kontakt"], ["Support", "mailto:Help@reachr.no"]] },
+            { title: "Juridisk", links: [["Personvern", "/personvern"], ["Vilkår", "/vilkaar"], ["GDPR", "/personvern#gdpr"]] },
           ].map(({ title, links }) => (
             <div key={title}>
               <p style={{ fontSize: 13, fontWeight: 700, color: "white", marginBottom: 16, textTransform: "uppercase", letterSpacing: "0.06em" }}>{title}</p>
@@ -39,8 +39,8 @@ export function Footer() {
         </div>
 
         <div style={{ borderTop: "1px solid rgba(255,255,255,0.1)", paddingTop: 28, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
-          <p style={{ fontSize: 13, color: "rgba(255,255,255,0.35)", margin: 0 }}>© 2025 Reachr AS. Alle rettigheter forbeholdt.</p>
-          <p style={{ fontSize: 13, color: "rgba(255,255,255,0.35)", margin: 0 }}>Org.nr: 123 456 789</p>
+          <p style={{ fontSize: 13, color: "rgba(255,255,255,0.35)", margin: 0 }}>© 2026 Reachr AS. Alle rettigheter forbeholdt.</p>
+          <p style={{ fontSize: 13, color: "rgba(255,255,255,0.35)", margin: 0 }}>Help@reachr.no</p>
         </div>
       </div>
     </footer>

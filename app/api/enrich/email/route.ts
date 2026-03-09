@@ -102,6 +102,12 @@ async function tryProff(orgnr: string): Promise<string[]> {
 }
 
 export async function GET(request: NextRequest) {
+  // Auth check — prevent unauthenticated use of scraping resources
+  const { createClient } = await import("@/lib/supabase/server");
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return NextResponse.json({ emails: [] }, { status: 401 });
+
   const sp = request.nextUrl.searchParams;
   const orgnr = sp.get("orgnr");
   const name = sp.get("name") ?? "";

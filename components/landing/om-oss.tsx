@@ -1,27 +1,6 @@
 "use client";
 import { Zap } from "lucide-react";
 
-const teamMembers = [
-  {
-    name: "Erik Haugen",
-    role: "CEO & Medgründer",
-    initials: "EH",
-    accent: "#09fe94",
-  },
-  {
-    name: "Marte Solberg",
-    role: "CTO & Medgründer",
-    initials: "MS",
-    accent: "#ff470a",
-  },
-  {
-    name: "Jonas Berge",
-    role: "Head of Sales",
-    initials: "JB",
-    accent: "#ffad0a",
-  },
-];
-
 const values = [
   {
     title: "Bygget for norsk B2B",
@@ -59,10 +38,10 @@ export function OmOss() {
         <div className="grid lg:grid-cols-2 gap-16 mb-20 items-center">
           <div>
             <p className="text-lg text-[#3d3a34] leading-relaxed mb-6">
-              Reachr ble startet i 2024 av et team som var lei av overpriste, kompliserte CRM-systemer som ikke passet norske SMB-er.
+              Reachr ble startet i 2026 av et team som var lei av overpriste, kompliserte CRM-systemer som ikke passet norske SMB-er.
             </p>
             <p className="text-base text-[#6b6660] leading-relaxed mb-6">
-              Vi kombinerte direkte tilgang til Brønnøysundregistrene med et moderne salgspipeline-verktøy – og laget noe vi selv ville brukt. I dag hjelper vi hundrevis av norske bedrifter finne og lukke nye kunder raskere enn noensinne.
+              Vi kombinerte direkte tilgang til Brønnøysundregistrene med et moderne salgspipeline-verktøy – og laget noe vi selv ville brukt. I dag hjelper vi norske bedrifter finne og lukke nye kunder raskere enn noensinne.
             </p>
             <p className="text-base text-[#6b6660] leading-relaxed">
               Vi er et lite, dedikert team. Vi elsker salg, produktdesign og å gjøre det enkelt å drive business i Norge.
@@ -73,7 +52,7 @@ export function OmOss() {
           <div className="grid grid-cols-2 gap-4">
             {[
               { value: "2024", label: "Grunnlagt" },
-              { value: "500+", label: "Aktive brukere" },
+              { value: "3 dager", label: "Gratis prøveperiode" },
               { value: "250 000+", label: "Bedrifter tilgjengelig" },
               { value: "4.9/5", label: "Brukervurdering" },
             ].map(({ value, label }) => (
@@ -110,26 +89,6 @@ export function OmOss() {
           </div>
         </div>
 
-        {/* Team */}
-        <div>
-          <p className="text-sm font-bold uppercase tracking-widest text-[#a09b8f] mb-10">Teamet</p>
-          <div className="flex flex-wrap gap-6">
-            {teamMembers.map(({ name, role, initials, accent }) => (
-              <div key={name} className="flex items-center gap-4 bg-[#faf8f2] border border-[#d8d3c5] rounded-2xl px-6 py-4">
-                <div
-                  className="w-12 h-12 rounded-xl flex items-center justify-center text-sm font-extrabold shrink-0"
-                  style={{ backgroundColor: accent + "22", color: accent === "#09fe94" ? "#065c3a" : accent }}
-                >
-                  {initials}
-                </div>
-                <div>
-                  <p className="text-sm font-bold text-[#171717]">{name}</p>
-                  <p className="text-xs text-[#a09b8f]">{role}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
 
       </div>
     </section>

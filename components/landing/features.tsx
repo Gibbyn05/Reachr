@@ -89,7 +89,6 @@ export function Features() {
           {[
             { value: "250 000+", label: "Norske bedrifter" },
             { value: "3 dager", label: "Gratis prøveperiode" },
-            { value: "500+", label: "Aktive brukere" },
             { value: "98%", label: "Fornøyde kunder" },
           ].map(({ value, label }) => (
             <div key={label} className="bg-[#faf8f2] px-8 py-8 text-center">
