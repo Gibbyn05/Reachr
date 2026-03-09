@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
     }, { onConflict: "owner_email,member_email" });
 
     // Build invite link with inviter info so register page can link the accounts
-    const inviteLink = `${APP_URL}/register?invite=${encodeURIComponent(email)}&inviter=${encodeURIComponent(user.email)}&company=${encodeURIComponent(companyName ?? "")}`;
+    const inviteLink = `${APP_URL}/register?invite=${encodeURIComponent(email)}&inviter=${encodeURIComponent(user.email)}&company=${encodeURIComponent(companyName ?? "")}&name=${encodeURIComponent(inviterName ?? "")}`;
 
     if (!RESEND_API_KEY) {
       console.warn("[invite] RESEND_API_KEY is not configured — invite not sent");

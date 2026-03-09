@@ -1,26 +1,48 @@
 "use client";
-import { useState, Suspense } from "react";
+import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
-import { ArrowRight, User } from "lucide-react";
+import { useSearchParams, useRouter } from "next/navigation";
+import { ArrowRight, User, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { createClient } from "@/lib/supabase/client";
 
 function RegisterForm() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const inviteEmail = searchParams.get("invite") ?? "";
   const inviterEmail = searchParams.get("inviter") ?? "";
   const inviteCompany = searchParams.get("company") ?? "";
+  const inviterName = searchParams.get("name") ?? inviterEmail;
   const isInvited = !!inviteEmail && !!inviterEmail;
 
   const [loading, setLoading] = useState(false);
+  const [checkingSession, setCheckingSession] = useState(isInvited);
   const [error, setError] = useState<string | null>(null);
   const [form, setForm] = useState({
     name: "",
     email: inviteEmail,
     password: "",
   });
+
+  // If invite link is opened and user is already logged in → link team + go to dashboard
+  useEffect(() => {
+    if (!isInvited) return;
+    const supabase = createClient();
+    supabase.auth.getUser().then(async ({ data: { user } }) => {
+      if (user) {
+        // Link this user to the team owner
+        await fetch("/api/team", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ owner_email: inviterEmail, member_name: user.user_metadata?.full_name ?? "" }),
+        });
+        router.replace("/dashboard");
+      } else {
+        setCheckingSession(false);
+      }
+    });
+  }, [isInvited, inviterEmail, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,7 +74,11 @@ function RegisterForm() {
         if (msg.includes("rate limit") || msg.includes("email rate")) {
           setError("For mange registreringsforsøk. Vent noen minutter og prøv igjen, eller kontakt support.");
         } else if (msg.includes("already registered") || msg.includes("user already exists")) {
-          setError("Denne e-postadressen er allerede registrert. Prøv å logge inn i stedet.");
+          setError(
+            isInvited
+              ? "Denne e-postadressen er allerede registrert. Logg inn nedenfor for å bli med i teamet."
+              : "Denne e-postadressen er allerede registrert. Prøv å logge inn i stedet."
+          );
         } else if (msg.includes("invalid email")) {
           setError("Ugyldig e-postadresse. Sjekk at den er riktig skrevet.");
         } else if (msg.includes("password")) {
@@ -83,32 +109,75 @@ function RegisterForm() {
     }
   };
 
+  // Build login link that preserves invite context
+  const loginHref = isInvited
+    ? `/login?invite=${encodeURIComponent(inviteEmail)}&inviter=${encodeURIComponent(inviterEmail)}&company=${encodeURIComponent(inviteCompany)}&name=${encodeURIComponent(inviterName)}`
+    : "/login";
+
+  if (checkingSession) {
+    return (
+      <div className="w-full max-w-md flex items-center justify-center h-48">
+        <div className="w-6 h-6 border-2 border-[#09fe94] border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
   return (
     <div className="w-full max-w-md">
+      {isInvited && (
+        <div className="mb-4 bg-[#171717] rounded-2xl border border-[#2a2a2a] p-5 flex items-start gap-4">
+          <div className="w-10 h-10 rounded-xl bg-[#09fe94]/10 flex items-center justify-center shrink-0">
+            <Users className="w-5 h-5 text-[#09fe94]" />
+          </div>
+          <div>
+            <p className="text-white font-semibold text-sm">
+              Du er invitert til{inviteCompany ? ` ${inviteCompany}` : " et team"} på Reachr
+            </p>
+            <p className="text-[#a09b8f] text-xs mt-0.5">
+              {inviterName !== inviterEmail ? inviterName : inviterEmail} har lagt deg til som teammedlem.
+              Kontoen din vil bli koblet til teamets abonnement — du trenger ikke betale selv.
+            </p>
+          </div>
+        </div>
+      )}
+
       <div className="bg-[#faf8f2] rounded-2xl border border-[#d8d3c5] shadow-sm p-8">
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
             <img src="/logo.svg" alt="Reachr" className="w-14 h-14" />
           </div>
           <h1 className="text-2xl font-bold text-[#171717] mb-2">
-            {isInvited ? "Bli med i teamet" : "Opprett konto"}
+            {isInvited ? "Opprett din konto" : "Opprett konto"}
           </h1>
           <p className="text-[#6b6660] text-sm">
-            {isInvited
-              ? "Du er invitert til Reachr. Opprett kontoen din for å komme i gang."
-              : <>
-                  Allerede registrert?{" "}
-                  <Link href="/login" className="text-[#ff470a] font-semibold hover:underline">
-                    Logg inn her
-                  </Link>
-                </>
-            }
+            {isInvited ? (
+              <>
+                Har du allerede en konto?{" "}
+                <Link href={loginHref} className="text-[#ff470a] font-semibold hover:underline">
+                  Logg inn her for å bli med
+                </Link>
+              </>
+            ) : (
+              <>
+                Allerede registrert?{" "}
+                <Link href="/login" className="text-[#ff470a] font-semibold hover:underline">
+                  Logg inn her
+                </Link>
+              </>
+            )}
           </p>
         </div>
 
         {error && (
           <div className="mb-4 rounded-lg bg-[#ff470a]/8 border border-[#ff470a]/20 px-4 py-3 text-sm text-[#ff470a]">
             {error}
+            {isInvited && error.includes("allerede registrert") && (
+              <div className="mt-2">
+                <Link href={loginHref} className="font-semibold underline">
+                  Logg inn her →
+                </Link>
+              </div>
+            )}
           </div>
         )}
 
@@ -151,7 +220,7 @@ function RegisterForm() {
           </div>
 
           <Button type="submit" variant="primary" size="lg" className="w-full justify-center mt-2" disabled={loading}>
-            {loading ? "Oppretter konto..." : isInvited ? "Kom i gang" : "Neste"}
+            {loading ? "Oppretter konto..." : isInvited ? "Bli med i teamet" : "Neste"}
             {!loading && <ArrowRight className="w-4 h-4" />}
           </Button>
         </form>
