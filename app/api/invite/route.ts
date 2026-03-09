@@ -38,6 +38,104 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const year = new Date().getFullYear();
+    const teamName = companyName || "teamet";
+    const plainText = [
+      `Hei,`,
+      ``,
+      `${inviterName} inviterer deg til aa bli med i ${teamName} paa Reachr.`,
+      ``,
+      `Reachr er det norske B2B-verktoeyet for leadsok og salgspipeline.`,
+      ``,
+      `Bli med i teamet:`,
+      inviteLink,
+      ``,
+      `Invitasjonen er gyldig i 7 dager.`,
+      ``,
+      `--`,
+      `Reachr · reachr.no`,
+      `(c) ${year} Reachr`,
+    ].join("\n");
+
+    // Table-based layout — required for Outlook (which renders HTML via Word engine)
+    const htmlBody = `<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="no">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Invitasjon til Reachr</title>
+</head>
+<body style="margin:0;padding:0;background-color:#F2EFE3;font-family:Arial,Helvetica,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#F2EFE3;">
+    <tr>
+      <td align="center" style="padding:40px 16px;">
+        <table width="560" cellpadding="0" cellspacing="0" border="0" style="max-width:560px;width:100%;background-color:#FAF8F2;border:1px solid #D8D3C5;">
+          <!-- Header -->
+          <tr>
+            <td style="background-color:#171717;padding:28px 40px;text-align:center;">
+              <table cellpadding="0" cellspacing="0" border="0" style="margin:0 auto;">
+                <tr>
+                  <td style="vertical-align:middle;padding-right:10px;">
+                    <table cellpadding="0" cellspacing="0" border="0">
+                      <tr>
+                        <td width="32" height="32" style="background-color:#09fe94;text-align:center;vertical-align:middle;">
+                          <span style="color:#171717;font-size:18px;font-weight:900;line-height:32px;">R</span>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                  <td style="vertical-align:middle;">
+                    <span style="color:#ffffff;font-size:22px;font-weight:800;letter-spacing:-0.5px;">Reachr</span>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <!-- Body -->
+          <tr>
+            <td style="padding:40px;">
+              <h2 style="margin:0 0 16px;font-size:22px;font-weight:700;color:#171717;font-family:Arial,Helvetica,sans-serif;">
+                Du er invitert til ${teamName}
+              </h2>
+              <p style="color:#6B6660;font-size:15px;line-height:1.7;margin:0 0 12px;font-family:Arial,Helvetica,sans-serif;">
+                <strong style="color:#171717;">${inviterName}</strong> har invitert deg til aa bli med i
+                <strong style="color:#171717;">${teamName}</strong> paa Reachr &mdash;
+                det norske B2B-verktoeyet for leadsok og salgspipeline.
+              </p>
+              <p style="color:#6B6660;font-size:15px;line-height:1.7;margin:0 0 28px;font-family:Arial,Helvetica,sans-serif;">
+                Du trenger ikke betale selv &mdash; du bruker teamets abonnement.
+              </p>
+              <!-- CTA Button — table-based for Outlook -->
+              <table cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td style="background-color:#09fe94;padding:14px 32px;">
+                    <a href="${inviteLink}" style="color:#171717;font-weight:700;font-size:15px;text-decoration:none;font-family:Arial,Helvetica,sans-serif;display:inline-block;">
+                      Bli med i teamet &rarr;
+                    </a>
+                  </td>
+                </tr>
+              </table>
+              <p style="color:#A09B8F;font-size:12px;margin:28px 0 0;font-family:Arial,Helvetica,sans-serif;">
+                Invitasjonen er gyldig i 7 dager. Fungerer ikke knappen? Kopier denne lenken:<br />
+                <a href="${inviteLink}" style="color:#ff470a;word-break:break-all;">${inviteLink}</a>
+              </p>
+            </td>
+          </tr>
+          <!-- Footer -->
+          <tr>
+            <td style="background-color:#EDE9DA;padding:16px 40px;border-top:1px solid #D8D3C5;text-align:center;">
+              <p style="color:#A09B8F;font-size:11px;margin:0;font-family:Arial,Helvetica,sans-serif;">
+                &copy; ${year} Reachr &middot; reachr.no
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
+
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: {
@@ -46,44 +144,11 @@ export async function POST(req: NextRequest) {
       },
       body: JSON.stringify({
         from: `Reachr <${FROM_EMAIL}>`,
+        reply_to: FROM_EMAIL,
         to: [email],
         subject: `${inviterName} inviterer deg til Reachr`,
-        html: `
-<!DOCTYPE html>
-<html lang="no">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
-<body style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#F8F9FC;margin:0;padding:40px 0;">
-  <div style="max-width:560px;margin:0 auto;background:white;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);">
-    <div style="background:linear-gradient(135deg,#0F1729,#1E3A5F);padding:32px 40px;text-align:center;">
-      <div style="display:inline-flex;align-items:center;gap:10px;margin-bottom:8px;">
-        <div style="width:36px;height:36px;background:#2563EB;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;">
-          <span style="color:white;font-size:20px;font-weight:900;">⚡</span>
-        </div>
-        <span style="color:white;font-size:22px;font-weight:800;letter-spacing:-0.5px;">Reachr</span>
-      </div>
-    </div>
-    <div style="padding:40px;">
-      <h2 style="margin:0 0 12px;font-size:22px;font-weight:700;color:#0F1729;">Du er invitert! 🎉</h2>
-      <p style="color:#6B7280;font-size:15px;line-height:1.6;margin:0 0 24px;">
-        <strong style="color:#374151;">${inviterName}</strong> inviterer deg til å bli med i
-        <strong style="color:#374151;">${companyName || "teamet"}</strong> på Reachr —
-        det norske B2B-verktøyet for leadsøk og salgspipeline.
-      </p>
-      <a href="${inviteLink}" style="display:inline-block;background:#2563EB;color:white;font-weight:700;font-size:15px;padding:14px 32px;border-radius:12px;text-decoration:none;box-shadow:0 4px 12px rgba(37,99,235,0.4);">
-        Bli med i teamet →
-      </a>
-      <p style="color:#9CA3AF;font-size:12px;margin:24px 0 0;">
-        Invitasjonen er gyldig i 7 dager. Har du spørsmål? Svar på denne e-posten.
-      </p>
-    </div>
-    <div style="background:#F9FAFB;padding:20px 40px;border-top:1px solid #F3F4F6;">
-      <p style="color:#D1D5DB;font-size:11px;margin:0;text-align:center;">
-        © ${new Date().getFullYear()} Reachr · reachr.no
-      </p>
-    </div>
-  </div>
-</body>
-</html>`,
+        text: plainText,
+        html: htmlBody,
       }),
     });
 
