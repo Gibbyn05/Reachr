@@ -227,6 +227,8 @@ function AiEmailModal({
   const [copied, setCopied] = useState(false);
   const [connections, setConnections] = useState<{ provider: string; email_address: string }[]>([]);
   const [selectedProvider, setSelectedProvider] = useState<string>("");
+  const [enriching, setEnriching] = useState(false);
+  const [enrichResult, setEnrichResult] = useState<string[] | null>(null);
 
   useEffect(() => {
     fetch("/api/email/connections")
@@ -290,6 +292,26 @@ function AiEmailModal({
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const handleFindEmail = async () => {
+    setEnriching(true);
+    setEnrichResult(null);
+    try {
+      const params = new URLSearchParams();
+      if (lead.orgNumber) params.set("orgnr", lead.orgNumber);
+      if (lead.name) params.set("name", lead.name);
+      if (lead.city) params.set("poststed", lead.city);
+      const res = await fetch(`/api/enrich/email?${params}`);
+      const data = await res.json();
+      const emails: string[] = data.emails ?? [];
+      setEnrichResult(emails);
+      if (emails.length > 0) setToEmail(emails[0]);
+    } catch {
+      setEnrichResult([]);
+    } finally {
+      setEnriching(false);
+    }
+  };
+
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40" onClick={onClose}>
       <div className="bg-[#faf8f2] rounded-2xl shadow-xl w-[600px] max-w-[95vw] max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
@@ -333,34 +355,70 @@ function AiEmailModal({
                   className="w-full text-sm border border-[#d8d3c5] rounded-lg px-3 py-2 focus:outline-none focus:border-purple-400 bg-[#faf8f2]"
                 />
                 {!toEmail && (
-                  <div className="mt-2 p-3 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-800 space-y-1.5">
+                  <div className="mt-2 p-3 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-800 space-y-2">
                     <p className="font-semibold">Ingen e-post registrert for denne bedriften.</p>
-                    <p>Prøv å finne e-posten via:</p>
-                    <div className="flex flex-wrap gap-2 mt-1">
-                      <a
-                        href={`https://www.1881.no/firma/?query=${encodeURIComponent(lead.name)}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 text-xs text-amber-700 underline hover:text-amber-900"
-                      >
-                        <ExternalLink className="w-3 h-3" /> 1881.no
-                      </a>
-                      <a
-                        href={`https://www.proff.no/søk?q=${encodeURIComponent(lead.name)}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 text-xs text-amber-700 underline hover:text-amber-900"
-                      >
-                        <ExternalLink className="w-3 h-3" /> Proff.no
-                      </a>
-                      <a
-                        href={`https://www.google.com/search?q=${encodeURIComponent(lead.name + " e-post kontakt")}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 text-xs text-amber-700 underline hover:text-amber-900"
-                      >
-                        <ExternalLink className="w-3 h-3" /> Google
-                      </a>
+
+                    {/* Auto-search button */}
+                    <button
+                      onClick={handleFindEmail}
+                      disabled={enriching}
+                      className="flex items-center gap-1.5 text-xs font-medium bg-amber-600 text-white px-3 py-1.5 rounded-lg hover:bg-amber-700 disabled:opacity-60 transition-colors"
+                    >
+                      {enriching ? (
+                        <><Loader2 className="w-3 h-3 animate-spin" /> Søker…</>
+                      ) : (
+                        <><Search className="w-3 h-3" /> Finn e-post automatisk</>
+                      )}
+                    </button>
+
+                    {/* Enrichment result */}
+                    {enrichResult !== null && enrichResult.length === 0 && (
+                      <p className="text-amber-700">Ingen e-post funnet i 1881, Gulesider eller Proff.</p>
+                    )}
+                    {enrichResult !== null && enrichResult.length > 1 && (
+                      <div className="space-y-1">
+                        <p className="font-medium">Flere e-poster funnet — velg én:</p>
+                        {enrichResult.map((e) => (
+                          <button
+                            key={e}
+                            onClick={() => setToEmail(e)}
+                            className="block w-full text-left text-amber-800 hover:text-amber-900 underline truncate"
+                          >
+                            {e}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Manual fallback links */}
+                    <div>
+                      <p className="text-amber-700 mb-1">Eller søk manuelt:</p>
+                      <div className="flex flex-wrap gap-2">
+                        <a
+                          href={`https://www.1881.no/firma/?query=${encodeURIComponent(lead.name)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 text-amber-700 underline hover:text-amber-900"
+                        >
+                          <ExternalLink className="w-3 h-3" /> 1881.no
+                        </a>
+                        <a
+                          href={`https://www.gulesider.no/finn/${encodeURIComponent(lead.name)}/`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 text-amber-700 underline hover:text-amber-900"
+                        >
+                          <ExternalLink className="w-3 h-3" /> Gulesider.no
+                        </a>
+                        <a
+                          href={`https://www.proff.no/søk?q=${encodeURIComponent(lead.name)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 text-amber-700 underline hover:text-amber-900"
+                        >
+                          <ExternalLink className="w-3 h-3" /> Proff.no
+                        </a>
+                      </div>
                     </div>
                   </div>
                 )}
