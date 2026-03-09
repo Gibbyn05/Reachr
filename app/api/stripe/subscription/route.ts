@@ -34,16 +34,23 @@ export async function GET() {
       .single();
 
     if (!process.env.STRIPE_SECRET_KEY) {
-      // No Stripe configured — check own sub, then team owner's sub
       if (sub) return NextResponse.json({ subscription: sub });
-      const teamOwnerEmail: string | undefined = user.user_metadata?.team_owner;
-      if (teamOwnerEmail) {
+      // Check team membership (metadata OR direct DB lookup)
+      const metaOwner: string | undefined = user.user_metadata?.team_owner;
+      const { data: mRow } = await supabase
+        .from("team_members")
+        .select("owner_email")
+        .eq("member_email", user.email)
+        .limit(1)
+        .single();
+      const ownerEmail = metaOwner ?? mRow?.owner_email ?? null;
+      if (ownerEmail) {
         const { data: ownerSub } = await supabase
           .from("subscriptions")
           .select("*")
-          .eq("user_email", teamOwnerEmail)
+          .eq("user_email", ownerEmail)
           .single();
-        if (ownerSub) return NextResponse.json({ subscription: { ...ownerSub, via_team_owner: teamOwnerEmail } });
+        if (ownerSub) return NextResponse.json({ subscription: { ...ownerSub, via_team_owner: ownerEmail } });
       }
       return NextResponse.json({ subscription: null });
     }
@@ -84,47 +91,48 @@ export async function GET() {
       });
     }
 
-    // 2. Team member fallback — check owner's subscription
-    const teamOwnerEmail: string | undefined = user.user_metadata?.team_owner;
+    // 2. Team member fallback — resolve owner email from two sources
+    //    a) user_metadata.team_owner (set during invite-link registration)
+    //    b) direct team_members table lookup (covers existing accounts added to a team)
+    const metaOwnerEmail: string | undefined = user.user_metadata?.team_owner;
+
+    // Direct DB lookup: find any team this user is a member of
+    const { data: memberRow } = await supabase
+      .from("team_members")
+      .select("owner_email")
+      .eq("member_email", user.email)
+      .limit(1)
+      .single();
+
+    const teamOwnerEmail = metaOwnerEmail ?? memberRow?.owner_email ?? null;
+
     if (teamOwnerEmail) {
-      // Verify this user is an active member of that team
-      const { data: membership } = await supabase
-        .from("team_members")
-        .select("status")
-        .eq("owner_email", teamOwnerEmail)
-        .eq("member_email", user.email)
+      const ownerResult = await getStripeSubForEmail(teamOwnerEmail);
+      if (ownerResult) {
+        const { stripeSub, customer } = ownerResult;
+        const plan = (stripeSub.metadata?.plan as string) ?? "team";
+        return NextResponse.json({
+          subscription: {
+            id: stripeSub.id,
+            status: stripeSub.status,
+            plan,
+            interval: (stripeSub.metadata?.interval as string) ?? "monthly",
+            current_period_end: new Date((stripeSub as any).current_period_end * 1000).toISOString(),
+            cancel_at_period_end: stripeSub.cancel_at_period_end,
+            stripe_customer_id: customer.id,
+            via_team_owner: teamOwnerEmail,
+          },
+        });
+      }
+
+      // Stripe not reachable / no Stripe sub — check Supabase subscriptions table for owner
+      const { data: ownerSub } = await supabase
+        .from("subscriptions")
+        .select("*")
+        .eq("user_email", teamOwnerEmail)
         .single();
-
-      if (membership) {
-        const ownerResult = await getStripeSubForEmail(teamOwnerEmail);
-        if (ownerResult) {
-          const { stripeSub, customer } = ownerResult;
-          // Only team plan covers multiple users
-          const plan = (stripeSub.metadata?.plan as string) ?? "team";
-          return NextResponse.json({
-            subscription: {
-              id: stripeSub.id,
-              status: stripeSub.status,
-              plan,
-              interval: (stripeSub.metadata?.interval as string) ?? "monthly",
-              current_period_end: new Date((stripeSub as any).current_period_end * 1000).toISOString(),
-              cancel_at_period_end: stripeSub.cancel_at_period_end,
-              stripe_customer_id: customer.id,
-              via_team_owner: teamOwnerEmail,
-            },
-          });
-        }
-
-        // Owner exists in team table but Stripe not configured / no sub found —
-        // also check Supabase subscriptions table for owner
-        const { data: ownerSub } = await supabase
-          .from("subscriptions")
-          .select("*")
-          .eq("user_email", teamOwnerEmail)
-          .single();
-        if (ownerSub) {
-          return NextResponse.json({ subscription: { ...ownerSub, via_team_owner: teamOwnerEmail } });
-        }
+      if (ownerSub) {
+        return NextResponse.json({ subscription: { ...ownerSub, via_team_owner: teamOwnerEmail } });
       }
     }
 
