@@ -140,6 +140,8 @@ export default function LeadsokPage() {
   const [pendingFilters, setPendingFilters] = useState<Filters>({ ansatte: "all", mva: false, bransje: "" });
 
   const filterRef = useRef<HTMLDivElement>(null);
+  const searchTokenRef = useRef(0);       // incremented on every new search
+  const abortRef = useRef<AbortController | null>(null); // cancel in-flight main fetch
 
   // Load leads from DB on mount
   useEffect(() => {
@@ -187,11 +189,14 @@ export default function LeadsokPage() {
   };
 
   // Fetch leaders and phone numbers in background batches and update state incrementally
-  const fetchLeadersInBackground = useCallback((enheter: BrregEnhet[], isAppend: boolean) => {
+  const fetchLeadersInBackground = useCallback((enheter: BrregEnhet[], isAppend: boolean, token: number) => {
     const BATCH = 8;
     let i = 0;
     const run = async () => {
       while (i < enheter.length) {
+        // Abort if a newer search has started
+        if (searchTokenRef.current !== token) return;
+
         const batch = enheter.slice(i, i + BATCH);
         i += BATCH;
         await Promise.all(
@@ -233,12 +238,12 @@ export default function LeadsokPage() {
             await Promise.all(tasks);
           })
         );
-        // Push incremental update to state
+
+        // Only update state if this search is still the active one
+        if (searchTokenRef.current !== token) return;
         setResults((prev) => {
-          if (isAppend) {
-            return [...prev];
-          }
-          return [...enheter]; // trigger re-render with updated data
+          if (isAppend) return [...prev];
+          return [...enheter];
         });
       }
     };
@@ -247,14 +252,29 @@ export default function LeadsokPage() {
 
   const doSearch = useCallback(async (loc: string, ind: string, f: Filters, page = 0, append = false) => {
     if (!loc && !ind && !f.bransje) return;
+
+    // Cancel previous in-flight search
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
+
+    // Assign a new token so stale background enrichment stops updating state
+    const token = ++searchTokenRef.current;
+
     if (append) setLoadingMore(true);
     else { setLoading(true); setResults([]); }
     setError("");
     setHasSearched(true);
 
     try {
-      const res  = await fetch(`/api/brreg?${buildParams(loc, ind, f, page)}`);
+      const res = await fetch(`/api/brreg?${buildParams(loc, ind, f, page)}`, {
+        signal: controller.signal,
+      });
       const data = await res.json();
+
+      // Another search started while this was in flight — discard
+      if (searchTokenRef.current !== token) return;
+
       const enheter: BrregEnhet[] = data?._embedded?.enheter ?? [];
       setTotal(data?.page?.totalElements ?? enheter.length);
       setCurrentPage(page);
@@ -262,18 +282,21 @@ export default function LeadsokPage() {
       if (append) {
         setResults((prev) => {
           const newList = [...prev, ...enheter];
-          fetchLeadersInBackground(newList, true);
+          fetchLeadersInBackground(newList, true, token);
           return newList;
         });
       } else {
         setResults(enheter);
-        fetchLeadersInBackground(enheter, false);
+        fetchLeadersInBackground(enheter, false, token);
       }
-    } catch {
+    } catch (err: any) {
+      if (err?.name === "AbortError") return; // intentionally cancelled
       setError("Kunne ikke laste data. Sjekk nettilkoblingen.");
     } finally {
-      setLoading(false);
-      setLoadingMore(false);
+      if (searchTokenRef.current === token) {
+        setLoading(false);
+        setLoadingMore(false);
+      }
     }
   }, [fetchLeadersInBackground]);
 
