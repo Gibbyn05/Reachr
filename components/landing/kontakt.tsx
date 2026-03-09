@@ -80,7 +80,11 @@ export function Kontakt() {
                   </div>
                   <div>
                     <p className="text-xs font-bold text-[#a09b8f] uppercase tracking-wide">{label}</p>
-                    <p className="text-sm font-semibold text-[#171717]">{value}</p>
+                    {label === "E-post" ? (
+                      <a href={`mailto:${value}`} className="text-sm font-semibold text-[#ff470a] hover:underline">{value}</a>
+                    ) : (
+                      <p className="text-sm font-semibold text-[#171717]">{value}</p>
+                    )}
                   </div>
                 </div>
               ))}
@@ -98,12 +102,13 @@ export function Kontakt() {
                 <p className="text-sm text-[#6b6660]">Vi tar kontakt med deg innen én virkedag.</p>
               </div>
             ) : (
-              {error && (
-                <div className="mb-4 rounded-xl bg-[#ff470a]/8 border border-[#ff470a]/20 px-4 py-3 text-sm text-[#ff470a]">
-                  {error}
-                </div>
-              )}
-              <form onSubmit={handleSubmit} className="space-y-5">
+              <>
+                {error && (
+                  <div className="mb-4 rounded-xl bg-[#ff470a]/8 border border-[#ff470a]/20 px-4 py-3 text-sm text-[#ff470a]">
+                    {error}
+                  </div>
+                )}
+                <form onSubmit={handleSubmit} className="space-y-5">
                 <div>
                   <label className="block text-xs font-bold text-[#a09b8f] uppercase tracking-widest mb-2">Navn</label>
                   <input
@@ -144,7 +149,8 @@ export function Kontakt() {
                 >
                   {loading ? <><Loader2 size={15} className="animate-spin" /> Sender…</> : <>Send melding <ArrowRight size={15} /></>}
                 </button>
-              </form>
+                </form>
+              </>
             )}
           </div>
 
