@@ -6,6 +6,11 @@ export const metadata: Metadata = {
   description:
     "Finn leads. Ta kontakt. Lukk avtaler. Reachr er det norske B2B-verktøyet for leadsøk og salgspipeline.",
   keywords: "B2B, leads, CRM, salg, Norge, norsk, leadsøk",
+  icons: {
+    icon: "/icon.svg",
+    shortcut: "/icon.svg",
+    apple: "/icon.svg",
+  },
 };
 
 export default function RootLayout({
