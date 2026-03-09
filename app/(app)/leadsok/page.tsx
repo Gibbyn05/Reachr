@@ -410,45 +410,50 @@ export default function LeadsokPage() {
       <TopBar title="Leadsøk" />
 
       {/* ── Search bar ───────────────────────────────────── */}
-      <div style={{ padding: "16px 24px", borderBottom: "1px solid #d8d3c5", backgroundColor: "#faf8f2", flexShrink: 0 }}>
-        <form onSubmit={handleSearch} style={{ display: "flex", gap: 10, alignItems: "center" }}>
+      <div style={{ padding: "12px 16px", borderBottom: "1px solid #d8d3c5", backgroundColor: "#faf8f2", flexShrink: 0 }}>
+        <form onSubmit={handleSearch} style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center" }}>
 
-          {/* Location */}
-          <div style={{ flex: 1, position: "relative" }}>
-            <MapPin size={15} color="#9CA3AF" style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }} />
-            <input
-              value={locationQ}
-              onChange={e => setLocationQ(e.target.value)}
-              placeholder="By eller kommune (f.eks. Oslo, Bergen)"
-              style={{
-                width: "100%", padding: "10px 12px 10px 36px",
-                border: "1.5px solid #d8d3c5", borderRadius: 10,
-                fontSize: 14, color: "#171717", outline: "none",
-                fontFamily: "inherit", backgroundColor: "#faf8f2",
-              }}
-              onFocus={e => (e.currentTarget.style.borderColor = "#09fe94")}
-              onBlur={e => (e.currentTarget.style.borderColor = "#d8d3c5")}
-            />
+          {/* Inputs group — full-width on mobile, flex-1 on desktop */}
+          <div className="flex gap-2 w-full sm:flex-1 sm:w-auto min-w-0" style={{ minWidth: 0 }}>
+            {/* Location */}
+            <div style={{ flex: 1, position: "relative", minWidth: 0 }}>
+              <MapPin size={15} color="#9CA3AF" style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }} />
+              <input
+                value={locationQ}
+                onChange={e => setLocationQ(e.target.value)}
+                placeholder="By / kommune"
+                style={{
+                  width: "100%", padding: "10px 12px 10px 36px",
+                  border: "1.5px solid #d8d3c5", borderRadius: 10,
+                  fontSize: 14, color: "#171717", outline: "none",
+                  fontFamily: "inherit", backgroundColor: "#faf8f2",
+                }}
+                onFocus={e => (e.currentTarget.style.borderColor = "#09fe94")}
+                onBlur={e => (e.currentTarget.style.borderColor = "#d8d3c5")}
+              />
+            </div>
+
+            {/* Industry */}
+            <div style={{ flex: 1, position: "relative", minWidth: 0 }}>
+              <Building2 size={15} color="#9CA3AF" style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }} />
+              <input
+                value={industryQ}
+                onChange={e => setIndustryQ(e.target.value)}
+                placeholder="Bransje (f.eks. frisør, bygg)"
+                style={{
+                  width: "100%", padding: "10px 12px 10px 36px",
+                  border: "1.5px solid #d8d3c5", borderRadius: 10,
+                  fontSize: 14, color: "#171717", outline: "none",
+                  fontFamily: "inherit", backgroundColor: "#faf8f2",
+                }}
+                onFocus={e => (e.currentTarget.style.borderColor = "#09fe94")}
+                onBlur={e => (e.currentTarget.style.borderColor = "#d8d3c5")}
+              />
+            </div>
           </div>
 
-          {/* Industry */}
-          <div style={{ flex: 1, position: "relative" }}>
-            <Building2 size={15} color="#9CA3AF" style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }} />
-            <input
-              value={industryQ}
-              onChange={e => setIndustryQ(e.target.value)}
-              placeholder="Bransje (f.eks. frisør, bygg, regnskap)"
-              style={{
-                width: "100%", padding: "10px 12px 10px 36px",
-                border: "1.5px solid #d8d3c5", borderRadius: 10,
-                fontSize: 14, color: "#171717", outline: "none",
-                fontFamily: "inherit", backgroundColor: "#faf8f2",
-              }}
-              onFocus={e => (e.currentTarget.style.borderColor = "#09fe94")}
-              onBlur={e => (e.currentTarget.style.borderColor = "#d8d3c5")}
-            />
-          </div>
-
+          {/* Buttons group */}
+          <div style={{ display: "flex", gap: 8, alignItems: "center", flexShrink: 0 }}>
           {/* Search button */}
           <button type="submit" style={{
             display: "inline-flex", alignItems: "center", gap: 7,
@@ -620,11 +625,12 @@ export default function LeadsokPage() {
               </button>
             ))}
           </div>
+          </div>{/* end buttons group */}
         </form>
       </div>
 
       {/* ── Results area ─────────────────────────────────── */}
-      <div style={{ flex: 1, overflow: "auto", padding: "20px 24px", backgroundColor: "#F8F9FC" }}>
+      <div className="flex-1 overflow-auto p-3 sm:p-5 bg-[#F8F9FC]">
 
         {/* Empty state */}
         {!hasSearched && !loading && (
@@ -695,7 +701,9 @@ export default function LeadsokPage() {
             </div>
 
             {view === "list" ? (
-              <div style={{ backgroundColor: "#faf8f2", borderRadius: 14, border: "1px solid #d8d3c5", overflow: "hidden", boxShadow: "0 1px 4px rgba(0,0,0,0.05)" }}>
+              <div style={{ backgroundColor: "#faf8f2", borderRadius: 14, border: "1px solid #d8d3c5", boxShadow: "0 1px 4px rgba(0,0,0,0.05)", overflow: "hidden" }}>
+              <div style={{ overflowX: "auto" }}>
+              <div style={{ minWidth: 780 }}>
                 {/* Table header */}
                 <div style={{
                   display: "grid",
@@ -846,6 +854,8 @@ export default function LeadsokPage() {
                     );
                   })
                 )}
+              </div>{/* end minWidth wrapper */}
+              </div>{/* end overflowX wrapper */}
               </div>
             ) : (
               <MapView

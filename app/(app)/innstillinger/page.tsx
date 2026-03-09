@@ -405,22 +405,22 @@ export default function InnstillingerPage() {
         </div>
       )}
 
-      <div className="p-8">
-        <div className="flex gap-8">
+      <div className="p-4 sm:p-8">
+        <div className="flex flex-col sm:flex-row gap-4 sm:gap-8">
           {/* Sidebar tabs */}
-          <div className="w-52 flex-shrink-0">
-            <nav className="space-y-1">
+          <div className="sm:w-52 sm:flex-shrink-0">
+            <nav className="flex sm:flex-col overflow-x-auto sm:overflow-visible gap-1 sm:space-y-1 pb-1 sm:pb-0 -mx-4 sm:mx-0 px-4 sm:px-0">
               {tabs.map(({ id, label, icon: Icon }) => (
                 <button
                   key={id}
                   onClick={() => setActiveTab(id)}
-                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all text-left ${
+                  className={`flex-shrink-0 sm:flex-shrink sm:w-full flex items-center gap-2 sm:gap-3 px-3 py-2 sm:py-2.5 rounded-lg text-sm font-medium transition-all text-left whitespace-nowrap sm:whitespace-normal ${
                     activeTab === id
                       ? "bg-[#09fe94]/10 text-[#05c472]"
                       : "text-[#6b6660] hover:bg-[#e8e4d8] hover:text-[#171717]"
                   }`}
                 >
-                  <Icon className="w-4 h-4" />
+                  <Icon className="w-4 h-4 flex-shrink-0" />
                   {label}
                 </button>
               ))}
@@ -428,7 +428,7 @@ export default function InnstillingerPage() {
           </div>
 
           {/* Content */}
-          <div className="flex-1">
+          <div className="flex-1 min-w-0">
             {/* ── Profil ── */}
             {activeTab === "profil" && (
               <div className="space-y-6">

@@ -116,7 +116,7 @@ export default function DashboardPage() {
     <div>
       <TopBar title="Dashboard" subtitle="Oversikt over din salgspipeline" />
 
-      <div className="p-4 sm:p-8 space-y-6 sm:space-y-8">
+      <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6 lg:space-y-8">
         {/* Welcome banner */}
         <div className="bg-[#171717] rounded-2xl p-5 sm:p-6 text-white flex flex-col sm:flex-row sm:items-center gap-4 sm:justify-between">
           <div>
@@ -182,8 +182,8 @@ export default function DashboardPage() {
           ) : (
             <div className="divide-y divide-[#e8e4d8]">
               {needsFollowUp.map(({ lead, reason }) => (
-                <div key={lead.id} className="flex items-center gap-4 px-6 py-3.5 hover:bg-[#f0ece0] transition-colors">
-                  <div className="w-9 h-9 bg-[#e8e4d8] rounded-lg flex items-center justify-center text-xs font-bold text-[#6b6660] flex-shrink-0">
+                <div key={lead.id} className="flex items-center gap-3 px-3 sm:px-6 py-3 hover:bg-[#f0ece0] transition-colors">
+                  <div className="w-8 h-8 sm:w-9 sm:h-9 bg-[#e8e4d8] rounded-lg flex items-center justify-center text-xs font-bold text-[#6b6660] flex-shrink-0">
                     {lead.name.substring(0, 2).toUpperCase()}
                   </div>
                   <div className="flex-1 min-w-0">
@@ -192,12 +192,12 @@ export default function DashboardPage() {
                   </div>
                   <div className="flex items-center gap-2 flex-shrink-0">
                     <Badge variant={statusColors[lead.status]}>{lead.status}</Badge>
-                    <span className="flex items-center gap-1 text-xs text-orange-500 bg-orange-50 border border-orange-100 px-2 py-1 rounded-full whitespace-nowrap">
+                    <span className="hidden sm:flex items-center gap-1 text-xs text-orange-500 bg-orange-50 border border-orange-100 px-2 py-1 rounded-full whitespace-nowrap">
                       <AlertCircle className="w-3 h-3" />
                       {reason}
                     </span>
                   </div>
-                  <div className="flex items-center gap-2 text-gray-300 flex-shrink-0">
+                  <div className="hidden sm:flex items-center gap-2 text-gray-300 flex-shrink-0">
                     {lead.phone && lead.phone !== "—" && (
                       <a href={`tel:${lead.phone}`} className="p-1.5 hover:bg-gray-100 rounded-lg hover:text-blue-500 transition-colors">
                         <Phone className="w-3.5 h-3.5" />
@@ -216,7 +216,7 @@ export default function DashboardPage() {
         {/* Pipeline overview */}
         <div className="bg-[#faf8f2] rounded-xl border border-[#d8d3c5] p-6" style={{boxShadow: "0 1px 3px rgba(0,0,0,0.08)"}}>
           <h3 className="font-semibold text-[#171717] mb-6">Pipeline-oversikt</h3>
-          <div className="grid grid-cols-3 md:grid-cols-6 gap-4">
+          <div className="grid grid-cols-3 sm:grid-cols-6 gap-3 sm:gap-4">
             {pipelineCounts.map(({ label, count, color, textColor }) => (
               <div key={label} className="text-center">
                 <div className={`w-16 h-16 ${color} rounded-xl flex items-center justify-center mx-auto mb-2`}>

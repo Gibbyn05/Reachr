@@ -85,9 +85,9 @@ export default function VarslerPage() {
   return (
     <div>
       <TopBar title="Varsler" subtitle={`${activeNotifs.length} aktive oppfølginger`} />
-      <div className="p-8 space-y-6">
+      <div className="p-4 sm:p-8 space-y-4 sm:space-y-6">
         {/* Summary cards */}
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
           {[
             { label: "Venter på svar", count: activeNotifs.filter(n => n.type === "follow-up").length, icon: Phone, color: "bg-[#ff470a]/10", iconColor: "text-[#ff470a]" },
             { label: "Påminnelser", count: activeNotifs.filter(n => n.type === "reminder").length, icon: Clock, color: "bg-[#09fe94]/10", iconColor: "text-[#05c472]" },
@@ -129,24 +129,26 @@ export default function VarslerPage() {
             const Icon = typeIcons[notif.type];
             const isDone = doneIds.has(notif.id);
             return (
-              <div key={notif.id} className={`bg-[#faf8f2] rounded-xl border border-[#d8d3c5] p-5 flex items-start gap-4 transition-all ${isDone ? "opacity-60" : "hover:shadow-sm hover:border-[#c5bfb0]"}`} style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.08)" }}>
-                <div className={`w-10 h-10 ${typeColors[notif.type]} rounded-xl flex items-center justify-center flex-shrink-0`}><Icon className="w-5 h-5" /></div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${typeColors[notif.type]}`}>{typeLabels[notif.type]}</span>
-                    <span className="text-xs text-[#a09b8f]">{new Date(notif.date).toLocaleDateString("nb-NO", { day: "numeric", month: "long" })}</span>
+              <div key={notif.id} className={`bg-[#faf8f2] rounded-xl border border-[#d8d3c5] p-4 sm:p-5 flex flex-col sm:flex-row items-start gap-3 sm:gap-4 transition-all ${isDone ? "opacity-60" : "hover:shadow-sm hover:border-[#c5bfb0]"}`} style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.08)" }}>
+                <div className="flex items-start gap-3 flex-1 min-w-0">
+                  <div className={`w-10 h-10 ${typeColors[notif.type]} rounded-xl flex items-center justify-center flex-shrink-0`}><Icon className="w-5 h-5" /></div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${typeColors[notif.type]}`}>{typeLabels[notif.type]}</span>
+                      <span className="text-xs text-[#a09b8f]">{new Date(notif.date).toLocaleDateString("nb-NO", { day: "numeric", month: "long" })}</span>
+                    </div>
+                    <p className="text-sm text-[#3d3a34] mb-1">{notif.message}</p>
+                    <p className="text-xs text-[#a09b8f] flex items-center gap-1"><ChevronRight className="w-3 h-3" />{notif.company}</p>
                   </div>
-                  <p className="text-sm text-[#3d3a34] mb-1">{notif.message}</p>
-                  <p className="text-xs text-[#a09b8f] flex items-center gap-1"><ChevronRight className="w-3 h-3" />{notif.company}</p>
                 </div>
                 {!isDone ? (
-                  <div className="flex items-center gap-2 flex-shrink-0">
+                  <div className="flex items-center gap-2 flex-shrink-0 ml-13 sm:ml-0">
                     <Button variant="secondary" size="sm" onClick={() => alert("Utsatt til i morgen")} className="text-gray-600"><RotateCcw className="w-3.5 h-3.5" />Utsett</Button>
                     <Button variant="primary" size="sm" onClick={() => setDoneIds(prev => new Set([...prev, notif.id]))}><Check className="w-3.5 h-3.5" />Ferdig</Button>
                     <button onClick={() => setDismissed(prev => new Set([...prev, notif.id]))} className="p-1.5 text-gray-300 hover:text-[#6b6660]"><X className="w-4 h-4" /></button>
                   </div>
                 ) : (
-                  <div className="flex items-center gap-2 flex-shrink-0">
+                  <div className="flex items-center gap-2 flex-shrink-0 ml-13 sm:ml-0">
                     <div className="flex items-center gap-1.5 text-green-600 text-sm font-medium"><CheckCircle2 className="w-4 h-4" />Fullført</div>
                     <button onClick={() => setDoneIds(prev => { const n = new Set(prev); n.delete(notif.id); return n; })} className="text-xs text-[#a09b8f] hover:text-gray-600 underline">Angre</button>
                   </div>

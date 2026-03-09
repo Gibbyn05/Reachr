@@ -609,7 +609,7 @@ function LeadRow({
         </td>
 
         {/* Contact */}
-        <td className="px-4 py-3.5 text-sm text-[#6b6660] whitespace-nowrap">{lead.contactPerson}</td>
+        <td className="hidden sm:table-cell px-4 py-3.5 text-sm text-[#6b6660] whitespace-nowrap">{lead.contactPerson}</td>
 
         {/* Status — uses fixed dropdown to avoid table overflow clipping */}
         <td className="px-4 py-3.5" onClick={(e) => e.stopPropagation()}>
@@ -626,7 +626,7 @@ function LeadRow({
         </td>
 
         {/* Last contacted / Meeting date */}
-        <td className="px-4 py-3.5 text-sm text-[#6b6660] whitespace-nowrap">
+        <td className="hidden md:table-cell px-4 py-3.5 text-sm text-[#6b6660] whitespace-nowrap">
           {lead.status === "Booket møte" && meetingDate ? (
             <span className="flex items-center gap-1 text-purple-600 font-medium text-xs">
               <Calendar className="w-3 h-3" />
@@ -638,7 +638,7 @@ function LeadRow({
         </td>
 
         {/* Assigned */}
-        <td className="px-4 py-3.5">
+        <td className="hidden md:table-cell px-4 py-3.5">
           <div className="flex items-center gap-2">
             <div className="w-6 h-6 bg-[#0F1729] rounded-full flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0">
               {lead.assignedAvatar}
@@ -648,7 +648,7 @@ function LeadRow({
         </td>
 
         {/* Notes preview */}
-        <td className="px-4 py-3.5 text-sm text-[#a09b8f] max-w-xs truncate">
+        <td className="hidden lg:table-cell px-4 py-3.5 text-sm text-[#a09b8f] max-w-xs truncate">
           {lead.notes || <span className="text-gray-300 italic">Ingen notater</span>}
         </td>
       </tr>
@@ -724,7 +724,7 @@ function LeadRow({
                 </div>
               </div>
 
-              <div className="grid grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
                 {/* Contact info */}
                 <div>
                   <p className="text-xs font-semibold text-[#a09b8f] uppercase tracking-wider mb-3 flex items-center gap-1.5">
@@ -1117,7 +1117,7 @@ export default function MineLeadsPage() {
     <div>
       <TopBar title="Mine Leads" subtitle="CRM-pipeline og leadoversikt" />
 
-      <div className="p-8 space-y-6">
+      <div className="p-4 sm:p-8 space-y-4 sm:space-y-6">
         {/* Stats */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {stats.map(({ label, value, icon: Icon, color, bg }) => (
@@ -1203,11 +1203,11 @@ export default function MineLeadsPage() {
               <thead>
                 <tr className="bg-[#f0ece0] border-b border-[#e8e4d8]">
                   <th className="px-4 py-3 text-left text-xs font-semibold text-[#6b6660] uppercase tracking-wider">Bedriftsnavn</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-[#6b6660] uppercase tracking-wider">Kontaktperson</th>
+                  <th className="hidden sm:table-cell px-4 py-3 text-left text-xs font-semibold text-[#6b6660] uppercase tracking-wider">Kontaktperson</th>
                   <th className="px-4 py-3 text-left text-xs font-semibold text-[#6b6660] uppercase tracking-wider">Status</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-[#6b6660] uppercase tracking-wider">Sist kontaktet</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-[#6b6660] uppercase tracking-wider">Ansvarlig</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-[#6b6660] uppercase tracking-wider">Notater</th>
+                  <th className="hidden md:table-cell px-4 py-3 text-left text-xs font-semibold text-[#6b6660] uppercase tracking-wider">Sist kontaktet</th>
+                  <th className="hidden md:table-cell px-4 py-3 text-left text-xs font-semibold text-[#6b6660] uppercase tracking-wider">Ansvarlig</th>
+                  <th className="hidden lg:table-cell px-4 py-3 text-left text-xs font-semibold text-[#6b6660] uppercase tracking-wider">Notater</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
