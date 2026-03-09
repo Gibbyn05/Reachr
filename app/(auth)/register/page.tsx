@@ -18,6 +18,7 @@ function RegisterForm() {
 
   const [loading, setLoading] = useState(false);
   const [checkingSession, setCheckingSession] = useState(isInvited);
+  const [wrongUser, setWrongUser] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [form, setForm] = useState({
     name: "",
@@ -25,24 +26,32 @@ function RegisterForm() {
     password: "",
   });
 
-  // If invite link is opened and user is already logged in → link team + go to dashboard
+  // If invite link is opened and user is already logged in:
+  // - correct user (email matches invite) → link team + go to dashboard
+  // - wrong user (different account logged in) → show "log out" screen
   useEffect(() => {
     if (!isInvited) return;
     const supabase = createClient();
     supabase.auth.getUser().then(async ({ data: { user } }) => {
       if (user) {
-        // Link this user to the team owner
-        await fetch("/api/team", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ owner_email: inviterEmail, member_name: user.user_metadata?.full_name ?? "" }),
-        });
-        router.replace("/dashboard");
+        if (user.email === inviteEmail) {
+          // Already logged in as the invited user — just link and go
+          await fetch("/api/team", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ owner_email: inviterEmail, member_name: user.user_metadata?.full_name ?? "" }),
+          });
+          router.replace("/dashboard");
+        } else {
+          // Different user is logged in — show warning
+          setWrongUser(user.email ?? "");
+          setCheckingSession(false);
+        }
       } else {
         setCheckingSession(false);
       }
     });
-  }, [isInvited, inviterEmail, router]);
+  }, [isInvited, inviteEmail, inviterEmail, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -118,6 +127,37 @@ function RegisterForm() {
     return (
       <div className="w-full max-w-md flex items-center justify-center h-48">
         <div className="w-6 h-6 border-2 border-[#09fe94] border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (wrongUser) {
+    const handleLogout = async () => {
+      const supabase = createClient();
+      await supabase.auth.signOut();
+      window.location.reload();
+    };
+    return (
+      <div className="w-full max-w-md">
+        <div className="bg-[#faf8f2] rounded-2xl border border-[#d8d3c5] shadow-sm p-8 text-center">
+          <div className="flex justify-center mb-4">
+            <img src="/logo.svg" alt="Reachr" className="w-14 h-14" />
+          </div>
+          <h1 className="text-xl font-bold text-[#171717] mb-2">Feil bruker er logget inn</h1>
+          <p className="text-sm text-[#6b6660] mb-1">
+            Denne invitasjonen er til <span className="font-semibold text-[#171717]">{inviteEmail}</span>,
+            men du er logget inn som <span className="font-semibold text-[#171717]">{wrongUser}</span>.
+          </p>
+          <p className="text-sm text-[#6b6660] mb-6">
+            Logg ut for å registrere riktig konto, eller logg inn med riktig e-postadresse.
+          </p>
+          <button
+            onClick={handleLogout}
+            className="w-full py-3 rounded-xl bg-[#09fe94] text-[#171717] font-bold text-sm hover:bg-[#00e882] transition-all duration-200"
+          >
+            Logg ut og fortsett
+          </button>
+        </div>
       </div>
     );
   }

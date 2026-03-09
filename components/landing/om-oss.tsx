@@ -51,7 +51,7 @@ export function OmOss() {
           {/* Stats block */}
           <div className="grid grid-cols-2 gap-4">
             {[
-              { value: "2024", label: "Grunnlagt" },
+              { value: "2026", label: "Grunnlagt" },
               { value: "3 dager", label: "Gratis prøveperiode" },
               { value: "250 000+", label: "Bedrifter tilgjengelig" },
               { value: "4.9/5", label: "Brukervurdering" },

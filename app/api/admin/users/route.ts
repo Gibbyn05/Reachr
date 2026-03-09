@@ -72,7 +72,7 @@ export async function GET() {
   const mrr = Object.values(stripeSubMap)
     .filter(s => s.status === "active" || s.status === "trialing")
     .reduce((sum, s) => {
-      const monthly = s.plan === "solo" ? 249 : 199;
+      const monthly = s.plan === "solo" ? 249 : 499;
       return sum + (s.interval === "yearly" ? Math.round(monthly * 10 / 12) : monthly);
     }, 0);
 
