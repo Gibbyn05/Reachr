@@ -13,11 +13,20 @@ const SKIP_PATTERNS = [
   /\.png$/i, /\.jpg$/i, /\.gif$/i, /\.svg$/i,
 ];
 
+// Emails that belong to the directory sites themselves — never a company email
+const SKIP_DOMAINS = [
+  "proff.no", "1881.no", "gulesider.no", "brreg.no", "altinn.no",
+  "skatteetaten.no", "nav.no", "regjeringen.no",
+];
+
 function isValidEmail(email: string): boolean {
   if (!email.includes("@") || !email.includes(".")) return false;
   if (SKIP_PATTERNS.some((p) => p.test(email))) return false;
   if (email.length > 100) return false;
-  return /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/.test(email);
+  if (!(/^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/.test(email))) return false;
+  const domain = email.split("@")[1].toLowerCase();
+  if (SKIP_DOMAINS.some((d) => domain === d || domain.endsWith("." + d))) return false;
+  return true;
 }
 
 function extractEmails(html: string): string[] {
