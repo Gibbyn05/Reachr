@@ -1,14 +1,34 @@
 "use client";
 import { useState } from "react";
-import { Mail, MessageSquare, ArrowRight } from "lucide-react";
+import { Mail, MessageSquare, ArrowRight, Loader2 } from "lucide-react";
 
 export function Kontakt() {
   const [sent, setSent] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [form, setForm] = useState({ name: "", email: "", message: "" });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSent(true);
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/kontakt", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        setError(data.error ?? "Noe gikk galt. Prøv igjen.");
+        return;
+      }
+      setSent(true);
+    } catch {
+      setError("Noe gikk galt. Prøv igjen.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -38,7 +58,7 @@ export function Kontakt() {
                 {
                   icon: Mail,
                   label: "E-post",
-                  value: "hei@reachr.no",
+                  value: "Help@reachr.no",
                   accent: "#ff470a",
                 },
                 {
@@ -78,6 +98,11 @@ export function Kontakt() {
                 <p className="text-sm text-[#6b6660]">Vi tar kontakt med deg innen én virkedag.</p>
               </div>
             ) : (
+              {error && (
+                <div className="mb-4 rounded-xl bg-[#ff470a]/8 border border-[#ff470a]/20 px-4 py-3 text-sm text-[#ff470a]">
+                  {error}
+                </div>
+              )}
               <form onSubmit={handleSubmit} className="space-y-5">
                 <div>
                   <label className="block text-xs font-bold text-[#a09b8f] uppercase tracking-widest mb-2">Navn</label>
@@ -114,9 +139,10 @@ export function Kontakt() {
                 </div>
                 <button
                   type="submit"
-                  className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl bg-[#09fe94] text-[#171717] font-bold text-sm hover:bg-[#00e882] shadow-[0_2px_12px_rgba(9,254,148,0.3)] transition-all duration-200 hover:-translate-y-px"
+                  disabled={loading}
+                  className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl bg-[#09fe94] text-[#171717] font-bold text-sm hover:bg-[#00e882] shadow-[0_2px_12px_rgba(9,254,148,0.3)] transition-all duration-200 hover:-translate-y-px disabled:opacity-60 disabled:cursor-not-allowed"
                 >
-                  Send melding <ArrowRight size={15} />
+                  {loading ? <><Loader2 size={15} className="animate-spin" /> Sender…</> : <>Send melding <ArrowRight size={15} /></>}
                 </button>
               </form>
             )}
