@@ -1,5 +1,5 @@
 "use client";
-import { Search, Users, Bell, Map, Zap, BarChart3 } from "lucide-react";
+import { Search, Users, Bell, Map, Mail, BarChart3, MessageSquare, Sparkles } from "lucide-react";
 
 const bentoItems = [
   {
@@ -7,7 +7,7 @@ const bentoItems = [
     icon: Search,
     accent: "#09fe94",
     title: "Leadsøk i Brønnøysundregistrene",
-    description: "Søk blant 250 000+ norske bedrifter etter bransje, sted, omsetning og antall ansatte. Finn de riktige kundene – ikke bare de nærliggende.",
+    description: "Søk blant 250 000+ norske bedrifter etter bransje, sted, omsetning og antall ansatte. Reachr henter også kontaktpersoner og e-postadresser automatisk.",
   },
   {
     span: "lg:col-span-1",
@@ -21,21 +21,21 @@ const bentoItems = [
     icon: Users,
     accent: "#ffad0a",
     title: "CRM-pipeline",
-    description: "6 statusnivåer med farger. Tildel leads til teammedlemmer og legg til notater og historikk.",
+    description: "6 statusnivåer med farger. Tildel leads til teammedlemmer, legg til notater og spor hele salgsprosessen.",
+  },
+  {
+    span: "lg:col-span-2",
+    icon: Sparkles,
+    accent: "#09fe94",
+    title: "AI-genererte e-poster og SMS",
+    description: "Én klikk og AI skriver en personlig salgsmelding tilpasset hver bedrift — basert på din salgspitch og målgruppe. Send direkte fra Reachr via Gmail eller Outlook, eller kopier teksten og send selv.",
   },
   {
     span: "lg:col-span-2",
     icon: Bell,
-    accent: "#09fe94",
-    title: "Automatiske varsler",
-    description: "Reachr minner deg på oppfølging basert på siste aktivitet. Aldri la et lead bli glemt.",
-  },
-  {
-    span: "lg:col-span-2",
-    icon: Zap,
     accent: "#ff470a",
-    title: "AI-genererte e-poster",
-    description: "La AI skrive salgse-poster tilpasset hver bedrift, basert på din salgspitch.",
+    title: "Automatiske varsler og sekvenser",
+    description: "Reachr minner deg på oppfølging basert på siste aktivitet. Sett opp e-postsekvenser som kjører automatisk – aldri la et lead bli glemt igjen.",
   },
   {
     span: "lg:col-span-1",

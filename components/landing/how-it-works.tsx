@@ -1,11 +1,11 @@
 "use client";
-import { Search, LayoutDashboard, Bell } from "lucide-react";
+import { Search, LayoutDashboard, Sparkles, Bell } from "lucide-react";
 
 const steps = [
   {
     number: "1",
     title: "Søk etter bedrifter",
-    description: "Skriv inn bransje, sted eller firmanavn. Reachr søker gjennom 250 000+ norske bedrifter fra Brønnøysundregistrene i sanntid.",
+    description: "Skriv inn bransje, sted eller firmanavn. Reachr søker gjennom 250 000+ norske bedrifter fra Brønnøysundregistrene i sanntid — og henter kontaktpersoner og e-postadresser automatisk.",
     accent: "#09fe94",
     icon: Search,
     mockup: (
@@ -21,14 +21,14 @@ const steps = [
           </div>
         </div>
         {[
-          { name: "Bjørnstad VVS AS", loc: "Oslo", emp: "12 ans." },
-          { name: "Nordre Rør & Bad", loc: "Oslo", emp: "7 ans." },
-          { name: "Oslo Rørservice", loc: "Oslo", emp: "24 ans." },
+          { name: "Bjørnstad VVS AS", loc: "Oslo", emp: "12 ans.", email: "post@bjornstad.no" },
+          { name: "Nordre Rør & Bad", loc: "Oslo", emp: "7 ans.", email: "kontakt@nordreror.no" },
+          { name: "Oslo Rørservice", loc: "Oslo", emp: "24 ans.", email: "post@osloros.no" },
         ].map((r, i) => (
           <div key={i} className="flex items-center justify-between py-2 border-b border-[#ede9da] last:border-0">
             <div>
               <p className="text-xs font-semibold text-[#171717]">{r.name}</p>
-              <p className="text-[10px] text-[#a09b8f]">{r.loc} · {r.emp}</p>
+              <p className="text-[10px] text-[#a09b8f]">{r.loc} · {r.emp} · {r.email}</p>
             </div>
             <button className="text-[10px] font-bold bg-[#09fe94] text-[#171717] px-2.5 py-1 rounded-lg">
               + Legg til
@@ -73,9 +73,42 @@ const steps = [
   },
   {
     number: "3",
-    title: "Følg opp automatisk",
-    description: "Reachr varsler deg når det er tid for oppfølging. Aldri glem et lead igjen – systemet holder styr på alt for deg.",
+    title: "Send AI-skrevne meldinger",
+    description: "Med ett klikk skriver AI en personlig e-post eller SMS tilpasset hver bedrift — basert på din salgspitch. Send direkte fra Reachr via Gmail eller Outlook, eller kopier teksten og send selv.",
     accent: "#ffad0a",
+    icon: Sparkles,
+    mockup: (
+      <div className="rounded-2xl border border-[#d8d3c5] bg-[#faf8f2] p-5 shadow-sm">
+        <p className="text-[10px] font-bold text-[#a09b8f] uppercase tracking-widest mb-3">AI E-post</p>
+        <div className="mb-3 rounded-xl border border-[#d8d3c5] bg-[#ede9da] px-3 py-2.5">
+          <p className="text-[10px] text-[#a09b8f] mb-0.5">Til</p>
+          <p className="text-xs font-semibold text-[#171717]">post@bjornstadvvs.no</p>
+        </div>
+        <div className="mb-3 rounded-xl border border-[#d8d3c5] bg-[#ede9da] px-3 py-2.5">
+          <p className="text-[10px] text-[#a09b8f] mb-0.5">Emne</p>
+          <p className="text-xs font-semibold text-[#171717]">Samarbeid med Bjørnstad VVS?</p>
+        </div>
+        <div className="rounded-xl border border-[#09fe94]/40 bg-[#09fe94]/5 px-3 py-3 mb-3">
+          <p className="text-[10px] text-[#3d3a34] leading-relaxed">
+            Hei Bjørnstad VVS! Vi hjelper rørleggere i Oslo-området med å finne nye kunder raskere. Kan vi ta en kort prat om hvordan vi kan hjelpe dere?
+          </p>
+        </div>
+        <div className="flex gap-2">
+          <div className="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-[#09fe94] py-2">
+            <span className="text-[10px] font-bold text-[#171717]">Send via Gmail</span>
+          </div>
+          <div className="flex items-center justify-center rounded-xl border border-[#d8d3c5] px-3 py-2">
+            <span className="text-[10px] font-bold text-[#6b6660]">SMS</span>
+          </div>
+        </div>
+      </div>
+    ),
+  },
+  {
+    number: "4",
+    title: "Følg opp automatisk",
+    description: "Reachr varsler deg når det er tid for oppfølging basert på siste aktivitet. Sett opp automatiske e-postsekvenser som kjører for deg — aldri glem et lead igjen.",
+    accent: "#09fe94",
     icon: Bell,
     mockup: (
       <div className="rounded-2xl border border-[#d8d3c5] bg-[#faf8f2] p-5 shadow-sm">
@@ -94,6 +127,10 @@ const steps = [
             <span className="text-[10px] text-[#a09b8f] shrink-0">{n.time}</span>
           </div>
         ))}
+        <div className="mt-3 rounded-xl bg-[#171717] px-3 py-2.5">
+          <p className="text-[10px] text-[#a09b8f] mb-0.5">Aktiv sekvens</p>
+          <p className="text-xs font-semibold text-white">E-post 2 av 3 sendes automatisk om 2 dager</p>
+        </div>
       </div>
     ),
   },
@@ -109,7 +146,7 @@ export function HowItWorks() {
             Slik fungerer det
           </p>
           <h2 className="font-display text-[clamp(2.5rem,5vw,4.5rem)] font-bold leading-[0.95] tracking-[-0.01em] text-[#171717]">
-            Tre steg til
+            Fire steg til
             <br />
             <span className="italic text-[#ff470a]">dine neste kunder.</span>
           </h2>
