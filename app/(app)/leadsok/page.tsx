@@ -146,10 +146,12 @@ export default function LeadsokPage() {
   // scraped emails: orgnr -> email | null | "loading"
   const [scrapedEmails, setScrapedEmails] = useState<Record<string, string | null | "loading">>({});
 
-  async function scrapeEmail(orgnr: string, website: string) {
+  async function scrapeEmail(orgnr: string, navn: string, website?: string) {
     setScrapedEmails(prev => ({ ...prev, [orgnr]: "loading" }));
     try {
-      const res = await fetch(`/api/scrape-email?url=${encodeURIComponent(website)}`);
+      const params = new URLSearchParams({ orgnr, navn });
+      if (website) params.set("url", website);
+      const res = await fetch(`/api/scrape-email?${params}`);
       const data = await res.json();
       setScrapedEmails(prev => ({ ...prev, [orgnr]: data.email ?? null }));
     } catch {
@@ -895,15 +897,13 @@ export default function LeadsokPage() {
                             if (scraped === null) {
                               return <span style={{ color: "#d8d3c5" }}>Ikke funnet</span>;
                             }
-                            if (enhet.hjemmeside) {
-                              return (
-                                <button onClick={ev => { ev.stopPropagation(); scrapeEmail(orgnr, enhet.hjemmeside!); }}
-                                  style={{ background: "none", border: "none", padding: 0, cursor: "pointer", fontSize: 12, color: "#09fe94", fontWeight: 600, whiteSpace: "nowrap" }}>
-                                  Finn e-post
-                                </button>
-                              );
-                            }
-                            return <span style={{ color: "#d8d3c5" }}>—</span>;
+                            // Vis "Finn e-post" for alle uten epost (med eller uten nettside)
+                            return (
+                              <button onClick={ev => { ev.stopPropagation(); scrapeEmail(orgnr, enhet.navn, enhet.hjemmeside); }}
+                                style={{ background: "none", border: "none", padding: 0, cursor: "pointer", fontSize: 12, color: "#09fe94", fontWeight: 600, whiteSpace: "nowrap" }}>
+                                Finn e-post
+                              </button>
+                            );
                           })()}
                         </div>
 
