@@ -653,9 +653,8 @@ function LeadRow({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name: lead.name,
           website: lead.website,
-          domain: new URL(`https://${lead.name.toLowerCase().replace(/\s+/g, "")}.no`).hostname,
+          orgNumber: lead.orgNumber,
         }),
       });
       const data = await res.json();

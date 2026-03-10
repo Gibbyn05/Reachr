@@ -411,14 +411,13 @@ export default function LeadsokPage() {
     setAddedIds(prev => new Set([...prev, e.organisasjonsnummer]));
 
     // Try to find email in background
-    if (e.hjemmeside || e.navn) {
+    if (e.hjemmeside || e.organisasjonsnummer) {
       fetch("/api/email-finder", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name: e.navn,
           website: e.hjemmeside,
-          domain: new URL(`https://${e.navn.toLowerCase().replace(/\s+/g, "")}.no`).hostname,
+          orgNumber: e.organisasjonsnummer,
         }),
       })
         .then(res => res.json())

@@ -1,63 +1,75 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
 
 interface EmailFinderResponse {
   email: string | null;
-  source: "website" | "pattern" | "api" | "none";
+  source: "website" | "proff" | "none";
   confidence: "high" | "medium" | "low";
 }
 
-/** Common email patterns to try */
-const EMAIL_PATTERNS = [
-  "info@",
-  "kontakt@",
-  "contact@",
-  "hello@",
-  "support@",
-  "sales@",
-  "post@",
-  "epost@",
-];
-
-/** Try to extract emails from HTML */
+/** Extract real emails from HTML, exclude spamtraps */
 function extractEmailsFromHtml(html: string): string[] {
   const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
-  return [...new Set(html.match(emailRegex) ?? [])];
+  const found = [...new Set(html.match(emailRegex) ?? [])];
+  return found.filter(
+    (e) =>
+      !e.includes("noreply") &&
+      !e.includes("no-reply") &&
+      !e.includes("sentry") &&
+      !e.includes("example") &&
+      !e.includes("wixpress") &&
+      !e.endsWith(".png") &&
+      !e.endsWith(".jpg") &&
+      !e.endsWith(".svg")
+  );
 }
 
-/** Try common patterns for a domain */
-function getCommonPatterns(domain: string): string[] {
-  return EMAIL_PATTERNS.map((p) => p + domain);
+/** Prefer contact-like emails, fall back to first found */
+function pickBestEmail(emails: string[]): string | null {
+  if (!emails.length) return null;
+  return (
+    emails.find((e) =>
+      /^(kontakt|contact|info|post|epost|hei|hello|salg|sales)@/.test(e)
+    ) ?? emails[0]
+  );
 }
 
-/** Check if a domain is reachable and scrape for emails */
-async function scrapeSiteForEmails(url: string): Promise<string | null> {
+/** Scrape a URL and return the best email found */
+async function scrapeUrl(url: string): Promise<string | null> {
   try {
-    // Ensure proper URL format
     const fullUrl = url.startsWith("http") ? url : `https://${url}`;
-
-    const response = await fetch(fullUrl, {
-      headers: { "User-Agent": "Mozilla/5.0 (Email Finder Bot)" },
-      signal: AbortSignal.timeout(5000),
+    const res = await fetch(fullUrl, {
+      headers: {
+        "User-Agent":
+          "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)",
+      },
+      signal: AbortSignal.timeout(6000),
+      redirect: "follow",
     });
+    if (!res.ok) return null;
+    const html = await res.text();
+    return pickBestEmail(extractEmailsFromHtml(html));
+  } catch {
+    return null;
+  }
+}
 
-    if (!response.ok) return null;
-
-    const html = await response.text();
+/** Try to find email from proff.no using org number */
+async function scrapeProff(orgNumber: string): Promise<string | null> {
+  try {
+    const searchUrl = `https://www.proff.no/sok?q=${orgNumber}`;
+    const res = await fetch(searchUrl, {
+      headers: {
+        "User-Agent":
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+        Accept: "text/html",
+      },
+      signal: AbortSignal.timeout(6000),
+    });
+    if (!res.ok) return null;
+    const html = await res.text();
     const emails = extractEmailsFromHtml(html);
-
-    // Filter to contact-like emails (avoid noreply, no-reply, etc)
-    return (
-      emails.find(
-        (e) =>
-          e.includes("kontakt") ||
-          e.includes("contact") ||
-          e.includes("info") ||
-          e.includes("support") ||
-          e.includes("sales") ||
-          e.includes("hello")
-      ) || emails[0] || null
-    );
+    // proff.no sometimes shows email in the result page
+    return pickBestEmail(emails);
   } catch {
     return null;
   }
@@ -65,59 +77,53 @@ async function scrapeSiteForEmails(url: string): Promise<string | null> {
 
 export async function POST(request: NextRequest) {
   try {
-    const { name, website, domain } = await request.json();
+    const { website, orgNumber } = await request.json();
 
-    if (!domain && !website) {
-      return NextResponse.json(
-        { error: "domain or website required" },
-        { status: 400 }
-      );
-    }
-
-    const targetDomain = domain || website?.replace(/^https?:\/\//i, "").split("/")[0] || "";
-
-    if (!targetDomain) {
-      return NextResponse.json(
-        { email: null, source: "none", confidence: "low" } as EmailFinderResponse
-      );
-    }
-
-    // Step 1: Try scraping the website
+    // Step 1: Scrape the company's own website (main page + kontakt)
     if (website) {
-      const scrapedEmail = await scrapeSiteForEmails(website);
-      if (scrapedEmail) {
+      const mainEmail = await scrapeUrl(website);
+      if (mainEmail) {
         return NextResponse.json({
-          email: scrapedEmail,
+          email: mainEmail,
           source: "website",
           confidence: "high",
         } as EmailFinderResponse);
       }
+
+      // Try /kontakt and /contact subpages
+      const base = website.replace(/\/$/, "");
+      for (const path of ["/kontakt", "/contact", "/om-oss", "/about"]) {
+        const subEmail = await scrapeUrl(base + path);
+        if (subEmail) {
+          return NextResponse.json({
+            email: subEmail,
+            source: "website",
+            confidence: "high",
+          } as EmailFinderResponse);
+        }
+      }
     }
 
-    // Step 2: Try common patterns
-    const commonPatterns = getCommonPatterns(targetDomain);
-    for (const pattern of commonPatterns) {
-      // We can't verify emails without an SMTP check, so just return the first likely pattern
-      if (pattern.includes("info@") || pattern.includes("kontakt@")) {
+    // Step 2: Try proff.no with org number
+    if (orgNumber) {
+      const proffEmail = await scrapeProff(orgNumber);
+      if (proffEmail) {
         return NextResponse.json({
-          email: pattern,
-          source: "pattern",
+          email: proffEmail,
+          source: "proff",
           confidence: "medium",
         } as EmailFinderResponse);
       }
     }
 
-    // Step 3: Return the first common pattern as fallback
+    // Nothing found — return null, don't guess
     return NextResponse.json({
-      email: commonPatterns[0] || null,
-      source: "pattern",
+      email: null,
+      source: "none",
       confidence: "low",
     } as EmailFinderResponse);
   } catch (error) {
     console.error("Email finder error:", error);
-    return NextResponse.json(
-      { error: "Failed to find email" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to find email" }, { status: 500 });
   }
 }
