@@ -763,7 +763,7 @@ export default function LeadsokPage() {
                   <span style={{ fontSize: 11, fontWeight: 600, color: "#6b6660", textTransform: "uppercase", letterSpacing: "0.05em" }}>Nettside</span>
                   <SortBtn field="bransje" label="Bransje" />
                   <SortBtn field="sted" label="Sted" />
-                  <SortBtn field="ansatte" label="Ansatte" />
+                  <span style={{ fontSize: 11, fontWeight: 600, color: "#6b6660", textTransform: "uppercase", letterSpacing: "0.05em" }}>E-post</span>
                   <span />
                 </div>
 
@@ -860,9 +860,12 @@ export default function LeadsokPage() {
                           {poststed}
                         </p>
 
-                        {/* Ansatte */}
-                        <p style={{ fontSize: 13, color: "#3d3a34", margin: 0 }}>
-                          {enhet.antallAnsatte != null ? enhet.antallAnsatte : <span style={{ color: "#d8d3c5" }}>—</span>}
+                        {/* E-post */}
+                        <p style={{ fontSize: 13, color: "#3d3a34", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                          {enhet.epostadresse
+                            ? <a href={`mailto:${enhet.epostadresse}`} style={{ color: "#ff470a", textDecoration: "none" }} onClick={ev => ev.stopPropagation()}>{enhet.epostadresse}</a>
+                            : <span style={{ color: "#d8d3c5" }}>—</span>
+                          }
                         </p>
 
                         {/* CTA */}
