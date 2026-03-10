@@ -25,6 +25,7 @@ interface BrregEnhet {
   };
   antallAnsatte?: number;
   hjemmeside?: string;
+  epostadresse?: string;
   telefon?: string;
   dagligLeder?: string; // will be filled by roles fetch
 }
@@ -388,7 +389,7 @@ export default function LeadsokPage() {
       orgNumber: e.organisasjonsnummer,
       contactPerson: e.dagligLeder ?? "—",
       phone: e.telefon ?? "—",
-      email: "—",
+      email: e.epostadresse ?? "—",
       website: e.hjemmeside,
       industry: naceToCategory(e.naeringskode1?.kode, e.naeringskode1?.beskrivelse),
       city: e.forretningsadresse?.poststed ? capitalize(e.forretningsadresse.poststed) : "—",
@@ -410,8 +411,8 @@ export default function LeadsokPage() {
     });
     setAddedIds(prev => new Set([...prev, e.organisasjonsnummer]));
 
-    // Try to find email in background
-    if (e.hjemmeside || e.organisasjonsnummer) {
+    // Try to find email in background only if Brreg didn't have one
+    if (!e.epostadresse && (e.hjemmeside || e.organisasjonsnummer)) {
       fetch("/api/email-finder", {
         method: "POST",
         headers: { "Content-Type": "application/json" },

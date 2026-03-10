@@ -75,9 +75,36 @@ async function scrapeProff(orgNumber: string): Promise<string | null> {
   }
 }
 
+/** Fetch email directly from Brreg official API */
+async function fetchBrregEmail(orgNumber: string): Promise<string | null> {
+  try {
+    const res = await fetch(
+      `https://data.brreg.no/enhetsregisteret/api/enheter/${orgNumber}`,
+      { headers: { Accept: "application/json" }, signal: AbortSignal.timeout(5000) }
+    );
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data.epostadresse ?? null;
+  } catch {
+    return null;
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
     const { website, orgNumber } = await request.json();
+
+    // Step 0: Check Brreg official registry first — most reliable source
+    if (orgNumber) {
+      const brregEmail = await fetchBrregEmail(orgNumber);
+      if (brregEmail) {
+        return NextResponse.json({
+          email: brregEmail,
+          source: "proff",
+          confidence: "high",
+        } as EmailFinderResponse);
+      }
+    }
 
     // Step 1: Scrape the company's own website (main page + kontakt)
     if (website) {
