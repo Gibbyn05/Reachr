@@ -11,8 +11,13 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     fetch("/api/stripe/subscription")
-      .then((r) => r.json())
-      .then((data) => {
+      .then(async (r) => {
+        if (r.status === 401) {
+          // Not authenticated — send to login, not paywall
+          router.replace("/login");
+          return;
+        }
+        const data = await r.json();
         if (!data.subscription) {
           router.replace("/onboarding/betaling");
         } else {
@@ -20,7 +25,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         }
       })
       .catch(() => {
-        // On error, allow through — don't block the user
+        // On network error, allow through — don't block the user
         setSubChecked(true);
       });
   }, [router]);

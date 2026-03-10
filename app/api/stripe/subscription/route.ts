@@ -136,6 +136,30 @@ export async function GET() {
       if (ownerSub) {
         return NextResponse.json({ subscription: { ...ownerSub, via_team_owner: teamOwnerEmail } });
       }
+
+      // Final fallback: if team_members row confirms the invite, grant access.
+      // This covers cases where the owner's subscription can't be found in Stripe/Supabase
+      // (e.g. new owner still setting up payment, Stripe email mismatch, etc.)
+      const { data: confirmedMember } = await serviceClient
+        .from("team_members")
+        .select("status")
+        .eq("owner_email", teamOwnerEmail)
+        .eq("member_email", user.email)
+        .in("status", ["pending", "active"])
+        .single();
+      if (confirmedMember) {
+        return NextResponse.json({
+          subscription: {
+            id: "team_member",
+            status: "active",
+            plan: "team",
+            interval: "monthly",
+            current_period_end: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+            cancel_at_period_end: false,
+            via_team_owner: teamOwnerEmail,
+          },
+        });
+      }
     }
 
     return NextResponse.json({ subscription: null });

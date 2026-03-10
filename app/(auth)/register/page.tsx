@@ -20,6 +20,7 @@ function RegisterForm() {
   const [checkingSession, setCheckingSession] = useState(isInvited);
   const [wrongUser, setWrongUser] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [info, setInfo] = useState<string | null>(null);
   const [form, setForm] = useState({
     name: "",
     email: inviteEmail,
@@ -63,7 +64,7 @@ function RegisterForm() {
       const timeout = new Promise<never>((_, reject) =>
         setTimeout(() => reject(new Error("Tilkoblingen tok for lang tid. Sjekk internettforbindelsen og prøv igjen.")), 10000)
       );
-      const { error: signUpError } = await Promise.race([
+      const { data: signUpData, error: signUpError } = await Promise.race([
         supabase.auth.signUp({
           email: form.email,
           password: form.password,
@@ -100,6 +101,15 @@ function RegisterForm() {
 
       // If invited, link this user to the team owner
       if (isInvited) {
+        if (!signUpData?.session) {
+          // Email confirmation is required — the user must confirm before logging in.
+          // team_owner is already stored in user_metadata so subscription check will
+          // work automatically after they confirm and log in.
+          setInfo(
+            "Sjekk e-posten din! Vi har sendt deg en bekreftelseslenke. Klikk på den for å aktivere kontoen og bli med i teamet."
+          );
+          return;
+        }
         await fetch("/api/team", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -207,6 +217,12 @@ function RegisterForm() {
             )}
           </p>
         </div>
+
+        {info && (
+          <div className="mb-4 rounded-lg bg-[#09fe94]/10 border border-[#09fe94]/30 px-4 py-3 text-sm text-[#171717]">
+            {info}
+          </div>
+        )}
 
         {error && (
           <div className="mb-4 rounded-lg bg-[#ff470a]/8 border border-[#ff470a]/20 px-4 py-3 text-sm text-[#ff470a]">
