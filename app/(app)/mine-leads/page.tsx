@@ -568,6 +568,7 @@ function LeadRow({
   targetCustomers?: string;
 }) {
   const statusOptions = useAppStore(s => s.pipelineStages);
+  const updateLeadEmail = useAppStore(s => s.updateLeadEmail);
 
   const handleEmailSent = (subject: string, emailBody: string) => {
     const now = new Date();
@@ -659,14 +660,7 @@ function LeadRow({
       });
       const data = await res.json();
       if (data.email && data.email !== "—") {
-        // Update lead email in store
-        const updatedLead = { ...lead, email: data.email };
-        onStatusChange(lead.id, lead.status); // Dummy to trigger store update
-        // Note: we should pass email update callback, for now we'll just update notes
-        const note = `E-post funnet: ${data.email} (${data.source} - ${data.confidence})`;
-        const combined = lead.notes && lead.notes !== "—" ? `${note}\n\n${lead.notes}` : note;
-        onNotesChange(lead.id, combined);
-        setNotes(combined);
+        updateLeadEmail(lead.id, data.email);
       }
     } catch (err) {
       console.error("Failed to find email:", err);

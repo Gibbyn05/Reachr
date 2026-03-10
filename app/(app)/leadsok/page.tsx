@@ -389,6 +389,7 @@ export default function LeadsokPage() {
       contactPerson: e.dagligLeder ?? "—",
       phone: e.telefon ?? "—",
       email: "—",
+      website: e.hjemmeside,
       industry: naceToCategory(e.naeringskode1?.kode, e.naeringskode1?.beskrivelse),
       city: e.forretningsadresse?.poststed ? capitalize(e.forretningsadresse.poststed) : "—",
       address: [

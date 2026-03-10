@@ -29,6 +29,7 @@ export interface Company {
   employees: number;
   lat: number;
   lng: number;
+  website?: string;
 }
 
 export interface Lead extends Company {
