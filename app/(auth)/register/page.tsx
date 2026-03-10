@@ -36,12 +36,14 @@ function RegisterForm() {
     supabase.auth.getUser().then(async ({ data: { user } }) => {
       if (user) {
         if (user.email === inviteEmail) {
-          // Already logged in as the invited user — just link and go
+          // Already logged in as the invited user — link team and set metadata
           await fetch("/api/team", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ owner_email: inviterEmail, member_name: user.user_metadata?.full_name ?? "" }),
           });
+          // Ensure team_owner is set in metadata so subscription check works reliably
+          await supabase.auth.updateUser({ data: { team_owner: inviterEmail } });
           router.replace("/dashboard");
         } else {
           // Different user is logged in — show warning

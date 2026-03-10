@@ -53,12 +53,10 @@ function LoginForm() {
             member_name: data.user.user_metadata?.full_name ?? "",
           }),
         });
-        // Also update user metadata with team_owner if not already set
-        if (!data.user.user_metadata?.team_owner) {
-          await supabase.auth.updateUser({
-            data: { team_owner: inviterEmail },
-          });
-        }
+        // Always update team_owner metadata so subscription check works reliably
+        await supabase.auth.updateUser({
+          data: { team_owner: inviterEmail },
+        });
       }
 
       router.push("/dashboard");

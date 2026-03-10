@@ -52,6 +52,28 @@ export async function GET() {
           .eq("user_email", ownerEmail)
           .single();
         if (ownerSub) return NextResponse.json({ subscription: { ...ownerSub, via_team_owner: ownerEmail } });
+
+        // Final fallback: if team_members row exists, grant access
+        const { data: confirmedMember } = await serviceClient
+          .from("team_members")
+          .select("status")
+          .eq("owner_email", ownerEmail)
+          .eq("member_email", user.email)
+          .in("status", ["pending", "active"])
+          .single();
+        if (confirmedMember) {
+          return NextResponse.json({
+            subscription: {
+              id: "team_member",
+              status: "active",
+              plan: "team",
+              interval: "monthly",
+              current_period_end: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+              cancel_at_period_end: false,
+              via_team_owner: ownerEmail,
+            },
+          });
+        }
       }
       return NextResponse.json({ subscription: null });
     }
