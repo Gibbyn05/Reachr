@@ -55,6 +55,7 @@ function countNeedsFollowUp(leads: Lead[]): number {
 export function Sidebar() {
   const pathname = usePathname();
   const [dark, setDark] = useState(false);
+  const [planLabel, setPlanLabel] = useState<string | null>(null);
   const { currentUser, setCurrentUser, loadLeads, avatarUrl, leads, sidebarOpen, setSidebarOpen } = useAppStore();
 
   const notifCount = countNeedsFollowUp(leads);
@@ -89,6 +90,23 @@ export function Sidebar() {
       loadLeads(user.email);
     });
   // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Load subscription label for the user profile section
+  useEffect(() => {
+    fetch("/api/stripe/subscription")
+      .then((r) => r.ok ? r.json() : null)
+      .then((data) => {
+        if (!data?.subscription) return;
+        const sub = data.subscription;
+        if (sub.via_team_owner) {
+          setPlanLabel("Medlem");
+        } else {
+          const name = sub.plan === "team" ? "Team" : sub.plan === "solo" ? "Solo" : sub.plan;
+          setPlanLabel(name ? `${name}-plan` : null);
+        }
+      })
+      .catch(() => {});
   }, []);
 
   // Close sidebar on route change (mobile)
@@ -211,7 +229,7 @@ export function Sidebar() {
           )}
           <div className="flex-1 min-w-0">
             <p className="text-white text-xs font-semibold truncate">{displayName}</p>
-            <p className="text-white/40 text-xs truncate">Pro-plan</p>
+            {planLabel && <p className="text-white/40 text-xs truncate">{planLabel}</p>}
           </div>
         </Link>
 

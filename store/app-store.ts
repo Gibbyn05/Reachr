@@ -2,7 +2,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { Lead, DEFAULT_PIPELINE_STAGES } from "@/lib/mock-data";
-import { createClient } from "@/lib/supabase/client";
 
 interface AppStore {
   leads: Lead[];
@@ -59,38 +58,15 @@ export const useAppStore = create<AppStore>()(
     (set, get) => ({
       leads: [],
 
-      loadLeads: async (userEmail: string) => {
-        const supabase = createClient();
-
-        // Get team owner email from auth metadata (for members)
-        const { data: { user } } = await supabase.auth.getUser();
-        const teamOwnerEmail = user?.user_metadata?.team_owner as string | undefined;
-        const ownerEmail = teamOwnerEmail ?? userEmail;
-
-        // Fetch all member emails under this team
-        const { data: members } = await supabase
-          .from("team_members")
-          .select("member_email")
-          .eq("owner_email", ownerEmail);
-
-        const teamEmails = Array.from(new Set([
-          ownerEmail,
-          userEmail,
-          ...(members ?? []).map((m: { member_email: string }) => m.member_email),
-        ]));
-
-        const { data, error } = await supabase
-          .from("leads")
-          .select("*")
-          .in("user_email", teamEmails)
-          .order("created_at", { ascending: false });
-
-        if (error) {
-          console.error("[loadLeads] error:", error);
+      loadLeads: async (_userEmail: string) => {
+        // Use the server-side API which runs with service role to bypass RLS.
+        // This ensures team members can see all leads belonging to their team.
+        const res = await fetch("/api/leads");
+        if (!res.ok) {
+          console.error("[loadLeads] API error:", res.status);
           return;
         }
-
-        const rows = data ?? [];
+        const rows: Record<string, unknown>[] = await res.json();
         const dbLeads = rows.map(dbRowToLead);
         const meetingDates: Record<string, string> = {};
         rows.forEach((r) => {

@@ -10,16 +10,19 @@ function getServiceClient() {
 }
 
 export async function GET(req: NextRequest) {
+  // Auth check with user-scoped client
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user?.email) return NextResponse.json([], { status: 200 });
 
-  // Build list of all team emails to load leads from
+  // Use service client to bypass RLS for all team data reads
+  const db = getServiceClient();
+
   const teamOwnerEmail = user.user_metadata?.team_owner as string | undefined;
   const ownerEmail = teamOwnerEmail ?? user.email;
 
-  // Fetch all member emails under this team
-  const { data: members } = await supabase
+  // Fetch all member emails under this team (service client bypasses RLS)
+  const { data: members } = await db
     .from("team_members")
     .select("member_email")
     .eq("owner_email", ownerEmail);
@@ -30,7 +33,7 @@ export async function GET(req: NextRequest) {
     ...(members ?? []).map((m: { member_email: string }) => m.member_email),
   ]));
 
-  const { data, error } = await supabase
+  const { data, error } = await db
     .from("leads")
     .select("*")
     .in("user_email", teamEmails)
