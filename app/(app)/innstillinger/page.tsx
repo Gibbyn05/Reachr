@@ -36,43 +36,74 @@ const tabs = [
   { id: "sikkerhet", label: "Sikkerhet", icon: Shield },
 ];
 
-/* ── Notification toggle as its own component so hooks are legal ── */
-function NotificationToggle({
-  label,
-  desc,
-  defaultEnabled,
-}: {
-  label: string;
-  desc: string;
-  defaultEnabled: boolean;
-}) {
-  const [enabled, setEnabled] = useState(defaultEnabled);
+/* ── Notification settings tab ── */
+const NOTIFICATION_ITEMS: { key: string; label: string; desc: string; defaultEnabled: boolean }[] = [
+  { key: "epost_nye_leads",         label: "E-postvarsler for nye leads",  desc: "Få e-post når et nytt lead legges til",                       defaultEnabled: true },
+  { key: "oppfolgingspaminnelser",  label: "Oppfølgingspåminnelser",       desc: "Automatiske påminnelser etter 3 dager uten kontakt",           defaultEnabled: true },
+  { key: "motepaminnelser",         label: "Møtepåminnelser",              desc: "Påminnelse 1 time før bookede møter",                          defaultEnabled: true },
+  { key: "ukentlig_sammendrag",     label: "Ukentlig rapport",             desc: "Ukentlig e-post hver søndag med pipeline-statistikk og teamtoppliste", defaultEnabled: false },
+  { key: "teamaktivitet",           label: "Teamaktivitet",                desc: "Varsler når teammedlemmer oppdaterer leads",                   defaultEnabled: false },
+];
+
+type NotifSettings = Record<string, boolean>;
+
+function NotifSettingsTab() {
+  const supabase = createClient();
+  const [settings, setSettings] = useState<NotifSettings>(() =>
+    Object.fromEntries(NOTIFICATION_ITEMS.map(i => [i.key, i.defaultEnabled]))
+  );
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user?.user_metadata?.notification_settings) {
+        setSettings(prev => ({ ...prev, ...user.user_metadata.notification_settings }));
+      }
+      setLoading(false);
+    });
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  async function save() {
+    setSaving(true);
+    await supabase.auth.updateUser({ data: { notification_settings: settings } });
+    setSaving(false);
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2500);
+  }
+
+  if (loading) return <div className="py-8 text-center text-sm text-[#a09b8f]">Laster innstillinger…</div>;
+
   return (
-    <div className="flex items-center justify-between py-3 border-b border-[#e8e4d8] last:border-0">
-      <div>
-        <p className="text-sm font-medium text-[#171717]">{label}</p>
-        <p className="text-xs text-[#a09b8f] mt-0.5">{desc}</p>
+    <div className="bg-[#faf8f2] rounded-xl border border-[#d8d3c5] p-6" style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.08)" }}>
+      <h2 className="text-base font-semibold text-[#171717] mb-6">Varslingsinnstillinger</h2>
+      <div className="space-y-1">
+        {NOTIFICATION_ITEMS.map(item => (
+          <div key={item.key} className="flex items-center justify-between py-3 border-b border-[#e8e4d8] last:border-0">
+            <div>
+              <p className="text-sm font-medium text-[#171717]">{item.label}</p>
+              <p className="text-xs text-[#a09b8f] mt-0.5">{item.desc}</p>
+            </div>
+            <button
+              onClick={() => setSettings(s => ({ ...s, [item.key]: !s[item.key] }))}
+              className={`relative w-12 h-6 rounded-full transition-colors focus:outline-none shrink-0 ${settings[item.key] ? "bg-[#09fe94]" : "bg-[#d8d3c5]"}`}
+            >
+              <span className="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-sm transition-transform duration-200"
+                style={{ transform: settings[item.key] ? "translateX(24px)" : "translateX(0)" }} />
+            </button>
+          </div>
+        ))}
       </div>
-      <button
-        onClick={() => setEnabled(!enabled)}
-        className={`relative w-12 h-6 rounded-full transition-colors focus:outline-none shrink-0 ${enabled ? "bg-[#09fe94]" : "bg-[#d8d3c5]"}`}
-      >
-        <span
-          className="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-sm transition-transform duration-200"
-          style={{ transform: enabled ? "translateX(24px)" : "translateX(0)" }}
-        />
-      </button>
+      <div className="mt-6 flex items-center gap-3">
+        <Button variant="primary" size="md" onClick={save} disabled={saving}>
+          {saving ? "Lagrer…" : "Lagre innstillinger"}
+        </Button>
+        {saved && <span className="text-sm text-[#09fe94] flex items-center gap-1"><Check className="w-3.5 h-3.5" />Lagret</span>}
+      </div>
     </div>
   );
 }
-
-const NOTIFICATION_ITEMS = [
-  { label: "E-postvarsler for nye leads", desc: "Få e-post når et nytt lead legges til", defaultEnabled: true },
-  { label: "Oppfølgingspåminnelser", desc: "Automatiske påminnelser etter 3 dager uten kontakt", defaultEnabled: true },
-  { label: "Møtepåminnelser", desc: "Påminnelse 1 time før bookede møter", defaultEnabled: true },
-  { label: "Ukentlig sammendrag", desc: "Ukentlig e-post med oversikt over pipeline", defaultEnabled: false },
-  { label: "Teamaktivitet", desc: "Varsler når teammedlemmer oppdaterer leads", defaultEnabled: false },
-];
 
 const DEFAULT_STAGES = ["Ikke kontaktet", "Kontaktet", "Kontaktet - ikke svar", "Booket møte", "Avslått", "Kunde"];
 
@@ -857,17 +888,7 @@ export default function InnstillingerPage() {
             )}
 
             {/* ── Varsler ── */}
-            {activeTab === "varsler" && (
-              <div className="bg-[#faf8f2] rounded-xl border border-[#d8d3c5] p-6" style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.08)" }}>
-                <h2 className="text-base font-semibold text-[#171717] mb-6">Varslingsinnstillinger</h2>
-                <div className="space-y-1">
-                  {NOTIFICATION_ITEMS.map((item) => (
-                    <NotificationToggle key={item.label} {...item} />
-                  ))}
-                </div>
-                <Button variant="primary" size="md" className="mt-6">Lagre innstillinger</Button>
-              </div>
-            )}
+            {activeTab === "varsler" && <NotifSettingsTab />}
 
             {/* ── Pipeline ── */}
             {activeTab === "pipeline" && (

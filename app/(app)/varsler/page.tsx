@@ -7,8 +7,9 @@ import { Lead } from "@/lib/mock-data";
 import {
   Bell, Phone, Calendar, Clock, Check, RotateCcw, X,
   ChevronRight, ChevronDown, CheckCircle2,
-  Building2, Users, MapPin, TrendingUp, Hash, Mail, PhoneCall,
+  Building2, Users, MapPin, TrendingUp, Hash, Mail, PhoneCall, Send,
 } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
 
 type NotifType = "follow-up" | "reminder" | "meeting";
 
@@ -138,6 +139,30 @@ function NotifCard({
   const Icon = typeIcons[notif.type];
   const isExpanded = expandedIds.has(notif.id);
   const lead = leads.find(l => l.id === notif.leadId);
+  const [reminderState, setReminderState] = useState<"idle" | "sending" | "sent" | "error">("idle");
+
+  async function sendReminder() {
+    if (!lead?.assignedTo) return;
+    setReminderState("sending");
+    try {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      const res = await fetch("/api/notify/reminder", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          assignedToName: lead.assignedTo,
+          leadName: notif.company,
+          message: notif.message,
+          senderName: user?.user_metadata?.name ?? user?.email,
+        }),
+      });
+      setReminderState(res.ok ? "sent" : "error");
+      if (res.ok) setTimeout(() => setReminderState("idle"), 3000);
+    } catch {
+      setReminderState("error");
+    }
+  }
 
   return (
     <div className={`bg-[#faf8f2] rounded-xl border ${typeBorderColors[notif.type]} p-4 transition-all ${isDone ? "opacity-50" : "hover:shadow-sm"}`}
@@ -157,6 +182,21 @@ function NotifCard({
             </button>
             {!isDone ? (
               <div className="flex items-center gap-1.5 flex-shrink-0">
+                {lead?.assignedTo && (
+                  reminderState === "sent" ? (
+                    <span className="text-xs text-[#05c472] flex items-center gap-1">
+                      <Check className="w-3 h-3" />Sendt
+                    </span>
+                  ) : reminderState === "error" ? (
+                    <span className="text-xs text-[#ff470a]">Feil</span>
+                  ) : (
+                    <button onClick={sendReminder} disabled={reminderState === "sending"}
+                      title={`Send påminnelse til ${lead.assignedTo}`}
+                      className="p-1.5 rounded-lg text-[#a09b8f] hover:text-[#ff470a] hover:bg-[#ff470a]/10 transition-all disabled:opacity-50">
+                      <Send className="w-3.5 h-3.5" />
+                    </button>
+                  )
+                )}
                 <button onClick={() => alert("Utsatt til i morgen")}
                   className="p-1.5 rounded-lg text-[#a09b8f] hover:text-[#6b6660] hover:bg-[#e8e4d8] transition-all" title="Utsett">
                   <RotateCcw className="w-3.5 h-3.5" />
