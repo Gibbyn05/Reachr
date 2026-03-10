@@ -228,6 +228,7 @@ export async function GET(req: NextRequest) {
 
   const supabase = createServiceClient();
   const year = new Date().getFullYear();
+  const force = req.nextUrl.searchParams.get("force");
 
   // Get all users (requires service role)
   const { data: { users }, error: usersError } = await supabase.auth.admin.listUsers({ perPage: 1000 });
@@ -237,7 +238,7 @@ export async function GET(req: NextRequest) {
 
   for (const user of users) {
     const settings = user.user_metadata?.notification_settings ?? {};
-    if (!settings.ukentlig_sammendrag) continue;
+    if (!force && !settings.ukentlig_sammendrag) continue;
 
     // Fetch leads for this user's team
     const { data: leads } = await supabase
