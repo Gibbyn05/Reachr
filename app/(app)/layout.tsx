@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAppStore } from "@/store/app-store";
 import { Sidebar } from "@/components/layout/sidebar";
+import { OnboardingModal } from "@/components/onboarding/onboarding-modal";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { sidebarOpen, setSidebarOpen } = useAppStore();
@@ -50,6 +51,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <main className="md:ml-60 min-h-screen">
         {children}
       </main>
+      <OnboardingModal />
     </div>
   );
 }
