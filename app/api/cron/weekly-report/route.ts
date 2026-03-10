@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { createServiceClient } from "@/lib/supabase/server";
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
 const FROM_EMAIL = process.env.RESEND_FROM_EMAIL ?? "noreply@reachr.no";
@@ -226,7 +226,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "RESEND_API_KEY ikke konfigurert" }, { status: 503 });
   }
 
-  const supabase = await createClient();
+  const supabase = createServiceClient();
   const year = new Date().getFullYear();
 
   // Get all users (requires service role)
