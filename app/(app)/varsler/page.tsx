@@ -6,7 +6,8 @@ import { useAppStore } from "@/store/app-store";
 import { Lead } from "@/lib/mock-data";
 import {
   Bell, Phone, Calendar, Clock, Check, RotateCcw, X,
-  ChevronRight, AlertCircle, CheckCircle2,
+  ChevronRight, ChevronDown, AlertCircle, CheckCircle2,
+  Building2, Users, MapPin, TrendingUp, Hash, Mail, PhoneCall,
 } from "lucide-react";
 
 type NotifType = "follow-up" | "reminder" | "meeting";
@@ -70,11 +71,70 @@ function buildNotifications(leads: Lead[]): ComputedNotif[] {
   return notifs.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 }
 
+function LeadInfoDropdown({ lead }: { lead: Lead }) {
+  return (
+    <div className="mt-3 pt-3 border-t border-[#e8e4d8] grid grid-cols-2 sm:grid-cols-3 gap-x-6 gap-y-2.5">
+      {lead.orgNumber && (
+        <div className="flex items-center gap-2 text-xs text-[#6b6660]">
+          <Hash className="w-3.5 h-3.5 text-[#a09b8f] shrink-0" />
+          <span>{lead.orgNumber}</span>
+        </div>
+      )}
+      {lead.industry && (
+        <div className="flex items-center gap-2 text-xs text-[#6b6660]">
+          <Building2 className="w-3.5 h-3.5 text-[#a09b8f] shrink-0" />
+          <span>{lead.industry}</span>
+        </div>
+      )}
+      {lead.city && (
+        <div className="flex items-center gap-2 text-xs text-[#6b6660]">
+          <MapPin className="w-3.5 h-3.5 text-[#a09b8f] shrink-0" />
+          <span>{lead.city}</span>
+        </div>
+      )}
+      {lead.employees > 0 && (
+        <div className="flex items-center gap-2 text-xs text-[#6b6660]">
+          <Users className="w-3.5 h-3.5 text-[#a09b8f] shrink-0" />
+          <span>{lead.employees} ansatte</span>
+        </div>
+      )}
+      {lead.revenue > 0 && (
+        <div className="flex items-center gap-2 text-xs text-[#6b6660]">
+          <TrendingUp className="w-3.5 h-3.5 text-[#a09b8f] shrink-0" />
+          <span>{(lead.revenue / 1_000_000).toFixed(1)} MNOK</span>
+        </div>
+      )}
+      {lead.contactPerson && (
+        <div className="flex items-center gap-2 text-xs text-[#6b6660]">
+          <Users className="w-3.5 h-3.5 text-[#a09b8f] shrink-0" />
+          <span>{lead.contactPerson}</span>
+        </div>
+      )}
+      {lead.phone && (
+        <div className="flex items-center gap-2 text-xs text-[#6b6660]">
+          <PhoneCall className="w-3.5 h-3.5 text-[#a09b8f] shrink-0" />
+          <span>{lead.phone}</span>
+        </div>
+      )}
+      {lead.email && (
+        <div className="flex items-center gap-2 text-xs text-[#6b6660] col-span-2">
+          <Mail className="w-3.5 h-3.5 text-[#a09b8f] shrink-0" />
+          <span className="truncate">{lead.email}</span>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function VarslerPage() {
   const { leads } = useAppStore();
   const [dismissed, setDismissed] = useState<Set<string>>(new Set());
   const [doneIds, setDoneIds] = useState<Set<string>>(new Set());
   const [activeTab, setActiveTab] = useState<"active" | "done">("active");
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
+
+  const toggleExpand = (id: string) =>
+    setExpandedIds(prev => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n; });
 
   const allNotifs = useMemo(() => buildNotifications(leads), [leads]);
   const visible = allNotifs.filter((n) => !dismissed.has(n.id));
@@ -128,31 +188,39 @@ export default function VarslerPage() {
           ) : displayed.map((notif) => {
             const Icon = typeIcons[notif.type];
             const isDone = doneIds.has(notif.id);
+            const isExpanded = expandedIds.has(notif.id);
+            const lead = leads.find(l => l.id === notif.leadId);
             return (
-              <div key={notif.id} className={`bg-[#faf8f2] rounded-xl border border-[#d8d3c5] p-4 sm:p-5 flex flex-col sm:flex-row items-start gap-3 sm:gap-4 transition-all ${isDone ? "opacity-60" : "hover:shadow-sm hover:border-[#c5bfb0]"}`} style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.08)" }}>
-                <div className="flex items-start gap-3 flex-1 min-w-0">
-                  <div className={`w-10 h-10 ${typeColors[notif.type]} rounded-xl flex items-center justify-center flex-shrink-0`}><Icon className="w-5 h-5" /></div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${typeColors[notif.type]}`}>{typeLabels[notif.type]}</span>
-                      <span className="text-xs text-[#a09b8f]">{new Date(notif.date).toLocaleDateString("nb-NO", { day: "numeric", month: "long" })}</span>
+              <div key={notif.id} className={`bg-[#faf8f2] rounded-xl border border-[#d8d3c5] p-4 sm:p-5 transition-all ${isDone ? "opacity-60" : "hover:shadow-sm hover:border-[#c5bfb0]"}`} style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.08)" }}>
+                <div className="flex flex-col sm:flex-row items-start gap-3 sm:gap-4">
+                  <div className="flex items-start gap-3 flex-1 min-w-0">
+                    <div className={`w-10 h-10 ${typeColors[notif.type]} rounded-xl flex items-center justify-center flex-shrink-0`}><Icon className="w-5 h-5" /></div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${typeColors[notif.type]}`}>{typeLabels[notif.type]}</span>
+                        <span className="text-xs text-[#a09b8f]">{new Date(notif.date).toLocaleDateString("nb-NO", { day: "numeric", month: "long" })}</span>
+                      </div>
+                      <p className="text-sm text-[#3d3a34] mb-1">{notif.message}</p>
+                      <button onClick={() => toggleExpand(notif.id)} className="text-xs text-[#a09b8f] hover:text-[#6b6660] flex items-center gap-1 transition-colors">
+                        {isExpanded ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
+                        {notif.company}
+                      </button>
                     </div>
-                    <p className="text-sm text-[#3d3a34] mb-1">{notif.message}</p>
-                    <p className="text-xs text-[#a09b8f] flex items-center gap-1"><ChevronRight className="w-3 h-3" />{notif.company}</p>
                   </div>
-                </div>
-                {!isDone ? (
-                  <div className="flex items-center gap-2 flex-shrink-0 ml-13 sm:ml-0">
-                    <Button variant="secondary" size="sm" onClick={() => alert("Utsatt til i morgen")} className="text-gray-600"><RotateCcw className="w-3.5 h-3.5" />Utsett</Button>
-                    <Button variant="primary" size="sm" onClick={() => setDoneIds(prev => new Set([...prev, notif.id]))}><Check className="w-3.5 h-3.5" />Ferdig</Button>
-                    <button onClick={() => setDismissed(prev => new Set([...prev, notif.id]))} className="p-1.5 text-gray-300 hover:text-[#6b6660]"><X className="w-4 h-4" /></button>
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-2 flex-shrink-0 ml-13 sm:ml-0">
-                    <div className="flex items-center gap-1.5 text-green-600 text-sm font-medium"><CheckCircle2 className="w-4 h-4" />Fullført</div>
-                    <button onClick={() => setDoneIds(prev => { const n = new Set(prev); n.delete(notif.id); return n; })} className="text-xs text-[#a09b8f] hover:text-gray-600 underline">Angre</button>
-                  </div>
+                  {!isDone ? (
+                    <div className="flex items-center gap-2 flex-shrink-0 ml-13 sm:ml-0">
+                      <Button variant="secondary" size="sm" onClick={() => alert("Utsatt til i morgen")} className="text-gray-600"><RotateCcw className="w-3.5 h-3.5" />Utsett</Button>
+                      <Button variant="primary" size="sm" onClick={() => setDoneIds(prev => new Set([...prev, notif.id]))}><Check className="w-3.5 h-3.5" />Ferdig</Button>
+                      <button onClick={() => setDismissed(prev => new Set([...prev, notif.id]))} className="p-1.5 text-gray-300 hover:text-[#6b6660]"><X className="w-4 h-4" /></button>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2 flex-shrink-0 ml-13 sm:ml-0">
+                      <div className="flex items-center gap-1.5 text-green-600 text-sm font-medium"><CheckCircle2 className="w-4 h-4" />Fullført</div>
+                      <button onClick={() => setDoneIds(prev => { const n = new Set(prev); n.delete(notif.id); return n; })} className="text-xs text-[#a09b8f] hover:text-gray-600 underline">Angre</button>
+                    </div>
                 )}
+                </div>
+                {isExpanded && lead && <LeadInfoDropdown lead={lead} />}
               </div>
             );
           })}

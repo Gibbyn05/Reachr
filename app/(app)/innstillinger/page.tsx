@@ -410,7 +410,7 @@ export default function InnstillingerPage() {
           {/* Sidebar tabs */}
           <div className="sm:w-52 sm:flex-shrink-0">
             <nav className="flex sm:flex-col overflow-x-auto sm:overflow-visible gap-1 sm:space-y-1 pb-1 sm:pb-0 -mx-4 sm:mx-0 px-4 sm:px-0">
-              {tabs.map(({ id, label, icon: Icon }) => (
+              {tabs.filter(t => !(teamRole === "member" && t.id === "fakturering")).map(({ id, label, icon: Icon }) => (
                 <button
                   key={id}
                   onClick={() => setActiveTab(id)}

@@ -56,6 +56,7 @@ export function Sidebar() {
   const pathname = usePathname();
   const [dark, setDark] = useState(false);
   const [planLabel, setPlanLabel] = useState<string | null>(null);
+  const [isMember, setIsMember] = useState(false);
   const { currentUser, setCurrentUser, loadLeads, avatarUrl, leads, sidebarOpen, setSidebarOpen } = useAppStore();
 
   const notifCount = countNeedsFollowUp(leads);
@@ -101,6 +102,7 @@ export function Sidebar() {
         const sub = data.subscription;
         if (sub.via_team_owner) {
           setPlanLabel("Medlem");
+          setIsMember(true);
         } else {
           const name = sub.plan === "team" ? "Team" : sub.plan === "solo" ? "Solo" : sub.plan;
           setPlanLabel(name ? `${name}-plan` : null);
@@ -163,7 +165,7 @@ export function Sidebar() {
 
       {/* Main Nav */}
       <nav className="flex-1 p-4 space-y-1">
-        {[...mainNavItems, ...(userIsAdmin ? [{ href: "/admin", icon: ShieldCheck, label: "Admin" }] : [])].map(({ href, icon: Icon, label }) => {
+        {[...mainNavItems.filter(item => !(isMember && item.label === "Rapporter")), ...(userIsAdmin ? [{ href: "/admin", icon: ShieldCheck, label: "Admin" }] : [])].map(({ href, icon: Icon, label }) => {
           const isActive = pathname === href || pathname.startsWith(href + "/");
           return (
             <Link
