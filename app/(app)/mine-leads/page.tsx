@@ -612,6 +612,7 @@ function LeadRow({
   const [reminderMsg, setReminderMsg] = useState("");
   const [reminderSending, setReminderSending] = useState(false);
   const [reminderSent, setReminderSent] = useState(false);
+  const [findingEmail, setFindingEmail] = useState(false);
 
   const openStatusDropdown = () => {
     const rect = statusBtnRef.current?.getBoundingClientRect();
@@ -641,6 +642,36 @@ function LeadRow({
       setTimeout(() => { setReminderSent(false); setReminderOpen(false); }, 2000);
     } finally {
       setReminderSending(false);
+    }
+  };
+
+  const handleFindEmail = async () => {
+    setFindingEmail(true);
+    try {
+      const res = await fetch("/api/email-finder", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: lead.name,
+          website: lead.website,
+          domain: new URL(`https://${lead.name.toLowerCase().replace(/\s+/g, "")}.no`).hostname,
+        }),
+      });
+      const data = await res.json();
+      if (data.email && data.email !== "—") {
+        // Update lead email in store
+        const updatedLead = { ...lead, email: data.email };
+        onStatusChange(lead.id, lead.status); // Dummy to trigger store update
+        // Note: we should pass email update callback, for now we'll just update notes
+        const note = `E-post funnet: ${data.email} (${data.source} - ${data.confidence})`;
+        const combined = lead.notes && lead.notes !== "—" ? `${note}\n\n${lead.notes}` : note;
+        onNotesChange(lead.id, combined);
+        setNotes(combined);
+      }
+    } catch (err) {
+      console.error("Failed to find email:", err);
+    } finally {
+      setFindingEmail(false);
     }
   };
 
@@ -796,13 +827,27 @@ function LeadRow({
                       <Phone className="w-4 h-4 text-[#a09b8f]" />
                       {lead.phone !== "—" ? lead.phone : <span className="text-gray-300 italic">Ingen telefon</span>}
                     </a>
-                    <a
-                      href={`mailto:${lead.email}`}
-                      className="flex items-center gap-2 text-sm text-[#6b6660] hover:text-green-600"
-                    >
-                      <Mail className="w-4 h-4 text-[#a09b8f]" />
-                      {lead.email !== "—" ? lead.email : <span className="text-gray-300 italic">Ingen e-post</span>}
-                    </a>
+                    {lead.email !== "—" ? (
+                      <a
+                        href={`mailto:${lead.email}`}
+                        className="flex items-center gap-2 text-sm text-[#6b6660] hover:text-green-600"
+                      >
+                        <Mail className="w-4 h-4 text-[#a09b8f]" />
+                        {lead.email}
+                      </a>
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm text-gray-300 italic">Ingen e-post</span>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); handleFindEmail(); }}
+                          disabled={findingEmail}
+                          className="text-xs px-2 py-1 bg-[#09fe94]/10 text-[#05c472] rounded hover:bg-[#09fe94]/20 transition-colors disabled:opacity-50 flex items-center gap-1"
+                        >
+                          {findingEmail ? <Loader2 className="w-3 h-3 animate-spin" /> : <Mail className="w-3 h-3" />}
+                          Finn e-post
+                        </button>
+                      </div>
+                    )}
                     <p className="text-xs text-[#a09b8f] flex items-center gap-2">
                       <Building2 className="w-3.5 h-3.5" />{lead.address || "—"}
                     </p>

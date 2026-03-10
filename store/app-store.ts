@@ -12,6 +12,7 @@ interface AppStore {
   updateLeadNotes: (id: string, notes: string) => Promise<void>;
   updateLeadAssigned: (id: string, assignedTo: string) => Promise<void>;
   updateLeadLastContacted: (id: string, date: string | null) => Promise<void>;
+  updateLeadEmail: (id: string, email: string) => Promise<void>;
   meetingDates: Record<string, string>; // leadId → ISO datetime string
   setMeetingDate: (leadId: string, datetime: string) => Promise<void>;
   isLoggedIn: boolean;
@@ -156,6 +157,17 @@ export const useAppStore = create<AppStore>()(
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ last_contacted: date }),
         });
+      },
+
+      updateLeadEmail: async (id: string, email: string) => {
+        set((state) => ({
+          leads: state.leads.map((l) => (l.id === id ? { ...l, email } : l)),
+        }));
+        await fetch(`/api/leads/${id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email }),
+        }).catch(() => {/* silent fail */});
       },
 
       meetingDates: {},

@@ -408,6 +408,26 @@ export default function LeadsokPage() {
       addedDate: new Date().toISOString().split("T")[0],
     });
     setAddedIds(prev => new Set([...prev, e.organisasjonsnummer]));
+
+    // Try to find email in background
+    if (e.hjemmeside || e.navn) {
+      fetch("/api/email-finder", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: e.navn,
+          website: e.hjemmeside,
+          domain: new URL(`https://${e.navn.toLowerCase().replace(/\s+/g, "")}.no`).hostname,
+        }),
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data.email && data.email !== "—") {
+            useAppStore.getState().updateLeadEmail(e.organisasjonsnummer, data.email);
+          }
+        })
+        .catch(() => {/* silent fail */});
+    }
   };
 
   const SortBtn = ({ field, label }: { field: string; label: string }) => (
