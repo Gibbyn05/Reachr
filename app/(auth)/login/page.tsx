@@ -1,5 +1,5 @@
 "use client";
-import { useState, Suspense } from "react";
+import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Eye, EyeOff, ArrowRight, Users } from "lucide-react";
@@ -21,6 +21,26 @@ function LoginForm() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [checkingSession, setCheckingSession] = useState(isInvited);
+
+  // If already logged in with the invited email, link team and go to dashboard
+  useEffect(() => {
+    if (!isInvited) return;
+    const supabase = createClient();
+    supabase.auth.getUser().then(async ({ data: { user } }) => {
+      if (user && user.email === inviteEmail) {
+        await fetch("/api/team", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ owner_email: inviterEmail, member_name: user.user_metadata?.full_name ?? "" }),
+        });
+        await supabase.auth.updateUser({ data: { team_owner: inviterEmail } });
+        router.replace("/dashboard");
+      } else {
+        setCheckingSession(false);
+      }
+    });
+  }, [isInvited, inviteEmail, inviterEmail, router]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -67,6 +87,14 @@ function LoginForm() {
       setLoading(false);
     }
   };
+
+  if (checkingSession) {
+    return (
+      <div className="w-full max-w-md flex items-center justify-center h-48">
+        <div className="w-6 h-6 border-2 border-[#09fe94] border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="w-full max-w-md">

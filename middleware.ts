@@ -46,9 +46,11 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // Redirect authenticated users away from auth pages
+  // Redirect authenticated users away from auth pages,
+  // but NOT if they're following an invite link (invite params must be handled by the page)
   const isAuthPage = request.nextUrl.pathname.match(/^\/(login|register)/);
-  if (isAuthPage && user) {
+  const hasInviteParams = request.nextUrl.searchParams.has("invite");
+  if (isAuthPage && user && !hasInviteParams) {
     const url = request.nextUrl.clone();
     url.pathname = "/dashboard";
     return NextResponse.redirect(url);
