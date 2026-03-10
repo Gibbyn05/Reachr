@@ -142,6 +142,20 @@ export default function LeadsokPage() {
 
   const filterRef = useRef<HTMLDivElement>(null);
   const searchTokenRef = useRef(0);       // incremented on every new search
+
+  // scraped emails: orgnr -> email | null | "loading"
+  const [scrapedEmails, setScrapedEmails] = useState<Record<string, string | null | "loading">>({});
+
+  async function scrapeEmail(orgnr: string, website: string) {
+    setScrapedEmails(prev => ({ ...prev, [orgnr]: "loading" }));
+    try {
+      const res = await fetch(`/api/scrape-email?url=${encodeURIComponent(website)}`);
+      const data = await res.json();
+      setScrapedEmails(prev => ({ ...prev, [orgnr]: data.email ?? null }));
+    } catch {
+      setScrapedEmails(prev => ({ ...prev, [orgnr]: null }));
+    }
+  }
   const abortRef = useRef<AbortController | null>(null); // cancel in-flight main fetch
 
   // Load leads from DB on mount
@@ -861,12 +875,37 @@ export default function LeadsokPage() {
                         </p>
 
                         {/* E-post */}
-                        <p style={{ fontSize: 13, color: "#3d3a34", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                          {enhet.epostadresse
-                            ? <a href={`mailto:${enhet.epostadresse}`} style={{ color: "#ff470a", textDecoration: "none" }} onClick={ev => ev.stopPropagation()}>{enhet.epostadresse}</a>
-                            : <span style={{ color: "#d8d3c5" }}>—</span>
-                          }
-                        </p>
+                        <div style={{ fontSize: 13, color: "#3d3a34", margin: 0, overflow: "hidden" }}>
+                          {(() => {
+                            const orgnr = enhet.organisasjonsnummer;
+                            const brreg = enhet.epostadresse;
+                            const scraped = scrapedEmails[orgnr];
+                            const email = brreg ?? (scraped !== "loading" ? scraped : null);
+                            if (email) {
+                              return (
+                                <a href={`mailto:${email}`} onClick={ev => ev.stopPropagation()}
+                                  style={{ color: "#ff470a", textDecoration: "none", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", display: "block" }}>
+                                  {email}
+                                </a>
+                              );
+                            }
+                            if (scraped === "loading") {
+                              return <Loader2 size={13} style={{ animation: "spin 1s linear infinite", color: "#a09b8f" }} />;
+                            }
+                            if (scraped === null) {
+                              return <span style={{ color: "#d8d3c5" }}>Ikke funnet</span>;
+                            }
+                            if (enhet.hjemmeside) {
+                              return (
+                                <button onClick={ev => { ev.stopPropagation(); scrapeEmail(orgnr, enhet.hjemmeside!); }}
+                                  style={{ background: "none", border: "none", padding: 0, cursor: "pointer", fontSize: 12, color: "#09fe94", fontWeight: 600, whiteSpace: "nowrap" }}>
+                                  Finn e-post
+                                </button>
+                              );
+                            }
+                            return <span style={{ color: "#d8d3c5" }}>—</span>;
+                          })()}
+                        </div>
 
                         {/* CTA */}
                         <div style={{ display: "flex", alignItems: "center", gap: 4, flexShrink: 0, justifyContent: "flex-end" }}>
