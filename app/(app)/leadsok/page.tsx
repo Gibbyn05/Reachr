@@ -28,6 +28,8 @@ interface BrregEnhet {
   epostadresse?: string;
   telefon?: string;
   dagligLeder?: string; // will be filled by roles fetch
+  stiftelsesdato?: string; // "YYYY-MM-DD"
+  registrertIMvaregisteret?: boolean;
 }
 
 interface Filters {
@@ -385,15 +387,44 @@ export default function LeadsokPage() {
 
   const sorted = [...results].sort((a, b) => {
     if (!sortField) return 0;
+    // Numeric sorts
     if (sortField === "ansatte") {
-      const av = a.antallAnsatte ?? 0;
-      const bv = b.antallAnsatte ?? 0;
+      const av = a.antallAnsatte ?? -1;
+      const bv = b.antallAnsatte ?? -1;
       return sortDir === "asc" ? av - bv : bv - av;
     }
+    if (sortField === "stiftet") {
+      const av = a.stiftelsesdato ? new Date(a.stiftelsesdato).getTime() : 0;
+      const bv = b.stiftelsesdato ? new Date(b.stiftelsesdato).getTime() : 0;
+      return sortDir === "asc" ? av - bv : bv - av;
+    }
+    // Boolean sorts — "har X" puts those with data first (asc = mangler øverst, desc = har øverst)
+    if (sortField === "har-epost") {
+      const av = a.epostadresse ? 1 : 0;
+      const bv = b.epostadresse ? 1 : 0;
+      return sortDir === "asc" ? av - bv : bv - av;
+    }
+    if (sortField === "har-nettside") {
+      const av = a.hjemmeside ? 1 : 0;
+      const bv = b.hjemmeside ? 1 : 0;
+      return sortDir === "asc" ? av - bv : bv - av;
+    }
+    if (sortField === "har-tlf") {
+      const av = a.telefon ? 1 : 0;
+      const bv = b.telefon ? 1 : 0;
+      return sortDir === "asc" ? av - bv : bv - av;
+    }
+    if (sortField === "mva") {
+      const av = a.registrertIMvaregisteret ? 1 : 0;
+      const bv = b.registrertIMvaregisteret ? 1 : 0;
+      return sortDir === "asc" ? av - bv : bv - av;
+    }
+    // String sorts
     let av: any, bv: any;
     if (sortField === "navn") { av = a.navn; bv = b.navn; }
     else if (sortField === "sted") { av = a.forretningsadresse?.poststed ?? ""; bv = b.forretningsadresse?.poststed ?? ""; }
     else if (sortField === "bransje") { av = naceToCategory(a.naeringskode1?.kode, a.naeringskode1?.beskrivelse); bv = naceToCategory(b.naeringskode1?.kode, b.naeringskode1?.beskrivelse); }
+    else { av = ""; bv = ""; }
     return sortDir === "asc" ? String(av).localeCompare(String(bv), "nb") : String(bv).localeCompare(String(av), "nb");
   });
 
@@ -759,6 +790,51 @@ export default function LeadsokPage() {
                 <span style={{ fontSize: 12, color: "#6b6660" }}>Live data</span>
               </div>
             </div>
+
+            {/* Sort pills */}
+            {view === "list" && hasSearched && results.length > 0 && (
+              <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 10, flexWrap: "wrap" }}>
+                <span style={{ fontSize: 11, fontWeight: 600, color: "#a09b8f", textTransform: "uppercase", letterSpacing: "0.05em", marginRight: 4 }}>Sorter:</span>
+                {([
+                  { field: "navn",        label: "Navn",       asc: "A–Å",        desc: "Å–A" },
+                  { field: "ansatte",     label: "Ansatte",    asc: "Færrest",     desc: "Flest" },
+                  { field: "stiftet",     label: "Stiftet",    asc: "Eldst",       desc: "Nyest" },
+                  { field: "bransje",     label: "Bransje",    asc: "A–Å",        desc: "Å–A" },
+                  { field: "sted",        label: "Sted",       asc: "A–Å",        desc: "Å–A" },
+                  { field: "har-epost",   label: "Har e-post", asc: "Mangler øverst", desc: "Har øverst" },
+                  { field: "har-nettside",label: "Nettside",   asc: "Mangler øverst", desc: "Har øverst" },
+                  { field: "har-tlf",     label: "Telefon",    asc: "Mangler øverst", desc: "Har øverst" },
+                  { field: "mva",         label: "MVA-reg",    asc: "Ikke reg. øverst", desc: "Reg. øverst" },
+                ] as const).map(({ field, label, asc, desc }) => {
+                  const active = sortField === field;
+                  return (
+                    <button key={field} onClick={() => handleSort(field)}
+                      style={{
+                        fontSize: 12, fontWeight: active ? 600 : 500,
+                        padding: "4px 10px", borderRadius: 20,
+                        border: `1px solid ${active ? "#09fe94" : "#d8d3c5"}`,
+                        backgroundColor: active ? "#09fe9418" : "#faf8f2",
+                        color: active ? "#05a862" : "#6b6660",
+                        cursor: "pointer", display: "flex", alignItems: "center", gap: 4,
+                        transition: "all 0.15s",
+                      }}>
+                      {label}
+                      {active && (
+                        <span style={{ fontSize: 10, color: "#05a862" }}>
+                          {sortDir === "asc" ? `↑ ${asc}` : `↓ ${desc}`}
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+                {sortField && (
+                  <button onClick={() => { setSortField(null); setSortDir("asc"); }}
+                    style={{ fontSize: 11, color: "#a09b8f", background: "none", border: "none", cursor: "pointer", textDecoration: "underline", padding: "4px 2px" }}>
+                    Nullstill
+                  </button>
+                )}
+              </div>
+            )}
 
             {view === "list" ? (
               <div style={{ backgroundColor: "#faf8f2", borderRadius: 14, border: "1px solid #d8d3c5", boxShadow: "0 1px 4px rgba(0,0,0,0.05)", overflow: "hidden" }}>

@@ -6,7 +6,7 @@ import { useAppStore } from "@/store/app-store";
 import { Lead } from "@/lib/mock-data";
 import {
   Bell, Phone, Calendar, Clock, Check, RotateCcw, X,
-  ChevronRight, ChevronDown, AlertCircle, CheckCircle2,
+  ChevronRight, ChevronDown, CheckCircle2,
   Building2, Users, MapPin, TrendingUp, Hash, Mail, PhoneCall,
 } from "lucide-react";
 
@@ -31,10 +31,20 @@ const typeColors: Record<NotifType, string> = {
   reminder: "bg-[#09fe94]/10 text-[#05c472]",
   meeting: "bg-[#ffad0a]/12 text-[#c47e00]",
 };
+const typeBorderColors: Record<NotifType, string> = {
+  "follow-up": "border-[#ff470a]/20",
+  reminder: "border-[#09fe94]/30",
+  meeting: "border-[#ffad0a]/30",
+};
+const typeHeaderColors: Record<NotifType, string> = {
+  "follow-up": "bg-[#ff470a]/8 border-b border-[#ff470a]/15",
+  reminder: "bg-[#09fe94]/8 border-b border-[#09fe94]/20",
+  meeting: "bg-[#ffad0a]/8 border-b border-[#ffad0a]/20",
+};
 const typeLabels: Record<NotifType, string> = {
-  "follow-up": "Oppfølging",
-  reminder: "Påminnelse",
-  meeting: "Møte",
+  "follow-up": "Trenger oppfølging",
+  reminder: "Venter på svar",
+  meeting: "Kommende møter",
 };
 
 function buildNotifications(leads: Lead[]): ComputedNotif[] {
@@ -49,23 +59,23 @@ function buildNotifications(leads: Lead[]): ComputedNotif[] {
 
     if (lead.status === "Ikke kontaktet" && addedDate <= twoDaysAgo) {
       notifs.push({ id: `nc-${lead.id}`, company: lead.name, type: "follow-up", leadId: lead.id, date: lead.addedDate,
-        message: `${lead.name} er ikke kontaktet ennå — lagt til ${addedDate.toLocaleDateString("nb-NO")}` });
+        message: `Ikke kontaktet ennå — lagt til ${addedDate.toLocaleDateString("nb-NO")}` });
     }
     if (lead.status === "Kontaktet - ikke svar" && (!lastContact || lastContact <= twoDaysAgo)) {
       const days = lastContact ? Math.floor((now.getTime() - lastContact.getTime()) / 86400000) : null;
       notifs.push({ id: `nis-${lead.id}`, company: lead.name, type: "reminder", leadId: lead.id,
         date: lead.lastContacted ?? lead.addedDate,
-        message: `${lead.name} svarte ikke — prøv igjen${days !== null ? ` (${days} dager siden sist)` : ""}` });
+        message: `Svarte ikke — prøv igjen${days !== null ? ` (${days} dager siden)` : ""}` });
     }
     if (lead.status === "Kontaktet" && lastContact && lastContact <= threeDaysAgo) {
       const days = Math.floor((now.getTime() - lastContact.getTime()) / 86400000);
       notifs.push({ id: `c-${lead.id}`, company: lead.name, type: "follow-up", leadId: lead.id,
-        date: lead.lastContacted!, message: `${lead.name} — ${days} dager siden sist kontakt` });
+        date: lead.lastContacted!, message: `${days} dager siden sist kontakt` });
     }
     if (lead.status === "Booket møte") {
       notifs.push({ id: `m-${lead.id}`, company: lead.name, type: "meeting", leadId: lead.id,
         date: lead.lastContacted ?? lead.addedDate,
-        message: `Møte booket med ${lead.name}${lead.lastContacted ? ` — ${new Date(lead.lastContacted).toLocaleDateString("nb-NO")}` : ""}` });
+        message: `Møte booket${lead.lastContacted ? ` — ${new Date(lead.lastContacted).toLocaleDateString("nb-NO")}` : ""}` });
     }
   }
   return notifs.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
@@ -73,158 +83,228 @@ function buildNotifications(leads: Lead[]): ComputedNotif[] {
 
 function LeadInfoDropdown({ lead }: { lead: Lead }) {
   return (
-    <div className="mt-3 pt-3 border-t border-[#e8e4d8] grid grid-cols-2 sm:grid-cols-3 gap-x-6 gap-y-2.5">
+    <div className="mt-3 pt-3 border-t border-[#e8e4d8] grid grid-cols-2 gap-x-4 gap-y-2">
       {lead.orgNumber && (
-        <div className="flex items-center gap-2 text-xs text-[#6b6660]">
-          <Hash className="w-3.5 h-3.5 text-[#a09b8f] shrink-0" />
-          <span>{lead.orgNumber}</span>
+        <div className="flex items-center gap-1.5 text-xs text-[#6b6660]">
+          <Hash className="w-3 h-3 text-[#a09b8f] shrink-0" /><span>{lead.orgNumber}</span>
         </div>
       )}
       {lead.industry && (
-        <div className="flex items-center gap-2 text-xs text-[#6b6660]">
-          <Building2 className="w-3.5 h-3.5 text-[#a09b8f] shrink-0" />
-          <span>{lead.industry}</span>
+        <div className="flex items-center gap-1.5 text-xs text-[#6b6660]">
+          <Building2 className="w-3 h-3 text-[#a09b8f] shrink-0" /><span className="truncate">{lead.industry}</span>
         </div>
       )}
       {lead.city && (
-        <div className="flex items-center gap-2 text-xs text-[#6b6660]">
-          <MapPin className="w-3.5 h-3.5 text-[#a09b8f] shrink-0" />
-          <span>{lead.city}</span>
+        <div className="flex items-center gap-1.5 text-xs text-[#6b6660]">
+          <MapPin className="w-3 h-3 text-[#a09b8f] shrink-0" /><span>{lead.city}</span>
         </div>
       )}
       {lead.employees > 0 && (
-        <div className="flex items-center gap-2 text-xs text-[#6b6660]">
-          <Users className="w-3.5 h-3.5 text-[#a09b8f] shrink-0" />
-          <span>{lead.employees} ansatte</span>
+        <div className="flex items-center gap-1.5 text-xs text-[#6b6660]">
+          <Users className="w-3 h-3 text-[#a09b8f] shrink-0" /><span>{lead.employees} ansatte</span>
         </div>
       )}
       {lead.revenue > 0 && (
-        <div className="flex items-center gap-2 text-xs text-[#6b6660]">
-          <TrendingUp className="w-3.5 h-3.5 text-[#a09b8f] shrink-0" />
-          <span>{(lead.revenue / 1_000_000).toFixed(1)} MNOK</span>
+        <div className="flex items-center gap-1.5 text-xs text-[#6b6660]">
+          <TrendingUp className="w-3 h-3 text-[#a09b8f] shrink-0" /><span>{(lead.revenue / 1_000_000).toFixed(1)} MNOK</span>
         </div>
       )}
-      {lead.contactPerson && (
-        <div className="flex items-center gap-2 text-xs text-[#6b6660]">
-          <Users className="w-3.5 h-3.5 text-[#a09b8f] shrink-0" />
-          <span>{lead.contactPerson}</span>
+      {lead.phone && lead.phone !== "—" && (
+        <div className="flex items-center gap-1.5 text-xs text-[#6b6660]">
+          <PhoneCall className="w-3 h-3 text-[#a09b8f] shrink-0" /><span>{lead.phone}</span>
         </div>
       )}
-      {lead.phone && (
-        <div className="flex items-center gap-2 text-xs text-[#6b6660]">
-          <PhoneCall className="w-3.5 h-3.5 text-[#a09b8f] shrink-0" />
-          <span>{lead.phone}</span>
-        </div>
-      )}
-      {lead.email && (
-        <div className="flex items-center gap-2 text-xs text-[#6b6660] col-span-2">
-          <Mail className="w-3.5 h-3.5 text-[#a09b8f] shrink-0" />
-          <span className="truncate">{lead.email}</span>
+      {lead.email && lead.email !== "—" && (
+        <div className="flex items-center gap-1.5 text-xs text-[#6b6660] col-span-2">
+          <Mail className="w-3 h-3 text-[#a09b8f] shrink-0" /><span className="truncate">{lead.email}</span>
         </div>
       )}
     </div>
   );
 }
 
+function NotifCard({
+  notif, isDone, leads, expandedIds, toggleExpand, onDone, onUndone, onDismiss,
+}: {
+  notif: ComputedNotif;
+  isDone: boolean;
+  leads: Lead[];
+  expandedIds: Set<string>;
+  toggleExpand: (id: string) => void;
+  onDone: (id: string) => void;
+  onUndone: (id: string) => void;
+  onDismiss: (id: string) => void;
+}) {
+  const Icon = typeIcons[notif.type];
+  const isExpanded = expandedIds.has(notif.id);
+  const lead = leads.find(l => l.id === notif.leadId);
+
+  return (
+    <div className={`bg-[#faf8f2] rounded-xl border ${typeBorderColors[notif.type]} p-4 transition-all ${isDone ? "opacity-50" : "hover:shadow-sm"}`}
+      style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}>
+      <div className="flex items-start gap-3">
+        <div className={`w-8 h-8 ${typeColors[notif.type]} rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5`}>
+          <Icon className="w-4 h-4" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-semibold text-[#171717] truncate">{notif.company}</p>
+          <p className="text-xs text-[#6b6660] mt-0.5 leading-relaxed">{notif.message}</p>
+          <div className="flex items-center justify-between mt-2.5 gap-2">
+            <button onClick={() => toggleExpand(notif.id)}
+              className="text-xs text-[#a09b8f] hover:text-[#6b6660] flex items-center gap-1 transition-colors">
+              {isExpanded ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
+              {new Date(notif.date).toLocaleDateString("nb-NO", { day: "numeric", month: "short" })}
+            </button>
+            {!isDone ? (
+              <div className="flex items-center gap-1.5 flex-shrink-0">
+                <button onClick={() => alert("Utsatt til i morgen")}
+                  className="p-1.5 rounded-lg text-[#a09b8f] hover:text-[#6b6660] hover:bg-[#e8e4d8] transition-all" title="Utsett">
+                  <RotateCcw className="w-3.5 h-3.5" />
+                </button>
+                <button onClick={() => onDone(notif.id)}
+                  className="p-1.5 rounded-lg bg-[#09fe94]/15 text-[#05c472] hover:bg-[#09fe94]/25 transition-all" title="Merk ferdig">
+                  <Check className="w-3.5 h-3.5" />
+                </button>
+                <button onClick={() => onDismiss(notif.id)}
+                  className="p-1.5 rounded-lg text-[#d8d3c5] hover:text-[#a09b8f] hover:bg-[#e8e4d8] transition-all" title="Avvis">
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-1.5 flex-shrink-0">
+                <CheckCircle2 className="w-3.5 h-3.5 text-[#05c472]" />
+                <button onClick={() => onUndone(notif.id)} className="text-xs text-[#a09b8f] hover:text-[#6b6660] underline">Angre</button>
+              </div>
+            )}
+          </div>
+          {isExpanded && lead && <LeadInfoDropdown lead={lead} />}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const COLUMNS: { type: NotifType; label: string }[] = [
+  { type: "follow-up", label: "Trenger oppfølging" },
+  { type: "reminder",  label: "Venter på svar" },
+  { type: "meeting",   label: "Kommende møter" },
+];
+
 export default function VarslerPage() {
   const { leads } = useAppStore();
   const [dismissed, setDismissed] = useState<Set<string>>(new Set());
-  const [doneIds, setDoneIds] = useState<Set<string>>(new Set());
-  const [activeTab, setActiveTab] = useState<"active" | "done">("active");
+  const [doneIds, setDoneIds]     = useState<Set<string>>(new Set());
+  const [showDone, setShowDone]   = useState(false);
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
 
   const toggleExpand = (id: string) =>
     setExpandedIds(prev => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n; });
 
+  const onDone    = (id: string) => setDoneIds(prev => new Set([...prev, id]));
+  const onUndone  = (id: string) => setDoneIds(prev => { const n = new Set(prev); n.delete(id); return n; });
+  const onDismiss = (id: string) => setDismissed(prev => new Set([...prev, id]));
+
   const allNotifs = useMemo(() => buildNotifications(leads), [leads]);
-  const visible = allNotifs.filter((n) => !dismissed.has(n.id));
-  const activeNotifs = visible.filter((n) => !doneIds.has(n.id));
-  const doneNotifs = visible.filter((n) => doneIds.has(n.id));
-  const displayed = activeTab === "active" ? activeNotifs : doneNotifs;
+  const visible   = allNotifs.filter(n => !dismissed.has(n.id));
+  const active    = visible.filter(n => !doneIds.has(n.id));
+  const done      = visible.filter(n => doneIds.has(n.id));
+
+  const byType = (type: NotifType) => active.filter(n => n.type === type);
 
   return (
     <div>
-      <TopBar title="Varsler" subtitle={`${activeNotifs.length} aktive oppfølginger`} />
-      <div className="p-4 sm:p-8 space-y-4 sm:space-y-6">
+      <TopBar title="Varsler" subtitle={`${active.length} aktive oppfølginger`} />
+      <div className="p-4 sm:p-8 space-y-6">
+
         {/* Summary cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
-          {[
-            { label: "Venter på svar", count: activeNotifs.filter(n => n.type === "follow-up").length, icon: Phone, color: "bg-[#ff470a]/10", iconColor: "text-[#ff470a]" },
-            { label: "Påminnelser", count: activeNotifs.filter(n => n.type === "reminder").length, icon: Clock, color: "bg-[#09fe94]/10", iconColor: "text-[#05c472]" },
-            { label: "Kommende møter", count: activeNotifs.filter(n => n.type === "meeting").length, icon: Calendar, color: "bg-[#ffad0a]/12", iconColor: "text-[#c47e00]" },
-          ].map(({ label, count, icon: Icon, color, iconColor }) => (
-            <div key={label} className="bg-[#faf8f2] rounded-xl border border-[#d8d3c5] p-5 flex items-center gap-4" style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.08)" }}>
-              <div className={`w-12 h-12 ${color} rounded-xl flex items-center justify-center`}><Icon className={`w-6 h-6 ${iconColor}`} /></div>
-              <div><p className="text-2xl font-extrabold text-[#171717]">{count}</p><p className="text-sm text-[#6b6660]">{label}</p></div>
-            </div>
-          ))}
-        </div>
-
-        {/* Tabs */}
-        <div className="flex items-center gap-1 bg-[#e8e4d8] p-1 rounded-lg w-fit">
-          {[["active", "Aktive", AlertCircle, activeNotifs.length], ["done", "Fullførte", CheckCircle2, doneNotifs.length]].map(([tab, label, Icon, count]) => (
-            <button key={tab as string} onClick={() => setActiveTab(tab as "active" | "done")}
-              className={`px-5 py-2 rounded-md text-sm font-medium transition-all flex items-center gap-2 ${activeTab === tab ? "bg-[#faf8f2] shadow-sm text-[#171717]" : "text-[#6b6660] hover:text-[#3d3a34]"}`}>
-              {/* @ts-ignore */}
-              <Icon className="w-4 h-4" />{label} ({count})
-            </button>
-          ))}
-        </div>
-
-        {/* List */}
-        <div className="space-y-3">
-          {displayed.length === 0 ? (
-            <div className="bg-[#faf8f2] rounded-xl border border-[#d8d3c5] p-16 text-center">
-              <Bell className="w-12 h-12 text-gray-200 mx-auto mb-4" />
-              <p className="text-[#6b6660] font-medium">
-                {activeTab === "active" ? (leads.length === 0 ? "Ingen leads i pipelinen ennå" : "Ingen aktive varsler – du er à jour!") : "Ingen fullførte varsler"}
-              </p>
-              <p className="text-sm text-[#a09b8f] mt-1">
-                {activeTab === "active" && leads.length === 0
-                  ? <><a href="/leadsok" className="text-green-600 font-medium hover:underline">Søk etter leads</a> for å komme i gang.</>
-                  : "Varsler genereres automatisk basert på aktivitet i pipelinen."}
-              </p>
-            </div>
-          ) : displayed.map((notif) => {
-            const Icon = typeIcons[notif.type];
-            const isDone = doneIds.has(notif.id);
-            const isExpanded = expandedIds.has(notif.id);
-            const lead = leads.find(l => l.id === notif.leadId);
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          {COLUMNS.map(({ type, label }) => {
+            const Icon = typeIcons[type];
+            const count = byType(type).length;
             return (
-              <div key={notif.id} className={`bg-[#faf8f2] rounded-xl border border-[#d8d3c5] p-4 sm:p-5 transition-all ${isDone ? "opacity-60" : "hover:shadow-sm hover:border-[#c5bfb0]"}`} style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.08)" }}>
-                <div className="flex flex-col sm:flex-row items-start gap-3 sm:gap-4">
-                  <div className="flex items-start gap-3 flex-1 min-w-0">
-                    <div className={`w-10 h-10 ${typeColors[notif.type]} rounded-xl flex items-center justify-center flex-shrink-0`}><Icon className="w-5 h-5" /></div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${typeColors[notif.type]}`}>{typeLabels[notif.type]}</span>
-                        <span className="text-xs text-[#a09b8f]">{new Date(notif.date).toLocaleDateString("nb-NO", { day: "numeric", month: "long" })}</span>
-                      </div>
-                      <p className="text-sm text-[#3d3a34] mb-1">{notif.message}</p>
-                      <button onClick={() => toggleExpand(notif.id)} className="text-xs text-[#a09b8f] hover:text-[#6b6660] flex items-center gap-1 transition-colors">
-                        {isExpanded ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
-                        {notif.company}
-                      </button>
-                    </div>
-                  </div>
-                  {!isDone ? (
-                    <div className="flex items-center gap-2 flex-shrink-0 ml-13 sm:ml-0">
-                      <Button variant="secondary" size="sm" onClick={() => alert("Utsatt til i morgen")} className="text-gray-600"><RotateCcw className="w-3.5 h-3.5" />Utsett</Button>
-                      <Button variant="primary" size="sm" onClick={() => setDoneIds(prev => new Set([...prev, notif.id]))}><Check className="w-3.5 h-3.5" />Ferdig</Button>
-                      <button onClick={() => setDismissed(prev => new Set([...prev, notif.id]))} className="p-1.5 text-gray-300 hover:text-[#6b6660]"><X className="w-4 h-4" /></button>
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-2 flex-shrink-0 ml-13 sm:ml-0">
-                      <div className="flex items-center gap-1.5 text-green-600 text-sm font-medium"><CheckCircle2 className="w-4 h-4" />Fullført</div>
-                      <button onClick={() => setDoneIds(prev => { const n = new Set(prev); n.delete(notif.id); return n; })} className="text-xs text-[#a09b8f] hover:text-gray-600 underline">Angre</button>
-                    </div>
-                )}
+              <div key={type} className="bg-[#faf8f2] rounded-xl border border-[#d8d3c5] p-5 flex items-center gap-4"
+                style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.08)" }}>
+                <div className={`w-11 h-11 ${typeColors[type]} rounded-xl flex items-center justify-center`}>
+                  <Icon className="w-5 h-5" />
                 </div>
-                {isExpanded && lead && <LeadInfoDropdown lead={lead} />}
+                <div>
+                  <p className="text-2xl font-extrabold text-[#171717]">{count}</p>
+                  <p className="text-sm text-[#6b6660]">{label}</p>
+                </div>
               </div>
             );
           })}
         </div>
+
+        {/* 3-column kanban */}
+        {active.length === 0 ? (
+          <div className="bg-[#faf8f2] rounded-xl border border-[#d8d3c5] p-16 text-center">
+            <Bell className="w-12 h-12 text-[#d8d3c5] mx-auto mb-4" />
+            <p className="text-[#6b6660] font-medium">
+              {leads.length === 0 ? "Ingen leads i pipelinen ennå" : "Ingen aktive varsler – du er à jour!"}
+            </p>
+            <p className="text-sm text-[#a09b8f] mt-1">
+              {leads.length === 0
+                ? <><a href="/leadsok" className="text-[#09fe94] font-medium hover:underline">Søk etter leads</a> for å komme i gang.</>
+                : "Varsler genereres automatisk basert på aktivitet i pipelinen."}
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-start">
+            {COLUMNS.map(({ type, label }) => {
+              const Icon = typeIcons[type];
+              const cards = byType(type);
+              return (
+                <div key={type} className={`rounded-xl border ${typeBorderColors[type]} bg-[#faf8f2] overflow-hidden`}
+                  style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.07)" }}>
+                  {/* Column header */}
+                  <div className={`${typeHeaderColors[type]} px-4 py-3 flex items-center justify-between`}>
+                    <div className="flex items-center gap-2">
+                      <Icon className={`w-4 h-4 ${typeColors[type].split(" ")[1]}`} />
+                      <span className="text-sm font-semibold text-[#171717]">{label}</span>
+                    </div>
+                    <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${typeColors[type]}`}>
+                      {cards.length}
+                    </span>
+                  </div>
+
+                  {/* Cards */}
+                  <div className="p-3 space-y-2.5 min-h-[120px]">
+                    {cards.length === 0 ? (
+                      <div className="flex items-center justify-center h-20">
+                        <p className="text-xs text-[#c5bfb0]">Ingen varsler her</p>
+                      </div>
+                    ) : cards.map(notif => (
+                      <NotifCard key={notif.id} notif={notif} isDone={false} leads={leads}
+                        expandedIds={expandedIds} toggleExpand={toggleExpand}
+                        onDone={onDone} onUndone={onUndone} onDismiss={onDismiss} />
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Fullførte (collapsible) */}
+        {done.length > 0 && (
+          <div>
+            <button onClick={() => setShowDone(v => !v)}
+              className="flex items-center gap-2 text-sm font-medium text-[#6b6660] hover:text-[#3d3a34] transition-colors mb-3">
+              {showDone ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+              Fullførte ({done.length})
+            </button>
+            {showDone && (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                {done.map(notif => (
+                  <NotifCard key={notif.id} notif={notif} isDone leads={leads}
+                    expandedIds={expandedIds} toggleExpand={toggleExpand}
+                    onDone={onDone} onUndone={onUndone} onDismiss={onDismiss} />
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
