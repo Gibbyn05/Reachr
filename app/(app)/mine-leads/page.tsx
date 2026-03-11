@@ -900,10 +900,14 @@ function LeadRow({
                             {sequences.map(seq => (
                               <button
                                 key={seq.id}
-                                onClick={() => {
-                                  enrollLeadInSequence(lead.id, seq.id);
+                                onClick={async () => {
                                   setSeqDropdownOpen(false);
-                                  toast.success(`Lagt til i "${seq.name}"`);
+                                  const promise = enrollLeadInSequence(lead.id, seq.id);
+                                  toast.promise(promise, {
+                                    loading: `Legger til i "${seq.name}"...`,
+                                    success: `Lagt til i "${seq.name}"!`,
+                                    error: (err) => `Feil: ${err.message}`,
+                                  });
                                 }}
                                 className={`w-full text-left px-3 py-2 text-xs hover:bg-[#f0ece0] flex items-center justify-between ${lead.enrolledSequenceId === seq.id ? "bg-blue-50 text-blue-700 font-medium" : "text-[#6b6660]"}`}
                               >

@@ -265,9 +265,18 @@ export const useAppStore = create<AppStore>()(
                 s.id === sequenceId ? { ...s, enrolled: (s.enrolled || 0) + 1 } : s
               ),
             }));
+          } else {
+            const data = await res.json();
+            throw new Error(data.error || "Utsendelse feilet");
           }
-        } catch (err) {
-          console.error("Enrollment failed:", err);
+        } catch (err: any) {
+          // Revert optimistic update
+          set((state) => ({
+            leads: state.leads.map((l) =>
+              l.id === leadId ? { ...l, enrolledSequenceId: null } : l
+            ),
+          }));
+          throw err;
         }
       },
     }),

@@ -48,9 +48,9 @@ export async function GET(req: NextRequest) {
     const leadIds = leads.map(l => l.id);
     const { data: enrollments } = await db
       .from("email_sequence_enrollments")
-      .select("lead_id, sequence_id")
+      .select("lead_id, sequence_id, status")
       .in("lead_id", leadIds)
-      .eq("status", "active");
+      .in("status", ["active", "completed"]);
 
     const enrollMap = Object.fromEntries(enrollments?.map(e => [e.lead_id, e.sequence_id]) ?? []);
     

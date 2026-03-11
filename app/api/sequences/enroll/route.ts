@@ -106,9 +106,14 @@ export async function POST(req: NextRequest) {
         await db.from("leads").update({ 
           last_contacted: new Date().toISOString().split("T")[0] 
         }).eq("id", leadId);
+        
+        console.log(`[Sequences] Immediate send successful for lead ${leadId}`);
+      } else {
+        console.warn(`[Sequences] Immediate send skipped: conn=${!!conn}, email=${leadEmail}`);
       }
     } catch (err: any) {
-      console.error("Immediate send failed:", err.message);
+      console.error("[Sequences] Immediate send failed:", err.message);
+      return NextResponse.json({ success: false, error: err.message }, { status: 500 });
     }
   }
 
