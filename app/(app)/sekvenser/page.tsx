@@ -52,11 +52,11 @@ export default function SekvenserPage() {
             />
           </div>
           <div className="flex gap-3">
-            <Button variant="secondary" size="md">
+            <Button variant="secondary" size="md" onClick={() => alert("Innstillinger for sekvenser kommer snart!")}>
               <Settings2 className="w-4 h-4 mr-2" />
               Innstillinger
             </Button>
-            <Button variant="primary" size="md">
+            <Button variant="primary" size="md" onClick={() => alert("Opprettelse av sekvenser kommer snart!")}>
               <Plus className="w-4 h-4 mr-2 text-[#171717]" />
               <span className="text-[#171717]">Ny sekvens</span>
             </Button>
@@ -81,10 +81,10 @@ export default function SekvenserPage() {
                 Sett salgsprosessen på autopilot. Send AI-genererte e-poster, vent i X dager, og følg opp automatisk. Sekvensen stopper av seg selv i det sekundet kunden svarer på e-posten.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 relative z-10">
-                <Button className="bg-[#09fe94] hover:bg-[#00e882] text-[#171717] font-bold border-none h-12 px-6">
+                <Button className="bg-[#09fe94] hover:bg-[#00e882] text-[#171717] font-bold border-none h-12 px-6" onClick={() => alert("Sekvensbygger under utvikling. Lanseres snart!")}>
                   Prøv sekvensbyggeren <ArrowRight className="w-4 h-4 ml-2" />
                 </Button>
-                <Button className="bg-white/10 hover:bg-white/20 text-white border border-white/20 h-12 px-6">
+                <Button className="bg-white/10 hover:bg-white/20 text-white border border-white/20 h-12 px-6" onClick={() => alert("Video-demo kommer snart!")}>
                   Se video-demo <Play className="w-4 h-4 ml-2" />
                 </Button>
               </div>

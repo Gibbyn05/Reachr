@@ -50,23 +50,6 @@ export default function KalenderPage() {
       }
     }
 
-    // Task: New leads not contacted for 2 days
-    if (lead.status === "Ikke kontaktet") {
-      const addedDate = new Date(lead.addedDate);
-      addedDate.setDate(addedDate.getDate() + 2);
-      if (addedDate <= now) {
-        leadTasks.push({
-          id: `new-${lead.id}`,
-          type: "new",
-          title: `Ring / send intro`,
-          leadName: lead.name,
-          time: "Snarest",
-          isToday: true,
-          leadId: lead.id,
-        });
-      }
-    }
-
     return leadTasks;
   });
 
@@ -185,15 +168,15 @@ export default function KalenderPage() {
             <div className="bg-[#171717] rounded-xl p-6 text-white shadow-xl">
               <h3 className="font-bold mb-4 text-white">Raske handlinger</h3>
               <div className="space-y-2">
-                <button className="w-full flex items-center gap-3 p-3 rounded-lg bg-white/10 hover:bg-white/20 transition-colors text-sm font-medium">
+                <button onClick={() => alert("Anropslogg kommer snart!")} className="w-full flex items-center gap-3 p-3 rounded-lg bg-white/10 hover:bg-white/20 transition-colors text-sm font-medium">
                   <Phone className="w-4 h-4 text-[#09fe94]" />
                   Loggfør et anrop
                 </button>
-                <button className="w-full flex items-center gap-3 p-3 rounded-lg bg-white/10 hover:bg-white/20 transition-colors text-sm font-medium">
+                <Link href="/mine-leads" className="w-full flex items-center gap-3 p-3 rounded-lg bg-white/10 hover:bg-white/20 transition-colors text-sm font-medium">
                   <Mail className="w-4 h-4 text-[#09fe94]" />
                   Skriv ny e-post
-                </button>
-                <button className="w-full flex items-center gap-3 p-3 rounded-lg bg-white/10 hover:bg-white/20 transition-colors text-sm font-medium">
+                </Link>
+                <button onClick={() => alert("Kalenderintegrasjon (Outlook/Google) lanseres snart!")} className="w-full flex items-center gap-3 p-3 rounded-lg bg-white/10 hover:bg-white/20 transition-colors text-sm font-medium">
                   <CalendarDays className="w-4 h-4 text-[#09fe94]" />
                   Opprett eget møte
                 </button>
