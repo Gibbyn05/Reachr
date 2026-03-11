@@ -1,321 +1,225 @@
 "use client";
-import { useState } from "react";
 import { TopBar } from "@/components/layout/top-bar";
 import { useAppStore } from "@/store/app-store";
-import { ChevronLeft, ChevronRight, Calendar, Clock, Building2, Phone, Mail } from "lucide-react";
+import { CalendarDays, CheckCircle2, Clock, Phone, Mail, ArrowRight, User } from "lucide-react";
 import Link from "next/link";
-
-const MONTHS_NO = ["Januar","Februar","Mars","April","Mai","Juni","Juli","August","September","Oktober","November","Desember"];
-const DAYS_NO = ["Man","Tir","Ons","Tor","Fre","Lør","Søn"];
-
-function getDaysInMonth(year: number, month: number) {
-  return new Date(year, month + 1, 0).getDate();
-}
-function getFirstDayOfMonth(year: number, month: number) {
-  const d = new Date(year, month, 1).getDay();
-  return d === 0 ? 6 : d - 1;
-}
+import { Badge } from "@/components/ui/badge";
+import { useState } from "react";
 
 export default function KalenderPage() {
   const { leads, meetingDates } = useAppStore();
-  const today = new Date();
-  const [viewYear, setViewYear] = useState(today.getFullYear());
-  const [viewMonth, setViewMonth] = useState(today.getMonth());
-  const [selectedDay, setSelectedDay] = useState<number | null>(null);
+  const [completedTasks, setCompletedTasks] = useState<string[]>([]);
 
-  const prevMonth = () => {
-    if (viewMonth === 0) { setViewYear(y => y - 1); setViewMonth(11); }
-    else setViewMonth(m => m - 1);
-    setSelectedDay(null);
-  };
-  const nextMonth = () => {
-    if (viewMonth === 11) { setViewYear(y => y + 1); setViewMonth(0); }
-    else setViewMonth(m => m + 1);
-    setSelectedDay(null);
-  };
-
-  const meetingMap = new Map<string, typeof leads>();
-  for (const lead of leads) {
-    const dt = meetingDates[lead.id];
-    if (!dt) continue;
-    const key = dt.slice(0, 10);
-    if (!meetingMap.has(key)) meetingMap.set(key, []);
-    meetingMap.get(key)!.push(lead);
-  }
-  for (const lead of leads) {
-    if (lead.status === "Booket møte" && lead.lastContacted && !meetingDates[lead.id]) {
-      const key = lead.lastContacted;
-      if (!meetingMap.has(key)) meetingMap.set(key, []);
-      if (!meetingMap.get(key)!.find(l => l.id === lead.id)) meetingMap.get(key)!.push(lead);
-    }
-  }
-
-  const daysInMonth = getDaysInMonth(viewYear, viewMonth);
-  const firstDay = getFirstDayOfMonth(viewYear, viewMonth);
-  const totalCells = Math.ceil((firstDay + daysInMonth) / 7) * 7;
-
-  const selectedKey = selectedDay
-    ? `${viewYear}-${String(viewMonth + 1).padStart(2, "0")}-${String(selectedDay).padStart(2, "0")}`
-    : null;
-  const selectedMeetings = selectedKey ? (meetingMap.get(selectedKey) ?? []) : [];
-
-  const monthMeetings: { lead: (typeof leads)[0]; date: string; time: string }[] = [];
-  for (const [key, mLeads] of meetingMap.entries()) {
-    if (!key.startsWith(`${viewYear}-${String(viewMonth + 1).padStart(2, "0")}`)) continue;
-    for (const lead of mLeads) {
-      const dt = meetingDates[lead.id] ?? key;
-      const d = new Date(dt);
-      monthMeetings.push({
-        lead,
-        date: key,
-        time: meetingDates[lead.id]
-          ? d.toLocaleTimeString("nb-NO", { hour: "2-digit", minute: "2-digit" })
-          : "—",
+  // Simple task generation based on leads
+  const now = new Date();
+  const todayStr = now.toISOString().split("T")[0];
+  
+  const tasks = leads.flatMap((lead) => {
+    const leadTasks = [];
+    
+    // Task: Meetings today or upcoming
+    const meetingDate = meetingDates[lead.id];
+    if (meetingDate && lead.status === "Booket møte") {
+      const isToday = meetingDate.startsWith(todayStr);
+      leadTasks.push({
+        id: `meet-${lead.id}`,
+        type: "meeting",
+        title: `Møte med ${lead.contactPerson || "kontaktperson"}`,
+        leadName: lead.name,
+        time: meetingDate.split("T")[1]?.substring(0, 5) || "Tidspunkt ukjent",
+        isToday,
+        leadId: lead.id,
       });
     }
-  }
-  monthMeetings.sort((a, b) => a.date.localeCompare(b.date));
 
-  const comingCount = [...meetingMap.entries()]
-    .filter(([k]) => k >= today.toISOString().slice(0, 10))
-    .reduce((s, [, v]) => s + v.length, 0);
+    // Task: Follow up on "Kontaktet - ikke svar" after 2 days
+    if (lead.status === "Kontaktet - ikke svar" && lead.lastContacted) {
+      const followUpDate = new Date(lead.lastContacted);
+      followUpDate.setDate(followUpDate.getDate() + 2);
+      const isTodayOrPast = followUpDate <= now;
+      if (isTodayOrPast) {
+        leadTasks.push({
+          id: `follow-${lead.id}`,
+          type: "follow-up",
+          title: `Følg opp (ikke svar)`,
+          leadName: lead.name,
+          time: "Hele dagen",
+          isToday: true,
+          leadId: lead.id,
+        });
+      }
+    }
+
+    // Task: New leads not contacted for 2 days
+    if (lead.status === "Ikke kontaktet") {
+      const addedDate = new Date(lead.addedDate);
+      addedDate.setDate(addedDate.getDate() + 2);
+      if (addedDate <= now) {
+        leadTasks.push({
+          id: `new-${lead.id}`,
+          type: "new",
+          title: `Ring / send intro`,
+          leadName: lead.name,
+          time: "Snarest",
+          isToday: true,
+          leadId: lead.id,
+        });
+      }
+    }
+
+    return leadTasks;
+  });
+
+  const toggleTask = (id: string) => {
+    setCompletedTasks((prev) => 
+      prev.includes(id) ? prev.filter(t => t !== id) : [...prev, id]
+    );
+  };
+
+  const todayTasks = tasks.filter((t) => t.isToday);
+  const upcomingTasks = tasks.filter((t) => !t.isToday);
 
   return (
     <div>
-      <TopBar title="Kalender" subtitle="Oversikt over bookede møter" />
+      <TopBar title="Oppgaver & Kalender" subtitle="Din to-do liste for dagen" />
 
-      <div className="p-4 sm:p-8 space-y-6">
+      <div className="p-4 sm:p-8 max-w-5xl">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
+          
+          {/* Main Task List */}
+          <div className="lg:col-span-2 space-y-6">
+            <div className="bg-[#faf8f2] border border-[#d8d3c5] rounded-xl p-6 shadow-sm">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-lg font-bold text-[#171717] flex items-center gap-2">
+                  <Clock className="w-5 h-5 text-orange-500" />
+                  Oppgaver i dag
+                  <Badge variant="yellow" className="ml-2">{todayTasks.length - completedTasks.filter(id => todayTasks.find(t => t.id === id)).length}</Badge>
+                </h2>
+                <span className="text-sm font-medium text-[#6b6660]">
+                  {now.toLocaleDateString("nb-NO", { weekday: "long", day: "numeric", month: "long" })}
+                </span>
+              </div>
 
-        {/* Stats row */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="bg-[#faf8f2] rounded-xl border border-[#d8d3c5] p-5 flex items-center gap-4" style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.08)" }}>
-            <div className="w-10 h-10 bg-[#ffad0a]/15 rounded-lg flex items-center justify-center shrink-0">
-              <Calendar className="w-5 h-5 text-[#c47e00]" />
+              {todayTasks.length === 0 ? (
+                <div className="text-center py-10 bg-white rounded-xl border border-dashed border-[#d8d3c5]">
+                  <CheckCircle2 className="w-10 h-10 text-green-500 mx-auto mb-3" />
+                  <p className="text-[#171717] font-semibold">Du er à jour!</p>
+                  <p className="text-[#6b6660] text-sm mt-1">Ingen flere oppgaver for i dag.</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {todayTasks.map((task) => {
+                    const isDone = completedTasks.includes(task.id);
+                    return (
+                      <div 
+                        key={task.id} 
+                        className={`flex items-center gap-4 p-4 rounded-xl border transition-all ${isDone ? "bg-gray-50 border-gray-100 opacity-60" : "bg-white border-[#e8e4d8] hover:border-[#09fe94]/50 hover:shadow-sm"}`}
+                      >
+                        <button 
+                          onClick={() => toggleTask(task.id)}
+                          className={`w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${isDone ? "bg-[#09fe94] border-[#09fe94]" : "border-[#d8d3c5] hover:border-[#09fe94]"}`}
+                        >
+                          {isDone && <CheckCircle2 className="w-4 h-4 text-[#171717]" />}
+                        </button>
+                        
+                        <div className="flex-1 min-w-0">
+                          <p className={`text-sm font-bold truncate ${isDone ? "line-through text-[#a09b8f]" : "text-[#171717]"}`}>
+                            {task.title}
+                          </p>
+                          <p className={`text-xs mt-0.5 flex items-center gap-1.5 ${isDone ? "text-[#a09b8f]" : "text-[#6b6660]"}`}>
+                            <User className="w-3.5 h-3.5" />
+                            {task.leadName}
+                          </p>
+                        </div>
+
+                        <div className="text-right shrink-0">
+                          <span className={`text-xs font-semibold px-2 py-1 rounded-md ${
+                            task.type === "meeting" ? "bg-purple-100 text-purple-700" : 
+                            task.type === "new" ? "bg-blue-100 text-blue-700" : 
+                            "bg-orange-100 text-orange-700"
+                          }`}>
+                            {task.time}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center gap-2 pl-2 border-l border-[#e8e4d8] ml-2 shrink-0">
+                          <Link href={`/mine-leads`} className="p-1.5 hover:bg-[#e8e4d8] rounded-md text-[#6b6660] hover:text-[#171717] transition-colors">
+                            <ArrowRight className="w-4 h-4" />
+                          </Link>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
-            <div>
-              <p className="text-2xl font-extrabold text-[#171717]">{monthMeetings.length}</p>
-              <p className="text-xs text-[#6b6660]">Møter i {MONTHS_NO[viewMonth].toLowerCase()}</p>
+            
+            <div className="bg-[#faf8f2] border border-[#d8d3c5] rounded-xl p-6 shadow-sm opacity-80">
+              <h2 className="text-base font-bold text-[#171717] flex items-center gap-2 mb-4">
+                <CalendarDays className="w-5 h-5 text-blue-500" />
+                Kommende (Senere)
+              </h2>
+              {upcomingTasks.length === 0 ? (
+                <p className="text-sm text-[#6b6660]">Ingen kommende møter eller tidsbestemte oppgaver.</p>
+              ) : (
+                <div className="space-y-3">
+                  {upcomingTasks.map((task) => (
+                    <div key={task.id} className="flex items-center justify-between p-3 rounded-xl bg-white border border-[#e8e4d8]">
+                      <div className="flex items-center gap-3">
+                        <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+                        <div>
+                          <p className="text-sm font-semibold text-[#171717]">{task.title}</p>
+                          <p className="text-xs text-[#6b6660]">{task.leadName}</p>
+                        </div>
+                      </div>
+                      <span className="text-xs text-[#a09b8f] font-medium">{task.time}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
-          <div className="bg-[#faf8f2] rounded-xl border border-[#d8d3c5] p-5 flex items-center gap-4" style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.08)" }}>
-            <div className="w-10 h-10 bg-[#09fe94]/10 rounded-lg flex items-center justify-center shrink-0">
-              <Clock className="w-5 h-5 text-[#05c472]" />
-            </div>
-            <div>
-              <p className="text-2xl font-extrabold text-[#171717]">{comingCount}</p>
-              <p className="text-xs text-[#6b6660]">Kommende møter</p>
-            </div>
-          </div>
-          <div className="bg-[#faf8f2] rounded-xl border border-[#d8d3c5] p-5 flex items-center gap-4" style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.08)" }}>
-            <div className="w-10 h-10 bg-[#171717]/5 rounded-lg flex items-center justify-center shrink-0">
-              <Building2 className="w-5 h-5 text-[#6b6660]" />
-            </div>
-            <div>
-              <p className="text-2xl font-extrabold text-[#171717]">{leads.filter(l => l.status === "Booket møte").length}</p>
-              <p className="text-xs text-[#6b6660]">Totalt bookede møter</p>
-            </div>
-          </div>
-        </div>
 
-        {/* Meeting list */}
-        {monthMeetings.length > 0 && (
-          <div className="bg-[#faf8f2] rounded-xl border border-[#d8d3c5] overflow-hidden" style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.08)" }}>
-            <div className="px-6 py-3 border-b border-[#e8e4d8]">
-              <h3 className="font-semibold text-[#171717] text-sm">Møter i {MONTHS_NO[viewMonth].toLowerCase()}</h3>
+          {/* Quick Actions / Mini Calendar Sidebar */}
+          <div className="space-y-6">
+            <div className="bg-[#171717] rounded-xl p-6 text-white shadow-xl">
+              <h3 className="font-bold mb-4 text-white">Raske handlinger</h3>
+              <div className="space-y-2">
+                <button className="w-full flex items-center gap-3 p-3 rounded-lg bg-white/10 hover:bg-white/20 transition-colors text-sm font-medium">
+                  <Phone className="w-4 h-4 text-[#09fe94]" />
+                  Loggfør et anrop
+                </button>
+                <button className="w-full flex items-center gap-3 p-3 rounded-lg bg-white/10 hover:bg-white/20 transition-colors text-sm font-medium">
+                  <Mail className="w-4 h-4 text-[#09fe94]" />
+                  Skriv ny e-post
+                </button>
+                <button className="w-full flex items-center gap-3 p-3 rounded-lg bg-white/10 hover:bg-white/20 transition-colors text-sm font-medium">
+                  <CalendarDays className="w-4 h-4 text-[#09fe94]" />
+                  Opprett eget møte
+                </button>
+              </div>
             </div>
-            <div className="divide-y divide-[#f2efe3]">
-              {monthMeetings.map(({ lead, date, time }) => (
-                <div key={lead.id + date} className="flex items-center gap-4 px-6 py-3 hover:bg-[#f2efe3] transition-colors">
-                  <div className="w-10 h-10 bg-[#ffad0a]/15 rounded-lg flex flex-col items-center justify-center shrink-0">
-                    <span className="text-xs font-bold text-[#c47e00] leading-none">{String(new Date(date).getDate()).padStart(2, "0")}</span>
-                    <span className="text-[9px] text-[#c47e00] uppercase">{MONTHS_NO[viewMonth].slice(0, 3)}</span>
+
+            <div className="bg-[#faf8f2] border border-[#d8d3c5] rounded-xl p-6 shadow-sm">
+              <h3 className="font-bold mb-4 text-[#171717]">Salgsoppsummering (I dag)</h3>
+              <div className="space-y-4">
+                <div>
+                  <div className="flex justify-between text-xs mb-1">
+                    <span className="text-[#6b6660] font-medium">Oppgaver fullført</span>
+                    <span className="text-[#171717] font-bold">{completedTasks.length} / {todayTasks.length}</span>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-[#171717] truncate">{lead.name}</p>
-                    <p className="text-xs text-[#a09b8f]">{lead.industry} · {lead.city}</p>
-                  </div>
-                  <div className="flex items-center gap-3 shrink-0">
-                    {time !== "—" && (
-                      <span className="flex items-center gap-1 text-xs text-[#6b6660]">
-                        <Clock className="w-3 h-3" />{time}
-                      </span>
-                    )}
-                    {lead.phone && lead.phone !== "—" && (
-                      <a href={`tel:${lead.phone}`} className="text-[#a09b8f] hover:text-[#ff470a]">
-                        <Phone className="w-3.5 h-3.5" />
-                      </a>
-                    )}
-                    {lead.email && lead.email !== "—" && (
-                      <a href={`mailto:${lead.email}`} className="text-[#a09b8f] hover:text-[#ff470a]">
-                        <Mail className="w-3.5 h-3.5" />
-                      </a>
-                    )}
+                  <div className="h-2 w-full bg-[#e8e4d8] rounded-full overflow-hidden">
+                    <div 
+                      className="h-full bg-[#09fe94] transition-all duration-500"
+                      style={{ width: `${todayTasks.length > 0 ? (completedTasks.length / todayTasks.length) * 100 : 100}%` }}
+                    />
                   </div>
                 </div>
-              ))}
+              </div>
             </div>
           </div>
-        )}
 
-        {/* Calendar grid */}
-        <div className="bg-[#faf8f2] rounded-xl border border-[#d8d3c5]" style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.08)" }}>
-          {/* Month nav */}
-          <div className="flex items-center justify-between px-6 py-4 border-b border-[#e8e4d8]">
-            <button onClick={prevMonth} className="p-1.5 rounded-lg hover:bg-[#e8e4d8] transition-colors">
-              <ChevronLeft className="w-4 h-4 text-[#6b6660]" />
-            </button>
-            <h2 className="font-bold text-[#171717]">{MONTHS_NO[viewMonth]} {viewYear}</h2>
-            <button onClick={nextMonth} className="p-1.5 rounded-lg hover:bg-[#e8e4d8] transition-colors">
-              <ChevronRight className="w-4 h-4 text-[#6b6660]" />
-            </button>
-          </div>
-
-          {/* Day headers */}
-          <div className="grid grid-cols-7 border-b border-[#e8e4d8]">
-            {DAYS_NO.map(d => (
-              <div key={d} className="text-center text-xs font-semibold text-[#a09b8f] py-2">{d}</div>
-            ))}
-          </div>
-
-          {/* Day cells — full-width grid with visible borders */}
-          <div className="grid grid-cols-7">
-            {Array.from({ length: totalCells }).map((_, i) => {
-              const dayNum = i - firstDay + 1;
-              const isValid = dayNum >= 1 && dayNum <= daysInMonth;
-
-              // Right border for all except last column, bottom border for all except last row
-              const col = i % 7;
-              const row = Math.floor(i / 7);
-              const totalRows = totalCells / 7;
-              const borderRight = col < 6 ? "border-r border-[#e8e4d8]" : "";
-              const borderBottom = row < totalRows - 1 ? "border-b border-[#e8e4d8]" : "";
-
-              if (!isValid) {
-                return <div key={i} className={`min-h-[110px] ${borderRight} ${borderBottom} bg-[#f7f4ec]`} />;
-              }
-
-              const dateKey = `${viewYear}-${String(viewMonth + 1).padStart(2, "0")}-${String(dayNum).padStart(2, "0")}`;
-              const meetings = meetingMap.get(dateKey) ?? [];
-              const isToday = dayNum === today.getDate() && viewMonth === today.getMonth() && viewYear === today.getFullYear();
-              const isSelected = dayNum === selectedDay;
-
-              return (
-                <button
-                  key={i}
-                  onClick={() => setSelectedDay(isSelected ? null : dayNum)}
-                  className={`
-                    min-h-[110px] p-2 flex flex-col items-start text-left transition-colors
-                    ${borderRight} ${borderBottom}
-                    ${isSelected ? "bg-[#171717]" : isToday ? "bg-[#09fe94]/15" : "hover:bg-[#f0ece0]"}
-                  `}
-                >
-                  {/* Day number */}
-                  <span className={`
-                    text-sm font-bold leading-none mb-2 w-7 h-7 flex items-center justify-center rounded-full
-                    ${isSelected ? "bg-[#09fe94] text-[#171717]" : isToday ? "bg-[#09fe94] text-[#171717]" : "text-[#3d3a34]"}
-                  `}>
-                    {dayNum}
-                  </span>
-
-                  {/* Meeting chips */}
-                  <div className="flex flex-col gap-1 w-full">
-                    {meetings.slice(0, 3).map((lead, mi) => {
-                      const dt = meetingDates[lead.id];
-                      const time = dt
-                        ? new Date(dt).toLocaleTimeString("nb-NO", { hour: "2-digit", minute: "2-digit" })
-                        : null;
-                      const shortName = lead.name.split(" ").slice(0, 2).join(" ");
-                      const contact = lead.contactPerson && lead.contactPerson !== "—"
-                        ? lead.contactPerson.split(" ")[0]
-                        : null;
-
-                      return (
-                        <div
-                          key={mi}
-                          className={`
-                            w-full rounded px-1.5 py-1 text-left
-                            ${isSelected ? "bg-[#09fe94]/20" : "bg-[#ffad0a]/15"}
-                          `}
-                        >
-                          {time && (
-                            <p className={`text-[10px] font-bold leading-tight ${isSelected ? "text-[#09fe94]" : "text-[#c47e00]"}`}>
-                              kl. {time}
-                            </p>
-                          )}
-                          <p className={`text-[11px] font-semibold leading-tight truncate ${isSelected ? "text-white" : "text-[#171717]"}`}>
-                            {shortName}
-                          </p>
-                          {contact && (
-                            <p className={`text-[10px] leading-tight truncate ${isSelected ? "text-[#a09b8f]" : "text-[#6b6660]"}`}>
-                              {contact}
-                            </p>
-                          )}
-                        </div>
-                      );
-                    })}
-                    {meetings.length > 3 && (
-                      <p className={`text-[10px] font-medium pl-1 ${isSelected ? "text-[#a09b8f]" : "text-[#a09b8f]"}`}>
-                        +{meetings.length - 3} til
-                      </p>
-                    )}
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Selected day detail panel */}
-          {selectedDay && selectedMeetings.length > 0 && (
-            <div className="border-t border-[#e8e4d8] px-6 py-4 space-y-3">
-              <h4 className="text-sm font-semibold text-[#171717]">
-                {selectedDay}. {MONTHS_NO[viewMonth].toLowerCase()}
-              </h4>
-              {selectedMeetings.map(lead => {
-                const dt = meetingDates[lead.id];
-                const time = dt
-                  ? new Date(dt).toLocaleTimeString("nb-NO", { hour: "2-digit", minute: "2-digit" })
-                  : "—";
-                return (
-                  <div key={lead.id} className="flex items-center gap-3 p-3 bg-[#f2efe3] rounded-lg">
-                    <div className="w-8 h-8 bg-[#ffad0a]/20 rounded-lg flex items-center justify-center text-xs font-bold text-[#c47e00] shrink-0">
-                      {lead.name.slice(0, 2).toUpperCase()}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-bold text-[#171717]">{lead.name}</p>
-                      <p className="text-xs text-[#6b6660]">
-                        {time !== "—" ? `kl. ${time}` : ""}
-                        {time !== "—" && lead.contactPerson && lead.contactPerson !== "—" ? " · " : ""}
-                        {lead.contactPerson && lead.contactPerson !== "—" ? lead.contactPerson : ""}
-                      </p>
-                    </div>
-                    <div className="flex gap-2">
-                      {lead.phone && lead.phone !== "—" && (
-                        <a href={`tel:${lead.phone}`} className="p-1.5 rounded-lg bg-[#e8e4d8] hover:bg-[#d8d3c5] text-[#6b6660]">
-                          <Phone className="w-3.5 h-3.5" />
-                        </a>
-                      )}
-                      {lead.email && lead.email !== "—" && (
-                        <a href={`mailto:${lead.email}`} className="p-1.5 rounded-lg bg-[#e8e4d8] hover:bg-[#d8d3c5] text-[#6b6660]">
-                          <Mail className="w-3.5 h-3.5" />
-                        </a>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-
-          {monthMeetings.length === 0 && (
-            <div className="text-center py-8 border-t border-[#e8e4d8]">
-              <p className="text-sm text-[#a09b8f]">Ingen møter i {MONTHS_NO[viewMonth].toLowerCase()}</p>
-              <Link href="/mine-leads" className="text-xs text-[#ff470a] hover:underline mt-1 block">
-                Book et møte i Mine Leads →
-              </Link>
-            </div>
-          )}
         </div>
-
       </div>
     </div>
   );

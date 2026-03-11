@@ -232,18 +232,34 @@ export default function DashboardPage() {
           )}
         </div>
 
-        {/* Pipeline overview */}
-        <div className="bg-[#faf8f2] rounded-xl border border-[#d8d3c5] p-6" style={{boxShadow: "0 1px 3px rgba(0,0,0,0.08)"}}>
-          <h3 className="font-semibold text-[#171717] mb-6">Pipeline-oversikt</h3>
-          <div className="grid grid-cols-3 sm:grid-cols-6 gap-3 sm:gap-4">
-            {pipelineCounts.map(({ label, count, color, textColor }) => (
-              <div key={label} className="text-center">
-                <div className={`w-16 h-16 ${color} rounded-xl flex items-center justify-center mx-auto mb-2`}>
-                  <span className={`text-2xl font-extrabold ${textColor}`}>{count}</span>
+        {/* Funnel / Pipeline overview */}
+        <div className="bg-[#faf8f2] rounded-xl border border-[#d8d3c5] p-6 lg:p-8" style={{boxShadow: "0 1px 3px rgba(0,0,0,0.08)"}}>
+          <h3 className="font-semibold text-[#171717] mb-6 flex items-center gap-2">
+            <Target className="w-5 h-5 text-gray-500" />
+            Salgstrakt (Funnel)
+          </h3>
+          <div className="flex flex-col md:flex-row gap-4 md:gap-2 items-end min-h-[140px] pt-8">
+            {pipelineCounts.map(({ label, count, color, textColor }, index) => {
+              const maxCount = Math.max(...pipelineCounts.map(p => p.count), 1);
+              const percentage = Math.max((count / maxCount) * 100, 15);
+              
+              return (
+                <div key={label} className="flex-1 flex flex-col items-center relative w-full group">
+                  {index < pipelineCounts.length - 1 && (
+                    <div className="hidden md:block absolute top-1/2 -right-2 w-4 h-[2px] bg-[#d8d3c5] z-0"></div>
+                  )}
+                  <div 
+                    className={`w-full max-w-[140px] ${color} rounded-lg flex flex-col items-center justify-center transition-all duration-500 hover:scale-[1.03] z-10 border border-black/5 mx-auto`}
+                    style={{ height: `${Math.max(percentage * 1.2, 50)}px` }}
+                  >
+                    <span className={`text-xl md:text-2xl font-extrabold ${textColor}`}>{count}</span>
+                  </div>
+                  <p className="text-xs md:text-sm text-[#6b6660] font-medium leading-tight text-center mt-3 h-8">
+                    {label}
+                  </p>
                 </div>
-                <p className="text-xs text-[#6b6660] leading-tight">{label}</p>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 
