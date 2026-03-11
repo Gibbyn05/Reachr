@@ -30,6 +30,7 @@ interface AppStore {
   sequences: Sequence[];
   addSequence: (seq: Sequence) => void;
   removeSequence: (id: string) => void;
+  enrollLeadInSequence: (leadId: string, sequenceId: string | null) => Promise<void>;
 }
 
 function dbRowToLead(row: Record<string, unknown>): Lead {
@@ -56,6 +57,17 @@ function dbRowToLead(row: Record<string, unknown>): Lead {
     addedDate: row.added_date as string,
   };
 }
+
+const persistOptions = {
+  name: "reachr-store",
+  partialize: (state: AppStore) => ({
+    currentUser: state.currentUser,
+    avatarUrl: state.avatarUrl,
+    profilePhone: state.profilePhone,
+    pipelineStages: state.pipelineStages,
+    sequences: state.sequences,
+  }),
+};
 
 export const useAppStore = create<AppStore>()(
   persist(
@@ -210,17 +222,29 @@ export const useAppStore = create<AppStore>()(
         }
       ],
       addSequence: (seq) => set((state) => ({ sequences: [...state.sequences, seq] })),
-      removeSequence: (id) => set((state) => ({ sequences: state.sequences.filter(s => s.id !== id) })),
+      removeSequence: (id) => {
+        set((state) => ({
+          sequences: state.sequences.filter((s) => s.id !== id),
+        }));
+      },
+
+      enrollLeadInSequence: async (leadId: string, sequenceId: string | null) => {
+        set((state) => ({
+          leads: state.leads.map((l) =>
+            l.id === leadId ? { ...l, enrolledSequenceId: sequenceId } : l
+          ),
+        }));
+
+        // Incremental: Update sequence counts
+        if (sequenceId) {
+          set((state) => ({
+            sequences: state.sequences.map((s) =>
+              s.id === sequenceId ? { ...s, enrolled: (s.enrolled || 0) + 1 } : s
+            ),
+          }));
+        }
+      },
     }),
-    {
-      name: "reachr-store",
-      partialize: (state) => ({
-        currentUser: state.currentUser,
-        avatarUrl: state.avatarUrl,
-        profilePhone: state.profilePhone,
-        pipelineStages: state.pipelineStages,
-        sequences: state.sequences,
-      }),
-    }
+    persistOptions
   )
 );

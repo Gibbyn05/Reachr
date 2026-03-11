@@ -8,10 +8,11 @@ import {
   Users, TrendingUp, Calendar, Star, Search, ChevronDown,
   X, Phone, Mail, MessageSquare, ChevronRight, Trash2,
   UserCheck, Clock, Building2, Bell, Check, Loader2, Sparkles, Send, Copy, ExternalLink,
-  Upload, Download, RefreshCw
+  Upload, Download, RefreshCw, Layers, CheckCircle2
 } from "lucide-react";
 import { useAppStore } from "@/store/app-store";
 import { Lead, LeadStatus } from "@/lib/mock-data";
+import { toast } from "sonner";
 
 /* ── Meeting date modal ───────────────────────────────────── */
 function MeetingDateModal({
@@ -570,6 +571,9 @@ function LeadRow({
 }) {
   const statusOptions = useAppStore(s => s.pipelineStages);
   const updateLeadEmail = useAppStore(s => s.updateLeadEmail);
+  const sequences = useAppStore(s => s.sequences);
+  const enrollLeadInSequence = useAppStore(s => s.enrollLeadInSequence);
+  const [seqDropdownOpen, setSeqDropdownOpen] = useState(false);
 
   const handleEmailSent = (subject: string, emailBody: string) => {
     const now = new Date();
@@ -861,6 +865,73 @@ function LeadRow({
                     <Phone className="w-3.5 h-3.5" />
                     Skriv AI-SMS
                   </button>
+
+                  <div className="relative">
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setSeqDropdownOpen(!seqDropdownOpen); }}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors border ${
+                        lead.enrolledSequenceId 
+                          ? "bg-blue-50 text-blue-700 border-blue-100 hover:bg-blue-100" 
+                          : "bg-orange-50 text-orange-700 border-orange-100 hover:bg-orange-100"
+                      }`}
+                    >
+                      <Layers className="w-3.5 h-3.5" />
+                      {lead.enrolledSequenceId 
+                        ? sequences.find(s => s.id === lead.enrolledSequenceId)?.name || "I sekvens" 
+                        : "Legg til i sekvens"}
+                      <ChevronDown className="w-3 h-3 ml-0.5" />
+                    </button>
+
+                    {seqDropdownOpen && (
+                      <div 
+                        className="absolute right-0 top-full mt-1 w-56 bg-white border border-[#d8d3c5] rounded-xl shadow-xl z-50 py-1 overflow-hidden"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <p className="px-3 py-1.5 text-[10px] font-bold text-[#a09b8f] uppercase tracking-wider bg-gray-50 border-b border-gray-100 mb-1">
+                          Velg oppfølgingsløp
+                        </p>
+                        {sequences.length === 0 ? (
+                          <div className="px-3 py-4 text-center">
+                            <p className="text-[10px] text-[#6b6660] italic">Ingen sekvenser opprettet.</p>
+                            <a href="/sekvenser/ny" className="text-[10px] text-orange-600 hover:underline mt-1 block">Opprett din første nå</a>
+                          </div>
+                        ) : (
+                          <>
+                            {sequences.map(seq => (
+                              <button
+                                key={seq.id}
+                                onClick={() => {
+                                  enrollLeadInSequence(lead.id, seq.id);
+                                  setSeqDropdownOpen(false);
+                                  toast.success(`Lagt til i "${seq.name}"`);
+                                }}
+                                className={`w-full text-left px-3 py-2 text-xs hover:bg-[#f0ece0] flex items-center justify-between ${lead.enrolledSequenceId === seq.id ? "bg-blue-50 text-blue-700 font-medium" : "text-[#6b6660]"}`}
+                              >
+                                {seq.name}
+                                {lead.enrolledSequenceId === seq.id && <Check className="w-3 h-3" />}
+                              </button>
+                            ))}
+                            {lead.enrolledSequenceId && (
+                              <>
+                                <div className="h-px bg-gray-100 my-1" />
+                                <button
+                                  onClick={() => {
+                                    enrollLeadInSequence(lead.id, null);
+                                    setSeqDropdownOpen(false);
+                                    toast.info("Fjernet fra sekvens");
+                                  }}
+                                  className="w-full text-left px-3 py-2 text-xs text-red-600 hover:bg-red-50 flex items-center gap-2"
+                                >
+                                  <X className="w-3 h-3" />
+                                  Stopp sekvens
+                                </button>
+                              </>
+                            )}
+                          </>
+                        )}
+                      </div>
+                    )}
+                  </div>
                   </div>
 
                   {/* Last contacted */}

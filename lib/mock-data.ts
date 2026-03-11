@@ -40,6 +40,16 @@ export interface Lead extends Company {
   addedBy: string;
   notes: string;
   addedDate: string;
+  enrolledSequenceId?: string | null;
+}
+
+export interface LeadEnrollment {
+  leadId: string;
+  sequenceId: string;
+  status: "Aktiv" | "Fullført" | "Svart" | "Pauset";
+  currentStepIndex: number;
+  lastStepSentAt: string | null;
+  nextStepDueAt: string | null;
 }
 
 export interface Notification {
