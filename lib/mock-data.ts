@@ -55,6 +55,24 @@ export const mockCompanies: Company[] = [];
 export const mockLeads: Lead[] = [];
 export const mockNotifications: Notification[] = [];
 
+export interface SequenceStep {
+  id: string;
+  type: "email" | "wait";
+  subject?: string;
+  body?: string;
+  waitDays?: number;
+}
+
+export interface Sequence {
+  id: string;
+  name: string;
+  status: "Aktiv" | "Pauset";
+  enrolled: number;
+  replied: number;
+  opened: number;
+  steps: SequenceStep[];
+}
+
 export const industries = [
   "Alle bransjer",
   "Regnskap",

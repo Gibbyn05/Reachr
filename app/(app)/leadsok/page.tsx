@@ -164,7 +164,7 @@ export default function LeadsokPage() {
 
   // Load leads from DB on mount
   useEffect(() => {
-    if (currentUser?.email) loadLeads(currentUser.email);
+    if (currentUser?.email) loadLeads();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentUser?.email]);
 

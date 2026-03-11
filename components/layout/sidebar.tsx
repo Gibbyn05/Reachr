@@ -88,7 +88,7 @@ export function Sidebar() {
         useAppStore.getState().setAvatarUrl(null);
         useAppStore.getState().setProfilePhone("");
       }
-      loadLeads(user.email);
+      loadLeads();
     });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

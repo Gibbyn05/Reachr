@@ -1,12 +1,12 @@
 "use client";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { Lead, DEFAULT_PIPELINE_STAGES } from "@/lib/mock-data";
+import { Lead, DEFAULT_PIPELINE_STAGES, Sequence } from "@/lib/mock-data";
 
 interface AppStore {
   leads: Lead[];
-  loadLeads: (userEmail: string) => Promise<void>;
-  addLead: (lead: Lead, userEmail?: string) => Promise<void>;
+  loadLeads: () => Promise<void>;
+  addLead: (lead: Lead) => Promise<void>;
   removeLead: (id: string) => Promise<void>;
   updateLeadStatus: (id: string, status: string) => Promise<void>;
   updateLeadNotes: (id: string, notes: string) => Promise<void>;
@@ -27,6 +27,9 @@ interface AppStore {
   setSidebarOpen: (open: boolean) => void;
   pipelineStages: string[];
   setPipelineStages: (stages: string[]) => void;
+  sequences: Sequence[];
+  addSequence: (seq: Sequence) => void;
+  removeSequence: (id: string) => void;
 }
 
 function dbRowToLead(row: Record<string, unknown>): Lead {
@@ -59,7 +62,7 @@ export const useAppStore = create<AppStore>()(
     (set, get) => ({
       leads: [],
 
-      loadLeads: async (_userEmail: string) => {
+      loadLeads: async () => {
         // Use the server-side API which runs with service role to bypass RLS.
         // This ensures team members can see all leads belonging to their team.
         const res = await fetch("/api/leads");
@@ -79,7 +82,7 @@ export const useAppStore = create<AppStore>()(
         set({ leads: [...dbLeads, ...pendingLeads], meetingDates });
       },
 
-      addLead: async (lead: Lead, _userEmail?: string) => {
+      addLead: async (lead: Lead) => {
         // Optimistically add to local state immediately
         set((state) => ({ leads: [...state.leads, lead] }));
 
@@ -96,9 +99,7 @@ export const useAppStore = create<AppStore>()(
         } else {
           // Refresh leads from DB to confirm persistence
           const userEmail = get().currentUser?.email;
-          if (userEmail) {
-            await get().loadLeads(userEmail);
-          }
+            await get().loadLeads();
         }
       },
 
@@ -194,6 +195,22 @@ export const useAppStore = create<AppStore>()(
       setSidebarOpen: (open) => set({ sidebarOpen: open }),
       pipelineStages: DEFAULT_PIPELINE_STAGES,
       setPipelineStages: (stages) => set({ pipelineStages: stages }),
+      sequences: [
+        {
+          id: "seq-init-1",
+          name: "Standard B2B Intro-kampanje",
+          status: "Aktiv",
+          enrolled: 142,
+          replied: 31,
+          opened: 89,
+          steps: [
+            { id: "1", type: "email", subject: "Introduksjon", body: "Hei..." },
+            { id: "2", type: "wait", waitDays: 3 }
+          ]
+        }
+      ],
+      addSequence: (seq) => set((state) => ({ sequences: [...state.sequences, seq] })),
+      removeSequence: (id) => set((state) => ({ sequences: state.sequences.filter(s => s.id !== id) })),
     }),
     {
       name: "reachr-store",
@@ -202,6 +219,7 @@ export const useAppStore = create<AppStore>()(
         avatarUrl: state.avatarUrl,
         profilePhone: state.profilePhone,
         pipelineStages: state.pipelineStages,
+        sequences: state.sequences,
       }),
     }
   )

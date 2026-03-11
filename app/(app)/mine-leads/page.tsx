@@ -1257,7 +1257,7 @@ export default function MineLeadsPage() {
                lastContacted: null,
             };
             // sequentially add to avoid overwhelming API immediately
-            await addLead(newLead, currentUser?.email);
+            await addLead(newLead);
         }
         alert("Leads importert suksessfullt!");
       } catch (err) {
@@ -1271,7 +1271,8 @@ export default function MineLeadsPage() {
   };
 
   useEffect(() => {
-    if (currentUser?.email) loadLeads(currentUser.email);
+    // Load leads from API when component mounts (or when currentUser changes contextually)
+    if (currentUser?.email) loadLeads();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentUser?.email]);
 

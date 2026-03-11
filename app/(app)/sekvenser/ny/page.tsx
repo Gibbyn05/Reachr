@@ -1,24 +1,18 @@
 "use client";
-import { TopBar } from "@/components/layout/top-bar";
+
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Plus, Save, Clock, Mail, MousePointerClick, Reply, Send, Trash2 } from "lucide-react";
+import { ArrowLeft, Save, Clock, Mail, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-
-interface Step {
-  id: string;
-  type: "email" | "wait";
-  subject?: string;
-  body?: string;
-  waitDays?: number;
-}
-
+import { useAppStore } from "@/store/app-store";
+import { SequenceStep, Sequence } from "@/lib/mock-data";
 export default function NySekvensPage() {
   const router = useRouter();
+  const { addSequence } = useAppStore();
   const [name, setName] = useState("Min nye sekvens");
-  const [steps, setSteps] = useState<Step[]>([
+  const [steps, setSteps] = useState<SequenceStep[]>([
     { id: "1", type: "email", subject: "Introduksjon til [Selskap]", body: "Hei [Navn],\\n\\nVi hjelper selskaper som [Selskap] med..." },
     { id: "2", type: "wait", waitDays: 3 },
     { id: "3", type: "email", subject: "Re: Introduksjon", body: "Hei igjen,\\n\\nHadde du sjanse til å se på min forrige e-post?" }
@@ -37,6 +31,16 @@ export default function NySekvensPage() {
   };
 
   const saveSequence = () => {
+    const newSeq: Sequence = {
+      id: "seq-" + Date.now(),
+      name,
+      status: "Aktiv",
+      enrolled: 0,
+      replied: 0,
+      opened: 0,
+      steps
+    };
+    addSequence(newSeq);
     toast.success("Sekvensen ble lagret!");
     setTimeout(() => {
       router.push("/sekvenser");
