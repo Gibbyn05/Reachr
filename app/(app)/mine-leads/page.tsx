@@ -8,6 +8,7 @@ import {
   Users, TrendingUp, Calendar, Star, Search, ChevronDown,
   X, Phone, Mail, MessageSquare, ChevronRight, Trash2,
   UserCheck, Clock, Building2, Bell, Check, Loader2, Sparkles, Send, Copy, ExternalLink,
+  Upload, Download, RefreshCw
 } from "lucide-react";
 import { useAppStore } from "@/store/app-store";
 import { Lead, LeadStatus } from "@/lib/mock-data";
@@ -1142,9 +1143,99 @@ function LeadRow({
 }
 
 export default function MineLeadsPage() {
-  const { leads, loadLeads, updateLeadStatus, updateLeadNotes, updateLeadAssigned, updateLeadLastContacted, removeLead, meetingDates, setMeetingDate, currentUser, pipelineStages } = useAppStore();
+  const { leads, loadLeads, addLead, updateLeadStatus, updateLeadNotes, updateLeadAssigned, updateLeadLastContacted, removeLead, meetingDates, setMeetingDate, currentUser, pipelineStages } = useAppStore();
   const [search, setSearch] = useState("");
   const [teamMembers, setTeamMembers] = useState<string[]>([]);
+  const [isImporting, setIsImporting] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleSyncEmails = async () => {
+    setIsSyncing(true);
+    try {
+      const res = await fetch("/api/email/sync", { method: "POST" });
+      const data = await res.json();
+      if (res.ok) {
+        alert(data.message || "E-poster synkronisert for svar!");
+      } else {
+        alert(data.error || "Ugyldig eller utløpt token, vennligst autentiser på nytt i Innstillinger.");
+      }
+    } catch {
+      alert("Feil under synkronisering med e-postleverandør.");
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
+  const handleExportCSV = () => {
+    const headers = ["ID", "Bedriftsnavn", "Kontaktperson", "E-post", "Telefon", "Orgnr", "Status", "Lagt til dato", "Kilde", "Notater"];
+    const rows = leads.map(l => [
+      l.id, l.name, l.contactPerson || "", l.email || "", l.phone || "", l.orgNumber || "",
+      l.status || "", l.addedDate || "", l.addedBy || "", (l.notes || "").replace(/\n/g, " ")
+    ]);
+    const csvContent = [
+      headers.join(","),
+      ...rows.map(row => row.map(cell => `"${(cell || "").replace(/"/g, '""')}"`).join(","))
+    ].join("\n");
+    
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.setAttribute("download", `reachr_leads_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleImportCSV = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setIsImporting(true);
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      try {
+        const text = event.target?.result as string;
+        // Simple CSV parse handling quotes somewhat
+        const rows = text.split("\n").map(r => r.split(",").map(c => c.replace(/^"|"$/g, "").trim()));
+        if (rows.length < 2) return;
+        
+        for (let i = 1; i < rows.length; i++) {
+            const row = rows[i];
+            if (row.length < 2 || !row[1]) continue; // skip empty rows
+            const newLead: Lead = {
+               id: crypto.randomUUID(),
+               name: row[1],
+               contactPerson: row[2] || "—",
+               email: row[3] || "—",
+               phone: row[4] || "—",
+               orgNumber: row[5] || "—",
+               status: "Ikke kontaktet",
+               addedDate: new Date().toISOString().split("T")[0],
+               addedBy: currentUser?.name || "Importert",
+               assignedTo: currentUser?.name || "Meg",
+               assignedAvatar: (currentUser?.name || "M").substring(0,2).toUpperCase(),
+               industry: "Importert fra CSV",
+               city: "Ukjent",
+               address: "—",
+               revenue: 0,
+               employees: 0,
+               lat: 0, lng: 0,
+               notes: row[9] || "",
+               lastContacted: null,
+            };
+            // sequentially add to avoid overwhelming API immediately
+            await addLead(newLead, currentUser?.email);
+        }
+        alert("Leads importert suksessfullt!");
+      } catch (err) {
+        alert("En feil oppstod under import. Sjekk at CSV-filen er i riktig format.");
+      } finally {
+        setIsImporting(false);
+        if (fileInputRef.current) fileInputRef.current.value = "";
+      }
+    };
+    reader.readAsText(file);
+  };
 
   useEffect(() => {
     if (currentUser?.email) loadLeads(currentUser.email);
@@ -1211,7 +1302,24 @@ export default function MineLeadsPage() {
 
   return (
     <div>
-      <TopBar title="Mine Leads" subtitle="CRM-pipeline og leadoversikt" />
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-[#e8e4d8] bg-white pr-4 sm:pr-8">
+        <TopBar title="Mine Leads" subtitle="CRM-pipeline og leadoversikt" />
+        <div className="flex items-center gap-2 pb-4 sm:pb-0 px-4 sm:px-0 flex-shrink-0">
+          <input type="file" ref={fileInputRef} onChange={handleImportCSV} accept=".csv" className="hidden" />
+          <Button variant="secondary" size="sm" onClick={() => fileInputRef.current?.click()} disabled={isImporting} className="bg-white border-[#d8d3c5] text-[#6b6660] hover:bg-[#faf8f2] hover:text-[#171717]">
+            {isImporting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Upload className="w-4 h-4 mr-2" />}
+            {isImporting ? "Importerer..." : "Importér CSV"}
+          </Button>
+          <Button variant="secondary" size="sm" onClick={handleExportCSV} className="bg-white border-[#d8d3c5] text-[#6b6660] hover:bg-[#faf8f2] hover:text-[#171717]">
+            <Download className="w-4 h-4 mr-2" />
+            Eksportér CSV
+          </Button>
+          <Button variant="primary" size="sm" onClick={handleSyncEmails} disabled={isSyncing} className="bg-[#09fe94] text-[#171717] hover:bg-[#00e882] shadow-sm font-semibold">
+            {isSyncing ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <RefreshCw className="w-4 h-4 mr-2" />}
+            {isSyncing ? "Sjekker innboks..." : "Synkroniser innboks"}
+          </Button>
+        </div>
+      </div>
 
       <div className="p-4 sm:p-8 space-y-4 sm:space-y-6">
         {/* Stats */}

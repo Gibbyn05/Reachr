@@ -1,6 +1,6 @@
 "use client";
 import { TopBar } from "@/components/layout/top-bar";
-import { TrendingUp, Users, Calendar, Star, ArrowUpRight, ArrowRight, Phone, Mail, AlertCircle } from "lucide-react";
+import { TrendingUp, Users, Calendar, Star, ArrowUpRight, ArrowRight, Phone, Mail, AlertCircle, BarChart, Trophy, Target } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -111,6 +111,25 @@ export default function DashboardPage() {
     { label: "Avslått", count: leads.filter((l) => l.status === "Avslått").length, color: "bg-[#ff470a]/15", textColor: "text-[#ff470a]" },
     { label: "Kunde", count: leads.filter((l) => l.status === "Kunde").length, color: "bg-[#171717]", textColor: "text-[#09fe94]" },
   ];
+
+  // --- ANALYTICS / METRICS CALCULATIONS ---
+  // Hit Rate = (Booket Møte + Kunde) / All Contacted Leads
+  const totalContacted = leads.filter((l) => ["Kontaktet", "Kontaktet - ikke svar", "Booket møte", "Avslått", "Kunde"].includes(l.status)).length;
+  const totalSuccess = leads.filter((l) => ["Booket møte", "Kunde"].includes(l.status)).length;
+  const hitRate = totalContacted > 0 ? Math.round((totalSuccess / totalContacted) * 100) : 0;
+
+  // Leaderboard (Group by addedBy / assignedTo)
+  const agentStats = leads.reduce((acc: Record<string, { total: number; success: number }>, lead) => {
+    const agent = lead.addedBy || "Ukjent";
+    if (!acc[agent]) acc[agent] = { total: 0, success: 0 };
+    acc[agent].total++;
+    if (["Booket møte", "Kunde"].includes(lead.status)) acc[agent].success++;
+    return acc;
+  }, {});
+
+  const leaderboardArray = Object.entries(agentStats)
+    .sort((a, b) => b[1].success - a[1].success) // sort by successes
+    .slice(0, 3); // top 3
 
   return (
     <div>
@@ -225,6 +244,85 @@ export default function DashboardPage() {
                 <p className="text-xs text-[#6b6660] leading-tight">{label}</p>
               </div>
             ))}
+          </div>
+        </div>
+
+        {/* Sales Metrics & Leaderboard */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 mt-6">
+          {/* Hit Rate / Conversion Card */}
+          <div className="bg-[#faf8f2] rounded-xl border border-[#d8d3c5] p-6 lg:p-8 flex flex-col items-center justify-center text-center" style={{boxShadow: "0 1px 3px rgba(0,0,0,0.08)"}}>
+            <h3 className="font-semibold text-[#171717] w-full text-left mb-6 flex items-center gap-2">
+              <BarChart className="w-5 h-5 text-gray-500" />
+              Salgskonvertering (Hit Rate)
+            </h3>
+            
+            <div className="relative w-32 h-32 flex items-center justify-center rounded-full bg-white border-4 border-[#e8e4d8] shadow-inner mb-4">
+              <svg className="absolute top-0 left-0 w-full h-full transform -rotate-90">
+                {hitRate > 0 && (
+                  <circle
+                    cx="64"
+                    cy="64"
+                    r="60"
+                    stroke="#09fe94"
+                    strokeWidth="8"
+                    fill="transparent"
+                    strokeDasharray={`${(hitRate / 100) * 377} 377`}
+                    className="transition-all duration-1000 ease-out"
+                  />
+                )}
+              </svg>
+              <div className="flex flex-col items-center justify-center">
+                <span className="text-3xl font-extrabold text-[#171717]">{hitRate}%</span>
+              </div>
+            </div>
+            
+            <p className="text-sm text-[#6b6660] font-medium max-w-xs">
+              Møter booket eller vunnet som andel av totalt ukontaktede leads. Du har kontaktet <strong className="text-black">{totalContacted}</strong> prospekter og landet <strong className="text-green-600">{totalSuccess}</strong>!
+            </p>
+          </div>
+
+          {/* Leaderboard Card */}
+          <div className="bg-[#faf8f2] rounded-xl border border-[#d8d3c5] p-6 lg:p-8" style={{boxShadow: "0 1px 3px rgba(0,0,0,0.08)"}}>
+            <h3 className="font-semibold text-[#171717] mb-6 flex items-center gap-2">
+              <Trophy className="w-5 h-5 text-yellow-500" />
+              Toppselgere i Teamet
+            </h3>
+            
+            {leaderboardArray.length === 0 ? (
+              <div className="text-center py-8 text-[#a09b8f]">
+                <Target className="w-10 h-10 mx-auto mb-2 text-gray-300" />
+                <p className="text-sm">Ingen bookede møter enda.</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {leaderboardArray.map(([name, stats], index) => (
+                  <div key={name} className="flex items-center justify-between p-3 rounded-lg bg-white border border-[#e8e4d8]">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${
+                        index === 0 ? "bg-yellow-100 text-yellow-700" :
+                        index === 1 ? "bg-gray-100 text-gray-600" :
+                        "bg-orange-100 text-orange-700"
+                      }`}>
+                        #{index + 1}
+                      </div>
+                      <div>
+                        <p className="text-sm font-bold text-[#171717]">{name}</p>
+                        <p className="text-xs text-[#a09b8f]">{stats.total} leads i pipeline</p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm font-bold text-green-600">{stats.success} Wins</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+            
+            {leaderboardArray.length > 0 && (
+              <p className="text-xs text-[#a09b8f] mt-5 text-center px-4">
+                "Wins" baseres på summen av antall bookede møter og signerte kunder per selger.
+              </p>
+            )}
           </div>
         </div>
       </div>
