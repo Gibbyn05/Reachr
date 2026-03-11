@@ -218,6 +218,7 @@ export default function InnstillingerPage() {
   const [emailConnections, setEmailConnections] = useState<{ provider: string; email_address: string }[]>([]);
   const [emailConnecting, setEmailConnecting] = useState<string | null>(null);
   const [emailDisconnecting, setEmailDisconnecting] = useState<string | null>(null);
+  const [removingMember, setRemovingMember] = useState<string | null>(null);
 
   useEffect(() => {
     fetch("/api/team")
@@ -373,6 +374,28 @@ export default function InnstillingerPage() {
       setInviteError("Nettverksfeil. Sjekk tilkoblingen.");
     } finally {
       setInviteSending(false);
+    }
+  };
+
+  const handleRemoveMember = async (memberEmail: string) => {
+    if (!confirm(`Er du sikker på at du vil fjerne ${memberEmail} fra teamet ditt?`)) return;
+    
+    setRemovingMember(memberEmail);
+    try {
+      const res = await fetch("/api/team", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ member_email: memberEmail }),
+      });
+      if (res.ok) {
+        setTeamMembers(prev => prev.filter(m => m.member_email !== memberEmail));
+      } else {
+        alert("Kunne ikke fjerne medlemmet.");
+      }
+    } catch {
+      alert("Nettverksfeil. Sjekk tilkoblingen.");
+    } finally {
+      setRemovingMember(null);
     }
   };
 
@@ -686,9 +709,21 @@ export default function InnstillingerPage() {
                             </div>
                             <p className="text-xs text-[#a09b8f]">{m.member_email}</p>
                           </div>
-                          <span className={`text-xs px-3 py-1.5 rounded-lg border ${isOwner ? "text-yellow-700 bg-yellow-50 border-yellow-200" : isPending ? "text-yellow-700 bg-yellow-50 border-yellow-200" : "text-green-700 bg-green-50 border-green-200"}`}>
-                            {isOwner ? "Admin" : isPending ? "Invitert" : "Aktiv"}
-                          </span>
+                          <div className="flex items-center gap-3">
+                            <span className={`text-xs px-3 py-1.5 rounded-lg border ${isOwner ? "text-yellow-700 bg-yellow-50 border-yellow-200" : isPending ? "text-yellow-700 bg-yellow-50 border-yellow-200" : "text-green-700 bg-green-50 border-green-200"}`}>
+                              {isOwner ? "Admin" : isPending ? "Invitert" : "Aktiv"}
+                            </span>
+                            {teamRole === "owner" && !isOwner && (
+                              <button
+                                onClick={() => handleRemoveMember(m.member_email)}
+                                disabled={removingMember === m.member_email}
+                                className="p-1.5 text-[#a09b8f] hover:text-[#ff470a] hover:bg-[#ff470a]/10 rounded-lg transition-colors disabled:opacity-50"
+                                title="Fjern medlem"
+                              >
+                                {removingMember === m.member_email ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                              </button>
+                            )}
+                          </div>
                         </div>
                       );
                     })}

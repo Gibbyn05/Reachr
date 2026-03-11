@@ -101,3 +101,26 @@ export async function PATCH(req: NextRequest) {
 
   return NextResponse.json({ success: true });
 }
+
+// DELETE /api/team — Remove a team member (only allowed by owner)
+export async function DELETE(req: NextRequest) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user?.email) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const { member_email } = await req.json();
+  if (!member_email) return NextResponse.json({ error: "member_email mangler" }, { status: 400 });
+
+  // Delete the team member record where current user is the owner
+  const { error } = await supabase
+    .from("team_members")
+    .delete()
+    .eq("owner_email", user.email)
+    .eq("member_email", member_email);
+
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  return NextResponse.json({ success: true });
+}
