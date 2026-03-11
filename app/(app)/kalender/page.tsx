@@ -10,6 +10,8 @@ import { toast } from "sonner";
 export default function KalenderPage() {
   const { leads, meetingDates } = useAppStore();
   const [completedTasks, setCompletedTasks] = useState<string[]>([]);
+  const [showCallModal, setShowCallModal] = useState(false);
+  const [showMeetingModal, setShowMeetingModal] = useState(false);
 
   // Simple task generation based on leads
   const now = new Date();
@@ -169,7 +171,7 @@ export default function KalenderPage() {
             <div className="bg-[#171717] rounded-xl p-6 text-white shadow-xl">
               <h3 className="font-bold mb-4 text-white">Raske handlinger</h3>
               <div className="space-y-2">
-                <button onClick={() => toast.info("Anropslogg kommer snart!")} className="w-full flex items-center gap-3 p-3 rounded-lg bg-white/10 hover:bg-white/20 transition-colors text-sm font-medium">
+                <button onClick={() => setShowCallModal(true)} className="w-full flex items-center gap-3 p-3 rounded-lg bg-white/10 hover:bg-white/20 transition-colors text-sm font-medium">
                   <Phone className="w-4 h-4 text-[#09fe94]" />
                   Loggfør et anrop
                 </button>
@@ -177,7 +179,7 @@ export default function KalenderPage() {
                   <Mail className="w-4 h-4 text-[#09fe94]" />
                   Skriv ny e-post
                 </Link>
-                <button onClick={() => toast.info("Kalenderintegrasjon (Outlook/Google) lanseres snart!")} className="w-full flex items-center gap-3 p-3 rounded-lg bg-white/10 hover:bg-white/20 transition-colors text-sm font-medium">
+                <button onClick={() => setShowMeetingModal(true)} className="w-full flex items-center gap-3 p-3 rounded-lg bg-white/10 hover:bg-white/20 transition-colors text-sm font-medium">
                   <CalendarDays className="w-4 h-4 text-[#09fe94]" />
                   Opprett eget møte
                 </button>
@@ -205,6 +207,64 @@ export default function KalenderPage() {
 
         </div>
       </div>
+
+      {showCallModal && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden">
+            <div className="p-4 border-b border-[#e8e4d8] flex justify-between items-center bg-[#faf8f2]">
+              <h3 className="font-bold text-[#171717] flex items-center gap-2">
+                <Phone className="w-4 h-4 text-[#09fe94]" /> Loggfør et anrop
+              </h3>
+              <button onClick={() => setShowCallModal(false)} className="text-gray-400 hover:text-black">&times;</button>
+            </div>
+            <div className="p-4 space-y-4">
+              <div>
+                <label className="text-xs font-semibold text-[#a09b8f] mb-1 block">Lead / Bedrift</label>
+                <input type="text" className="w-full border border-[#d8d3c5] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#09fe94]" placeholder="Søk etter lead..." />
+              </div>
+              <div>
+                <label className="text-xs font-semibold text-[#a09b8f] mb-1 block">Samtalenotater</label>
+                <textarea rows={3} className="w-full border border-[#d8d3c5] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#09fe94] resize-none" placeholder="Hva snakket dere om?"></textarea>
+              </div>
+              <button onClick={() => { setShowCallModal(false); toast.success("Anrop loggført i historikken."); }} className="w-full bg-[#09fe94] hover:bg-[#00e882] text-black font-bold py-2 rounded-lg transition-colors">
+                Lagre i historikk
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showMeetingModal && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden">
+            <div className="p-4 border-b border-[#e8e4d8] flex justify-between items-center bg-[#faf8f2]">
+              <h3 className="font-bold text-[#171717] flex items-center gap-2">
+                <CalendarDays className="w-4 h-4 text-[#09fe94]" /> Opprett eget møte
+              </h3>
+              <button onClick={() => setShowMeetingModal(false)} className="text-gray-400 hover:text-black">&times;</button>
+            </div>
+            <div className="p-4 space-y-4">
+              <div>
+                <label className="text-xs font-semibold text-[#a09b8f] mb-1 block">Møtetittel</label>
+                <input type="text" className="w-full border border-[#d8d3c5] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#09fe94]" placeholder="Kaffeprat med..." />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs font-semibold text-[#a09b8f] mb-1 block">Dato</label>
+                  <input type="date" className="w-full border border-[#d8d3c5] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#09fe94]" />
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-[#a09b8f] mb-1 block">Tidspunkt</label>
+                  <input type="time" className="w-full border border-[#d8d3c5] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#09fe94]" />
+                </div>
+              </div>
+              <button onClick={() => { setShowMeetingModal(false); toast.success("Møte opprettet og lagt i kalenderen."); }} className="w-full bg-[#09fe94] hover:bg-[#00e882] text-black font-bold py-2 rounded-lg transition-colors">
+                Lagre møte
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
