@@ -397,7 +397,7 @@ export default function InnstillingerPage() {
               {[
                 { name: "Starter", price: "99 kr/mnd", desc: "1 bruker · 50 leads · Leadsøk" },
                 { name: "Pro", price: "199 kr/mnd", desc: "5 brukere · Ubegrenset leads · Alt i Starter + e-postintegrasjon" },
-                { name: "Team", price: "499 kr/mnd", desc: "15 brukere · Prioritert support · Alt i Pro + API-tilgang" },
+                { name: "Team", price: "499 kr/mnd", desc: "5 brukere · Prioritert support · Alt i Pro + API-tilgang" },
               ].map((plan) => {
                 const isSelected = selectedPlan === plan.name;
                 return (
@@ -573,8 +573,13 @@ export default function InnstillingerPage() {
                 {/* Invite — only shown to team owners */}
                 {teamRole === "owner" && (
                 <div className="bg-[#faf8f2] rounded-xl border border-[#d8d3c5] p-6" style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.08)" }}>
-                  <h2 className="text-base font-semibold text-[#171717] mb-4">Inviter teammedlem</h2>
-                  <form onSubmit={handleInvite} className="flex gap-3">
+                  <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-base font-semibold text-[#171717]">Inviter teammedlem</h2>
+                    <span className="text-xs text-[#a09b8f] px-2 py-1 bg-[#e8e4d8] rounded-md font-medium">
+                      {teamMembers.length} / 4 inviterte
+                    </span>
+                  </div>
+                  <form onSubmit={handleInvite} className={`flex gap-3 ${teamMembers.length >= 4 ? "opacity-50 pointer-events-none" : ""}`}>
                     <Input
                       type="email"
                       placeholder="kollega@bedrift.no"
@@ -583,8 +588,9 @@ export default function InnstillingerPage() {
                       onChange={(e) => setInviteEmail(e.target.value)}
                       className="flex-1"
                       required
+                      disabled={teamMembers.length >= 4}
                     />
-                    <Button type="submit" variant="primary" size="md" disabled={inviteSending}>
+                    <Button type="submit" variant="primary" size="md" disabled={inviteSending || teamMembers.length >= 4}>
                       {inviteSending ? (
                         <><Loader2 className="w-4 h-4 animate-spin" /> Sender…</>
                       ) : inviteSent ? (
@@ -594,6 +600,12 @@ export default function InnstillingerPage() {
                       )}
                     </Button>
                   </form>
+                  {teamMembers.length >= 4 && (
+                    <p className="text-xs text-amber-600 mt-3 font-medium flex items-center gap-1.5">
+                      <Shield className="w-3.5 h-3.5" /> 
+                      Du har nådd grensen på 4 inviterte medlemmer (maks 5 i teamet totalt).
+                    </p>
+                  )}
                   {inviteError && (
                     <p className="text-xs text-red-500 mt-2">{inviteError}</p>
                   )}
@@ -602,9 +614,11 @@ export default function InnstillingerPage() {
                       <Check className="w-3 h-3" /> Invitasjon sendt til {inviteEmail || "kollega"}!
                     </p>
                   )}
-                  <p className="text-xs text-[#a09b8f] mt-2">
-                    Invitasjonen er gyldig i 7 dager. Ny bruker legges til planen din automatisk.
-                  </p>
+                  {teamMembers.length < 4 && (
+                    <p className="text-xs text-[#a09b8f] mt-2">
+                      Invitasjonen er gyldig i 7 dager. Ny bruker legges til planen din automatisk.
+                    </p>
+                  )}
                 </div>
                 )}
 

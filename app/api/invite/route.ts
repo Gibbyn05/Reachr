@@ -18,6 +18,23 @@ export async function POST(req: NextRequest) {
     const { email, inviterName, companyName } = await req.json();
     if (!email) return NextResponse.json({ error: "E-post mangler" }, { status: 400 });
 
+    // Check how many people have already been invited
+    const { count, error: countError } = await supabase
+      .from("team_members")
+      .select("*", { count: "exact", head: true })
+      .eq("owner_email", user.email);
+
+    if (countError) {
+      return NextResponse.json({ error: "Kunne ikke sjekke teamgrense" }, { status: 500 });
+    }
+
+    if (count !== null && count >= 4) {
+      return NextResponse.json(
+        { error: "Du har nådd maksgrensen. Du kan maks invitere 4 personer (totalt 5 i teamet)." },
+        { status: 403 }
+      );
+    }
+
     // Store a pending team_members record (with owner's display name so members can see it)
     await supabase.from("team_members").upsert({
       owner_email: user.email,
