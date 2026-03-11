@@ -5,17 +5,27 @@ export const metadata = { title: "Oppdateringer – Reachr" };
 const updates = [
   {
     date: "Mars 2026",
+    version: "1.4",
+    tag: "Automasjon & Analyse",
+    tagColor: "#ffad0a",
+    changes: [
+      "Helt ny Kalender med automatisk oppfølgingsvarsling og to-do list",
+      "Draft-bygger for E-postsekvenser (Drip campaigns) for å automatisere salg",
+      "Visuell Salgstrakt (Funnel chart) og Team Leaderboard på dashbordet",
+      "Eksport og Import av Leads (CSV) med feilhåndtering",
+      "Ny og sikker Kundeportal for fakturahåndtering og abonnementsendringer",
+    ],
+  },
+  {
+    date: "Mars 2026",
     version: "1.3",
-    tag: "Sikkerhet & invitasjoner",
+    tag: "Forbedringer & Team",
     tagColor: "#ff470a",
     changes: [
-      "Forbedret invitasjonsflyt: brukere med eksisterende konto kobles automatisk til team ved innlogging",
-      "Tydelig teambanner på invitasjonssiden som forklarer at du ikke trenger eget abonnement",
-      "Fikset at teammedlemmer uten invitasjonslenke kom til betalingsvegg",
-      "Sikret alle API-endepunkter med autentiseringssjekk",
-      "Fikset manglende eierskapskontroll på leads – brukere kan ikke lenger endre andres data",
-      "Fjernet eksponert debug-endepunkt",
-      "Forbedret e-postleveranse til Outlook med tabell-basert HTML og ren-tekst fallback",
+      "Sømløs invitasjonsflyt — brukere kobles lynraskt til sitt Team uten friksjon",
+      "Forbedret design som tydeliggjør at teammedlemmer ikke trenger eget abonnement",
+      "Betydelige forbedringer for e-postleveranse (spesielt til Outlook) slik at de ikke havner i spam",
+      "Forbedret systemstabilitet og dataisolasjon mellom brukere",
     ],
   },
   {
