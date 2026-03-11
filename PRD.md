@@ -19,9 +19,13 @@
 * **Oppfølgingsvarsler:** Varslinger og påminnelser slik at ingen leads faller gjennom sprekkene (ofte levert som en "ukentlig rapport" via e-post).
 
 ### 2.3 Automatisering & Sekvenser
-* **E-post integrasjon:** Brukere kan koble til sine egne **Google Workspace** eller **Microsoft 365** kontoer for å sende målrettede og personaliserte B2B-eposter direkte fra sin egen identitet (øker leveringsgrad og minsker spam-markering).
-* **AI-Hjelp:** Generering av profesjonelle salgseposter/SMS basert på AI og kontekst om selskapet.
-* **Drip-kampanjer (Sequences):** Planlegging av oppfølgingspunkter (Steg 1, Steg 2, osv.).
+* **E-post integrasjon:** Brukere kan koble til sine egne **Google Workspace** eller **Microsoft 365** kontoer for å sende målrettede og personaliserte B2B-eposter direkte fra sin egen identitet.
+* **Sekvensbygger (Drip Campaigns):** Full oversikt over oppfølgingspunkter (Steg 1, Steg 2, osv.) med egendefinerte ventetider mellom hver kontakt.
+* **AI Skriver i Sekvenser:** En innebygd AI-assistent i sekvensbyggeren som lager ferdige utkast basert på bedriftens "Sales Pitch" og "Målgruppe".
+    *   **Intelligent logikk:** AI-en skiller mellom introduksjon (steg 1) og oppfølging (steg 2+), der oppfølginger holdes korte (maks 2 setninger) og refererer naturlig til forrige kontakt.
+    *   **Placeholders:** Full støtte for `{{navn}}` og `{{bedrift}}` som automatisk fylles ut ved utsendelse.
+* **Automatisk utsendelse:** Ved påmelding til en sekvens sendes første steg umiddelbart dersom ventetiden er satt til 0 dager.
+* **Persistent lagring:** Alle sekvenser, steg og medlemskap lagres trygt i databasen og synkroniseres på tvers av enheter.
 
 ### 2.4 Team & Administrasjon
 * **Roller:** "Owner" og "Member".
@@ -45,7 +49,7 @@
 
 ### Backend / Database
 * **Database & Auth:** Supabase (PostgreSQL, in-built Authentication og Row Level Security).
-* **Datamodell (Key tables):** `leads`, `team_members`, `subscriptions`,  `email_connections`.
+* **Datamodell (Key tables):** `leads`, `team_members`, `subscriptions`, `email_connections`, `email_sequences`, `email_sequence_steps`, `email_sequence_enrollments`.
 
 ### Eksterne Integrasjoner
 * **Stripe:** Betaling, Webhooks, Håndtering av Subscriptions.
@@ -65,7 +69,7 @@
 ## 5. Viktige Brukerflyter (User Journeys)
 1. **Onboarding:** Bruker registrerer ("Sign up") -> Velger plan ("Solo" eller "Team") -> Starter 3-dagers gratis prøveperiode gjennom Stripe -> Kommer inn i Dashboard.
 2. **Finne en kunde:** Går til "Finn Leads" -> Søker på "Rørleggere i Oslo" -> Får liste opp via Brreg -> Velger "Legg til i pipeline".
-3. **Oppfølging:** Går til "Mine Leads" -> Klikker på rørleggeren -> Appen trigger en e-post/phone enrichment search -> Bruker kobler til sin Google-konto -> Klikker "Generer AI email" -> Sender e-posten.
+3. **Sekvenser & Oppfølging:** Går til "Sekvenser" -> Bruker "AI Skriver" for å lage en 3-stegs plan -> Lagrer. Går til "Mine Leads" -> Velger lead -> "Legg til i sekvens" -> Første e-post sendes umiddelbart (hvis 0 dager ventetid).
 4. **Organisasjon:** Innstillinger -> Team -> Skriver e-post til kollega -> Kollega mottar profesjonelt stylet "Reachr" invitasjonsepost -> Klikker -> Logges direkte inn og kan se samme Pipeline. Eier kan fjerne tilgang når kollegaen slutter.
 5. **Analytics/Oppsummering:** Hver uke kjører et Cron-job script og e-poster Owner en fin infografikk om ukens "added leads" vs "contacted".
 
