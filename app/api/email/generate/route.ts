@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { lead, senderName, senderCompany, salesPitch, targetCustomers, comment } = await req.json();
+  const { lead, senderName, senderCompany, salesPitch, targetCustomers, comment, isSequence } = await req.json();
 
   if (!process.env.ANTHROPIC_API_KEY) {
     return NextResponse.json({ error: "ANTHROPIC_API_KEY ikke konfigurert" }, { status: 500 });
@@ -18,24 +18,27 @@ export async function POST(req: NextRequest) {
   const targetLabel: Record<string, string> = { b2b: "bedrifter (B2B)", b2c: "privatpersoner (B2C)", begge: "både bedrifter og privatpersoner" };
   const productSection = salesPitch
     ? `Hva avsender selger: ${salesPitch}${targetCustomers ? `\nMålgruppe: ${targetLabel[targetCustomers] ?? targetCustomers}` : ""}`
-    : "Hva avsender selger: ukjent (finn et relevant verdiforslag basert på bransjen til mottaker)";
+    : "Hva avsender selger: Salgsfremmende tjenester";
 
-  const prompt = `Du er en norsk salgsprofesjonell. Skriv en kort, personlig og profesjonell kald e-post til følgende bedrift.
+  const leadSection = isSequence 
+    ? "Dette er en generell mal for en sekvens. Bruk {{navn}} for kontaktperson og {{bedrift}} for firmanavn som placeholders."
+    : `Bedrift: ${lead?.name || "ukjent"}
+Bransje: ${lead?.industry || "ukjent"}
+By: ${lead?.city || "ukjent"}
+Kontaktperson: ${lead?.contactPerson || "ukjent"}
+Antall ansatte: ${lead?.employees || "ukjent"}
+Omsetning: ${lead?.revenue ? `${(lead.revenue / 1_000_000).toFixed(1)} mill kr` : "ukjent"}`;
 
-Bedrift: ${lead.name}
-Bransje: ${lead.industry}
-By: ${lead.city}
-Kontaktperson: ${lead.contactPerson || "ukjent"}
-Antall ansatte: ${lead.employees || "ukjent"}
-Omsetning: ${lead.revenue ? `${(lead.revenue / 1_000_000).toFixed(1)} mill kr` : "ukjent"}
+  const prompt = `Du er en norsk salgsprofesjonell. Skriv en kort, personlig og profesjonell salgs-e-post.
+${leadSection}
 
 Avsender: ${senderName}${senderCompany ? ` fra ${senderCompany}` : ""}
 ${productSection}
 
 Krav til e-posten:
 - Maks 4–5 setninger i brødteksten
-- Skriv til bedriften, ikke til kontaktpersonen spesifikt. Ikke bruk kontaktpersonens navn i hilsenen.
-- Start med "Hei," eller "Hei [bedriftsnavn]," – aldri "Kjære [navn]" eller lignende.
+- Skriv til bedriften, ikke til kontaktpersonen spesifikt. Bruk gjerne {{bedrift}} i hilsenen.
+- Start med "Hei," eller "Hei {{bedrift}},"
 - Start med en kort referanse til bransjen eller hva bedriften driver med.
 - Aldri skriv at du har fulgt med på bedriften, sett dem på sosiale medier, lagt merke til dem eller lignende. Det fremstår som falskt.
 - Fokuser e-posten rundt det avsender selger – ikke finn på andre produkter eller tjenester.
@@ -55,7 +58,7 @@ Med vennlig hilsen,
 ${senderName}`;
 
   const message = await anthropic.messages.create({
-    model: "claude-haiku-4-5-20251001",
+    model: "claude-3-5-sonnet-20241022",
     max_tokens: 400,
     messages: [{ role: "user", content: prompt }],
   });

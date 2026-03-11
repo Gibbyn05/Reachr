@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Save, Clock, Mail, Trash2 } from "lucide-react";
+import { ArrowLeft, Save, Clock, Mail, Trash2, Zap, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -10,8 +10,9 @@ import { useAppStore } from "@/store/app-store";
 import { SequenceStep, Sequence } from "@/lib/mock-data";
 export default function NySekvensPage() {
   const router = useRouter();
-  const { addSequence } = useAppStore();
+  const { addSequence, currentUser } = useAppStore();
   const [name, setName] = useState("Min nye sekvens");
+  const [generatingStepIds, setGeneratingStepIds] = useState<Set<string>>(new Set());
   const [steps, setSteps] = useState<SequenceStep[]>([
     { id: "1", type: "email", subject: "Introduksjon til [Selskap]", body: "Hei [Navn],\\n\\nVi hjelper selskaper som [Selskap] med..." },
     { id: "2", type: "wait", waitDays: 3 },
@@ -28,6 +29,43 @@ export default function NySekvensPage() {
 
   const removeStep = (id: string) => {
     setSteps(steps.filter(s => s.id !== id));
+  };
+
+  const generateAiStep = async (index: number) => {
+    const step = steps[index];
+    setGeneratingStepIds(prev => new Set(prev).add(step.id));
+    try {
+      const res = await fetch("/api/email/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          senderName: currentUser?.name || "Selger",
+          salesPitch: currentUser?.salesPitch,
+          targetCustomers: currentUser?.targetCustomers,
+          comment: index === 0 ? "Dette er den første introduksjons-e-posten i en sekvens. Bruk {{navn}} og {{bedrift}} som placeholders." : `Dette er oppfølging nummer ${index} i en sekvens. Hold det kort. Bruk {{navn}} og {{bedrift}} som placeholders.`,
+          isSequence: true,
+        }),
+      });
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+
+      const newSteps = [...steps];
+      newSteps[index] = {
+        ...newSteps[index],
+        subject: data.subject || "",
+        body: data.body || "",
+      };
+      setSteps(newSteps);
+      toast.success("AI genererte et utkast!");
+    } catch (err: any) {
+      toast.error("AI-generering feilet: " + err.message);
+    } finally {
+      setGeneratingStepIds(prev => {
+        const next = new Set(prev);
+        next.delete(step.id);
+        return next;
+      });
+    }
   };
 
   const saveSequence = async () => {
@@ -98,9 +136,23 @@ export default function NySekvensPage() {
                       </div>
                       <span className="font-semibold text-[#171717]">Steg {index + 1}: Send e-post</span>
                     </div>
-                    <button onClick={() => removeStep(step.id)} className="text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+                    <div className="flex items-center gap-1">
+                      <button 
+                        onClick={() => generateAiStep(index)} 
+                        disabled={generatingStepIds.has(step.id)}
+                        className="flex items-center gap-1.5 px-2 py-1 text-xs font-bold text-blue-600 hover:bg-blue-50 rounded transition-colors disabled:opacity-50"
+                      >
+                        {generatingStepIds.has(step.id) ? (
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        ) : (
+                          <Zap className="w-3.5 h-3.5" />
+                        )}
+                        AI Skriver
+                      </button>
+                      <button onClick={() => removeStep(step.id)} className="p-1.5 text-gray-400 hover:text-red-500 transition-colors">
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
                   </div>
                   <div className="p-4 space-y-3">
                     <div>
