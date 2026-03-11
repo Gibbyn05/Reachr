@@ -5,6 +5,7 @@ import { CalendarDays, CheckCircle2, Clock, Phone, Mail, ArrowRight, User } from
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
+import { toast } from "sonner";
 
 export default function KalenderPage() {
   const { leads, meetingDates } = useAppStore();
@@ -168,7 +169,7 @@ export default function KalenderPage() {
             <div className="bg-[#171717] rounded-xl p-6 text-white shadow-xl">
               <h3 className="font-bold mb-4 text-white">Raske handlinger</h3>
               <div className="space-y-2">
-                <button onClick={() => alert("Anropslogg kommer snart!")} className="w-full flex items-center gap-3 p-3 rounded-lg bg-white/10 hover:bg-white/20 transition-colors text-sm font-medium">
+                <button onClick={() => toast.info("Anropslogg kommer snart!")} className="w-full flex items-center gap-3 p-3 rounded-lg bg-white/10 hover:bg-white/20 transition-colors text-sm font-medium">
                   <Phone className="w-4 h-4 text-[#09fe94]" />
                   Loggfør et anrop
                 </button>
@@ -176,7 +177,7 @@ export default function KalenderPage() {
                   <Mail className="w-4 h-4 text-[#09fe94]" />
                   Skriv ny e-post
                 </Link>
-                <button onClick={() => alert("Kalenderintegrasjon (Outlook/Google) lanseres snart!")} className="w-full flex items-center gap-3 p-3 rounded-lg bg-white/10 hover:bg-white/20 transition-colors text-sm font-medium">
+                <button onClick={() => toast.info("Kalenderintegrasjon (Outlook/Google) lanseres snart!")} className="w-full flex items-center gap-3 p-3 rounded-lg bg-white/10 hover:bg-white/20 transition-colors text-sm font-medium">
                   <CalendarDays className="w-4 h-4 text-[#09fe94]" />
                   Opprett eget møte
                 </button>
