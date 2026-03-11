@@ -33,7 +33,7 @@ export async function GET(req: NextRequest) {
     ...(members ?? []).map((m: { member_email: string }) => m.member_email),
   ]));
 
-  const { data, error } = await db
+  const { data: leads, error } = await db
     .from("leads")
     .select("*")
     .in("user_email", teamEmails)
@@ -43,7 +43,25 @@ export async function GET(req: NextRequest) {
     console.error("[GET /api/leads] leads query error:", error);
     return NextResponse.json({ error: error.message, details: error.details }, { status: 500 });
   }
-  return NextResponse.json(data ?? []);
+
+  if (leads && leads.length > 0) {
+    const leadIds = leads.map(l => l.id);
+    const { data: enrollments } = await db
+      .from("email_sequence_enrollments")
+      .select("lead_id, sequence_id")
+      .in("lead_id", leadIds)
+      .eq("status", "active");
+
+    const enrollMap = Object.fromEntries(enrollments?.map(e => [e.lead_id, e.sequence_id]) ?? []);
+    
+    const leadsWithEnrollment = leads.map(l => ({
+      ...l,
+      enrolled_sequence_id: enrollMap[l.id] || null
+    }));
+    return NextResponse.json(leadsWithEnrollment);
+  }
+
+  return NextResponse.json(leads ?? []);
 }
 
 export async function POST(req: NextRequest) {

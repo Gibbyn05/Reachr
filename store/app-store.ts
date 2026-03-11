@@ -55,6 +55,7 @@ function dbRowToLead(row: Record<string, unknown>): Lead {
     addedBy: row.added_by as string,
     notes: (row.notes as string) ?? "",
     addedDate: row.added_date as string,
+    enrolledSequenceId: row.enrolled_sequence_id as string | null,
   };
 }
 
@@ -229,19 +230,44 @@ export const useAppStore = create<AppStore>()(
       },
 
       enrollLeadInSequence: async (leadId: string, sequenceId: string | null) => {
+        // Optimistic UI update
         set((state) => ({
           leads: state.leads.map((l) =>
             l.id === leadId ? { ...l, enrolledSequenceId: sequenceId } : l
           ),
         }));
 
-        // Incremental: Update sequence counts
-        if (sequenceId) {
-          set((state) => ({
-            sequences: state.sequences.map((s) =>
-              s.id === sequenceId ? { ...s, enrolled: (s.enrolled || 0) + 1 } : s
-            ),
-          }));
+        if (!sequenceId) {
+          // Find enrollment ID and stop it via API
+          // This is a simplified local state clear, for actual stop we'd need enrollment ID
+          // In this iteration we just clear the local lead status.
+          return;
+        }
+
+        const lead = get().leads.find(l => l.id === leadId);
+        if (!lead) return;
+
+        try {
+          const res = await fetch("/api/sequences/enroll", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              sequenceId,
+              leadId,
+              leadName: lead.name,
+              leadEmail: lead.email,
+            }),
+          });
+
+          if (res.ok) {
+            set((state) => ({
+              sequences: state.sequences.map((s) =>
+                s.id === sequenceId ? { ...s, enrolled: (s.enrolled || 0) + 1 } : s
+              ),
+            }));
+          }
+        } catch (err) {
+          console.error("Enrollment failed:", err);
         }
       },
     }),

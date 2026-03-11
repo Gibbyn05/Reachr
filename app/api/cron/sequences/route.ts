@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient as createAdminClient } from "@supabase/supabase-js";
+import { sendEmail } from "@/lib/email-sender";
 
 // Vercel Cron: runs daily at 08:00
-// Add to vercel.json: { "crons": [{ "path": "/api/cron/sequences", "schedule": "0 8 * * *" }] }
 export async function GET(req: NextRequest) {
   const authHeader = req.headers.get("authorization");
   if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
@@ -40,7 +40,6 @@ export async function GET(req: NextRequest) {
       .single();
 
     if (!step) {
-      // No more steps — mark complete
       await supabase.from("email_sequence_enrollments").update({ status: "completed" }).eq("id", enrollment.id);
       continue;
     }
@@ -53,31 +52,21 @@ export async function GET(req: NextRequest) {
       .limit(1)
       .single();
 
-    if (!enrollment.lead_email) {
-      // Skip if no email on lead
-      continue;
-    }
+    if (!enrollment.lead_email || enrollment.lead_email === "—") continue;
 
-    // Replace template variables
-    const body = step.body
-      .replace(/\{\{bedrift\}\}/g, enrollment.lead_name ?? "")
-      .replace(/\{\{navn\}\}/g, enrollment.lead_name ?? "");
+    try {
+      const body = (step.body || "")
+        .replace(/\{\{bedrift\}\}/g, enrollment.lead_name ?? "")
+        .replace(/\{\{navn\}\}/g, enrollment.lead_name ?? "");
 
-    // Send via our email send API
-    const sendRes = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/email/send`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
+      await sendEmail({
+        ownerEmail: seq.owner_email,
         to: enrollment.lead_email,
         subject: step.subject,
         body,
-        provider: connection?.provider ?? "gmail",
-        ownerEmail: seq.owner_email,
-        sequenceMode: true,
-      }),
-    });
+        provider: (connection?.provider as any) ?? "gmail",
+      });
 
-    if (sendRes.ok) {
       sent++;
       // Advance to next step
       const { data: nextStep } = await supabase
@@ -89,7 +78,7 @@ export async function GET(req: NextRequest) {
 
       if (nextStep) {
         const nextSendAt = new Date();
-        nextSendAt.setDate(nextSendAt.getDate() + nextStep.delay_days);
+        nextSendAt.setDate(nextSendAt.getDate() + (nextStep.delay_days || 0));
         await supabase.from("email_sequence_enrollments").update({
           current_step: nextStep.step_number,
           next_send_at: nextSendAt.toISOString(),
@@ -97,6 +86,14 @@ export async function GET(req: NextRequest) {
       } else {
         await supabase.from("email_sequence_enrollments").update({ status: "completed" }).eq("id", enrollment.id);
       }
+
+      // Update lead
+      await supabase.from("leads").update({ 
+        last_contacted: new Date().toISOString().split("T")[0] 
+      }).eq("id", enrollment.lead_id);
+
+    } catch (err: any) {
+      console.error(`Cron send failed for enrollment ${enrollment.id}:`, err.message);
     }
   }
 
