@@ -34,38 +34,53 @@ export async function POST(req: NextRequest) {
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
   <title>Ny kontaktmelding</title>
 </head>
-<body style="margin:0;padding:0;background-color:#F2EFE3;font-family:Arial,Helvetica,sans-serif;">
-  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#F2EFE3;">
+<body style="margin:0;padding:0;background-color:#F9FAFB;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#F9FAFB;">
     <tr>
-      <td align="center" style="padding:40px 16px;">
-        <table width="560" cellpadding="0" cellspacing="0" border="0" style="max-width:560px;width:100%;background-color:#FAF8F2;border:1px solid #D8D3C5;">
+      <td align="center" style="padding:60px 16px;">
+        <table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;width:100%;background-color:#ffffff;border:1px solid #E5E7EB;border-radius:16px;overflow:hidden;box-shadow:0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);">
           <tr>
-            <td style="background-color:#171717;padding:24px 40px;">
-              <span style="color:#ffffff;font-size:20px;font-weight:800;">Reachr</span>
-              <span style="color:#09fe94;font-size:20px;font-weight:800;">.</span>
-            </td>
-          </tr>
-          <tr>
-            <td style="padding:32px 40px;">
-              <h2 style="margin:0 0 20px;font-size:20px;font-weight:700;color:#171717;font-family:Arial,Helvetica,sans-serif;">Ny melding fra kontaktskjema</h2>
-              <table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-bottom:24px;">
+            <td style="background-color:#111827;padding:32px 40px;text-align:center;">
+              <table cellpadding="0" cellspacing="0" border="0" style="margin:0 auto;">
                 <tr>
-                  <td style="padding:10px 14px;background-color:#EDE9DA;border-radius:0;font-size:12px;font-weight:700;color:#A09B8F;font-family:Arial,Helvetica,sans-serif;text-transform:uppercase;letter-spacing:0.05em;width:80px;">Navn</td>
-                  <td style="padding:10px 14px;background-color:#EDE9DA;font-size:14px;color:#171717;font-family:Arial,Helvetica,sans-serif;font-weight:600;">${name}</td>
-                </tr>
-                <tr>
-                  <td style="padding:10px 14px;font-size:12px;font-weight:700;color:#A09B8F;font-family:Arial,Helvetica,sans-serif;text-transform:uppercase;letter-spacing:0.05em;">E-post</td>
-                  <td style="padding:10px 14px;font-size:14px;color:#ff470a;font-family:Arial,Helvetica,sans-serif;"><a href="mailto:${email}" style="color:#ff470a;text-decoration:none;">${email}</a></td>
+                  <td style="vertical-align:middle;padding-right:12px;">
+                    <img src="https://www.reachr.no/logo.svg" alt="Reachr" width="36" height="36" style="display:block;border:0;outline:none;text-decoration:none;" />
+                  </td>
+                  <td style="vertical-align:middle;">
+                    <span style="color:#ffffff;font-size:24px;font-weight:800;letter-spacing:-0.5px;">Reachr</span>
+                  </td>
                 </tr>
               </table>
-              <p style="font-size:12px;font-weight:700;color:#A09B8F;font-family:Arial,Helvetica,sans-serif;text-transform:uppercase;letter-spacing:0.05em;margin:0 0 10px;">Melding</p>
-              <div style="background-color:#EDE9DA;padding:16px;font-size:14px;color:#3d3a34;font-family:Arial,Helvetica,sans-serif;line-height:1.7;white-space:pre-wrap;">${message.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>
-              <p style="font-size:12px;color:#A09B8F;margin:20px 0 0;font-family:Arial,Helvetica,sans-serif;">Svar direkte på denne e-posten for å svare ${name}.</p>
             </td>
           </tr>
           <tr>
-            <td style="background-color:#EDE9DA;padding:14px 40px;border-top:1px solid #D8D3C5;text-align:center;">
-              <p style="color:#A09B8F;font-size:11px;margin:0;font-family:Arial,Helvetica,sans-serif;">&copy; 2026 Reachr &middot; reachr.no</p>
+            <td style="padding:48px 40px;">
+              <p style="margin:0 0 8px;font-size:12px;font-weight:700;color:#2563EB;text-transform:uppercase;letter-spacing:0.08em;">
+                Support / Kontakt
+              </p>
+              <h2 style="margin:0 0 24px;font-size:24px;font-weight:700;color:#111827;letter-spacing:-0.4px;">
+                Ny melding fra kontaktskjema
+              </h2>
+              <table cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color:#F3F4F6;border-radius:12px;margin-bottom:32px;">
+                <tr>
+                  <td style="padding:24px;">
+                    <p style="margin:0 0 6px;font-size:13px;color:#6B7280;font-weight:500;">Avsender</p>
+                    <p style="margin:0 0 4px;font-size:16px;font-weight:700;color:#111827;">${name}</p>
+                    <p style="margin:0 0 20px;font-size:14px;"><a href="mailto:${email}" style="color:#2563EB;text-decoration:none;">${email}</a></p>
+                    
+                    <p style="margin:0 0 6px;font-size:13px;color:#6B7280;font-weight:500;">Melding</p>
+                    <div style="margin:0;font-size:16px;color:#374151;line-height:1.6;white-space:pre-wrap;">${message.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>
+                  </td>
+                </tr>
+              </table>
+              <p style="font-size:14px;color:#6B7280;margin:0;">Svar direkte på denne e-posten for å besvare ${name}.</p>
+            </td>
+          </tr>
+          <tr>
+            <td style="background-color:#F3F4F6;padding:24px 40px;text-align:center;">
+              <p style="color:#9CA3AF;font-size:12px;margin:0;">
+                &copy; ${new Date().getFullYear()} Reachr &middot; <a href="https://reachr.no" style="color:#9CA3AF;text-decoration:underline;">reachr.no</a>
+              </p>
             </td>
           </tr>
         </table>

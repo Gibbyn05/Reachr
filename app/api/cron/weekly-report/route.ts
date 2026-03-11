@@ -77,21 +77,21 @@ function buildHtml(ownerName: string, stats: ReturnType<typeof weeklyStats>, yea
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Ukentlig rapport – Reachr</title>
 </head>
-<body style="margin:0;padding:0;background-color:#F2EFE3;font-family:Arial,Helvetica,sans-serif;">
-  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#F2EFE3;">
+<body style="margin:0;padding:0;background-color:#F9FAFB;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#F9FAFB;">
     <tr>
-      <td align="center" style="padding:40px 16px;">
-        <table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;width:100%;background-color:#FAF8F2;border:1px solid #D8D3C5;">
+      <td align="center" style="padding:60px 16px;">
+        <table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;width:100%;background-color:#ffffff;border:1px solid #E5E7EB;border-radius:16px;overflow:hidden;box-shadow:0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);">
           <!-- Header -->
           <tr>
-            <td style="background-color:#171717;padding:24px 40px;">
-              <table cellpadding="0" cellspacing="0" border="0">
+            <td style="background-color:#111827;padding:32px 40px;text-align:center;">
+              <table cellpadding="0" cellspacing="0" border="0" style="margin:0 auto;">
                 <tr>
-                  <td width="30" height="30" style="background-color:#09fe94;text-align:center;vertical-align:middle;">
-                    <span style="color:#171717;font-size:17px;font-weight:900;line-height:30px;">R</span>
+                  <td style="vertical-align:middle;padding-right:12px;">
+                    <img src="${APP_URL}/logo.svg" alt="Reachr" width="36" height="36" style="display:block;border:0;outline:none;text-decoration:none;" />
                   </td>
-                  <td style="padding-left:10px;vertical-align:middle;">
-                    <span style="color:#ffffff;font-size:20px;font-weight:800;">Reachr</span>
+                  <td style="vertical-align:middle;">
+                    <span style="color:#ffffff;font-size:24px;font-weight:800;letter-spacing:-0.5px;">Reachr</span>
                   </td>
                 </tr>
               </table>
@@ -99,52 +99,54 @@ function buildHtml(ownerName: string, stats: ReturnType<typeof weeklyStats>, yea
           </tr>
           <!-- Title -->
           <tr>
-            <td style="padding:36px 40px 0;">
-              <p style="margin:0 0 4px;font-size:12px;font-weight:700;color:#ff470a;text-transform:uppercase;letter-spacing:0.08em;">Ukentlig rapport</p>
-              <h2 style="margin:0 0 6px;font-size:24px;font-weight:700;color:#171717;">Hei, ${ownerName}!</h2>
-              <p style="margin:0;font-size:14px;color:#6b6660;">Her er en oppsummering av teamets aktivitet siste 7 dager.</p>
+            <td style="padding:48px 40px 0;">
+              <p style="margin:0 0 8px;font-size:12px;font-weight:700;color:#2563EB;text-transform:uppercase;letter-spacing:0.08em;">Ukentlig rapport</p>
+              <h2 style="margin:0 0 8px;font-size:28px;font-weight:700;color:#111827;letter-spacing:-0.5px;">Hei, ${ownerName}!</h2>
+              <p style="margin:0;font-size:16px;color:#4B5563;">Her er en oppsummering av teamets aktivitet fra de siste 7 dagene.</p>
             </td>
           </tr>
           <!-- KPI row -->
           <tr>
-            <td style="padding:24px 40px;">
+            <td style="padding:32px 40px;">
               <table width="100%" cellpadding="0" cellspacing="0" border="0">
                 <tr>
-                  <td width="30%" style="background-color:#171717;padding:18px;text-align:center;">
-                    <p style="margin:0;font-size:28px;font-weight:800;color:#09fe94;">${total}</p>
-                    <p style="margin:4px 0 0;font-size:11px;color:#a09b8f;text-transform:uppercase;letter-spacing:0.05em;">Totalt i pipeline</p>
+                  <td width="30%" style="background-color:#111827;border-radius:12px;padding:24px;text-align:center;">
+                    <p style="margin:0;font-size:32px;font-weight:800;color:#09fe94;">${total}</p>
+                    <p style="margin:8px 0 0;font-size:12px;font-weight:600;color:#9CA3AF;text-transform:uppercase;letter-spacing:0.05em;">Totalt i pipeline</p>
                   </td>
                   <td width="4%" style="font-size:1px;">&nbsp;</td>
-                  <td width="30%" style="background-color:#F2EFE3;border:1px solid #D8D3C5;padding:18px;text-align:center;">
-                    <p style="margin:0;font-size:28px;font-weight:800;color:#171717;">${addedCount}</p>
-                    <p style="margin:4px 0 0;font-size:11px;color:#6b6660;text-transform:uppercase;letter-spacing:0.05em;">Lagt til denne uka</p>
+                  <td width="30%" style="background-color:#F3F4F6;border-radius:12px;padding:24px;text-align:center;">
+                    <p style="margin:0;font-size:32px;font-weight:800;color:#111827;">${addedCount}</p>
+                    <p style="margin:8px 0 0;font-size:12px;font-weight:600;color:#6B7280;text-transform:uppercase;letter-spacing:0.05em;">Lagt til denne uken</p>
                   </td>
                   <td width="4%" style="font-size:1px;">&nbsp;</td>
-                  <td width="30%" style="background-color:#F2EFE3;border:1px solid #D8D3C5;padding:18px;text-align:center;">
-                    <p style="margin:0;font-size:28px;font-weight:800;color:#171717;">${contactedCount}</p>
-                    <p style="margin:4px 0 0;font-size:11px;color:#6b6660;text-transform:uppercase;letter-spacing:0.05em;">Kontaktet denne uka</p>
+                  <td width="30%" style="background-color:#F3F4F6;border-radius:12px;padding:24px;text-align:center;">
+                    <p style="margin:0;font-size:32px;font-weight:800;color:#111827;">${contactedCount}</p>
+                    <p style="margin:8px 0 0;font-size:12px;font-weight:600;color:#6B7280;text-transform:uppercase;letter-spacing:0.05em;">Kontaktet denne uken</p>
                   </td>
                 </tr>
               </table>
             </td>
           </tr>
           <!-- Top performers -->
-          ${topAdder ? `<tr><td style="padding:0 40px 8px;">
-            <p style="margin:0;font-size:13px;color:#6b6660;">
-              🏆 <strong style="color:#171717;">${topAdder[0]}</strong> la inn flest leads (${topAdder[1]})
-              ${topContacter ? ` &nbsp;·&nbsp; <strong style="color:#171717;">${topContacter[0]}</strong> kontaktet flest (${topContacter[1]})` : ""}
-            </p>
+          ${topAdder ? `<tr><td style="padding:0 40px 16px;">
+            <div style="background-color:#EFF6FF;border-radius:8px;padding:16px;text-align:center;">
+              <p style="margin:0;font-size:14px;color:#1E3A8A;">
+                🏆 <strong style="color:#1E40AF;">${topAdder[0]}</strong> la inn flest leads (${topAdder[1]})
+                ${topContacter ? ` &nbsp;·&nbsp; <strong style="color:#1E40AF;">${topContacter[0]}</strong> kontaktet flest (${topContacter[1]})` : ""}
+              </p>
+            </div>
           </td></tr>` : ""}
           <!-- Leads lagt til -->
           <tr>
-            <td style="padding:0 40px 28px;">
-              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#F2EFE3;border:1px solid #D8D3C5;">
+            <td style="padding:0 40px 32px;">
+              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#F9FAFB;border:1px solid #E5E7EB;border-radius:8px;overflow:hidden;">
                 <tr>
-                  <td colspan="2" style="padding:14px 20px 10px;border-bottom:1px solid #D8D3C5;">
-                    <p style="margin:0;font-size:13px;font-weight:700;color:#171717;text-transform:uppercase;letter-spacing:0.05em;">Leads lagt til denne uka</p>
+                  <td colspan="2" style="padding:16px 24px;border-bottom:1px solid #E5E7EB;background-color:#F3F4F6;">
+                    <p style="margin:0;font-size:13px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:0.05em;">Leads lagt til denne uken</p>
                   </td>
                 </tr>
-                <tr><td colspan="2" style="padding:4px 20px 8px;">
+                <tr><td colspan="2" style="padding:8px 24px 16px;">
                   <table width="100%" cellpadding="0" cellspacing="0" border="0">
                     ${personRows(addedPerPerson)}
                   </table>
@@ -154,14 +156,14 @@ function buildHtml(ownerName: string, stats: ReturnType<typeof weeklyStats>, yea
           </tr>
           <!-- Kontaktet -->
           <tr>
-            <td style="padding:0 40px 28px;">
-              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#F2EFE3;border:1px solid #D8D3C5;">
+            <td style="padding:0 40px 32px;">
+              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#F9FAFB;border:1px solid #E5E7EB;border-radius:8px;overflow:hidden;">
                 <tr>
-                  <td colspan="2" style="padding:14px 20px 10px;border-bottom:1px solid #D8D3C5;">
-                    <p style="margin:0;font-size:13px;font-weight:700;color:#171717;text-transform:uppercase;letter-spacing:0.05em;">Kontaktet denne uka</p>
+                  <td colspan="2" style="padding:16px 24px;border-bottom:1px solid #E5E7EB;background-color:#F3F4F6;">
+                    <p style="margin:0;font-size:13px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:0.05em;">Kontaktet denne uken</p>
                   </td>
                 </tr>
-                <tr><td colspan="2" style="padding:4px 20px 8px;">
+                <tr><td colspan="2" style="padding:8px 24px 16px;">
                   <table width="100%" cellpadding="0" cellspacing="0" border="0">
                     ${personRows(contactedPerPerson)}
                   </table>
@@ -171,14 +173,14 @@ function buildHtml(ownerName: string, stats: ReturnType<typeof weeklyStats>, yea
           </tr>
           <!-- Pipeline status -->
           <tr>
-            <td style="padding:0 40px 36px;">
-              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#F2EFE3;border:1px solid #D8D3C5;">
+            <td style="padding:0 40px 48px;">
+              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#F9FAFB;border:1px solid #E5E7EB;border-radius:8px;overflow:hidden;">
                 <tr>
-                  <td colspan="2" style="padding:14px 20px 10px;border-bottom:1px solid #D8D3C5;">
-                    <p style="margin:0;font-size:13px;font-weight:700;color:#171717;text-transform:uppercase;letter-spacing:0.05em;">Pipeline fordeling</p>
+                  <td colspan="2" style="padding:16px 24px;border-bottom:1px solid #E5E7EB;background-color:#F3F4F6;">
+                    <p style="margin:0;font-size:13px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:0.05em;">Pipeline fordeling</p>
                   </td>
                 </tr>
-                <tr><td colspan="2" style="padding:4px 20px 8px;">
+                <tr><td colspan="2" style="padding:8px 24px 16px;">
                   <table width="100%" cellpadding="0" cellspacing="0" border="0">${statusRows}</table>
                 </td></tr>
               </table>
@@ -186,11 +188,11 @@ function buildHtml(ownerName: string, stats: ReturnType<typeof weeklyStats>, yea
           </tr>
           <!-- CTA -->
           <tr>
-            <td style="padding:0 40px 36px;">
-              <table cellpadding="0" cellspacing="0" border="0">
+            <td style="padding:0 40px 48px;">
+              <table cellpadding="0" cellspacing="0" border="0" width="100%">
                 <tr>
-                  <td style="background-color:#09fe94;padding:13px 28px;">
-                    <a href="${APP_URL}/dashboard" style="color:#171717;font-weight:700;font-size:15px;text-decoration:none;font-family:Arial,Helvetica,sans-serif;">
+                  <td style="background-color:#09fe94;border-radius:8px;text-align:center;">
+                    <a href="${APP_URL}/dashboard" style="display:block;padding:16px;color:#064e3b;font-weight:700;font-size:16px;text-decoration:none;">
                       Åpne dashboard &rarr;
                     </a>
                   </td>
@@ -200,10 +202,12 @@ function buildHtml(ownerName: string, stats: ReturnType<typeof weeklyStats>, yea
           </tr>
           <!-- Footer -->
           <tr>
-            <td style="background-color:#EDE9DA;padding:14px 40px;border-top:1px solid #D8D3C5;text-align:center;">
-              <p style="color:#A09B8F;font-size:11px;margin:0;">
-                &copy; ${year} Reachr &middot; reachr.no &middot;
-                <a href="${APP_URL}/innstillinger" style="color:#A09B8F;">Endre varslingsinnstillinger</a>
+            <td style="background-color:#F3F4F6;padding:24px 40px;text-align:center;">
+              <p style="color:#9CA3AF;font-size:12px;margin:0 0 8px;">
+                &copy; ${year} Reachr &middot; <a href="https://reachr.no" style="color:#9CA3AF;text-decoration:underline;">reachr.no</a>
+              </p>
+              <p style="color:#9CA3AF;font-size:12px;margin:0;">
+                <a href="${APP_URL}/innstillinger" style="color:#9CA3AF;text-decoration:underline;">Endre varslingsinnstillinger</a>
               </p>
             </td>
           </tr>

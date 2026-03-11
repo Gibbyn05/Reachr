@@ -82,27 +82,21 @@ export async function POST(req: NextRequest) {
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Invitasjon til Reachr</title>
 </head>
-<body style="margin:0;padding:0;background-color:#F2EFE3;font-family:Arial,Helvetica,sans-serif;">
-  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#F2EFE3;">
+<body style="margin:0;padding:0;background-color:#F9FAFB;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#F9FAFB;">
     <tr>
-      <td align="center" style="padding:40px 16px;">
-        <table width="560" cellpadding="0" cellspacing="0" border="0" style="max-width:560px;width:100%;background-color:#FAF8F2;border:1px solid #D8D3C5;">
+      <td align="center" style="padding:60px 16px;">
+        <table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;width:100%;background-color:#ffffff;border:1px solid #E5E7EB;border-radius:16px;overflow:hidden;box-shadow:0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);">
           <!-- Header -->
           <tr>
-            <td style="background-color:#171717;padding:28px 40px;text-align:center;">
+            <td style="background-color:#111827;padding:32px 40px;text-align:center;">
               <table cellpadding="0" cellspacing="0" border="0" style="margin:0 auto;">
                 <tr>
-                  <td style="vertical-align:middle;padding-right:10px;">
-                    <table cellpadding="0" cellspacing="0" border="0">
-                      <tr>
-                        <td width="32" height="32" style="background-color:#09fe94;text-align:center;vertical-align:middle;">
-                          <span style="color:#171717;font-size:18px;font-weight:900;line-height:32px;">R</span>
-                        </td>
-                      </tr>
-                    </table>
+                  <td style="vertical-align:middle;padding-right:12px;">
+                    <img src="${APP_URL}/logo.svg" alt="Reachr" width="36" height="36" style="display:block;border:0;outline:none;text-decoration:none;" />
                   </td>
                   <td style="vertical-align:middle;">
-                    <span style="color:#ffffff;font-size:22px;font-weight:800;letter-spacing:-0.5px;">Reachr</span>
+                    <span style="color:#ffffff;font-size:24px;font-weight:800;letter-spacing:-0.5px;">Reachr</span>
                   </td>
                 </tr>
               </table>
@@ -110,39 +104,40 @@ export async function POST(req: NextRequest) {
           </tr>
           <!-- Body -->
           <tr>
-            <td style="padding:40px;">
-              <h2 style="margin:0 0 16px;font-size:22px;font-weight:700;color:#171717;font-family:Arial,Helvetica,sans-serif;">
+            <td style="padding:48px 40px;">
+              <h2 style="margin:0 0 16px;font-size:24px;font-weight:700;color:#111827;letter-spacing:-0.4px;">
                 Du er invitert til ${teamName}
               </h2>
-              <p style="color:#6B6660;font-size:15px;line-height:1.7;margin:0 0 12px;font-family:Arial,Helvetica,sans-serif;">
-                <strong style="color:#171717;">${inviterName}</strong> har invitert deg til aa bli med i
-                <strong style="color:#171717;">${teamName}</strong> paa Reachr &mdash;
-                det norske B2B-verktoeyet for leadsok og salgspipeline.
+              <p style="color:#4B5563;font-size:16px;line-height:1.6;margin:0 0 16px;">
+                <strong style="color:#111827;">${inviterName}</strong> har invitert deg til å bli med i
+                <strong style="color:#111827;">${teamName}</strong> på Reachr &mdash; det norske B2B-verktøyet for leadsøk og salgspipeline.
               </p>
-              <p style="color:#6B6660;font-size:15px;line-height:1.7;margin:0 0 28px;font-family:Arial,Helvetica,sans-serif;">
-                Du trenger ikke betale selv &mdash; du bruker teamets abonnement.
+              <p style="color:#4B5563;font-size:16px;line-height:1.6;margin:0 0 32px;">
+                Du trenger ikke betale selv &mdash; du bruker teamets abonnementet.
               </p>
-              <!-- CTA Button — table-based for Outlook -->
+              <!-- CTA Button -->
               <table cellpadding="0" cellspacing="0" border="0">
                 <tr>
-                  <td style="background-color:#09fe94;padding:14px 32px;">
-                    <a href="${inviteLink}" style="color:#171717;font-weight:700;font-size:15px;text-decoration:none;font-family:Arial,Helvetica,sans-serif;display:inline-block;">
+                  <td style="background-color:#09fe94;border-radius:8px;">
+                    <a href="${inviteLink}" style="padding:14px 32px;color:#064e3b;font-weight:700;font-size:15px;text-decoration:none;display:block;text-align:center;border-radius:8px;">
                       Bli med i teamet &rarr;
                     </a>
                   </td>
                 </tr>
               </table>
-              <p style="color:#A09B8F;font-size:12px;margin:28px 0 0;font-family:Arial,Helvetica,sans-serif;">
-                Invitasjonen er gyldig i 7 dager. Fungerer ikke knappen? Kopier denne lenken:<br />
-                <a href="${inviteLink}" style="color:#ff470a;word-break:break-all;">${inviteLink}</a>
-              </p>
+              <div style="margin-top:32px;padding-top:24px;border-top:1px solid #E5E7EB;">
+                <p style="color:#6B7280;font-size:13px;line-height:1.5;margin:0;">
+                  Invitasjonen er gyldig i 7 dager. Fungerer ikke knappen? Kopier denne lenken og lim den inn i nettleseren din:<br />
+                  <a href="${inviteLink}" style="color:#2563EB;text-decoration:underline;word-break:break-all;margin-top:8px;display:block;">${inviteLink}</a>
+                </p>
+              </div>
             </td>
           </tr>
           <!-- Footer -->
           <tr>
-            <td style="background-color:#EDE9DA;padding:16px 40px;border-top:1px solid #D8D3C5;text-align:center;">
-              <p style="color:#A09B8F;font-size:11px;margin:0;font-family:Arial,Helvetica,sans-serif;">
-                &copy; ${year} Reachr &middot; reachr.no
+            <td style="background-color:#F3F4F6;padding:24px 40px;text-align:center;">
+              <p style="color:#9CA3AF;font-size:12px;margin:0;">
+                &copy; ${year} Reachr &middot; <a href="https://reachr.no" style="color:#9CA3AF;text-decoration:underline;">reachr.no</a>
               </p>
             </td>
           </tr>
