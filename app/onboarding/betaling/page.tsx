@@ -1,10 +1,8 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
-import { ArrowRight, Lock, Check, Shield, Users, User, LogOut } from "lucide-react";
+import { ArrowRight, Lock, Check, Shield, Users, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { createClient } from "@/lib/supabase/client";
-import { useRouter } from "next/navigation";
 
 const PLANS = [
   {
@@ -42,13 +40,6 @@ export default function BetalingPage() {
   const [interval, setInterval] = useState<"monthly" | "yearly">("monthly");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const router = useRouter();
-
-  const handleLogout = async () => {
-    const supabase = createClient();
-    await supabase.auth.signOut();
-    router.replace("/login");
-  };
 
   const handleStart = async () => {
     setLoading(true);
@@ -208,10 +199,11 @@ export default function BetalingPage() {
 
         {/* Buttons */}
         <div className="flex gap-3">
-          <Button type="button" variant="secondary" size="lg" className="flex-1 justify-center" onClick={handleLogout}>
-            <LogOut className="w-4 h-4 mr-2" />
-            Logg ut
-          </Button>
+          <Link href="/register" className="flex-1">
+            <Button type="button" variant="secondary" size="lg" className="w-full justify-center">
+              Tilbake
+            </Button>
+          </Link>
           <Button
             type="button"
             variant="primary"
