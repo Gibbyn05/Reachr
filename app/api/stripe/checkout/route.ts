@@ -33,20 +33,38 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Ugyldig plan" }, { status: 400 });
     }
 
+    let customerId = undefined;
+    let hasHadTrial = false;
+
+    if (user?.email) {
+      const customers = await stripe.customers.list({ email: user.email, limit: 1 });
+      if (customers.data.length > 0) {
+        customerId = customers.data[0].id;
+        const subs = await stripe.subscriptions.list({
+          customer: customerId,
+          status: "all",
+          limit: 1,
+        });
+        if (subs.data.length > 0) {
+          hasHadTrial = true;
+        }
+      }
+    }
+
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",
       payment_method_types: ["card"],
       line_items: [{ price: priceId, quantity: 1 }],
       success_url: `${process.env.NEXT_PUBLIC_APP_URL}/onboarding?payment=success`,
       cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/onboarding/betaling`,
-      ...(user?.email && { customer_email: user.email }),
+      ...(customerId ? { customer: customerId } : user?.email ? { customer_email: user.email } : {}),
       metadata: {
         plan,
         interval,
         ...(user?.id && { userId: user.id }),
       },
       subscription_data: {
-        trial_period_days: 3,
+        ...(hasHadTrial ? {} : { trial_period_days: 3 }),
         metadata: {
           plan,
           ...(user?.id && { userId: user.id }),
