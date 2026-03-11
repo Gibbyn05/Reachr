@@ -24,6 +24,7 @@ import {
   GitBranch,
   Trash2,
   GripVertical,
+  ArrowRight,
 } from "lucide-react";
 
 const tabs = [
@@ -279,6 +280,7 @@ export default function InnstillingerPage() {
   const [showPlanModal, setShowPlanModal] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState("Pro");
   const [cancellingSubscription, setCancellingSubscription] = useState(false);
+  const [openingPortal, setOpeningPortal] = useState(false);
   const [stripeSubscription, setStripeSubscription] = useState<{
     id: string;
     status: string;
@@ -892,30 +894,30 @@ export default function InnstillingerPage() {
 
                       {!stripeSubscription.cancel_at_period_end && (
                         <div className="flex gap-3 mt-6">
-                          <Button variant="secondary" size="md" onClick={() => setShowPlanModal(true)}>Endre plan</Button>
+                          <Button variant="secondary" size="md" onClick={() => setShowPlanModal(true)}>Endre abonnement</Button>
                           <Button variant="ghost" size="md" className="text-red-500 hover:text-red-600 hover:bg-red-50"
-                            disabled={cancellingSubscription}
+                            disabled={openingPortal}
                             onClick={async () => {
-                              if (!confirm("Er du sikker på at du vil avbestille abonnementet? Du beholder tilgang til slutten av perioden.")) return;
-                              setCancellingSubscription(true);
+                              setOpeningPortal(true);
                               try {
-                                const res = await fetch("/api/stripe/cancel", { method: "POST" });
-                                const text = await res.text();
-                                let data: any = {};
-                                try { data = JSON.parse(text); } catch { data = { error: text }; }
-                                if (res.ok) {
-                                  alert("Abonnementet er avbestilt. Du beholder tilgang til slutten av perioden.");
-                                  setStripeSubscription((prev) => prev && prev !== "loading" ? { ...prev, cancel_at_period_end: true } : prev);
+                                const res = await fetch("/api/stripe/portal", { method: "POST" });
+                                const data = await res.json();
+                                if (data.url) {
+                                  window.location.href = data.url;
                                 } else {
-                                  alert("Feil (" + res.status + "): " + (data.error || text || "Ukjent feil"));
+                                  alert("Kunne ikke åpne Stripe-portalen: " + (data.error || "Ukjent feil"));
                                 }
                               } catch (err: any) {
                                 alert("Nettverksfeil: " + err.message);
                               } finally {
-                                setCancellingSubscription(false);
+                                setOpeningPortal(false);
                               }
                             }}>
-                            {cancellingSubscription ? "Avbestiller..." : "Avbestill abonnement"}
+                            {openingPortal ? (
+                              <><Loader2 className="w-4 h-4 animate-spin mr-2" /> Åpner Stripe...</>
+                            ) : (
+                              "Administrer & avbryt i Stripe"
+                            )}
                           </Button>
                         </div>
                       )}
@@ -928,8 +930,17 @@ export default function InnstillingerPage() {
                     <div className="px-6 py-4 border-b border-[#d8d3c5]">
                       <h2 className="text-base font-semibold text-[#171717]">Fakturahistorikk</h2>
                     </div>
-                    <div className="px-6 py-4 text-sm text-[#6b6660]">
-                      Fakturahistorikk er tilgjengelig i Stripe-portalen. Ta kontakt med support for å få tilsendt fakturaer.
+                    <div className="px-6 py-4 text-sm text-[#6b6660] flex items-center justify-between">
+                      <p>Fakturahistorikk og nedlasting av kvitteringer utføres kryptert hos Stripe.</p>
+                      <Button variant="secondary" size="sm" onClick={async () => {
+                        setOpeningPortal(true);
+                        const res = await fetch("/api/stripe/portal", { method: "POST" });
+                        const data = await res.json();
+                        if (data.url) window.location.href = data.url;
+                        setOpeningPortal(false);
+                      }}>
+                        Vis fakturaer i Stripe <ArrowRight className="w-3.5 h-3.5 ml-1" />
+                      </Button>
                     </div>
                   </div>
                 )}
