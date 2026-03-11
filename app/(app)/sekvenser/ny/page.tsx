@@ -42,8 +42,9 @@ export default function NySekvensPage() {
           senderName: currentUser?.name || "Selger",
           salesPitch: currentUser?.salesPitch,
           targetCustomers: currentUser?.targetCustomers,
-          comment: index === 0 ? "Dette er den første introduksjons-e-posten i en sekvens. Bruk {{navn}} og {{bedrift}} som placeholders." : `Dette er oppfølging nummer ${index} i en sekvens. Hold det kort. Bruk {{navn}} og {{bedrift}} som placeholders.`,
+          comment: index === 0 ? "Første introduksjons-e-post i en sekvens. Bruk {{navn}} og {{bedrift}}." : `Dette er oppfølging nummer ${index}. Referer til forrige e-post, men ikke introduser deg selv eller firmaet på nytt. Bruk {{navn}} og {{bedrift}}.`,
           isSequence: true,
+          stepIndex: index,
         }),
       });
       const data = await res.json();

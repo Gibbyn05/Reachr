@@ -11,52 +11,62 @@ export async function POST(req: NextRequest) {
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const bodyData = await req.json().catch(() => ({}));
-    const { lead, senderName, senderCompany, salesPitch, targetCustomers, comment, isSequence } = bodyData;
+    const { lead, senderName, senderCompany, salesPitch, targetCustomers, comment, isSequence, stepIndex } = bodyData;
 
     if (!process.env.ANTHROPIC_API_KEY) {
       return NextResponse.json({ error: "ANTHROPIC_API_KEY ikke konfigurert" }, { status: 500 });
     }
 
+    const isFollowUp = (stepIndex ?? 0) > 0;
+
     const targetLabel: Record<string, string> = { b2b: "bedrifter (B2B)", b2c: "privatpersoner (B2C)", begge: "både bedrifter og privatpersoner" };
-    const productSection = salesPitch
+    const productSection = salesPitch && !isFollowUp
       ? `Hva avsender selger: ${salesPitch}${targetCustomers ? `\nMålgruppe: ${targetLabel[targetCustomers] ?? targetCustomers}` : ""}`
-      : "Hva avsender selger: Salgsfremmende tjenester";
+      : isFollowUp ? "Dette er en oppfølging. Du har allerede sent en introduksjon. Referer kort til forrige e-post uten å gjenta salgspitchen." : "Hva avsender selger: Salgsfremmende tjenester";
 
     const leadSection = isSequence 
-      ? "Dette er en generell mal for en sekvens. Bruk {{navn}} for kontaktperson og {{bedrift}} for firmanavn som placeholders."
-      : `Bedrift: ${lead?.name || "ukjent"}
-Bransje: ${lead?.industry || "ukjent"}
-By: ${lead?.city || "ukjent"}
-Kontaktperson: ${lead?.contactPerson || "ukjent"}
-Antall ansatte: ${lead?.employees || "ukjent"}
-Omsetning: ${lead?.revenue ? `${(lead.revenue / 1_000_000).toFixed(1)} mill kr` : "ukjent"}`;
+      ? `Dette er en generell mal for steg ${ (stepIndex ?? 0) + 1} i en sekvens. Bruk {{navn}} og {{bedrift}} som placeholders.`
+      : `Bedrift: ${lead?.name || "ukjent"}\nBransje: ${lead?.industry || "ukjent"}\nBy: ${lead?.city || "ukjent"}\nKontaktperson: ${lead?.contactPerson || "ukjent"}`;
 
-    const prompt = `Du er en norsk salgsprofesjonell. Skriv en kort, personlig og profesjonell salgs-e-post.
+    const prompt = isFollowUp 
+    ? `Du er en norsk salgsprofesjonell. Skriv en oppfølgings-e-post.
 ${leadSection}
+Avsender: ${senderName}
+Målet med denne e-posten: Sjekke om mottakeren har lest den forrige e-posten din.
 
+Krav til e-posten:
+- Maks 2 setninger
+- IKKE presenter deg selv eller produktet på nytt.
+- Bruk en personlig og uformell tone (f.eks "Hei igjen,").
+- Referer til forrige e-post (f.eks "Ville bare sjekke om du hadde sjanse til å lese min forrige e-post").
+- Avslutt med en enkel CTA (f.eks "Hører gjerne fra deg").
+${comment ? `- Tilleggsinstruksjoner: ${comment}` : ""}
+
+Format:
+Emne: Re: [forrige emne eller lignende]
+
+[brødtekst]
+
+Hilsen,
+${senderName}`
+    : `Du er en norsk salgsprofesjonell. Skriv en introduksjons-e-post.
+${leadSection}
 Avsender: ${senderName}${senderCompany ? ` fra ${senderCompany}` : ""}
 ${productSection}
 
 Krav til e-posten:
-- Maks 4–5 setninger i brødteksten
-- Skriv til bedriften, ikke til kontaktpersonen spesifikt. Bruk gjerne {{bedrift}} i hilsenen.
-- Start med "Hei," eller "Hei {{bedrift}},"
-- Start med en kort referanse til bransjen eller hva bedriften driver med.
-- Aldri skriv at du har fulgt med på bedriften, sett dem på sosiale medier, lagt merke til dem eller lignende. Det fremstår som falskt.
-- Fokuser e-posten rundt det avsender selger – ikke finn på andre produkter eller tjenester.
-- Avslutt med en enkel CTA (f.eks. be om et kort møte eller svar).
-- Naturlig, uformell og profesjonell norsk tone – ikke selgende eller generisk.
-- Unngå bindestreker som pausetegn (ikke bruk " – " eller " - " midt i setninger). Bruk heller komma eller skriv om til to setninger.
-- Ikke skriv som om avsender befinner seg i samme by som mottakeren. Avsender henvender seg utenfra, så unngå formuleringer som "her i [by]" eller "dere her i [by]".
-${comment ? `- Tilleggsinstruksjoner fra avsender: ${comment}` : ""}
-- Skriv BARE e-posten (emnelinjen og brødteksten), ingen forklaringer
+- Maks 4 setninger.
+- Start med "Hei {{bedrift}}," eller "Hei {{navn}},"
+- Introduser kort hvorfor du kontakter dem basert på salgspitchen ovenfor.
+- Naturlig og uformell tone.
+${comment ? `- Tilleggsinstruksjoner: ${comment}` : ""}
 
 Format:
-Emne: [emnetekst]
+Emne: [emne]
 
 [brødtekst]
 
-Med vennlig hilsen,
+Hilsen,
 ${senderName}`;
 
     console.log("[/api/email/generate] Calling Anthropic...");
