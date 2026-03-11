@@ -1196,31 +1196,64 @@ export default function MineLeadsPage() {
       try {
         const text = event.target?.result as string;
         // Simple CSV parse handling quotes somewhat
-        const rows = text.split("\n").map(r => r.split(",").map(c => c.replace(/^"|"$/g, "").trim()));
+        const rows = text.split("\n")
+          .filter(r => r.trim()) // filter empty lines
+          .map(r => r.split(",").map(c => c.replace(/^"|"$/g, "").trim()));
+          
         if (rows.length < 2) return;
         
+        const headers = rows[0].map(h => h.toLowerCase());
+        const getIdx = (keywords: string[]) => headers.findIndex(h => keywords.some(k => h === k || h.includes(k)));
+        
+        let nameIdx = getIdx(["bedriftsnavn", "navn", "bedrift", "company", "name"]);
+        if (nameIdx === -1) nameIdx = 0; // Assume first column
+        
+        let contactIdx = getIdx(["kontaktperson", "contact person", "contactperson"]);
+        if (contactIdx === -1 && headers.includes("kontakt")) contactIdx = headers.indexOf("kontakt");
+        
+        const locIdx = getIdx(["lokasjon", "by", "poststed", "city", "location"]);
+        const emailIdx = getIdx(["e-post", "epost", "email"]);
+        const phoneIdx = getIdx(["telefon", "tlf", "phone"]);
+        const orgIdx = getIdx(["orgnr", "org", "organisasjonsnummer"]);
+        const statusIdx = getIdx(["status", "kontaktet"]);
+        const notesIdx = getIdx(["notater", "notes", "notat"]);
+
         for (let i = 1; i < rows.length; i++) {
             const row = rows[i];
-            if (row.length < 2 || !row[1]) continue; // skip empty rows
+            if (row.length === 0 || !row[nameIdx]) continue; // skip empty rows
+            
+            let status = "Ikke kontaktet";
+            if (statusIdx >= 0) {
+              const sval = row[statusIdx]?.toLowerCase() || "";
+              if (sval === "ja" || sval === "yes" || sval === "kontaktet") status = "Kontaktet";
+              else if (["kontaktet - ikke svar", "ikke svar"].includes(sval)) status = "Kontaktet - ikke svar";
+              else if (["booket møte", "møte booket", "møte"].includes(sval)) status = "Booket møte";
+              else if (["avslått", "nei"].includes(sval)) status = "Avslått";
+              else if (["kunde", "vunnet"].includes(sval)) status = "Kunde";
+              else if (sval && ["ikke kontaktet", "kontaktet", "kontaktet - ikke svar", "booket møte", "avslått", "kunde"].includes(row[statusIdx])) {
+                 status = row[statusIdx]; // try to use it directly if it matches exactly
+              }
+            }
+
             const newLead: Lead = {
                id: crypto.randomUUID(),
-               name: row[1],
-               contactPerson: row[2] || "—",
-               email: row[3] || "—",
-               phone: row[4] || "—",
-               orgNumber: row[5] || "—",
-               status: "Ikke kontaktet",
+               name: row[nameIdx],
+               contactPerson: contactIdx >= 0 && row[contactIdx] ? row[contactIdx] : "—",
+               email: emailIdx >= 0 && row[emailIdx] ? row[emailIdx] : "—",
+               phone: phoneIdx >= 0 && row[phoneIdx] ? row[phoneIdx] : "—",
+               orgNumber: orgIdx >= 0 && row[orgIdx] ? row[orgIdx] : "—",
+               status: status,
                addedDate: new Date().toISOString().split("T")[0],
                addedBy: currentUser?.name || "Importert",
                assignedTo: currentUser?.name || "Meg",
                assignedAvatar: (currentUser?.name || "M").substring(0,2).toUpperCase(),
                industry: "Importert fra CSV",
-               city: "Ukjent",
+               city: locIdx >= 0 && row[locIdx] ? row[locIdx] : "Ukjent",
                address: "—",
                revenue: 0,
                employees: 0,
                lat: 0, lng: 0,
-               notes: row[9] || "",
+               notes: notesIdx >= 0 && row[notesIdx] ? row[notesIdx] : "",
                lastContacted: null,
             };
             // sequentially add to avoid overwhelming API immediately
