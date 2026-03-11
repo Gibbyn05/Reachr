@@ -61,7 +61,7 @@ ${senderName}`;
 
     console.log("[/api/email/generate] Calling Anthropic...");
     const message = await anthropic.messages.create({
-      model: "claude-3-5-sonnet-latest",
+      model: "claude-3-5-sonnet-20240620",
       max_tokens: 600,
       messages: [{ role: "user", content: prompt }],
     });
