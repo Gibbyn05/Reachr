@@ -123,9 +123,10 @@ export async function sendEmail({
 
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
-      throw new Error(err.error?.message ?? "Outlook-utsendelse feilet");
+      throw new Error(err.error?.message || "Outlook-utsendelse feilet");
     }
   }
 
+  console.log(`[EmailSender] Vellykket utsendelse til ${to} via ${provider}`);
   return { success: true };
 }

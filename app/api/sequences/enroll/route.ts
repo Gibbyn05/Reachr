@@ -60,8 +60,14 @@ export async function POST(req: NextRequest) {
     }).select().single();
   }
 
-  // If immediate (delay_days = 0) and first step is e-mail, send now.
-  if (isImmediate && !enrollmentResult.error && firstStep?.type === "email") {
+  if (enrollmentResult.error) {
+    console.error("[Sequences] Enrollment DB error:", enrollmentResult.error);
+    return NextResponse.json({ error: enrollmentResult.error.message, details: enrollmentResult.error.details }, { status: 500 });
+  }
+
+  // If immediate (delay_days = 0) and first step is an e-mail (has subject/body), send now.
+  const isEmail = !!(firstStep?.subject || firstStep?.body);
+  if (isImmediate && isEmail) {
     try {
       const { data: conn } = await db
         .from("email_connections")

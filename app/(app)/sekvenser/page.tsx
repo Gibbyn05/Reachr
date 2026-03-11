@@ -6,10 +6,16 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import Link from "next/link";
 
+import { useEffect } from "react";
 import { useAppStore } from "@/store/app-store";
 
 export default function SekvenserPage() {
-  const { sequences, removeSequence } = useAppStore();
+  const { sequences, removeSequence, loadSequences } = useAppStore();
+
+  useEffect(() => {
+    loadSequences();
+  }, [loadSequences]);
+
   return (
     <div className="min-h-screen pb-12">
       <TopBar title="Sekvenser" subtitle="Automatiserte e-postkampanjer (Drip campaigns)" />

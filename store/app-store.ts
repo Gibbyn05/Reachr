@@ -28,8 +28,9 @@ interface AppStore {
   pipelineStages: string[];
   setPipelineStages: (stages: string[]) => void;
   sequences: Sequence[];
-  addSequence: (seq: Sequence) => void;
-  removeSequence: (id: string) => void;
+  loadSequences: () => Promise<void>;
+  addSequence: (seq: Sequence) => Promise<void>;
+  removeSequence: (id: string) => Promise<void>;
   enrollLeadInSequence: (leadId: string, sequenceId: string | null) => Promise<void>;
 }
 
@@ -93,6 +94,7 @@ export const useAppStore = create<AppStore>()(
         const dbIds = new Set(dbLeads.map((l) => l.id));
         const pendingLeads = get().leads.filter((l) => !dbIds.has(l.id));
         set({ leads: [...dbLeads, ...pendingLeads], meetingDates });
+        get().loadSequences();
       },
 
       addLead: async (lead: Lead) => {
@@ -204,26 +206,59 @@ export const useAppStore = create<AppStore>()(
       setAvatarUrl: (url) => set({ avatarUrl: url }),
       profilePhone: "+47 22 11 22 33",
       setProfilePhone: (phone) => set({ profilePhone: phone }),
-      sidebarOpen: false,
+      sidebarOpen: true,
       setSidebarOpen: (open) => set({ sidebarOpen: open }),
       pipelineStages: DEFAULT_PIPELINE_STAGES,
       setPipelineStages: (stages) => set({ pipelineStages: stages }),
-      sequences: [
-        {
-          id: "seq-init-1",
-          name: "Standard B2B Intro-kampanje",
-          status: "Aktiv",
-          enrolled: 142,
-          replied: 31,
-          opened: 89,
-          steps: [
-            { id: "1", type: "email", subject: "Introduksjon", body: "Hei..." },
-            { id: "2", type: "wait", waitDays: 3 }
-          ]
+      sequences: [],
+      loadSequences: async () => {
+        const res = await fetch("/api/sequences");
+        if (res.ok) {
+          const { sequences } = await res.json();
+          // Map backend steps to frontend format
+          const formatted: Sequence[] = sequences.map((s: any) => ({
+            id: s.id,
+            name: s.name,
+            status: s.is_active ? "Aktiv" : "Pauset",
+            enrolled: s.activeEnrollments || 0,
+            replied: s.replied || 0,
+            opened: s.opened || 0,
+            steps: s.email_sequence_steps.map((st: any) => ({
+              id: st.id,
+              type: st.delay_days === 0 && (st.subject || st.body) ? "email" : (st.delay_days > 0 && !st.subject ? "wait" : "email"),
+              // Better logic for type: if it has subject/body it's email.
+              subject: st.subject,
+              body: st.body,
+              waitDays: st.delay_days
+            }))
+          }));
+          set({ sequences: formatted });
         }
-      ],
-      addSequence: (seq) => set((state) => ({ sequences: [...state.sequences, seq] })),
-      removeSequence: (id) => {
+      },
+      addSequence: async (seq) => {
+        const res = await fetch("/api/sequences", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: seq.name,
+            steps: seq.steps.map(s => ({
+              delayDays: s.type === "wait" ? s.waitDays : 0,
+              subject: s.subject || "",
+              body: s.body || ""
+            }))
+          }),
+        });
+        if (res.ok) {
+          const { sequence } = await res.json();
+          set((state) => ({ sequences: [...state.sequences, { ...seq, id: sequence.id }] }));
+        }
+      },
+      removeSequence: async (id) => {
+        await fetch("/api/sequences", {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id }),
+        });
         set((state) => ({
           sequences: state.sequences.filter((s) => s.id !== id),
         }));

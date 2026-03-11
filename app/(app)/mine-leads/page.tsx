@@ -1347,7 +1347,10 @@ export default function MineLeadsPage() {
 
   useEffect(() => {
     // Load leads from API when component mounts (or when currentUser changes contextually)
-    if (currentUser?.email) loadLeads();
+    if (currentUser?.email) {
+      loadLeads();
+      useAppStore.getState().loadSequences();
+    }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentUser?.email]);
 

@@ -49,14 +49,19 @@ export async function GET(req: NextRequest) {
     const { data: enrollments } = await db
       .from("email_sequence_enrollments")
       .select("lead_id, sequence_id, status")
-      .in("lead_id", leadIds)
-      .in("status", ["active", "completed"]);
+      .in("lead_id", leadIds);
 
-    const enrollMap = Object.fromEntries(enrollments?.map(e => [e.lead_id, e.sequence_id]) ?? []);
+    const enrollMap = new Map();
+    enrollments?.forEach(e => {
+      // Only keep active/completed as the primary one shown in UI
+      if (["active", "completed"].includes(e.status)) {
+        enrollMap.set(String(e.lead_id), String(e.sequence_id));
+      }
+    });
     
     const leadsWithEnrollment = leads.map(l => ({
       ...l,
-      enrolled_sequence_id: enrollMap[l.id] || null
+      enrolled_sequence_id: enrollMap.get(String(l.id)) || null
     }));
     return NextResponse.json(leadsWithEnrollment);
   }

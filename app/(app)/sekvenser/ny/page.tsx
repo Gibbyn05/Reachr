@@ -30,7 +30,8 @@ export default function NySekvensPage() {
     setSteps(steps.filter(s => s.id !== id));
   };
 
-  const saveSequence = () => {
+  const saveSequence = async () => {
+    if (!name.trim()) return toast.error("Vennligst gi sekvensen et navn");
     const newSeq: Sequence = {
       id: "seq-" + Date.now(),
       name,
@@ -40,11 +41,18 @@ export default function NySekvensPage() {
       opened: 0,
       steps
     };
-    addSequence(newSeq);
-    toast.success("Sekvensen ble lagret!");
+    
+    const promise = addSequence(newSeq);
+    toast.promise(promise, {
+      loading: "Lagrer sekvens...",
+      success: "Sekvensen ble lagret!",
+      error: "Klarte ikke lagre sekvens. Vennligst sjekk tilkoblingen."
+    });
+
+    await promise;
     setTimeout(() => {
       router.push("/sekvenser");
-    }, 1500);
+    }, 1000);
   };
 
   return (
