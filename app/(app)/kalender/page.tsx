@@ -1,7 +1,7 @@
 "use client";
 import { TopBar } from "@/components/layout/top-bar";
 import { useAppStore } from "@/store/app-store";
-import { CalendarDays, CheckCircle2, Clock, Phone, Mail, ArrowRight, User } from "lucide-react";
+import { CalendarDays, CheckCircle2, Clock, Phone, Mail, ArrowRight, User, Mic, Square } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
@@ -12,6 +12,26 @@ export default function KalenderPage() {
   const [completedTasks, setCompletedTasks] = useState<string[]>([]);
   const [showCallModal, setShowCallModal] = useState(false);
   const [showMeetingModal, setShowMeetingModal] = useState(false);
+  
+  // Audio recording state simulation
+  const [isRecording, setIsRecording] = useState(false);
+  const [transcribedText, setTranscribedText] = useState("");
+
+  const toggleRecording = () => {
+    if (isRecording) {
+      setIsRecording(false);
+      toast.success("Opptak avsluttet.");
+    } else {
+      setIsRecording(true);
+      toast.info("Lytter til samtalen...", { duration: 4000 });
+      // Simulate real-time transcription after a delay
+      setTimeout(() => {
+        setTranscribedText(prev => prev + (prev ? " " : "") + "Kunden var veldig interessert i AI-transkriberingen og ønsket et konkret pristilbud i løpet av neste uke. De vurderer oppstart om ca. to uker.");
+        setIsRecording(false);
+        toast.success("Notater ble transkribert med AI!");
+      }, 3500);
+    }
+  };
 
   // Simple task generation based on leads
   const now = new Date();
@@ -222,11 +242,34 @@ export default function KalenderPage() {
                 <label className="text-xs font-semibold text-[#a09b8f] mb-1 block">Lead / Bedrift</label>
                 <input type="text" className="w-full border border-[#d8d3c5] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#09fe94]" placeholder="Søk etter lead..." />
               </div>
-              <div>
-                <label className="text-xs font-semibold text-[#a09b8f] mb-1 block">Samtalenotater</label>
-                <textarea rows={3} className="w-full border border-[#d8d3c5] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#09fe94] resize-none" placeholder="Hva snakket dere om?"></textarea>
+              <div className="relative">
+                <div className="flex justify-between items-center mb-1">
+                  <label className="text-xs font-semibold text-[#a09b8f] block">Samtalenotater</label>
+                  <button 
+                    onClick={toggleRecording} 
+                    className={`flex items-center gap-1.5 px-2 py-1 rounded text-xs font-bold transition-colors ${
+                      isRecording ? "bg-red-100 text-red-600 animate-pulse" : "bg-blue-50 text-blue-600 hover:bg-blue-100"
+                    }`}
+                  >
+                    {isRecording ? <Square className="w-3 h-3" /> : <Mic className="w-3 h-3" />}
+                    {isRecording ? "Avslutt opptak" : "AI Transkribering"}
+                  </button>
+                </div>
+                <textarea 
+                  rows={4} 
+                  value={transcribedText}
+                  onChange={(e) => setTranscribedText(e.target.value)}
+                  className={`w-full border rounded-lg px-3 py-2 text-sm focus:outline-none transition-colors resize-none ${
+                    isRecording ? "border-blue-400 bg-blue-50/30" : "border-[#d8d3c5] focus:border-[#09fe94]"
+                  }`} 
+                  placeholder={isRecording ? "Lytter..." : "Hva snakket dere om? AI kan lytte for deg!"}
+                ></textarea>
               </div>
-              <button onClick={() => { setShowCallModal(false); toast.success("Anrop loggført i historikken."); }} className="w-full bg-[#09fe94] hover:bg-[#00e882] text-black font-bold py-2 rounded-lg transition-colors">
+              <button onClick={() => { 
+                setShowCallModal(false); 
+                setTranscribedText(""); 
+                toast.success("Anrop loggført i historikken."); 
+              }} className="w-full bg-[#09fe94] hover:bg-[#00e882] text-black font-bold py-2 rounded-lg transition-colors">
                 Lagre i historikk
               </button>
             </div>
