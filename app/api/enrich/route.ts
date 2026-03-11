@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { createClient } from "@/lib/supabase/server";
 
 const HEADERS = {
   "User-Agent":
@@ -150,6 +151,12 @@ async function try1881Search(name: string): Promise<string | null> {
 }
 
 export async function GET(request: NextRequest) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    return NextResponse.json({ error: "Ikke autorisert" }, { status: 401 });
+  }
+
   const sp = request.nextUrl.searchParams;
   const orgnr = sp.get("orgnr");
   const name = sp.get("name") ?? "";

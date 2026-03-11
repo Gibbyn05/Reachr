@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { createClient } from "@/lib/supabase/server";
 
 // Organizational form codes that are NOT real businesses (housing, associations with no commercial intent)
 const EXCLUDED_ORG_FORMS = new Set([
@@ -41,6 +42,12 @@ const EXCLUDED_NAME_PATTERNS = [
 ];
 
 export async function GET(request: NextRequest) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    return NextResponse.json({ error: "Ikke autorisert" }, { status: 401 });
+  }
+
   const sp = request.nextUrl.searchParams;
 
   const params = new URLSearchParams();

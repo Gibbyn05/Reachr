@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { createClient } from "@/lib/supabase/server";
 
 interface EmailFinderResponse {
   email: string | null;
@@ -92,6 +93,12 @@ async function fetchBrregEmail(orgNumber: string): Promise<string | null> {
 
 export async function POST(request: NextRequest) {
   try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      return NextResponse.json({ error: "Ikke autorisert" }, { status: 401 });
+    }
+
     const { website, orgNumber } = await request.json();
 
     // Step 0: Check Brreg official registry first — most reliable source

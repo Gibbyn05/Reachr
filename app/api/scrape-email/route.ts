@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { createClient } from "@/lib/supabase/server";
 
 /* ── Regex & filtrering ─────────────────────────────────── */
 const EMAIL_REGEX = /[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/g;
@@ -194,6 +195,12 @@ async function tryBing(navn: string): Promise<string | null> {
 
 /* ── Hoved-handler ───────────────────────────────────────── */
 export async function GET(req: NextRequest) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    return NextResponse.json({ error: "Ikke autorisert" }, { status: 401 });
+  }
+
   const website = req.nextUrl.searchParams.get("url") ?? "";
   const navn    = req.nextUrl.searchParams.get("navn") ?? "";
   const orgnr   = req.nextUrl.searchParams.get("orgnr") ?? "";
