@@ -1,41 +1,15 @@
 "use client";
 import { TopBar } from "@/components/layout/top-bar";
-import { Zap, Plus, ArrowRight, Settings2, Play, Users, MoreVertical, Search, MousePointerClick, Reply, FileText, Clock } from "lucide-react";
+import { Zap, Plus, ArrowRight, Settings2, Play, Users, Search, MousePointerClick, Reply, FileText, Clock, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
+import Link from "next/link";
 
-const MOCK_SEQUENCES = [
-  {
-    id: "seq-1",
-    name: "Standard B2B Intro-kampanje",
-    status: "Aktiv",
-    enrolled: 142,
-    replied: 31,
-    opened: 89,
-    steps: 3,
-  },
-  {
-    id: "seq-2",
-    name: "Oppfølging: Avslag via telefon",
-    status: "Pauset",
-    enrolled: 45,
-    replied: 8,
-    opened: 22,
-    steps: 2,
-  },
-  {
-    id: "seq-3",
-    name: "Varme leads - Nyhetsbrev",
-    status: "Aktiv",
-    enrolled: 812,
-    replied: 104,
-    opened: 580,
-    steps: 6,
-  }
-];
+import { useAppStore } from "@/store/app-store";
 
 export default function SekvenserPage() {
+  const { sequences, removeSequence } = useAppStore();
   return (
     <div className="min-h-screen pb-12">
       <TopBar title="Sekvenser" subtitle="Automatiserte e-postkampanjer (Drip campaigns)" />
@@ -57,10 +31,12 @@ export default function SekvenserPage() {
               <Settings2 className="w-4 h-4 mr-2" />
               Innstillinger
             </Button>
-            <Button variant="primary" size="md" onClick={() => toast.success("Opprettelse av sekvenser kommer snart!")}>
-              <Plus className="w-4 h-4 mr-2 text-[#171717]" />
-              <span className="text-[#171717]">Ny sekvens</span>
-            </Button>
+            <Link href="/sekvenser/ny">
+              <Button variant="primary" size="md">
+                <Plus className="w-4 h-4 mr-2 text-[#171717]" />
+                <span className="text-[#171717]">Ny sekvens</span>
+              </Button>
+            </Link>
           </div>
         </div>
 
@@ -82,9 +58,11 @@ export default function SekvenserPage() {
                 Sett salgsprosessen på autopilot. Send AI-genererte e-poster, vent i X dager, og følg opp automatisk. Sekvensen stopper av seg selv i det sekundet kunden svarer på e-posten.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 relative z-10">
-                <Button className="bg-[#09fe94] hover:bg-[#00e882] text-[#171717] font-bold border-none h-12 px-6" onClick={() => toast.success("Sekvensbygger under utvikling. Lanseres snart!")}>
-                  Prøv sekvensbyggeren <ArrowRight className="w-4 h-4 ml-2" />
-                </Button>
+                <Link href="/sekvenser/ny">
+                  <Button className="bg-[#09fe94] hover:bg-[#00e882] text-[#171717] font-bold border-none h-12 px-6">
+                    Prøv sekvensbyggeren <ArrowRight className="w-4 h-4 ml-2" />
+                  </Button>
+                </Link>
                 <Button className="bg-white/10 hover:bg-white/20 text-white border border-white/20 h-12 px-6" onClick={() => toast.info("Video-demo kommer snart!")}>
                   Se video-demo <Play className="w-4 h-4 ml-2" />
                 </Button>
@@ -130,7 +108,7 @@ export default function SekvenserPage() {
                     </div>
                     <div>
                       <p className="text-sm font-bold text-white">Steg 2: Oppfølging hvis ikke svar</p>
-                      <p className="text-xs text-white/60">"Hei igjen, sjekker bare..."</p>
+                      <p className="text-xs text-white/60">&quot;Hei igjen, sjekker bare...&quot;</p>
                     </div>
                   </div>
                 </div>
@@ -156,11 +134,17 @@ export default function SekvenserPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#e8e4d8]">
-                {MOCK_SEQUENCES.map((seq) => (
+                {sequences.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="p-8 text-center text-[#6b6660]">
+                      Du har ingen sekvenser enda. Opprett en for å komme i gang!
+                    </td>
+                  </tr>
+                ) : sequences.map((seq) => (
                   <tr key={seq.id} className="hover:bg-white transition-colors group cursor-pointer">
                     <td className="p-4 pl-6">
                       <p className="text-sm font-bold text-[#171717]">{seq.name}</p>
-                      <p className="text-xs text-[#a09b8f] mt-0.5">{seq.steps} steg totalt</p>
+                      <p className="text-xs text-[#a09b8f] mt-0.5">{seq.steps?.length || 0} steg totalt</p>
                     </td>
                     <td className="p-4">
                       <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold ${
@@ -180,17 +164,17 @@ export default function SekvenserPage() {
                       <div className="grid grid-cols-2 gap-4">
                         <div className="text-blue-600 flex items-center gap-1.5">
                           <MousePointerClick className="w-4 h-4" />
-                          {Math.round((seq.opened / seq.enrolled) * 100)}%
+                          {seq.enrolled > 0 ? Math.round((seq.opened / seq.enrolled) * 100) : 0}%
                         </div>
                         <div className="text-green-600 flex items-center gap-1.5">
                           <Reply className="w-4 h-4" />
-                          {Math.round((seq.replied / seq.enrolled) * 100)}%
+                          {seq.enrolled > 0 ? Math.round((seq.replied / seq.enrolled) * 100) : 0}%
                         </div>
                       </div>
                     </td>
                     <td className="p-4 text-right">
-                      <button className="p-2 text-gray-400 hover:text-[#171717] rounded-lg hover:bg-gray-100 transition-colors">
-                        <MoreVertical className="w-5 h-5" />
+                      <button onClick={(e) => { e.stopPropagation(); removeSequence(seq.id); toast.success("Sekvens fjernet"); }} className="p-2 text-gray-400 hover:text-red-500 rounded-lg hover:bg-red-50 transition-colors">
+                        <Trash2 className="w-5 h-5" />
                       </button>
                     </td>
                   </tr>
