@@ -1,57 +1,149 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { createServiceClient } from "@/lib/supabase/server";
+
+async function refreshGoogleToken(refreshToken: string) {
+  const res = await fetch("https://oauth2.googleapis.com/token", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({
+      refresh_token: refreshToken,
+      client_id: process.env.GOOGLE_CLIENT_ID!,
+      client_secret: process.env.GOOGLE_CLIENT_SECRET!,
+      grant_type: "refresh_token",
+    }),
+  });
+  return res.json();
+}
+
+async function refreshMicrosoftToken(refreshToken: string) {
+  const res = await fetch("https://login.microsoftonline.com/common/oauth2/v2.0/token", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({
+      refresh_token: refreshToken,
+      client_id: process.env.MICROSOFT_CLIENT_ID!,
+      client_secret: process.env.MICROSOFT_CLIENT_SECRET!,
+      grant_type: "refresh_token",
+      scope: "https://graph.microsoft.com/Mail.Read offline_access",
+    }),
+  });
+  return res.json();
+}
 
 export async function POST(req: NextRequest) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const db = createServiceClient();
+  const { data: { user } } = await db.auth.getUser();
 
   if (!user) {
     return NextResponse.json({ error: "Ikke autorisert" }, { status: 401 });
   }
 
   try {
-    // 1. Get user's email connections
-    const { data: connections, error: connError } = await supabase
+    const { data: connections } = await db
       .from("email_connections")
       .select("*")
       .eq("user_email", user.email);
 
-    if (connError || !connections || connections.length === 0) {
+    if (!connections || connections.length === 0) {
       return NextResponse.json({ error: "Ingen e-postkonto tilkoblet" }, { status: 400 });
     }
 
-    const connection = connections[0];
-    const accessToken = connection.access_token;
-    let foundReplies = 0;
+    // Get all leads for this user to match senders
+    const { data: leads } = await db
+      .from("leads")
+      .select("id, email, name")
+      .eq("user_email", user.email);
 
-    if (connection.provider === "gmail") {
-      // Basic implementation of Gmail API polling
-      // In a production app, you would use Webhooks (Pub/Sub) instead of polling,
-      // and handle token refresh with the refresh_token.
-      const q = encodeURIComponent("is:unread in:inbox");
-      const listRes = await fetch(`https://gmail.googleapis.com/gmail/v1/users/me/messages?q=${q}&maxResults=10`, {
-        headers: { Authorization: `Bearer ${accessToken}` }
-      });
+    if (!leads) return NextResponse.json({ success: true, message: "Ingen leads å sjekke mot." });
 
-      if (listRes.ok) {
-        const listData = await listRes.json();
-        const messages = listData.messages || [];
+    const leadEmailMap = new Map(leads.map(l => [l.email?.toLowerCase(), l]));
+    let foundRepliesCount = 0;
+
+    for (const conn of connections) {
+      let accessToken = conn.access_token;
+      
+      // Refresh token if needed
+      if (conn.expires_at && new Date(conn.expires_at) < new Date()) {
+        const refreshed = conn.provider === "gmail" 
+          ? await refreshGoogleToken(conn.refresh_token) 
+          : await refreshMicrosoftToken(conn.refresh_token);
         
-        // Match senders to leads simply as an example
-        // (This would normally parse the headers "From" and "Subject")
-        for (const msg of messages) {
-           // We would fetch message details, compare email addresses to DB leads,
-           // and update status to "Kunde" or "Kontaktet - Svar mottatt".
-           foundReplies++; // Mocking that we processed them
+        if (refreshed.access_token) {
+          accessToken = refreshed.access_token;
+          await db.from("email_connections").update({
+            access_token: accessToken,
+            expires_at: refreshed.expires_in ? new Date(Date.now() + refreshed.expires_in * 1000).toISOString() : null
+          }).eq("id", conn.id);
         }
-      } else {
-        console.warn("Gmail API failed, token might be expired.");
+      }
+
+      const senderEmailsFound: string[] = [];
+
+      if (conn.provider === "gmail") {
+        const listRes = await fetch(`https://gmail.googleapis.com/gmail/v1/users/me/messages?q=${encodeURIComponent("is:unread in:inbox")}&maxResults=20`, {
+          headers: { Authorization: `Bearer ${accessToken}` }
+        });
+        if (listRes.ok) {
+          const listData = await listRes.json();
+          const messages = listData.messages || [];
+          for (const msg of messages) {
+            const detailRes = await fetch(`https://gmail.googleapis.com/gmail/v1/users/me/messages/${msg.id}`, {
+              headers: { Authorization: `Bearer ${accessToken}` }
+            });
+            if (detailRes.ok) {
+              const detail = await detailRes.json();
+              const fromHeader = detail.payload.headers.find((h: any) => h.name === "From")?.value || "";
+              const match = fromHeader.match(/<(.+)>|(\S+@\S+)/);
+              const email = (match ? (match[1] || match[2]) : fromHeader).toLowerCase().trim();
+              if (email) senderEmailsFound.push(email);
+            }
+          }
+        }
+      } else if (conn.provider === "outlook") {
+        const listRes = await fetch(`https://graph.microsoft.com/v1.0/me/mailFolders/inbox/messages?$filter=isRead eq false&$top=20&$select=from`, {
+          headers: { Authorization: `Bearer ${accessToken}` }
+        });
+        if (listRes.ok) {
+          const data = await listRes.json();
+          const messages = data.value || [];
+          for (const msg of messages) {
+            const email = msg.from?.emailAddress?.address?.toLowerCase();
+            if (email) senderEmailsFound.push(email);
+          }
+        }
+      }
+
+      // Match found emails to leads and stop sequences
+      for (const email of senderEmailsFound) {
+        const lead = leadEmailMap.get(email);
+        if (lead) {
+          // 1. Update Lead Status
+          await db.from("leads").update({ 
+            status: "Kontaktet", // Or "Svar mottatt" if you have that
+            last_contacted: new Date().toISOString()
+          }).eq("id", lead.id);
+
+          // 2. Stop any active sequences for this lead
+          const { data: enrollment } = await db
+            .from("email_sequence_enrollments")
+            .update({ status: "completed" })
+            .eq("lead_id", lead.id)
+            .eq("status", "active")
+            .select();
+
+          if (enrollment && enrollment.length > 0) {
+            foundRepliesCount++;
+            console.log(`[ReplyDetection] Stopped sequence for ${lead.name} (${email})`);
+          }
+        }
       }
     }
 
     return NextResponse.json({ 
       success: true, 
-      message: `Synkronisering fullført. Analyserte innboks og sjekket opp mot leads. (Mock: Fant ${foundReplies} relevante e-poster)` 
+      message: foundRepliesCount > 0 
+        ? `Synkronisering fullført. Fant ${foundRepliesCount} svar og stoppet tilhørende sekvenser.` 
+        : "Synkronisering fullført. Ingen nye svar oppdaget." 
     });
 
   } catch (error) {
@@ -59,3 +151,4 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "En feil oppstod under synkronisering" }, { status: 500 });
   }
 }
+

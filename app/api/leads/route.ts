@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
+import { enrichLead } from "@/lib/enrichment";
 
 function getServiceClient() {
   return createServiceClient(
@@ -110,10 +111,15 @@ export async function POST(req: NextRequest) {
       added_date: body.addedDate,
       meeting_date: body.meetingDate ?? null,
     }, { onConflict: "id" });
-
+  
   if (error) {
     console.error("[POST /api/leads] upsert error:", error.message, error.details, error.hint);
     return NextResponse.json({ error: error.message, details: error.details, hint: error.hint }, { status: 500 });
   }
+
+  // Start enrichment in background (don't await)
+  enrichLead(body.id).catch(err => console.error("[Background Enrichment Error]", err));
+
   return NextResponse.json({ ok: true });
 }
+
