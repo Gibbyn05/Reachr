@@ -158,17 +158,35 @@ export async function POST(req: NextRequest) {
               const aiResponse = await anthropic.messages.create({
                 model: "claude-3-haiku-20240307",
                 max_tokens: 300,
-                system: `Du er en norsk salgsassistent. Dagens dato er ${now.toISOString().split('T')[0]}. Finn ut om kunden vil ha et møte. Analyser KUN den nyeste meldingen.`,
-                messages: [{ role: "user", content: `Analyser: "${cleanedSnippet}"\nReturner JSON: { "isMeetingRequested": boolean, "datetime": "YYYY-MM-DDTHH:mm" | null, "reason": "kort forklaring" }` }],
+                system: `Du er en norsk salgsassistent. Dagens dato er ${now.toLocaleDateString("nb-NO")}.
+                VIKTIG: Vi bruker norsk tid (Europe/Oslo). 
+                - Hvis kunden skriver "kl 17", betyr det 17:00 norsk tid.
+                - Hvis kunden skriver "kl 9", betyr det 09:00 norsk tid.
+                - Analyser KUN den nyeste meldingen.`,
+                messages: [{ 
+                  role: "user", 
+                  content: `Analyser: "${cleanedSnippet}"
+                  
+                  Returner JSON: 
+                  { 
+                    "isMeetingRequested": boolean, 
+                    "datetime": "YYYY-MM-DDTHH:mm" | null, 
+                    "reason": "kort forklaring" 
+                  }` 
+                }],
               });
+
               const analysis = JSON.parse((aiResponse.content[0] as any).text);
-              if (analysis.isMeetingRequested) {
+              if (analysis.isMeetingRequested && analysis.datetime) {
                 status = "Booket møte";
-                meetingDate = analysis.datetime;
+                // Append Norwegian offset (+01:00 for winter) to ensure correct storage
+                meetingDate = `${analysis.datetime}:00+01:00`;
                 aiReason = analysis.reason;
                 foundMeetingsCount++;
               }
-            } catch (e) {}
+            } catch (e) {
+              console.error("[Sync] AI Error:", e);
+            }
           }
 
           const nowStr = new Date().toLocaleString("nb-NO");

@@ -608,7 +608,13 @@ function LeadRow({
     try {
       const d = new Date(dt);
       if (isNaN(d.getTime())) return "";
-      return d.toISOString().slice(0, 16); // format for datetime-local: YYYY-MM-DDTHH:mm
+      // Manual adjustment to get local YYYY-MM-DDTHH:mm for the input field
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, "0");
+      const day = String(d.getDate()).padStart(2, "0");
+      const hour = String(d.getHours()).padStart(2, "0");
+      const min = String(d.getMinutes()).padStart(2, "0");
+      return `${year}-${month}-${day}T${hour}:${min}`;
     } catch { return ""; }
   };
 
