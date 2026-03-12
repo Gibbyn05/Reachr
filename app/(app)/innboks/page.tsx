@@ -45,6 +45,15 @@ export default function InboxPage() {
   const [search, setSearch] = useState("");
   const [selectedEmail, setSelectedEmail] = useState<Email | null>(null);
   const [starredIds, setStarredIds] = useState<Set<string>>(new Set());
+  const [isReplying, setIsReplying] = useState(false);
+  const [replyBody, setReplyBody] = useState("");
+  const [sending, setSending] = useState(false);
+
+  useEffect(() => {
+    // Reset reply state when email changes
+    setIsReplying(false);
+    setReplyBody("");
+  }, [selectedEmail?.id]);
 
   const handleStar = (id: string, e?: React.MouseEvent) => {
     e?.stopPropagation();
@@ -74,7 +83,43 @@ export default function InboxPage() {
   };
 
   const handleReply = () => {
-    toast.info("Svar-funksjonalitet kommer snart! Foreløpig kan du svare direkte fra Gmail/Outlook.");
+    setIsReplying(true);
+    // Focus or scroll to reply area could be added
+  };
+
+  const sendReply = async () => {
+    if (!selectedEmail || !replyBody.trim()) return;
+    setSending(true);
+    try {
+      const toMatch = selectedEmail.from.match(/<(.+)>|(\S+@\S+)/);
+      const to = toMatch ? (toMatch[1] || toMatch[2]) : selectedEmail.from;
+      
+      const res = await fetch("/api/email/send", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          provider: selectedEmail.provider,
+          to: to.trim(),
+          subject: selectedEmail.subject.toLowerCase().startsWith("re:") 
+            ? selectedEmail.subject 
+            : `Re: ${selectedEmail.subject}`,
+          body: replyBody
+        })
+      });
+      
+      const data = await res.json();
+      if (data.success) {
+        toast.success("Svar sendt!");
+        setIsReplying(false);
+        setReplyBody("");
+      } else {
+        toast.error(data.error || "Kunne ikke sende svar.");
+      }
+    } catch (e) {
+      toast.error("En feil oppstod under sending.");
+    } finally {
+      setSending(false);
+    }
   };
 
   const fetchEmails = async (isRefresh = false) => {
@@ -291,27 +336,67 @@ export default function InboxPage() {
               </div>
 
               <div className="flex-1 p-8 overflow-y-auto">
-                <div className="max-w-2xl mx-auto">
-                   <div className="text-sm text-[#171717] leading-relaxed whitespace-pre-wrap">
+                <div className="max-w-3xl mx-auto pb-12">
+                   <div className="text-sm text-[#171717] leading-relaxed whitespace-pre-wrap mb-8">
                       {selectedEmail.snippet}
-                      <div className="mt-8 pt-8 border-t border-[#e8e4d8] text-xs text-[#a09b8f] italic">
-                         Merk: Dette er en forhåndsvisning av meldingen. Svar-funksjonalitet kommer snart.
-                      </div>
                    </div>
+
+                   {/* Reply Area */}
+                   {isReplying ? (
+                     <div className="bg-[#faf8f2] border border-[#09fe94]/40 rounded-2xl p-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                        <div className="flex items-center gap-2 mb-3">
+                           <Reply className="w-4 h-4 text-[#05c472]" />
+                           <span className="text-xs font-bold text-[#171717]">Svarer til: {selectedEmail.from}</span>
+                        </div>
+                        <textarea
+                          value={replyBody}
+                          onChange={(e) => setReplyBody(e.target.value)}
+                          placeholder="Skriv ditt svar her..."
+                          className="w-full bg-white border border-[#d8d3c5] rounded-xl p-4 text-sm min-h-[200px] focus:outline-none focus:border-[#09fe94] transition-all resize-none shadow-inner"
+                          autoFocus
+                        />
+                        <div className="flex justify-end gap-2 mt-4">
+                           <Button 
+                             variant="ghost" 
+                             size="sm" 
+                             onClick={() => setIsReplying(false)}
+                             className="text-[#6b6660]"
+                           >
+                             Avbryt
+                           </Button>
+                           <Button 
+                             variant="primary" 
+                             size="sm" 
+                             className="bg-[#171717] text-[#09fe94] font-bold px-6"
+                             onClick={sendReply}
+                             disabled={sending || !replyBody.trim()}
+                           >
+                              {sending ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Send className="w-4 h-4 mr-2" />}
+                              Send svar
+                           </Button>
+                        </div>
+                     </div>
+                   ) : (
+                     <div className="pt-8 border-t border-[#e8e4d8] text-xs text-[#a09b8f] italic">
+                        Klikk på knappen under for å svare på denne meldingen.
+                     </div>
+                   )}
                 </div>
               </div>
 
-              {/* Action Floating Bar */}
-              <div className="p-4 border-t border-[#e8e4d8] bg-white flex items-center justify-center gap-3 sticky bottom-0">
-                  <Button variant="primary" className="bg-[#09fe94] text-black font-bold h-11 px-8" onClick={handleReply}>
-                     <Reply className="w-4 h-4 mr-2" />
-                     Svar på e-post
-                  </Button>
-                  <Button variant="outline" className="border-[#d8d3c5] h-11 px-8" onClick={handleReply}>
-                     <Send className="w-4 h-4 mr-2" />
-                     Videresend
-                  </Button>
-              </div>
+              {/* Action Floating Bar - Hidden when replying to avoid clutter */}
+              {!isReplying && (
+                <div className="p-4 border-t border-[#e8e4d8] bg-white flex items-center justify-center gap-3 sticky bottom-0 z-10 shadow-sm">
+                    <Button variant="primary" className="bg-[#09fe94] text-black font-bold h-11 px-8 hover:scale-105 transition-transform" onClick={handleReply}>
+                       <Reply className="w-4 h-4 mr-2" />
+                       Svar på e-post
+                    </Button>
+                    <Button variant="outline" className="border-[#d8d3c5] h-11 px-8" onClick={() => toast.info("Videresending kommer!")}>
+                       <Send className="w-4 h-4 mr-2" />
+                       Videresend
+                    </Button>
+                </div>
+              )}
             </div>
           )}
         </div>
