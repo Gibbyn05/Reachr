@@ -187,7 +187,7 @@ export default function KalenderPage() {
   const upcomingTasks = tasks.filter((t) => !t.isToday);
 
   return (
-    <div className="min-h-screen bg-[#F8F9FC] dark:bg-[#0a0a0a]">
+    <div className="min-h-screen bg-[#F8F9FC] dark:bg-[#0a0a0a] transition-colors duration-500">
       <TopBar title="Oppgaver & Kalender" subtitle="Loggfør anrop, book møter og følg opp dine leads" />
 
       <div className="p-4 sm:p-8 max-w-7xl mx-auto">
@@ -312,7 +312,7 @@ export default function KalenderPage() {
               )}
             </div>
             
-            <div className="bg-white/50 dark:bg-[#141414]/50 border border-[#e8e4d8] dark:border-[#262626] rounded-[2rem] p-8 shadow-sm backdrop-blur-sm">
+            <div className="bg-white dark:bg-[#141414] border border-[#e8e4d8] dark:border-[#262626] rounded-[2rem] p-8 shadow-sm">
               <h2 className="text-lg font-black text-[#171717] dark:text-white flex items-center gap-2 mb-6">
                 <CalendarDays className="w-6 h-6 text-blue-500" />
                 Planlagt (Senere)
@@ -377,11 +377,11 @@ export default function KalenderPage() {
             <div className="grid grid-cols-3 lg:grid-cols-1 gap-3">
                <button 
                  onClick={() => setShowCallModal(true)} 
-                 className="group relative overflow-hidden bg-[#171717] dark:bg-[#1a1a1a] text-white p-4 rounded-2xl flex flex-col gap-3 hover:scale-[1.02] active:scale-95 transition-all shadow-lg"
+                 className="group relative overflow-hidden bg-[#09fe94] dark:bg-[#1a1a1a] text-black dark:text-white p-4 rounded-2xl flex flex-col gap-3 hover:scale-[1.02] active:scale-95 transition-all shadow-lg"
                >
-                 <div className="absolute top-0 right-0 w-16 h-16 bg-[#09fe94]/10 rounded-full -mr-8 -mt-8 transition-transform group-hover:scale-150" />
-                 <div className="p-2.5 bg-white/10 rounded-xl w-fit">
-                    <Phone className="w-5 h-5 text-[#09fe94]" />
+                 <div className="absolute top-0 right-0 w-16 h-16 bg-black/5 dark:bg-[#09fe94]/10 rounded-full -mr-8 -mt-8 transition-transform group-hover:scale-150" />
+                 <div className="p-2.5 bg-black/10 dark:bg-white/10 rounded-xl w-fit">
+                    <Phone className="w-5 h-5 text-black dark:text-[#09fe94]" />
                  </div>
                  <span className="text-[11px] lg:text-sm font-black text-left">Loggfør anrop</span>
                </button>
