@@ -71,15 +71,14 @@ export async function POST(req: NextRequest) {
     let totalUnreadMessagesSeen = 0;
     let detectedSenderEmails: string[] = [];
     let apiDiagnostics: string[] = [];
+    let foundMeetingsCount = 0;
 
     for (const conn of connections) {
       let accessToken = conn.access_token;
-      console.log(`[Sync] Checking ${conn.provider} for user ${user.email} (Account: ${conn.email_address})`);
       
       // Refresh token if needed
       if (conn.expires_at && new Date(conn.expires_at) < new Date()) {
         try {
-          console.log(`[Sync] Token expired for ${conn.provider}, refreshing...`);
           const refreshed = conn.provider === "gmail" 
             ? await refreshGoogleToken(conn.refresh_token) 
             : await refreshMicrosoftToken(conn.refresh_token);
@@ -90,13 +89,9 @@ export async function POST(req: NextRequest) {
               access_token: accessToken,
               expires_at: refreshed.expires_in ? new Date(Date.now() + refreshed.expires_in * 1000).toISOString() : null
             }).eq("id", conn.id);
-            console.log(`[Sync] Token refreshed successfully`);
-          } else {
-            apiDiagnostics.push(`${conn.provider}: Kunne ikke fornye tilgang (re-autentiser i innstillinger)`);
-            continue;
           }
         } catch (e) {
-          apiDiagnostics.push(`${conn.provider}: Feil under token-fornyelse`);
+          apiDiagnostics.push(`${conn.provider}: Token refresh failed`);
           continue;
         }
       }
@@ -125,20 +120,14 @@ export async function POST(req: NextRequest) {
                 const fromHeader = headers.find((h: any) => h.name.toLowerCase() === "from")?.value || "";
                 const match = fromHeader.match(/<(.+)>|(\S+@\S+)/);
                 const email = (match ? (match[1] || match[2]) : fromHeader).toLowerCase().trim();
-                
                 if (email) {
                   detectedSenderEmails.push(email);
                   foundConversations.push({ email, snippet: detail.snippet || "" });
                 }
               }
             }
-          } else if (listRes.status === 403) {
-            apiDiagnostics.push("Gmail: Mangler tilgang (vennligst koble til på nytt i innstillinger)");
-          } else {
-            apiDiagnostics.push(`Gmail API feil: ${listRes.status}`);
           }
         } else if (conn.provider === "outlook") {
-          // Broad search in messages for unread
           const listRes = await fetch(`https://graph.microsoft.com/v1.0/me/messages?$filter=isRead eq false&$top=15&$select=from,bodyPreview`, {
             headers: { Authorization: `Bearer ${accessToken}` }
           });
@@ -146,7 +135,6 @@ export async function POST(req: NextRequest) {
             const data = await listRes.json();
             const messages = data.value || [];
             totalUnreadMessagesSeen += messages.length;
-            
             for (const msg of messages) {
               const email = msg.from?.emailAddress?.address?.toLowerCase().trim();
               if (email) {
@@ -154,35 +142,26 @@ export async function POST(req: NextRequest) {
                 foundConversations.push({ email, snippet: msg.bodyPreview || "" });
               }
             }
-          } else {
-            apiDiagnostics.push(`Outlook API feil: ${listRes.status}`);
           }
         }
-      } catch (e) {
-        apiDiagnostics.push(`${conn.provider}: Nettverksfeil under henting`);
-      }
+      } catch (e) { console.error(e); }
 
-      // Match found emails to leads
       for (const conv of foundConversations) {
         const lead = leadEmailMap.get(conv.email);
-        
         if (lead) {
-          console.log(`[Sync] Match funnet! Lead: ${lead.name} (${conv.email})`);
           foundRepliesCount++;
-
           let status = "Kontaktet";
           let meetingDate = null;
 
-          // AI Intent Detection (if enabled)
           if (process.env.ANTHROPIC_API_KEY) {
             try {
               const aiResponse = await anthropic.messages.create({
                 model: "claude-3-haiku-20240307",
-                max_tokens: 200,
-                system: "Du er en AI som analyserer e-poster for å se om noen vil ha et møte. Svar KUN med JSON.",
+                max_tokens: 300,
+                system: "Du er en norsk salgsassistent som tolker e-poster. Mål: finne ut om kunden vil ha et møte/prat. Dato/tid skal i ISO format (YYYY-MM-DDTHH:mm). Bruk 09:00 hvis tid mangler.",
                 messages: [{
                   role: "user", 
-                  content: `Analyser: "${conv.snippet}". Svar: {"isMeetingRequested": boolean, "date": string | null (YYYY-MM-DD), "summary": string}`
+                  content: `E-post: "${conv.snippet}"\n\nReturner JSON: {"isMeetingRequested": boolean, "datetime": string | null, "reason": "norsk forklaring"}`
                 }],
               });
 
@@ -191,21 +170,22 @@ export async function POST(req: NextRequest) {
 
               if (analysis.isMeetingRequested) {
                 status = "Booket møte";
-                meetingDate = analysis.date;
+                meetingDate = analysis.datetime;
+                foundMeetingsCount++;
               }
             } catch (e) {
               console.error("[Sync] AI Error:", e);
             }
           }
 
-          // 1. Update Lead
+          // Update Lead
           await db.from("leads").update({ 
             status: status,
             meeting_date: meetingDate || lead.meeting_date,
             last_contacted: new Date().toISOString()
           }).eq("id", lead.id);
 
-          // 2. Stop sequence
+          // Stop sequence
           await db.from("email_sequence_enrollments")
             .update({ status: "completed" })
             .eq("lead_id", lead.id)
@@ -215,35 +195,25 @@ export async function POST(req: NextRequest) {
     }
 
     if (foundRepliesCount > 0) {
-      return NextResponse.json({ 
-        success: true, 
-        message: `Vellykket! Fant svar fra ${foundRepliesCount} leads og oppdaterte status.` 
-      });
+      let msg = `Vellykket! Fant svar fra ${foundRepliesCount} leads.`;
+      if (foundMeetingsCount > 0) {
+        msg += ` 🎯 Fant ${foundMeetingsCount} nye møteforespørsler!`;
+      }
+      return NextResponse.json({ success: true, message: msg });
     }
 
-    // Diagnostics if nothing was matched
-    let message = "Ingen nye svar ble oppdaget.";
-    
-    if (totalUnreadMessagesSeen > 0) {
-      // Get unique emails detected
-      const uniqueSenders = Array.from(new Set(detectedSenderEmails));
-      message = `Fant ${totalUnreadMessagesSeen} uleste e-poster fra: ${uniqueSenders.slice(0, 3).join(", ")}. Ingen av disse samsvarer med dine leads i Reachr. Sjekk at e-posten på leadet er helt riktig.`;
-    } else if (apiDiagnostics.length > 0) {
-      message = `Problemer med tilkobling: ${apiDiagnostics.join(", ")}`;
-    } else {
-      message = "Ingen uleste e-poster ble funnet i din innboks. Pass på at svar-mailen ligger som 'ulest' for at Reachr skal se den.";
-    }
+    let report = totalUnreadMessagesSeen > 0 
+      ? `Fant ${totalUnreadMessagesSeen} uleste e-poster, men ingen var fra dine leads.` 
+      : "Ingen uleste e-poster funnet i din innboks.";
 
-    return NextResponse.json({ 
-      success: true, 
-      message: message
-    });
+    return NextResponse.json({ success: true, message: report });
 
   } catch (error) {
     console.error("Email sync error:", error);
-    return NextResponse.json({ error: "En uventet feil oppstod under synkronisering" }, { status: 500 });
+    return NextResponse.json({ error: "En feil oppstod under synkronisering" }, { status: 500 });
   }
 }
+
 
 
 

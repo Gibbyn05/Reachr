@@ -949,16 +949,25 @@ function LeadRow({
                       onChange={(e) => onLastContactedChange(lead.id, e.target.value || null)}
                       className="text-sm border border-[#d8d3c5] rounded-lg px-2 py-1.5 text-gray-700 focus:outline-none focus:border-[#09fe94]/60 bg-[#faf8f2] w-full"
                     />
-                    {lead.lastContacted && (
-                      <button
-                        onClick={() => onLastContactedChange(lead.id, null)}
-                        className="text-xs text-[#a09b8f] hover:text-[#6b6660] mt-1 underline"
-                      >
-                        Nullstill dato
-                      </button>
-                    )}
                   </div>
+
+                  {/* Meeting date */}
+                  {(lead.status === "Booket møte" || meetingDate) && (
+                    <div className="mt-4 p-3 bg-purple-50 rounded-xl border border-purple-100">
+                      <p className="text-xs font-bold text-purple-700 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                        <Calendar className="w-3.5 h-3.5" /> Planlagt møte
+                      </p>
+                      <input
+                        type="datetime-local"
+                        value={meetingDate || ""}
+                        onChange={(e) => onMeetingDateSave(lead.id, e.target.value)}
+                        className="text-sm border border-purple-200 rounded-lg px-2 py-1.5 text-purple-900 focus:outline-none focus:border-purple-400 bg-white w-full"
+                      />
+                      <p className="text-[10px] text-purple-500 mt-1">Automatisk oppdaget fra e-post eller satt manuelt.</p>
+                    </div>
+                  )}
                 </div>
+
 
                 {/* Notes */}
                 <div>
