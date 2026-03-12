@@ -45,7 +45,6 @@ export async function POST(req: NextRequest) {
 
   const db = createServiceClient();
   try {
-
     const { data: connections } = await db
       .from("email_connections")
       .select("*")
@@ -55,7 +54,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Ingen e-postkonto tilkoblet" }, { status: 400 });
     }
 
-    // Get all leads for this user to match senders
     const { data: leads } = await db
       .from("leads")
       .select("id, email, name, meeting_date, notes")
@@ -64,18 +62,15 @@ export async function POST(req: NextRequest) {
     if (!leads) return NextResponse.json({ success: true, message: "Ingen leads å sjekke mot." });
 
     const leadEmailMap = new Map(leads.map(l => [l.email?.toLowerCase().trim(), l]));
-    const monitoredEmails = Array.from(leadEmailMap.keys());
-
+    
     let foundRepliesCount = 0;
-    let totalUnreadMessagesSeen = 0;
-    let detectedSenderEmails: string[] = [];
-    let apiDiagnostics: string[] = [];
     let foundMeetingsCount = 0;
+    let totalUnreadMessagesSeen = 0;
 
     for (const conn of connections) {
       let accessToken = conn.access_token;
       
-      // Refresh token if needed
+      // Refresh token if expired
       if (conn.expires_at && new Date(conn.expires_at) < new Date()) {
         try {
           const refreshed = conn.provider === "gmail" 
@@ -89,13 +84,10 @@ export async function POST(req: NextRequest) {
               expires_at: refreshed.expires_in ? new Date(Date.now() + refreshed.expires_in * 1000).toISOString() : null
             }).eq("id", conn.id);
           }
-        } catch (e) {
-          apiDiagnostics.push(`${conn.provider}: Token refresh failed`);
-          continue;
-        }
+        } catch (e) { continue; }
       }
 
-      const foundConversations: { email: string, snippet: string }[] = [];
+      const foundConversations: { id: string, provider: string, email: string, snippet: string }[] = [];
 
       try {
         if (conn.provider === "gmail") {
@@ -103,31 +95,25 @@ export async function POST(req: NextRequest) {
           const listRes = await fetch(`https://gmail.googleapis.com/gmail/v1/users/me/messages?q=${q}&maxResults=15`, {
             headers: { Authorization: `Bearer ${accessToken}` }
           });
-          
           if (listRes.ok) {
             const listData = await listRes.json();
             const messages = listData.messages || [];
             totalUnreadMessagesSeen += messages.length;
-            
             for (const msg of messages) {
               const detailRes = await fetch(`https://gmail.googleapis.com/gmail/v1/users/me/messages/${msg.id}`, {
                 headers: { Authorization: `Bearer ${accessToken}` }
               });
               if (detailRes.ok) {
                 const detail = await detailRes.json();
-                const headers = detail.payload.headers;
-                const fromHeader = headers.find((h: any) => h.name.toLowerCase() === "from")?.value || "";
+                const fromHeader = detail.payload.headers.find((h: any) => h.name.toLowerCase() === "from")?.value || "";
                 const match = fromHeader.match(/<(.+)>|(\S+@\S+)/);
                 const email = (match ? (match[1] || match[2]) : fromHeader).toLowerCase().trim();
-                if (email) {
-                  detectedSenderEmails.push(email);
-                  foundConversations.push({ email, snippet: detail.snippet || "" });
-                }
+                if (email) foundConversations.push({ id: msg.id, provider: "gmail", email, snippet: detail.snippet || "" });
               }
             }
           }
         } else if (conn.provider === "outlook") {
-          const listRes = await fetch(`https://graph.microsoft.com/v1.0/me/messages?$filter=isRead eq false&$top=15&$select=from,bodyPreview`, {
+          const listRes = await fetch(`https://graph.microsoft.com/v1.0/me/messages?$filter=isRead eq false&$top=15&$select=from,id,bodyPreview`, {
             headers: { Authorization: `Bearer ${accessToken}` }
           });
           if (listRes.ok) {
@@ -136,41 +122,35 @@ export async function POST(req: NextRequest) {
             totalUnreadMessagesSeen += messages.length;
             for (const msg of messages) {
               const email = msg.from?.emailAddress?.address?.toLowerCase().trim();
-              if (email) {
-                detectedSenderEmails.push(email);
-                foundConversations.push({ email, snippet: msg.bodyPreview || "" });
-              }
+              if (email) foundConversations.push({ id: msg.id, provider: "outlook", email, snippet: msg.bodyPreview || "" });
             }
           }
         }
-      } catch (e) { console.error(e); }
+      } catch (e) { console.error("[Sync] Fetch failed:", e); }
 
       for (const conv of foundConversations) {
         const lead = leadEmailMap.get(conv.email);
         if (lead) {
           foundRepliesCount++;
+
+          // Cleaning
+          let cleanedSnippet = (conv.snippet || "").trim();
+          const threadMarkers = [/\nOn\s.*\swrote:/i, /\sOn\s.*\swrote:/i, /\nDen\s.*\sskrev:/i, /\sDen\s.*\sskrev:/i, /---------- Forwarded message ---------/i, /From:.*@/i];
+          for (const marker of threadMarkers) {
+            const match = cleanedSnippet.match(marker);
+            if (match) cleanedSnippet = cleanedSnippet.substring(0, match.index).trim();
+          }
+
+          // Dedupe: If snippet already in notes, skip adding it
+          if (lead.notes && lead.notes.includes(cleanedSnippet.substring(0, 40))) {
+            // Still mark as read so we don't look at it again
+            await markAsRead(conv.id, conv.provider, accessToken);
+            continue;
+          }
+
           let status = "Kontaktet";
           let meetingDate = null;
           let aiReason = "";
-
-          // Clean the snippet to remove email history/threads
-          let cleanedSnippet = conv.snippet;
-          const threadMarkers = [
-            /\nOn\s.*\swrote:/i,
-            /\sOn\s.*\swrote:/i,
-            /\nDen\s.*\sskrev:/i,
-            /\sDen\s.*\sskrev:/i,
-            /---------- Forwarded message ---------/i,
-            /From:.*@/i,
-            /________________________________/
-          ];
-          
-          for (const marker of threadMarkers) {
-            const index = cleanedSnippet.search(marker);
-            if (index !== -1) {
-              cleanedSnippet = cleanedSnippet.substring(0, index).trim();
-            }
-          }
 
           if (process.env.ANTHROPIC_API_KEY) {
             try {
@@ -178,92 +158,70 @@ export async function POST(req: NextRequest) {
               const aiResponse = await anthropic.messages.create({
                 model: "claude-3-haiku-20240307",
                 max_tokens: 300,
-                system: `Du er en norsk salgsassistent. Dagens dato er ${now.toISOString().split('T')[0]}. Din jobb er å finne ut om kunden vil ha et møte. 
-                
-                Instrukser:
-                1. Analyser KUN den nyeste meldingen (ignorer tidligere samtalehistorikk).
-                2. "kl 17" betyr 17:00.
-                3. Bruk ISO format: YYYY-MM-DDTHH:mm.`,
-                messages: [{
-                  role: "user", 
-                  content: `Analyser dette svaret: "${cleanedSnippet}"
-                  
-                  Returner kun JSON:
-                  {
-                    "isMeetingRequested": boolean,
-                    "datetime": "YYYY-MM-DDTHH:mm" | null,
-                    "reason": "kort forklaring på norsk"
-                  }`
-                }],
+                system: `Du er en norsk salgsassistent. Dagens dato er ${now.toISOString().split('T')[0]}. Finn ut om kunden vil ha et møte. Analyser KUN den nyeste meldingen.`,
+                messages: [{ role: "user", content: `Analyser: "${cleanedSnippet}"\nReturner JSON: { "isMeetingRequested": boolean, "datetime": "YYYY-MM-DDTHH:mm" | null, "reason": "kort forklaring" }` }],
               });
-
-              const content = aiResponse.content[0].type === 'text' ? aiResponse.content[0].text : '';
-              const analysis = JSON.parse(content);
-
+              const analysis = JSON.parse((aiResponse.content[0] as any).text);
               if (analysis.isMeetingRequested) {
                 status = "Booket møte";
                 meetingDate = analysis.datetime;
                 aiReason = analysis.reason;
                 foundMeetingsCount++;
               }
-            } catch (e) {
-              console.error("[Sync] AI Error:", e);
+            } catch (e) {}
+          }
+
+          const nowStr = new Date().toLocaleString("nb-NO");
+          let newNoteText = `Svar mottatt (${nowStr}): "${cleanedSnippet}"`;
+          if (status === "Booket møte" && meetingDate) {
+            if (lead.meeting_date === meetingDate) {
+              newNoteText = `Gjentatt bekreftelse på møte (${nowStr}): "${cleanedSnippet}"`;
+            } else {
+              const displayDate = new Date(meetingDate).toLocaleString("nb-NO", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" });
+              newNoteText = `🎯 MØTE BOOKET (${nowStr})\nTid: ${displayDate}\nBeskrivelse: ${aiReason || "Møteforespørsel"}\n\nSvar: "${cleanedSnippet}"`;
             }
           }
 
-          // Create Note
-          const nowStr = new Date().toLocaleString("nb-NO");
-          let newNoteContent = `Svar mottatt via e-post (${nowStr}):\n"${cleanedSnippet}"`;
+          const combined = lead.notes && lead.notes !== "—" ? `${newNoteText}\n\n---\n\n${lead.notes}` : newNoteText;
           
-          if (status === "Booket møte" && meetingDate) {
-            const displayDate = new Date(meetingDate).toLocaleString("nb-NO", {
-              day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit"
-            });
-            newNoteContent = `🎯 MØTE BOOKET (${nowStr})\n Foreslått tid: ${displayDate}\n Beskrivelse: ${aiReason}\n\nSvar: "${cleanedSnippet}"`;
-          }
-
-          const combinedNotes = lead.notes && lead.notes !== "—"
-            ? `${newNoteContent}\n\n---\n\n${lead.notes}`
-            : newNoteContent;
-
-          // Update Lead
           await db.from("leads").update({ 
             status: status,
             meeting_date: meetingDate || lead.meeting_date,
             last_contacted: new Date().toISOString(),
-            notes: combinedNotes
+            notes: combined
           }).eq("id", lead.id);
 
-          // Stop sequence
-          await db.from("email_sequence_enrollments")
-            .update({ status: "completed" })
-            .eq("lead_id", lead.id)
-            .eq("status", "active");
+          await markAsRead(conv.id, conv.provider, accessToken);
+          
+          await db.from("email_sequence_enrollments").update({ status: "completed" }).eq("lead_id", lead.id).eq("status", "active");
         }
       }
     }
 
-
     if (foundRepliesCount > 0) {
-      let msg = `Vellykket! Fant svar fra ${foundRepliesCount} leads.`;
-      if (foundMeetingsCount > 0) {
-        msg += ` 🎯 Fant ${foundMeetingsCount} nye møteforespørsler!`;
-      }
-      return NextResponse.json({ success: true, message: msg });
+      return NextResponse.json({ success: true, message: `Fant svar fra ${foundRepliesCount} leads.${foundMeetingsCount > 0 ? ` 🎯 ${foundMeetingsCount} møter booket!` : ""}` });
     }
-
-    let report = totalUnreadMessagesSeen > 0 
-      ? `Fant ${totalUnreadMessagesSeen} uleste e-poster, men ingen var fra dine leads.` 
-      : "Ingen uleste e-poster funnet i din innboks.";
-
-    return NextResponse.json({ success: true, message: report });
+    return NextResponse.json({ success: true, message: totalUnreadMessagesSeen > 0 ? `Sett ${totalUnreadMessagesSeen} e-poster, men ingen fra leads.` : "Ingen nye e-poster." });
 
   } catch (error) {
-    console.error("Email sync error:", error);
-    return NextResponse.json({ error: "En feil oppstod under synkronisering" }, { status: 500 });
+    return NextResponse.json({ error: "Feil under synk" }, { status: 500 });
   }
 }
 
-
-
-
+async function markAsRead(id: string, provider: string, token: string) {
+  try {
+    if (provider === "gmail") {
+      await fetch(`https://gmail.googleapis.com/gmail/v1/users/me/messages/${id}/modify`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ removeLabelIds: ["UNREAD"] })
+      });
+    } else {
+      await fetch(`https://graph.microsoft.com/v1.0/me/messages/${id}`, {
+        method: "PATCH",
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ isRead: true })
+      });
+    }
+  } catch (e) {}
+}
