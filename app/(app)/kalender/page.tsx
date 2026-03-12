@@ -1,21 +1,28 @@
 "use client";
 import { TopBar } from "@/components/layout/top-bar";
 import { useAppStore } from "@/store/app-store";
-import { CalendarDays, CheckCircle2, Clock, Phone, Mail, ArrowRight, User, Mic, Square } from "lucide-react";
+import { CalendarDays, CheckCircle2, Clock, Phone, Mail, ArrowRight, User, Mic, Square, Search } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
 import { toast } from "sonner";
 
 export default function KalenderPage() {
-  const { leads, meetingDates } = useAppStore();
+  const { leads, meetingDates, updateLeadNotes } = useAppStore();
   const [completedTasks, setCompletedTasks] = useState<string[]>([]);
   const [showCallModal, setShowCallModal] = useState(false);
   const [showMeetingModal, setShowMeetingModal] = useState(false);
   
-  // Audio recording state simulation
+  // Audio recording & Lead select state
   const [isRecording, setIsRecording] = useState(false);
   const [transcribedText, setTranscribedText] = useState("");
+  const [selectedLeadId, setSelectedLeadId] = useState("");
+  const [leadSearch, setLeadSearch] = useState("");
+
+  const filteredLeadsForSelect = leads.filter(l => 
+    l.name.toLowerCase().includes(leadSearch.toLowerCase()) ||
+    l.contactPerson?.toLowerCase().includes(leadSearch.toLowerCase())
+  );
 
   const toggleRecording = () => {
     if (isRecording) {
@@ -24,16 +31,43 @@ export default function KalenderPage() {
     } else {
       setIsRecording(true);
       toast.info("Lytter til samtalen...", { duration: 4000 });
-      // Simulate real-time transcription after a delay
       setTimeout(() => {
-        setTranscribedText(prev => prev + (prev ? " " : "") + "Kunden var veldig interessert i AI-transkriberingen og ønsket et konkret pristilbud i løpet av neste uke. De vurderer oppstart om ca. to uker.");
         setIsRecording(false);
-        toast.success("Notater ble transkribert med AI!");
-      }, 3500);
+        if (!transcribedText) {
+          setTranscribedText("Sammendrag: Kunden er interessert i oppfølging. (Demo-tekst)");
+        }
+        toast.success("AI ferdig med å lytte!");
+      }, 3000);
     }
   };
 
-  // Simple task generation based on leads
+  const handleSaveCall = async () => {
+    if (!selectedLeadId) {
+      toast.error("Vennligst velg en bedrift først.");
+      return;
+    }
+    const lead = leads.find(l => l.id === selectedLeadId);
+    if (!lead) return;
+
+    const nowStr = new Date().toLocaleString("nb-NO");
+    const newNote = `📞 Loggført anrop (${nowStr}):\n${transcribedText}`;
+    const combined = lead.notes && lead.notes !== "—" 
+      ? `${newNote}\n\n---\n\n${lead.notes}` 
+      : newNote;
+    
+    try {
+      await updateLeadNotes(selectedLeadId, combined);
+      setShowCallModal(false);
+      setTranscribedText("");
+      setSelectedLeadId("");
+      setLeadSearch("");
+      toast.success(`Samtale med ${lead.name} er loggført!`);
+    } catch (err) {
+      toast.error("Kunne ikke lagre samtalen.");
+    }
+  };
+
+  // Task generation
   const now = new Date();
   const todayStr = now.toISOString().split("T")[0];
   
@@ -170,7 +204,7 @@ export default function KalenderPage() {
             <div className="bg-[#faf8f2] border border-[#d8d3c5] rounded-xl p-6 shadow-sm opacity-80">
               <h2 className="text-base font-bold text-[#171717] flex items-center gap-2 mb-4">
                 <CalendarDays className="w-5 h-5 text-blue-500" />
-                Kommende (Senere)
+                Planlagt (Senere)
               </h2>
               {upcomingTasks.length === 0 ? (
                 <p className="text-sm text-[#6b6660]">Ingen kommende møter eller tidsbestemte oppgaver.</p>
@@ -270,10 +304,45 @@ export default function KalenderPage() {
               <button onClick={() => setShowCallModal(false)} className="text-gray-400 hover:text-black">&times;</button>
             </div>
             <div className="p-4 space-y-4">
-              <div>
-                <label className="text-xs font-semibold text-[#a09b8f] mb-1 block">Lead / Bedrift</label>
-                <input type="text" className="w-full border border-[#d8d3c5] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#09fe94]" placeholder="Søk etter lead..." />
+              <div className="relative">
+                <label className="text-xs font-semibold text-[#a09b8f] mb-1 block">Søk etter Lead / Bedrift</label>
+                <div className="relative">
+                  <input 
+                    type="text" 
+                    value={leadSearch}
+                    onChange={(e) => {
+                      setLeadSearch(e.target.value);
+                      if (selectedLeadId) setSelectedLeadId("");
+                    }}
+                    className="w-full border border-[#d8d3c5] rounded-lg pl-9 pr-3 py-2 text-sm focus:outline-none focus:border-[#09fe94]" 
+                    placeholder="Søk etter navn..." 
+                  />
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#a09b8f]" />
+                </div>
+                
+                {leadSearch && !selectedLeadId && (
+                  <div className="absolute z-10 w-full mt-1 bg-white border border-[#d8d3c5] rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                    {filteredLeadsForSelect.length > 0 ? (
+                      filteredLeadsForSelect.map(l => (
+                        <button
+                          key={l.id}
+                          onClick={() => {
+                            setSelectedLeadId(l.id);
+                            setLeadSearch(l.name);
+                          }}
+                          className="w-full text-left px-4 py-2 text-sm hover:bg-[#faf8f2] border-b border-[#f0ece0] last:border-0"
+                        >
+                          <div className="font-bold text-[#171717]">{l.name}</div>
+                          <div className="text-[10px] text-[#a09b8f]">{l.contactPerson || l.industry}</div>
+                        </button>
+                      ))
+                    ) : (
+                      <div className="px-4 py-3 text-sm text-[#a09b8f] italic">Ingen treff...</div>
+                    )}
+                  </div>
+                )}
               </div>
+
               <div className="relative">
                 <div className="flex justify-between items-center mb-1">
                   <label className="text-xs font-semibold text-[#a09b8f] block">Samtalenotater</label>
@@ -294,14 +363,14 @@ export default function KalenderPage() {
                   className={`w-full border rounded-lg px-3 py-2 text-sm focus:outline-none transition-colors resize-none ${
                     isRecording ? "border-blue-400 bg-blue-50/30" : "border-[#d8d3c5] focus:border-[#09fe94]"
                   }`} 
-                  placeholder={isRecording ? "Lytter..." : "Hva snakket dere om? AI kan lytte for deg!"}
+                  placeholder={isRecording ? "Lytter..." : "Skriv notater eller bruk AI til å lytte!"}
                 ></textarea>
               </div>
-              <button onClick={() => { 
-                setShowCallModal(false); 
-                setTranscribedText(""); 
-                toast.success("Anrop loggført i historikken."); 
-              }} className="w-full bg-[#09fe94] hover:bg-[#00e882] text-black font-bold py-2 rounded-lg transition-colors">
+              <button 
+                onClick={handleSaveCall}
+                className="w-full bg-[#09fe94] hover:bg-[#00e882] text-black font-bold py-2 rounded-lg transition-colors flex items-center justify-center gap-2"
+              >
+                <CheckCircle2 className="w-4 h-4" />
                 Lagre i historikk
               </button>
             </div>

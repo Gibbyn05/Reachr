@@ -153,6 +153,25 @@ export async function POST(req: NextRequest) {
           let meetingDate = null;
           let aiReason = "";
 
+          // Clean the snippet to remove email history/threads
+          let cleanedSnippet = conv.snippet;
+          const threadMarkers = [
+            /\nOn\s.*\swrote:/i,
+            /\sOn\s.*\swrote:/i,
+            /\nDen\s.*\sskrev:/i,
+            /\sDen\s.*\sskrev:/i,
+            /---------- Forwarded message ---------/i,
+            /From:.*@/i,
+            /________________________________/
+          ];
+          
+          for (const marker of threadMarkers) {
+            const index = cleanedSnippet.search(marker);
+            if (index !== -1) {
+              cleanedSnippet = cleanedSnippet.substring(0, index).trim();
+            }
+          }
+
           if (process.env.ANTHROPIC_API_KEY) {
             try {
               const now = new Date();
@@ -161,19 +180,19 @@ export async function POST(req: NextRequest) {
                 max_tokens: 300,
                 system: `Du er en norsk salgsassistent. Dagens dato er ${now.toISOString().split('T')[0]}. Din jobb er å finne ut om kunden vil ha et møte. 
                 
-                Instrukser for tidsuthenting:
-                - "kl 17" betyr 17:00.
-                - "neste mandag" skal beregnes ut fra dagens dato.
-                - Bruk ISO format: YYYY-MM-DDTHH:mm.`,
+                Instrukser:
+                1. Analyser KUN den nyeste meldingen (ignorer tidligere samtalehistorikk).
+                2. "kl 17" betyr 17:00.
+                3. Bruk ISO format: YYYY-MM-DDTHH:mm.`,
                 messages: [{
                   role: "user", 
-                  content: `Analyser dette svaret: "${conv.snippet}"
+                  content: `Analyser dette svaret: "${cleanedSnippet}"
                   
                   Returner kun JSON:
                   {
                     "isMeetingRequested": boolean,
                     "datetime": "YYYY-MM-DDTHH:mm" | null,
-                    "reason": "forklaring"
+                    "reason": "kort forklaring på norsk"
                   }`
                 }],
               });
@@ -194,13 +213,13 @@ export async function POST(req: NextRequest) {
 
           // Create Note
           const nowStr = new Date().toLocaleString("nb-NO");
-          let newNoteContent = `Svar mottatt via e-post (${nowStr}):\n"${conv.snippet}"`;
+          let newNoteContent = `Svar mottatt via e-post (${nowStr}):\n"${cleanedSnippet}"`;
           
           if (status === "Booket møte" && meetingDate) {
             const displayDate = new Date(meetingDate).toLocaleString("nb-NO", {
               day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit"
             });
-            newNoteContent = `🎯 MØTE BOOKET (${nowStr})\n Foreslått tid: ${displayDate}\n Beskrivelse: ${aiReason}\n\nSvar: "${conv.snippet}"`;
+            newNoteContent = `🎯 MØTE BOOKET (${nowStr})\n Foreslått tid: ${displayDate}\n Beskrivelse: ${aiReason}\n\nSvar: "${cleanedSnippet}"`;
           }
 
           const combinedNotes = lead.notes && lead.notes !== "—"
