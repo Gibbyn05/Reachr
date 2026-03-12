@@ -155,13 +155,26 @@ export async function POST(req: NextRequest) {
 
           if (process.env.ANTHROPIC_API_KEY) {
             try {
+              const now = new Date();
               const aiResponse = await anthropic.messages.create({
                 model: "claude-3-haiku-20240307",
                 max_tokens: 300,
-                system: "Du er en norsk salgsassistent som tolker e-poster. Mål: finne ut om kunden vil ha et møte/prat. Dato/tid skal i ISO format (YYYY-MM-DDTHH:mm). Bruk 09:00 hvis tid mangler.",
+                system: `Du er en norsk salgsassistent. Dagens dato er ${now.toISOString().split('T')[0]}. Din jobb er å finne ut om kunden vil ha et møte. 
+                
+                Instrukser for tidsuthenting:
+                - "kl 17" betyr 17:00.
+                - "neste mandag" skal beregnes ut fra dagens dato (${now.toISOString().split('T')[0]}).
+                - Bruk ISO format: YYYY-MM-DDTHH:mm.`,
                 messages: [{
                   role: "user", 
-                  content: `E-post: "${conv.snippet}"\n\nReturner JSON: {"isMeetingRequested": boolean, "datetime": string | null, "reason": "norsk forklaring"}`
+                  content: `Analyser dette svaret: "${conv.snippet}"
+                  
+                  Returner kun JSON:
+                  {
+                    "isMeetingRequested": boolean,
+                    "datetime": "YYYY-MM-DDTHH:mm" | null,
+                    "reason": "forklaring"
+                  }`
                 }],
               });
 
