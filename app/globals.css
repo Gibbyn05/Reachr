@@ -47,10 +47,11 @@ html {
   --text-muted:       #6b6660;   /* Muted / placeholder text */
   --text-xmuted:      #a09b8f;   /* Very muted, timestamps etc */
   --rc-border:        #d8d3c5;   /* All borders */
-  --sidebar-bg:       #171717;   /* Sidebar always dark */
+  --sidebar-bg:       #f2efe3;   /* Light beige sidebar like landing page */
   --topbar-bg:        #faf8f2;   /* Top navigation bar */
   --btn-ghost-hover:  #e8e4d8;   /* Ghost button hover */
   --accent:           #09fe94;   /* Primary accent green */
+  --accent-foreground: #171717;  /* Text on accent green */
   --accent-hover:     #00e882;   /* Accent hover */
   --accent-danger:    #ff470a;   /* Danger / warning red-orange */
 }
@@ -69,7 +70,9 @@ html.dark {
   --sidebar-bg:       #000000;
   --topbar-bg:        #141414;
   --btn-ghost-hover:  #1f1f1f;
+  /* Keep accent green for consistency, but maybe adjust text color */
   --accent:           #09fe94;
+  --accent-foreground: #000000;
   --accent-hover:     #00e882;
   --accent-danger:    #ff470a;
 }
@@ -87,13 +90,23 @@ body {
 ::-webkit-scrollbar-thumb { background: var(--rc-border); border-radius: 99px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--text-xmuted); }
 
-/* ── Global color overrides: map hardcoded hex to CSS vars ─────── */
-/* This ensures every component using these classes gets theme-aware */
+.bg-sidebar                             { background-color: var(--sidebar-bg) !important; }
+.bg-card                                { background-color: var(--bg-card) !important; }
+.bg-muted                                { background-color: var(--bg-muted) !important; }
+.text-primary                            { color: var(--text-primary) !important; }
+.text-secondary                          { color: var(--text-secondary) !important; }
+.text-muted-foreground                   { color: var(--text-muted) !important; }
+.text-accent                             { color: var(--accent) !important; }
+.border-border                           { border-color: var(--rc-border) !important; }
+
+/* Global overrides for hardcoded Tailwind hex classes */
 .bg-white                                 { background-color: var(--bg-card) !important; }
 .bg-\[\#faf8f2\]                          { background-color: var(--bg-card) !important; }
 .bg-\[\#f2efe3\]                          { background-color: var(--bg-page) !important; }
 .bg-\[\#f0ece0\]                          { background-color: var(--bg-card-alt) !important; }
 .bg-\[\#e8e4d8\]                          { background-color: var(--bg-muted) !important; }
+.bg-accent                                { background-color: var(--accent) !important; }
+.text-accent-foreground                   { color: var(--accent-foreground) !important; }
 .border-\[\#d8d3c5\],
 .border-\[\#e8e4d8\],
 .border-\[\#f0ece0\]                       { border-color: var(--rc-border) !important; }

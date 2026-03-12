@@ -374,35 +374,35 @@ export default function KalenderPage() {
 
             {/* Quick Actions Stack */}
             <div className="grid grid-cols-3 lg:grid-cols-1 gap-3">
-               <button 
-                 onClick={() => setShowCallModal(true)} 
-                 className="group relative overflow-hidden bg-[#09fe94] dark:bg-[#1a1a1a] text-black dark:text-white p-4 rounded-2xl flex flex-col gap-3 hover:scale-[1.02] active:scale-95 transition-all shadow-lg"
-               >
-                 <div className="absolute top-0 right-0 w-16 h-16 bg-black/5 dark:bg-[#09fe94]/10 rounded-full -mr-8 -mt-8 transition-transform group-hover:scale-150" />
-                 <div className="p-2.5 bg-black/10 dark:bg-white/10 rounded-xl w-fit">
-                    <Phone className="w-5 h-5 text-black dark:text-[#09fe94]" />
-                 </div>
-                 <span className="text-[11px] lg:text-sm font-black text-left">Loggfør anrop</span>
-               </button>
+                <button 
+                  onClick={() => setShowCallModal(true)} 
+                  className="group relative overflow-hidden bg-accent text-accent-foreground p-4 rounded-2xl flex flex-col gap-3 hover:scale-[1.02] active:scale-95 transition-all shadow-lg shadow-accent/20"
+                >
+                  <div className="absolute top-0 right-0 w-16 h-16 bg-white/10 rounded-full -mr-8 -mt-8 transition-transform group-hover:scale-150" />
+                  <div className="p-2.5 bg-black/5 rounded-xl w-fit">
+                     <Phone className="w-5 h-5 text-accent-foreground" />
+                  </div>
+                  <span className="text-[11px] lg:text-sm font-black text-left">Loggfør anrop</span>
+                </button>
 
                <Link 
                  href="/innboks" 
-                 className="group relative overflow-hidden bg-white dark:bg-[#141414] border border-[#e8e4d8] dark:border-[#262626] p-4 rounded-2xl flex flex-col gap-3 hover:scale-[1.02] active:scale-95 transition-all shadow-sm"
+                 className="group relative overflow-hidden bg-card border border-border p-4 rounded-2xl flex flex-col gap-3 hover:scale-[1.02] active:scale-95 transition-all shadow-sm"
                >
-                 <div className="p-2.5 bg-blue-500/10 rounded-xl w-fit">
-                    <Mail className="w-5 h-5 text-blue-500" />
+                 <div className="p-2.5 bg-accent/10 rounded-xl w-fit">
+                    <Mail className="w-5 h-5 text-accent" />
                  </div>
-                 <span className="text-[11px] lg:text-sm font-black text-[#171717] dark:text-white text-left">Ny e-post</span>
+                 <span className="text-[11px] lg:text-sm font-black text-primary text-left">Ny e-post</span>
                </Link>
 
                <button 
                  onClick={() => setShowMeetingModal(true)} 
-                 className="group relative overflow-hidden bg-white dark:bg-[#141414] border border-[#e8e4d8] dark:border-[#262626] p-4 rounded-2xl flex flex-col gap-3 hover:scale-[1.02] active:scale-95 transition-all shadow-sm"
+                 className="group relative overflow-hidden bg-card border border-border p-4 rounded-2xl flex flex-col gap-3 hover:scale-[1.02] active:scale-95 transition-all shadow-sm"
                >
-                 <div className="p-2.5 bg-purple-500/10 rounded-xl w-fit">
-                    <Plus className="w-5 h-5 text-purple-500" />
+                 <div className="p-2.5 bg-accent/10 rounded-xl w-fit">
+                    <Plus className="w-5 h-5 text-accent" />
                  </div>
-                 <span className="text-[11px] lg:text-sm font-black text-[#171717] dark:text-white text-left">Nytt møte</span>
+                 <span className="text-[11px] lg:text-sm font-black text-primary text-left">Nytt møte</span>
                </button>
             </div>
 

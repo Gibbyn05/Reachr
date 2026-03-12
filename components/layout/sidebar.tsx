@@ -152,21 +152,21 @@ export function Sidebar() {
   return (
     <aside
       className={cn(
-        "fixed left-0 top-0 h-full w-60 bg-[#171717] flex flex-col z-[1000]",
+        "fixed left-0 top-0 h-full w-60 bg-sidebar border-r border-border flex flex-col z-[1000]",
         "transition-transform duration-300 ease-in-out",
         "md:translate-x-0",
         sidebarOpen ? "translate-x-0" : "-translate-x-full"
       )}
     >
       {/* Logo */}
-      <div className="p-6 border-b border-white/10 flex items-center justify-between">
+      <div className="p-6 border-b border-border flex items-center justify-between">
         <Link href="/dashboard" className="flex items-center gap-2.5">
           <img src="/logo.svg" alt="Reachr" className="w-9 h-9" />
-          <span className="text-white font-bold text-xl" style={{ fontFamily: "'EB Garamond', Georgia, serif" }}>Reachr</span>
+          <span className="text-primary font-bold text-xl" style={{ fontFamily: "'EB Garamond', Georgia, serif" }}>Reachr</span>
         </Link>
         <button
           onClick={() => setSidebarOpen(false)}
-          className="md:hidden p-1.5 rounded-lg text-white/50 hover:text-white hover:bg-white/10 transition-colors"
+          className="md:hidden p-1.5 rounded-lg text-muted-foreground hover:text-primary hover:bg-muted transition-colors"
         >
           <X className="w-5 h-5" />
         </button>
@@ -183,17 +183,17 @@ export function Sidebar() {
               className={cn(
                 "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
                 isActive
-                  ? "bg-white/15 text-white"
-                  : "text-white/60 hover:text-white hover:bg-white/10"
+                  ? "bg-muted text-primary"
+                  : "text-muted-foreground hover:text-primary hover:bg-muted/50"
               )}
             >
               <Icon
-                className={cn(isActive ? "text-[#09fe94]" : "text-current")}
+                className={cn(isActive ? "text-accent" : "text-current")}
                 style={{ width: "18px", height: "18px" }}
               />
               {label}
               {label === "Varsler" && notifCount > 0 && (
-                <span className="ml-auto bg-[#09fe94] text-[#171717] text-xs rounded-full min-w-5 h-5 flex items-center justify-center font-semibold px-1">
+                <span className="ml-auto bg-accent text-accent-foreground text-xs rounded-full min-w-5 h-5 flex items-center justify-center font-semibold px-1 shadow-sm shadow-accent/20">
                   {notifCount}
                 </span>
               )}
@@ -203,10 +203,10 @@ export function Sidebar() {
       </nav>
 
       {/* Bottom section */}
-      <div className="p-4 border-t border-white/10 space-y-1">
+      <div className="p-4 border-t border-border space-y-1">
         <button
           onClick={toggleDark}
-          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-white/60 hover:text-white hover:bg-white/10 transition-all duration-200"
+          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-muted-foreground hover:text-primary hover:bg-muted transition-all duration-200"
         >
           {dark
             ? <Sun style={{ width: "18px", height: "18px" }} />
@@ -219,34 +219,34 @@ export function Sidebar() {
           className={cn(
             "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
             pathname === "/innstillinger"
-              ? "bg-white/15 text-white"
-              : "text-white/60 hover:text-white hover:bg-white/10"
+              ? "bg-muted text-primary"
+              : "text-muted-foreground hover:text-primary hover:bg-muted/50"
           )}
         >
           <Settings
-            className={cn(pathname === "/innstillinger" ? "text-[#09fe94]" : "text-current")}
+            className={cn(pathname === "/innstillinger" ? "text-accent" : "text-current")}
             style={{ width: "18px", height: "18px" }}
           />
           Innstillinger
         </Link>
 
-        <Link href="/innstillinger" className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-white/10 transition-colors mt-1">
+        <Link href="/innstillinger" className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-muted/50 transition-colors mt-1">
           {avatarUrl ? (
             <img src={avatarUrl} alt="Avatar" className="w-8 h-8 rounded-full object-cover flex-shrink-0" />
           ) : (
-            <div className="w-8 h-8 bg-[#09fe94] rounded-full flex items-center justify-center text-[#171717] text-xs font-bold flex-shrink-0">
+            <div className="w-8 h-8 bg-accent rounded-full flex items-center justify-center text-accent-foreground text-xs font-bold flex-shrink-0 shadow-sm shadow-accent/20">
               {initials}
             </div>
           )}
           <div className="flex-1 min-w-0">
-            <p className="text-white text-xs font-semibold truncate">{displayName}</p>
-            {planLabel && <p className="text-white/40 text-xs truncate">{planLabel}</p>}
+            <p className="text-primary text-xs font-semibold truncate">{displayName}</p>
+            {planLabel && <p className="text-muted-foreground text-xs truncate">{planLabel}</p>}
           </div>
         </Link>
 
         <button
           onClick={handleLogout}
-          className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-white/50 hover:text-white/80 hover:bg-white/10 text-sm transition-colors"
+          className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-muted-foreground hover:text-red-500 hover:bg-red-500/5 text-sm transition-colors"
         >
           <LogOut className="w-4 h-4" />
           Logg ut
