@@ -1,5 +1,5 @@
 "use client";
-// Triggering fresh deployment for inbox fixes
+// Force fresh deployment on main branch with redesigned UI and STT fixes
 import { useState, useEffect } from "react";
 import { TopBar } from "@/components/layout/top-bar";
 import { 
