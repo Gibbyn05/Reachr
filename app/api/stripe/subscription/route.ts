@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
-import { isAdmin } from "@/lib/admin";
+import { isAdmin, isFreeUser } from "@/lib/admin";
 
 export async function GET() {
   try {
@@ -12,11 +12,11 @@ export async function GET() {
       return NextResponse.json({ error: "Ikke logget inn" }, { status: 401 });
     }
 
-    // Admin bypass — full access, no payment required
-    if (isAdmin(user.email)) {
+    // Admin or VIP bypass — full access, no payment required
+    if (isFreeUser(user.email)) {
       return NextResponse.json({
         subscription: {
-          id: "admin",
+          id: isAdmin(user.email) ? "admin" : "free_user",
           status: "active",
           plan: "team",
           interval: "yearly",
@@ -53,11 +53,11 @@ export async function GET() {
           .single();
         if (ownerSub) return NextResponse.json({ subscription: { ...ownerSub, via_team_owner: ownerEmail } });
 
-        // Admin bypass for team members too
-        if (isAdmin(ownerEmail)) {
+        // Admin/VIP bypass for team members too
+        if (isFreeUser(ownerEmail)) {
           return NextResponse.json({
             subscription: {
-              id: "admin_team_member",
+              id: isAdmin(ownerEmail) ? "admin_team_member" : "free_team_member",
               status: "active",
               plan: "team",
               interval: "yearly",
@@ -152,11 +152,11 @@ export async function GET() {
         return NextResponse.json({ subscription: { ...ownerSub, via_team_owner: teamOwnerEmail } });
       }
 
-      // Admin bypass for team members too
-      if (isAdmin(teamOwnerEmail)) {
+      // Admin/VIP bypass for team members too
+      if (isFreeUser(teamOwnerEmail)) {
         return NextResponse.json({
           subscription: {
-            id: "admin_team_member",
+            id: isAdmin(teamOwnerEmail) ? "admin_team_member" : "free_team_member",
             status: "active",
             plan: "team",
             interval: "yearly",
