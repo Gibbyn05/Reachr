@@ -1,14 +1,15 @@
 "use client";
 import { TopBar } from "@/components/layout/top-bar";
 import { useAppStore } from "@/store/app-store";
-import { CalendarDays, CheckCircle2, Clock, Phone, Mail, ArrowRight, User, Mic, Square, Search } from "lucide-react";
+import { CalendarDays, CheckCircle2, Clock, Phone, Mail, ArrowRight, User, Mic, Square, Search, Sparkles, TrendingUp, Plus, Calendar } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 
 export default function KalenderPage() {
-  const { leads, meetingDates, updateLeadNotes } = useAppStore();
+  const { currentUser, leads, meetingDates, updateLeadNotes } = useAppStore();
   const [completedTasks, setCompletedTasks] = useState<string[]>([]);
   const [showCallModal, setShowCallModal] = useState(false);
   const [showMeetingModal, setShowMeetingModal] = useState(false);
@@ -182,72 +183,123 @@ export default function KalenderPage() {
   const upcomingTasks = tasks.filter((t) => !t.isToday);
 
   return (
-    <div>
-      <TopBar title="Oppgaver & Kalender" subtitle="Din to-do liste for dagen" />
+    <div className="min-h-screen bg-[#F8F9FC] dark:bg-[#0a0a0a]">
+      <TopBar title="Oppgaver & Kalender" subtitle="Loggfør anrop, book møter og følg opp dine leads" />
 
-      <div className="p-4 sm:p-8 max-w-5xl">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
+      <div className="p-4 sm:p-8 max-w-7xl mx-auto">
+        {/* Header Section */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
+           <div>
+              <p className="text-sm font-bold text-[#05c472] uppercase tracking-[0.2em] mb-1">Dagsplan</p>
+              <h1 className="text-3xl font-black text-[#171717] dark:text-white">
+                 God dag, {currentUser?.name?.split(" ")[0] || "Selger"}! 👋
+              </h1>
+           </div>
+           <div className="flex items-center gap-3 bg-white dark:bg-[#141414] border border-[#e8e4d8] dark:border-[#262626] rounded-2xl px-5 py-3 shadow-sm">
+              <Calendar className="w-5 h-5 text-[#05c472]" />
+              <div className="flex flex-col">
+                 <span className="text-[10px] uppercase font-bold text-[#a09b8f]">I dag</span>
+                 <span className="text-sm font-bold text-[#171717] dark:text-white">
+                    {now.toLocaleDateString("nb-NO", { weekday: "long", day: "numeric", month: "long" })}
+                 </span>
+              </div>
+           </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 sm:gap-8">
           
-          {/* Main Task List */}
-          <div className="lg:col-span-2 space-y-6">
-            <div className="bg-[#faf8f2] border border-[#d8d3c5] rounded-xl p-6 shadow-sm">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-lg font-bold text-[#171717] flex items-center gap-2">
-                  <Clock className="w-5 h-5 text-orange-500" />
-                  Oppgaver i dag
-                  <Badge variant="yellow" className="ml-2">{todayTasks.length - completedTasks.filter(id => todayTasks.find(t => t.id === id)).length}</Badge>
-                </h2>
-                <span className="text-sm font-medium text-[#6b6660]">
-                  {now.toLocaleDateString("nb-NO", { weekday: "long", day: "numeric", month: "long" })}
-                </span>
+          {/* Main Task List (Left Column) */}
+          <div className="lg:col-span-3 space-y-8">
+            <div className="bg-white dark:bg-[#141414] border border-[#e8e4d8] dark:border-[#262626] rounded-[2rem] p-8 shadow-sm">
+              <div className="flex items-center justify-between mb-8">
+                <div className="flex items-center gap-3">
+                   <div className="p-3 bg-orange-500/10 rounded-2xl">
+                      <Clock className="w-6 h-6 text-orange-500" />
+                   </div>
+                   <div>
+                      <h2 className="text-xl font-black text-[#171717] dark:text-white">Dagens oppgaver</h2>
+                      <p className="text-xs text-[#a09b8f]">Status på dine viktigste gjøremål</p>
+                   </div>
+                </div>
+                <div className="flex items-center gap-2">
+                   <Badge className="bg-[#09fe94]/10 text-[#05c472] border-none font-bold px-3 py-1">
+                      {todayTasks.length - completedTasks.filter(id => todayTasks.find(t => t.id === id)).length} Gjenstår
+                   </Badge>
+                </div>
               </div>
 
               {todayTasks.length === 0 ? (
-                <div className="text-center py-10 bg-white rounded-xl border border-dashed border-[#d8d3c5]">
-                  <CheckCircle2 className="w-10 h-10 text-green-500 mx-auto mb-3" />
-                  <p className="text-[#171717] font-semibold">Du er à jour!</p>
-                  <p className="text-[#6b6660] text-sm mt-1">Ingen flere oppgaver for i dag.</p>
+                <div className="text-center py-16 bg-[#faf8f2] dark:bg-[#1a1a1a] rounded-[2rem] border-2 border-dashed border-[#d8d3c5] dark:border-[#262626]">
+                  <div className="w-16 h-16 bg-[#09fe94]/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                     <CheckCircle2 className="w-8 h-8 text-[#05c472]" />
+                  </div>
+                  <p className="text-lg font-black text-[#171717] dark:text-white italic">Du er helt à jour!</p>
+                  <p className="text-[#a09b8f] text-sm mt-1">Ingen flere planlagte oppgaver for resten av dagen.</p>
                 </div>
               ) : (
-                <div className="space-y-3">
+                <div className="space-y-4">
                   {todayTasks.map((task) => {
                     const isDone = completedTasks.includes(task.id);
                     return (
                       <div 
                         key={task.id} 
-                        className={`flex items-center gap-4 p-4 rounded-xl border transition-all ${isDone ? "bg-gray-50 border-gray-100 opacity-60" : "bg-white border-[#e8e4d8] hover:border-[#09fe94]/50 hover:shadow-sm"}`}
+                        className={`group flex items-center gap-5 p-5 rounded-2xl border transition-all duration-300 ${
+                          isDone 
+                            ? "bg-[#faf8f2] dark:bg-[#0a0a0a] border-transparent opacity-60 scale-[0.98]" 
+                            : "bg-white dark:bg-[#1a1a1a] border-[#e8e4d8] dark:border-[#262626] hover:border-[#09fe94] hover:shadow-lg dark:hover:shadow-[#09fe94]/5"
+                        }`}
                       >
                         <button 
                           onClick={() => toggleTask(task.id)}
-                          className={`w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${isDone ? "bg-[#09fe94] border-[#09fe94]" : "border-[#d8d3c5] hover:border-[#09fe94]"}`}
+                          className={`w-8 h-8 rounded-xl border-2 flex items-center justify-center shrink-0 transition-all duration-300 ${
+                            isDone 
+                              ? "bg-[#09fe94] border-[#09fe94] shadow-[0_0_15px_rgba(9,254,148,0.4)]" 
+                              : "border-[#d8d3c5] dark:border-[#262626] group-hover:border-[#09fe94] bg-white dark:bg-[#141414]"
+                          }`}
                         >
-                          {isDone && <CheckCircle2 className="w-4 h-4 text-[#171717]" />}
+                          {isDone && <CheckCircle2 className="w-5 h-5 text-black" />}
                         </button>
                         
                         <div className="flex-1 min-w-0">
-                          <p className={`text-sm font-bold truncate ${isDone ? "line-through text-[#a09b8f]" : "text-[#171717]"}`}>
-                            {task.title}
-                          </p>
-                          <p className={`text-xs mt-0.5 flex items-center gap-1.5 ${isDone ? "text-[#a09b8f]" : "text-[#6b6660]"}`}>
-                            <User className="w-3.5 h-3.5" />
-                            {task.leadName}
-                          </p>
+                           <div className="flex items-center gap-2 mb-1">
+                              {task.type === "meeting" ? (
+                                <CalendarDays className="w-3.5 h-3.5 text-purple-500" />
+                              ) : (
+                                <Phone className="w-3.5 h-3.5 text-orange-500" />
+                              )}
+                              <span className="text-[10px] font-black uppercase tracking-widest text-[#a09b8f]">
+                                 {task.type === "meeting" ? "Møte" : "Oppfølging"}
+                              </span>
+                           </div>
+                           <p className={`text-base font-bold truncate transition-all ${isDone ? "line-through text-[#a09b8f]" : "text-[#171717] dark:text-white"}`}>
+                             {task.title}
+                           </p>
+                           <div className="flex items-center gap-3 mt-1 text-xs font-medium text-[#6b6660] dark:text-[#a09b8f]">
+                              <span className="flex items-center gap-1">
+                                 <User className="w-3 h-3" />
+                                 {task.leadName}
+                              </span>
+                           </div>
                         </div>
 
-                        <div className="text-right shrink-0">
-                          <span className={`text-xs font-semibold px-2 py-1 rounded-md ${
-                            task.type === "meeting" ? "bg-purple-100 text-purple-700" : 
-                            task.type === "new" ? "bg-blue-100 text-blue-700" : 
-                            "bg-orange-100 text-orange-700"
-                          }`}>
-                            {task.time}
-                          </span>
-                        </div>
+                        <div className="flex items-center gap-4">
+                           <div className="text-right shrink-0">
+                              <span className={`text-[11px] font-black px-3 py-1.5 rounded-xl uppercase tracking-wider ${
+                                task.type === "meeting" ? "bg-purple-100 dark:bg-purple-500/10 text-purple-700 dark:text-purple-400" : 
+                                "bg-orange-100 dark:bg-orange-500/10 text-orange-700 dark:text-orange-400"
+                              }`}>
+                                {task.time}
+                              </span>
+                           </div>
 
-                        <div className="flex items-center gap-2 pl-2 border-l border-[#e8e4d8] ml-2 shrink-0">
-                          <Link href={`/mine-leads`} className="p-1.5 hover:bg-[#e8e4d8] rounded-md text-[#6b6660] hover:text-[#171717] transition-colors">
-                            <ArrowRight className="w-4 h-4" />
-                          </Link>
+                           <div className="flex items-center gap-2 border-l border-[#e8e4d8] dark:border-[#262626] pl-4">
+                              <Link 
+                                href={`/mine-leads?id=${task.leadId}`} 
+                                className="w-10 h-10 flex items-center justify-center bg-[#faf8f2] dark:bg-[#202020] hover:bg-[#09fe94] text-[#6b6660] hover:text-black rounded-xl transition-all duration-300"
+                              >
+                                <ArrowRight className="w-5 h-5" />
+                              </Link>
+                           </div>
                         </div>
                       </div>
                     );
@@ -256,25 +308,25 @@ export default function KalenderPage() {
               )}
             </div>
             
-            <div className="bg-[#faf8f2] border border-[#d8d3c5] rounded-xl p-6 shadow-sm opacity-80">
-              <h2 className="text-base font-bold text-[#171717] flex items-center gap-2 mb-4">
-                <CalendarDays className="w-5 h-5 text-blue-500" />
+            <div className="bg-white/50 dark:bg-[#141414]/50 border border-[#e8e4d8] dark:border-[#262626] rounded-[2rem] p-8 shadow-sm backdrop-blur-sm">
+              <h2 className="text-lg font-black text-[#171717] dark:text-white flex items-center gap-2 mb-6">
+                <CalendarDays className="w-6 h-6 text-blue-500" />
                 Planlagt (Senere)
               </h2>
               {upcomingTasks.length === 0 ? (
-                <p className="text-sm text-[#6b6660]">Ingen kommende møter eller tidsbestemte oppgaver.</p>
+                <p className="text-sm text-[#a09b8f] italic ml-8">Ingen kommende møter eller tidsbestemte oppgaver.</p>
               ) : (
-                <div className="space-y-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {upcomingTasks.map((task) => (
-                    <div key={task.id} className="flex items-center justify-between p-3 rounded-xl bg-white border border-[#e8e4d8]">
+                    <div key={task.id} className="group flex items-center justify-between p-4 rounded-2xl bg-white dark:bg-[#1a1a1a] border border-[#e8e4d8] dark:border-[#262626] hover:border-blue-400/50 transition-all">
                       <div className="flex items-center gap-3">
-                        <div className="w-2 h-2 rounded-full bg-blue-500"></div>
-                        <div>
-                          <p className="text-sm font-semibold text-[#171717]">{task.title}</p>
-                          <p className="text-xs text-[#6b6660]">{task.leadName}</p>
+                        <div className="w-2.5 h-2.5 rounded-full bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)]"></div>
+                        <div className="min-w-0">
+                          <p className="text-sm font-bold text-[#171717] dark:text-white truncate">{task.title}</p>
+                          <p className="text-[11px] text-[#a09b8f] font-medium">{task.leadName}</p>
                         </div>
                       </div>
-                      <span className="text-xs text-[#a09b8f] font-medium">{task.time}</span>
+                      <span className="text-[10px] bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 font-black px-2 py-1 rounded-lg uppercase whitespace-nowrap">{task.time}</span>
                     </div>
                   ))}
                 </div>
@@ -282,66 +334,105 @@ export default function KalenderPage() {
             </div>
           </div>
 
-          {/* Quick Actions / Mini Calendar Sidebar */}
-          <div className="space-y-6">
-            <div className="bg-[#171717] rounded-xl p-6 text-white shadow-xl">
-              <h3 className="font-bold mb-4 text-white">Raske handlinger</h3>
-              <div className="space-y-2">
-                <button onClick={() => setShowCallModal(true)} className="w-full flex items-center gap-3 p-3 rounded-lg bg-white/10 hover:bg-white/20 transition-colors text-sm font-medium">
-                  <Phone className="w-4 h-4 text-[#09fe94]" />
-                  Loggfør et anrop
-                </button>
-                <Link href="/mine-leads" className="w-full flex items-center gap-3 p-3 rounded-lg bg-white/10 hover:bg-white/20 transition-colors text-sm font-medium">
-                  <Mail className="w-4 h-4 text-[#09fe94]" />
-                  Skriv ny e-post
-                </Link>
-                <button onClick={() => setShowMeetingModal(true)} className="w-full flex items-center gap-3 p-3 rounded-lg bg-white/10 hover:bg-white/20 transition-colors text-sm font-medium">
-                  <CalendarDays className="w-4 h-4 text-[#09fe94]" />
-                  Opprett eget møte
-                </button>
+          {/* Activity & Quick Actions Sidebar (Right Column) */}
+          <div className="space-y-6 lg:sticky lg:top-24 h-fit">
+            
+            {/* Summary Progress */}
+            <div className="bg-white dark:bg-[#141414] border border-[#e8e4d8] dark:border-[#262626] rounded-3xl p-6 shadow-sm">
+              <div className="flex items-center justify-between mb-4">
+                 <h3 className="font-black text-sm text-[#171717] dark:text-white uppercase tracking-wider">Status (I dag)</h3>
+                 <div className="p-2 bg-[#09fe94]/10 rounded-xl">
+                    <TrendingUp className="w-4 h-4 text-[#05c472]" />
+                 </div>
               </div>
-            </div>
-
-            <div className="bg-[#faf8f2] border border-[#d8d3c5] rounded-xl p-6 shadow-sm">
-              <h3 className="font-bold mb-4 text-[#171717] flex items-center gap-2">
-                <CalendarDays className="w-5 h-5 text-purple-500" />
-                Kommende møter
-              </h3>
-              <div className="space-y-4">
-                {tasks.filter(t => t.type === "meeting").length === 0 ? (
-                  <p className="text-xs text-[#a09b8f] italic">Ingen møter booket ennå.</p>
-                ) : (
-                  tasks
-                    .filter(t => t.type === "meeting")
-                    .sort((a, b) => (a.fullDate?.getTime() || 0) - (b.fullDate?.getTime() || 0))
-                    .map(meeting => (
-                      <div key={meeting.id} className="flex flex-col gap-1 p-3 bg-purple-50 border border-purple-100 rounded-lg">
-                        <p className="text-xs font-bold text-purple-900">{meeting.leadName}</p>
-                        <p className="text-[10px] text-purple-700 font-medium flex items-center gap-1">
-                          <Clock className="w-3 h-3" />
-                          {meeting.time}
-                        </p>
-                      </div>
-                    ))
-                )}
-              </div>
-            </div>
-
-            <div className="bg-[#faf8f2] border border-[#d8d3c5] rounded-xl p-6 shadow-sm">
-              <h3 className="font-bold mb-4 text-[#171717]">Salgsoppsummering (I dag)</h3>
-              <div className="space-y-4">
+              <div className="space-y-5">
                 <div>
-                  <div className="flex justify-between text-xs mb-1">
-                    <span className="text-[#6b6660] font-medium">Oppgaver fullført</span>
-                    <span className="text-[#171717] font-bold">{completedTasks.length} / {todayTasks.length}</span>
+                  <div className="flex justify-between text-[11px] font-bold mb-2">
+                    <span className="text-[#a09b8f]">Oppgaver fullført</span>
+                    <span className="text-[#171717] dark:text-white">{completedTasks.length} / {todayTasks.length}</span>
                   </div>
-                  <div className="h-2 w-full bg-[#e8e4d8] rounded-full overflow-hidden">
+                  <div className="h-3 w-full bg-[#f2efe3] dark:bg-[#0a0a0a] rounded-full overflow-hidden">
                     <div 
-                      className="h-full bg-[#09fe94] transition-all duration-500"
+                      className="h-full bg-gradient-to-r from-[#09fe94] to-[#05c472] transition-all duration-700 ease-out"
                       style={{ width: `${todayTasks.length > 0 ? (completedTasks.length / todayTasks.length) * 100 : 100}%` }}
                     />
                   </div>
                 </div>
+                <div className="flex items-center gap-3 p-3 bg-[#faf8f2] dark:bg-[#1a1a1a] rounded-2xl border border-[#e8e4d8] dark:border-[#262626]">
+                   <Sparkles className="w-5 h-5 text-yellow-500" />
+                   <p className="text-[10px] text-[#6b6660] dark:text-[#a09b8f] font-medium leading-tight">
+                      {completedTasks.length === todayTasks.length && todayTasks.length > 0 
+                        ? "Fantastisk innsats! Du har tømt lista for i dag. 😎" 
+                        : "Hold det gående! Hver oppfølging er ett skritt nærmere et salg."}
+                   </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Actions Stack */}
+            <div className="grid grid-cols-3 lg:grid-cols-1 gap-3">
+               <button 
+                 onClick={() => setShowCallModal(true)} 
+                 className="group relative overflow-hidden bg-[#171717] dark:bg-[#1a1a1a] text-white p-4 rounded-2xl flex flex-col gap-3 hover:scale-[1.02] active:scale-95 transition-all shadow-lg"
+               >
+                 <div className="absolute top-0 right-0 w-16 h-16 bg-[#09fe94]/10 rounded-full -mr-8 -mt-8 transition-transform group-hover:scale-150" />
+                 <div className="p-2.5 bg-white/10 rounded-xl w-fit">
+                    <Phone className="w-5 h-5 text-[#09fe94]" />
+                 </div>
+                 <span className="text-[11px] lg:text-sm font-black text-left">Loggfør anrop</span>
+               </button>
+
+               <Link 
+                 href="/innboks" 
+                 className="group relative overflow-hidden bg-white dark:bg-[#141414] border border-[#e8e4d8] dark:border-[#262626] p-4 rounded-2xl flex flex-col gap-3 hover:scale-[1.02] active:scale-95 transition-all shadow-sm"
+               >
+                 <div className="p-2.5 bg-blue-500/10 rounded-xl w-fit">
+                    <Mail className="w-5 h-5 text-blue-500" />
+                 </div>
+                 <span className="text-[11px] lg:text-sm font-black text-[#171717] dark:text-white text-left">Ny e-post</span>
+               </Link>
+
+               <button 
+                 onClick={() => setShowMeetingModal(true)} 
+                 className="group relative overflow-hidden bg-white dark:bg-[#141414] border border-[#e8e4d8] dark:border-[#262626] p-4 rounded-2xl flex flex-col gap-3 hover:scale-[1.02] active:scale-95 transition-all shadow-sm"
+               >
+                 <div className="p-2.5 bg-purple-500/10 rounded-xl w-fit">
+                    <Plus className="w-5 h-5 text-purple-500" />
+                 </div>
+                 <span className="text-[11px] lg:text-sm font-black text-[#171717] dark:text-white text-left">Nytt møte</span>
+               </button>
+            </div>
+
+            {/* Compact Meetings List */}
+            <div className="bg-white dark:bg-[#141414] border border-[#e8e4d8] dark:border-[#262626] rounded-3xl p-6 shadow-sm">
+              <h3 className="font-black text-sm text-[#171717] dark:text-white uppercase tracking-wider mb-5 flex items-center gap-2">
+                <CalendarDays className="w-4 h-4 text-purple-500" />
+                Møteoversikt
+              </h3>
+              <div className="space-y-4">
+                {tasks.filter(t => t.type === "meeting").length === 0 ? (
+                  <div className="text-center py-4 text-xs text-[#a09b8f] italic border-2 border-dashed border-[#e8e4d8] dark:border-[#262626] rounded-2xl">
+                    Ingen møter booket
+                  </div>
+                ) : (
+                  tasks
+                    .filter(t => t.type === "meeting")
+                    .sort((a, b) => (a.fullDate?.getTime() || 0) - (b.fullDate?.getTime() || 0))
+                    .slice(0, 5)
+                    .map(meeting => (
+                      <div key={meeting.id} className="flex items-start gap-3 p-3 bg-purple-50 dark:bg-purple-500/5 hover:bg-purple-100 dark:hover:bg-purple-500/10 rounded-2xl transition-colors">
+                        <div className="p-2 bg-white dark:bg-[#1a1a1a] rounded-xl shadow-sm">
+                           <Calendar className="w-3.5 h-3.5 text-purple-500" />
+                        </div>
+                        <div className="min-w-0">
+                           <p className="text-xs font-black text-purple-900 dark:text-purple-300 truncate">{meeting.leadName}</p>
+                           <p className="text-[10px] text-purple-600 dark:text-purple-400/80 font-bold flex items-center gap-1 mt-0.5">
+                              {meeting.time}
+                           </p>
+                        </div>
+                      </div>
+                    ))
+                )}
               </div>
             </div>
           </div>
@@ -350,17 +441,26 @@ export default function KalenderPage() {
       </div>
 
       {showCallModal && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden">
-            <div className="p-4 border-b border-[#e8e4d8] flex justify-between items-center bg-[#faf8f2]">
-              <h3 className="font-bold text-[#171717] flex items-center gap-2">
-                <Phone className="w-4 h-4 text-[#09fe94]" /> Loggfør et anrop
-              </h3>
-              <button onClick={() => setShowCallModal(false)} className="text-gray-400 hover:text-black">&times;</button>
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-[#141414] rounded-[2.5rem] shadow-2xl w-full max-w-lg overflow-hidden border border-[#e8e4d8] dark:border-[#262626] animate-in fade-in zoom-in duration-300">
+            <div className="p-8 border-b border-[#e8e4d8] dark:border-[#262626] flex justify-between items-center bg-[#faf8f2] dark:bg-[#1a1a1a]">
+              <div className="flex items-center gap-4">
+                 <div className="p-3 bg-black dark:bg-[#09fe94] rounded-2xl">
+                    <Phone className="w-6 h-6 text-[#09fe94] dark:text-black" />
+                 </div>
+                 <div>
+                    <h3 className="text-xl font-black text-[#171717] dark:text-white">Loggfør anrop</h3>
+                    <p className="text-xs text-[#a09b8f]">Spar tid med AI-transkribering</p>
+                 </div>
+              </div>
+              <button onClick={() => setShowCallModal(false)} className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-black/5 dark:hover:bg-white/5 text-gray-400 hover:text-black dark:hover:text-white transition-colors">
+                 <Plus className="w-6 h-6 rotate-45" />
+              </button>
             </div>
-            <div className="p-4 space-y-4">
+            
+            <div className="p-8 space-y-6">
               <div className="relative">
-                <label className="text-xs font-semibold text-[#a09b8f] mb-1 block">Søk etter Lead / Bedrift</label>
+                <label className="text-[10px] uppercase tracking-widest font-black text-[#a09b8f] mb-2 block">Søk etter Lead / Bedrift</label>
                 <div className="relative">
                   <input 
                     type="text" 
@@ -369,14 +469,14 @@ export default function KalenderPage() {
                       setLeadSearch(e.target.value);
                       if (selectedLeadId) setSelectedLeadId("");
                     }}
-                    className="w-full border border-[#d8d3c5] rounded-lg pl-9 pr-3 py-2 text-sm focus:outline-none focus:border-[#09fe94]" 
-                    placeholder="Søk etter navn..." 
+                    className="w-full bg-[#faf8f2] dark:bg-[#0a0a0a] border border-[#d8d3c5] dark:border-[#262626] rounded-2xl pl-11 pr-4 py-4 text-sm font-bold focus:outline-none focus:border-[#09fe94] dark:text-white placeholder:text-[#a09b8f]/50 transition-all" 
+                    placeholder="Søk etter navn eller bedrift..." 
                   />
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#a09b8f]" />
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#a09b8f]" />
                 </div>
                 
                 {leadSearch && !selectedLeadId && (
-                  <div className="absolute z-10 w-full mt-1 bg-white border border-[#d8d3c5] rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                  <div className="absolute z-10 w-full mt-2 bg-white dark:bg-[#1a1a1a] border border-[#d8d3c5] dark:border-[#262626] rounded-2xl shadow-2xl max-h-60 overflow-y-auto p-2">
                     {filteredLeadsForSelect.length > 0 ? (
                       filteredLeadsForSelect.map(l => (
                         <button
@@ -385,83 +485,130 @@ export default function KalenderPage() {
                             setSelectedLeadId(l.id);
                             setLeadSearch(l.name);
                           }}
-                          className="w-full text-left px-4 py-2 text-sm hover:bg-[#faf8f2] border-b border-[#f0ece0] last:border-0"
+                          className="w-full text-left px-4 py-3 rounded-xl hover:bg-[#faf8f2] dark:hover:bg-[#0a0a0a] transition-colors group"
                         >
-                          <div className="font-bold text-[#171717]">{l.name}</div>
-                          <div className="text-[10px] text-[#a09b8f]">{l.contactPerson || l.industry}</div>
+                          <div className="font-black text-[#171717] dark:text-white group-hover:text-[#05c472]">{l.name}</div>
+                          <div className="text-[10px] uppercase font-bold text-[#a09b8f] mt-0.5">{l.contactPerson || l.industry}</div>
                         </button>
                       ))
                     ) : (
-                      <div className="px-4 py-3 text-sm text-[#a09b8f] italic">Ingen treff...</div>
+                      <div className="px-4 py-4 text-center text-sm text-[#a09b8f] italic">Ingen treff på "{leadSearch}"</div>
                     )}
                   </div>
                 )}
               </div>
 
               <div className="relative">
-                <div className="flex justify-between items-center mb-1">
-                  <label className="text-xs font-semibold text-[#a09b8f] block">Samtalenotater</label>
+                <div className="flex justify-between items-center mb-2">
+                  <label className="text-[10px] uppercase tracking-widest font-black text-[#a09b8f] block">Samtalenotater</label>
                    <button 
                      onClick={toggleRecording} 
-                     className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all border shadow-sm ${
+                     className={`flex items-center gap-2 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all border ${
                        isRecording 
-                         ? "bg-red-500 text-white border-red-600 animate-pulse" 
-                         : "bg-white text-blue-600 border-blue-200 hover:border-blue-400"
+                         ? "bg-red-500 text-white border-red-400 shadow-[0_0_20px_rgba(239,68,68,0.3)] animate-pulse" 
+                         : "bg-white dark:bg-[#141414] text-[#05c472] border-[#e8e4d8] dark:border-[#262626] hover:border-[#09fe94] shadow-sm"
                      }`}
                    >
-                     {isRecording ? <Square className="w-3 h-3 fill-current" /> : <Mic className="w-3 h-3" />}
+                     {isRecording ? <Square className="w-3.5 h-3.5 fill-current" /> : <Mic className="w-3.5 h-3.5" />}
                      {isRecording ? "STOPP OPPTAK" : "START AI LYTTING"}
                    </button>
                 </div>
-                <textarea 
-                  rows={4} 
-                  value={transcribedText}
-                  onChange={(e) => setTranscribedText(e.target.value)}
-                  className={`w-full border rounded-lg px-3 py-2 text-sm focus:outline-none transition-colors resize-none ${
-                    isRecording ? "border-blue-400 bg-blue-50/30" : "border-[#d8d3c5] focus:border-[#09fe94]"
-                  }`} 
-                  placeholder={isRecording ? "Lytter..." : "Skriv notater eller bruk AI til å lytte!"}
-                ></textarea>
+                <div className="relative">
+                   <textarea 
+                     rows={5} 
+                     value={transcribedText}
+                     onChange={(e) => setTranscribedText(e.target.value)}
+                     className={`w-full bg-[#faf8f2] dark:bg-[#0a0a0a] border rounded-[1.5rem] px-5 py-4 text-sm font-medium focus:outline-none transition-all resize-none dark:text-white ${
+                       isRecording ? "border-red-400 ring-4 ring-red-400/5 shadow-inner" : "border-[#d8d3c5] dark:border-[#262626] focus:border-[#09fe94]"
+                     }`} 
+                     placeholder={isRecording ? "Lytter til samtalen..." : "Her dukker samtalen opp automatisk, eller skriv selv..."}
+                   />
+                   {isRecording && (
+                      <div className="absolute bottom-4 right-4 flex gap-1">
+                         <div className="w-1.5 h-4 bg-red-400 rounded-full animate-bounce [animation-delay:-0.3s]" />
+                         <div className="w-1.5 h-6 bg-red-500 rounded-full animate-bounce [animation-delay:-0.15s]" />
+                         <div className="w-1.5 h-4 bg-red-400 rounded-full animate-bounce" />
+                      </div>
+                   )}
+                </div>
               </div>
-              <button 
-                onClick={handleSaveCall}
-                className="w-full bg-[#09fe94] hover:bg-[#00e882] text-black font-bold py-2 rounded-lg transition-colors flex items-center justify-center gap-2"
-              >
-                <CheckCircle2 className="w-4 h-4" />
-                Lagre i historikk
-              </button>
+
+              <div className="flex gap-3 pt-2">
+                 <button 
+                   onClick={() => setShowCallModal(false)}
+                   className="flex-1 bg-white dark:bg-[#141414] border border-[#e8e4d8] dark:border-[#262626] text-[#6b6660] font-black py-4 rounded-2xl hover:bg-[#faf8f2] dark:hover:bg-[#1a1a1a] transition-all uppercase tracking-widest text-[10px]"
+                 >
+                   Avbryt
+                 </button>
+                 <button 
+                   onClick={handleSaveCall}
+                   className="flex-[2] bg-[#09fe94] hover:bg-[#00e882] text-black font-black py-4 rounded-2xl transition-all shadow-lg shadow-[#09fe94]/20 flex items-center justify-center gap-2 uppercase tracking-widest text-[10px]"
+                 >
+                   <CheckCircle2 className="w-4 h-4" />
+                   Lagre Logg
+                 </button>
+              </div>
             </div>
           </div>
         </div>
       )}
 
       {showMeetingModal && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden">
-            <div className="p-4 border-b border-[#e8e4d8] flex justify-between items-center bg-[#faf8f2]">
-              <h3 className="font-bold text-[#171717] flex items-center gap-2">
-                <CalendarDays className="w-4 h-4 text-[#09fe94]" /> Opprett eget møte
-              </h3>
-              <button onClick={() => setShowMeetingModal(false)} className="text-gray-400 hover:text-black">&times;</button>
-            </div>
-            <div className="p-4 space-y-4">
-              <div>
-                <label className="text-xs font-semibold text-[#a09b8f] mb-1 block">Møtetittel</label>
-                <input type="text" className="w-full border border-[#d8d3c5] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#09fe94]" placeholder="Kaffeprat med..." />
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-[#141414] rounded-[2.5rem] shadow-2xl w-full max-w-md overflow-hidden border border-[#e8e4d8] dark:border-[#262626] animate-in fade-in zoom-in duration-300">
+            <div className="p-8 border-b border-[#e8e4d8] dark:border-[#262626] flex justify-between items-center bg-[#faf8f2] dark:bg-[#1a1a1a]">
+               <div className="flex items-center gap-4">
+                 <div className="p-3 bg-purple-500/10 rounded-2xl">
+                    <CalendarDays className="w-6 h-6 text-purple-500" />
+                 </div>
+                 <div>
+                    <h3 className="text-xl font-black text-[#171717] dark:text-white">Nytt møte</h3>
+                    <p className="text-xs text-[#a09b8f]">Planlegg din neste kaffeprat</p>
+                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-xs font-semibold text-[#a09b8f] mb-1 block">Dato</label>
-                  <input type="date" className="w-full border border-[#d8d3c5] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#09fe94]" />
-                </div>
-                <div>
-                  <label className="text-xs font-semibold text-[#a09b8f] mb-1 block">Tidspunkt</label>
-                  <input type="time" className="w-full border border-[#d8d3c5] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#09fe94]" />
-                </div>
-              </div>
-              <button onClick={() => { setShowMeetingModal(false); toast.success("Møte opprettet og lagt i kalenderen."); }} className="w-full bg-[#09fe94] hover:bg-[#00e882] text-black font-bold py-2 rounded-lg transition-colors">
-                Lagre møte
+              <button onClick={() => setShowMeetingModal(false)} className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-black/5 dark:hover:bg-white/5 text-gray-400 hover:text-black dark:hover:text-white transition-colors">
+                 <Plus className="w-6 h-6 rotate-45" />
               </button>
+            </div>
+            <div className="p-8 space-y-6">
+              <div>
+                <label className="text-[10px] uppercase tracking-widest font-black text-[#a09b8f] mb-2 block">Møtetittel</label>
+                <input 
+                  type="text" 
+                  className="w-full bg-[#faf8f2] dark:bg-[#0a0a0a] border border-[#d8d3c5] dark:border-[#262626] rounded-2xl px-5 py-4 text-sm font-bold focus:outline-none focus:border-[#09fe94] dark:text-white transition-all" 
+                  placeholder="F.eks: Oppstartsmøte med Reachr" 
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-[10px] uppercase tracking-widest font-black text-[#a09b8f] mb-2 block">Dato</label>
+                  <input 
+                    type="date" 
+                    className="w-full bg-[#faf8f2] dark:bg-[#0a0a0a] border border-[#d8d3c5] dark:border-[#262626] rounded-2xl px-5 py-4 text-sm font-bold focus:outline-none focus:border-[#09fe94] dark:text-white transition-all" 
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] uppercase tracking-widest font-black text-[#a09b8f] mb-2 block">Tidspunkt</label>
+                  <input 
+                    type="time" 
+                    className="w-full bg-[#faf8f2] dark:bg-[#0a0a0a] border border-[#d8d3c5] dark:border-[#262626] rounded-2xl px-5 py-4 text-sm font-bold focus:outline-none focus:border-[#09fe94] dark:text-white transition-all" 
+                  />
+                </div>
+              </div>
+              <div className="flex gap-3 pt-2">
+                 <button 
+                    onClick={() => setShowMeetingModal(false)}
+                    className="flex-1 bg-white dark:bg-[#141414] border border-[#e8e4d8] dark:border-[#262626] text-[#6b6660] font-black py-4 rounded-2xl hover:bg-[#faf8f2] dark:hover:bg-[#1a1a1a] transition-all uppercase tracking-widest text-[10px]"
+                 >
+                    Avbryt
+                 </button>
+                 <button 
+                    onClick={() => { setShowMeetingModal(false); toast.success("Møte opprettet!"); }} 
+                    className="flex-[2] bg-purple-600 hover:bg-purple-500 text-white font-black py-4 rounded-2xl transition-all shadow-lg shadow-purple-500/20 uppercase tracking-widest text-[10px]"
+                 >
+                    Bekreft
+                 </button>
+              </div>
             </div>
           </div>
         </div>
