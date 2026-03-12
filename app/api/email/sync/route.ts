@@ -1,5 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
+import Anthropic from "@anthropic-ai/sdk";
+
+const anthropic = new Anthropic({
+  apiKey: process.env.ANTHROPIC_API_KEY!,
+});
 
 async function refreshGoogleToken(refreshToken: string) {
   const res = await fetch("https://oauth2.googleapis.com/token", {
@@ -53,7 +58,7 @@ export async function POST(req: NextRequest) {
     // Get all leads for this user to match senders
     const { data: leads } = await db
       .from("leads")
-      .select("id, email, name")
+      .select("id, email, name, meeting_date")
       .eq("user_email", user.email);
 
     if (!leads) return NextResponse.json({ success: true, message: "Ingen leads å sjekke mot." });
@@ -79,10 +84,10 @@ export async function POST(req: NextRequest) {
         }
       }
 
-      const senderEmailsFound: string[] = [];
+      const foundConversations: { email: string, snippet: string }[] = [];
 
       if (conn.provider === "gmail") {
-        const listRes = await fetch(`https://gmail.googleapis.com/gmail/v1/users/me/messages?q=${encodeURIComponent("is:unread in:inbox")}&maxResults=20`, {
+        const listRes = await fetch(`https://gmail.googleapis.com/gmail/v1/users/me/messages?q=${encodeURIComponent("is:unread in:inbox")}&maxResults=10`, {
           headers: { Authorization: `Bearer ${accessToken}` }
         });
         if (listRes.ok) {
@@ -97,12 +102,14 @@ export async function POST(req: NextRequest) {
               const fromHeader = detail.payload.headers.find((h: any) => h.name === "From")?.value || "";
               const match = fromHeader.match(/<(.+)>|(\S+@\S+)/);
               const email = (match ? (match[1] || match[2]) : fromHeader).toLowerCase().trim();
-              if (email) senderEmailsFound.push(email);
+              if (email) {
+                foundConversations.push({ email, snippet: detail.snippet || "" });
+              }
             }
           }
         }
       } else if (conn.provider === "outlook") {
-        const listRes = await fetch(`https://graph.microsoft.com/v1.0/me/mailFolders/inbox/messages?$filter=isRead eq false&$top=20&$select=from`, {
+        const listRes = await fetch(`https://graph.microsoft.com/v1.0/me/mailFolders/inbox/messages?$filter=isRead eq false&$top=10&$select=from,bodyPreview`, {
           headers: { Authorization: `Bearer ${accessToken}` }
         });
         if (listRes.ok) {
@@ -110,18 +117,53 @@ export async function POST(req: NextRequest) {
           const messages = data.value || [];
           for (const msg of messages) {
             const email = msg.from?.emailAddress?.address?.toLowerCase();
-            if (email) senderEmailsFound.push(email);
+            if (email) {
+              foundConversations.push({ email, snippet: msg.bodyPreview || "" });
+            }
           }
         }
       }
 
-      // Match found emails to leads and stop sequences
-      for (const email of senderEmailsFound) {
-        const lead = leadEmailMap.get(email);
+      // Match found emails to leads and analyze intent with AI
+      for (const conv of foundConversations) {
+        const lead = leadEmailMap.get(conv.email);
         if (lead) {
-          // 1. Update Lead Status
+          // AI Intent Detection
+          let status = "Kontaktet";
+          let meetingDate = null;
+
+          try {
+            const aiResponse = await anthropic.messages.create({
+              model: "claude-3-haiku-20240307",
+              max_tokens: 100,
+              system: "Du er en AI som analyserer salgs-eposter. Din jobb er å oppdage om kunden ønsker et møte og trekke ut datoen.",
+              messages: [{
+                role: "user", 
+                content: `Analyser denne e-post-snutten: "${conv.snippet}". 
+                Svar KUN i JSON-format med disse feltene:
+                {
+                  "isMeetingRequested": boolean,
+                  "date": string | null (format YYYY-MM-DD),
+                  "summary": string (kort norsk oppsummering)
+                }`
+              }],
+            });
+
+            const content = aiResponse.content[0].type === 'text' ? aiResponse.content[0].text : '';
+            const analysis = JSON.parse(content);
+
+            if (analysis.isMeetingRequested) {
+              status = "Booket møte";
+              meetingDate = analysis.date;
+            }
+          } catch (e) {
+            console.error("AI Analysis failed:", e);
+          }
+
+          // 1. Update Lead Status and Meeting Date
           await db.from("leads").update({ 
-            status: "Kontaktet", // Or "Svar mottatt" if you have that
+            status: status,
+            meeting_date: meetingDate || lead.meeting_date,
             last_contacted: new Date().toISOString()
           }).eq("id", lead.id);
 
@@ -133,13 +175,11 @@ export async function POST(req: NextRequest) {
             .eq("status", "active")
             .select();
 
-          if (enrollment && enrollment.length > 0) {
-            foundRepliesCount++;
-            console.log(`[ReplyDetection] Stopped sequence for ${lead.name} (${email})`);
-          }
+          foundRepliesCount++;
         }
       }
     }
+
 
     return NextResponse.json({ 
       success: true, 
