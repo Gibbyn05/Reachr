@@ -35,76 +35,84 @@ export default function KalenderPage() {
     };
   }, []);
 
-  const startSpeechRecognition = (isInitial = true) => {
+  const startSpeechRecognition = () => {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SpeechRecognition) {
       toast.error("Nettleseren din støtter ikke tale-til-tekst. Prøv Chrome.");
       return;
     }
 
-    // Hindre flere aktive sesjoner samtidig
-    if (isInitial && recognitionRef.current) {
-        stopAndCleanup();
-    }
+    // Hindre flere samtidige start-forsøk
+    if (recognitionRef.current) return;
 
     try {
       const rec = new SpeechRecognition();
-      rec.continuous = false; 
+      rec.continuous = true;
       rec.interimResults = true;
       rec.lang = "nb-NO";
 
-      let sessionTranscript = "";
+      // Bruk en stabil referanse for å unngå tekst-tap
+      let lastFinalText = transcribedText;
 
       rec.onstart = () => {
-        if (isInitial) {
-            setIsRecording(true);
-            isRecordingRef.current = true;
-            toast.info("Lytter... (V9)", { duration: 2000 });
-        }
+        console.log("STT OnStart");
+        setIsRecording(true);
+        isRecordingRef.current = true;
       };
 
       rec.onresult = (event: any) => {
         let interim = "";
+        let final = "";
+        
         for (let i = event.resultIndex; i < event.results.length; ++i) {
+          const transcript = event.results[i][0].transcript;
           if (event.results[i].isFinal) {
-            sessionTranscript += event.results[i][0].transcript + " ";
+            final += transcript + " ";
           } else {
-            interim += event.results[i][0].transcript;
+            interim += transcript;
           }
         }
-        setTranscribedText(currentNotes => {
-            return sessionTranscript + interim;
-        });
+        
+        if (final) {
+           lastFinalText += final;
+        }
+        setTranscribedText(lastFinalText + interim);
       };
 
       rec.onerror = (event: any) => {
+        console.warn("STT Error (V10):", event.error);
         if (event.error === "not-allowed") {
           toast.error("Mangler tilgang til mikrofon.");
           stopAndCleanup();
         }
-        // Andre feil (som network) håndteres av onend restart-logikk
+        // Network/no-speech feil håndteres av onend
       };
 
       rec.onend = () => {
-        // KRITISK: Sjekk at denne instansen (rec) faktisk er den som er "aktiv" i ref-en
-        // Hvis ikke, er dette en gammel sesjon som dør ut, og vi skal ikke restarte fra den.
+        console.log("STT OnEnd");
+        // Hvis vi skal fortsette (isRecordingRef er true), men instansen er ferdig
+        // Prøv en rolig restart etter 1 sekund for å unngå flimmer-vulkaner
         if (isRecordingRef.current && recognitionRef.current === rec) {
-          setTimeout(() => {
-            if (isRecordingRef.current) {
-                // Vi nullstiller ref-en her slik at startSpeechRecognition slipper gjennom
-                recognitionRef.current = null;
-                startSpeechRecognition(false); // false = ikke vis Toast på nytt
-            }
-          }, 300);
-        } else if (!isRecordingRef.current) {
-          stopAndCleanup();
+           recognitionRef.current = null;
+           setTimeout(() => {
+             if (isRecordingRef.current) {
+               startSpeechRecognition();
+             }
+           }, 1000);
+        } else {
+            stopAndCleanup();
         }
       };
 
       recognitionRef.current = rec;
       rec.start();
+      
+      // Kun vis toast første gang vi starter
+      if (transcribedText === "") {
+          toast.info("Lytter... (V10)", { duration: 2500 });
+      }
     } catch (e) {
-      console.error("STT Session Start Error:", e);
+      console.error("STT Failed:", e);
       stopAndCleanup();
     }
   };
@@ -124,7 +132,7 @@ export default function KalenderPage() {
       toast.success("Opptak avsluttet.");
     } else {
       setTranscribedText("");
-      startSpeechRecognition(true);
+      startSpeechRecognition();
     }
   };
 
