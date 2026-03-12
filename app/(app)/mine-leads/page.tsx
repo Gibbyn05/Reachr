@@ -722,16 +722,21 @@ function LeadRow({
           </div>
         </td>
 
-        {/* Last contacted / Meeting date */}
+        {/* Last contacted */}
         <td className="hidden md:table-cell px-4 py-3.5 text-sm text-[#6b6660] whitespace-nowrap">
-          {lead.status === "Booket møte" && meetingDate ? (
-            <span className="flex items-center gap-1 text-purple-600 font-medium text-xs">
+          {lead.lastContacted ? (
+            new Date(lead.lastContacted).toLocaleDateString("nb-NO")
+          ) : "—"}
+        </td>
+
+        {/* Meeting date */}
+        <td className="hidden md:table-cell px-4 py-3.5 text-sm whitespace-nowrap">
+          {meetingDate ? (
+            <span className="flex items-center gap-1 text-purple-600 font-bold text-xs">
               <Calendar className="w-3 h-3" />
               {new Date(meetingDate).toLocaleString("nb-NO", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
             </span>
-          ) : lead.lastContacted ? (
-            new Date(lead.lastContacted).toLocaleDateString("nb-NO")
-          ) : "—"}
+          ) : <span className="text-gray-300">—</span>}
         </td>
 
         {/* Assigned */}
@@ -786,7 +791,7 @@ function LeadRow({
       {/* Expanded detail panel */}
       {expanded && (
         <tr>
-          <td colSpan={6} className="bg-slate-50 border-b border-[#e8e4d8]" onClick={(e) => e.stopPropagation()}>
+          <td colSpan={7} className="bg-slate-50 border-b border-[#e8e4d8]" onClick={(e) => e.stopPropagation()}>
             <div className="px-6 py-5 space-y-5">
 
               {/* Quick status buttons */}
@@ -1542,6 +1547,7 @@ export default function MineLeadsPage() {
                   <th className="hidden sm:table-cell px-4 py-3 text-left text-xs font-semibold text-[#6b6660] uppercase tracking-wider">Kontaktperson</th>
                   <th className="px-4 py-3 text-left text-xs font-semibold text-[#6b6660] uppercase tracking-wider">Status</th>
                   <th className="hidden md:table-cell px-4 py-3 text-left text-xs font-semibold text-[#6b6660] uppercase tracking-wider">Sist kontaktet</th>
+                  <th className="hidden md:table-cell px-4 py-3 text-left text-xs font-semibold text-[#6b6660] uppercase tracking-wider">Møtedato</th>
                   <th className="hidden md:table-cell px-4 py-3 text-left text-xs font-semibold text-[#6b6660] uppercase tracking-wider">Ansvarlig</th>
                   <th className="hidden lg:table-cell px-4 py-3 text-left text-xs font-semibold text-[#6b6660] uppercase tracking-wider">Notater</th>
                 </tr>
