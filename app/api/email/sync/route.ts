@@ -155,32 +155,37 @@ export async function POST(req: NextRequest) {
           if (process.env.ANTHROPIC_API_KEY) {
             try {
               const now = new Date();
+              const isoToday = now.toISOString().split("T")[0]; // Use ISO for context
               const aiResponse = await anthropic.messages.create({
                 model: "claude-3-haiku-20240307",
                 max_tokens: 300,
-                system: `Du er en norsk salgsassistent. Dagens dato er ${now.toLocaleDateString("nb-NO")}.
-                VIKTIG: Vi bruker norsk tid (Europe/Oslo). 
-                - Hvis kunden skriver "kl 17", betyr det 17:00 norsk tid.
-                - Hvis kunden skriver "kl 9", betyr det 09:00 norsk tid.
-                - Analyser KUN den nyeste meldingen.`,
+                system: `Du er en norsk salgsassistent. I dag er ${isoToday}.
+                Oppgave: Finn møtedato og tidspunkt i svaret. 
+                Viktige regler:
+                - Vi bruker Europe/Oslo tidssone.
+                - "kl 17" = 17:00. 
+                - Hvis kun dato er oppgitt, sett tid til 09:00.
+                - Returner KUN JSON.`,
                 messages: [{ 
                   role: "user", 
-                  content: `Analyser: "${cleanedSnippet}"
+                  content: `Analyser denne meldingen: "${cleanedSnippet}"
                   
                   Returner JSON: 
                   { 
                     "isMeetingRequested": boolean, 
-                    "datetime": "YYYY-MM-DDTHH:mm" | null, 
-                    "reason": "kort forklaring" 
+                    "date": "YYYY-MM-DD",
+                    "time": "HH:mm" | null,
+                    "reason": "forklaring" 
                   }` 
                 }],
               });
 
               const analysis = JSON.parse((aiResponse.content[0] as any).text);
-              if (analysis.isMeetingRequested && analysis.datetime) {
+              if (analysis.isMeetingRequested && analysis.date) {
                 status = "Booket møte";
-                // Append Norwegian offset (+01:00 for winter) to ensure correct storage
-                meetingDate = `${analysis.datetime}:00+01:00`;
+                const timeStr = analysis.time || "09:00";
+                // Final ISO string: YYYY-MM-DDTHH:mm:00+01:00
+                meetingDate = `${analysis.date}T${timeStr}:00+01:00`;
                 aiReason = analysis.reason;
                 foundMeetingsCount++;
               }
