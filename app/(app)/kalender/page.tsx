@@ -42,66 +42,84 @@ export default function KalenderPage() {
       return;
     }
 
-    if (recognitionRef.current) {
-        try { recognitionRef.current.abort(); } catch(e) {}
-        recognitionRef.current = null;
-    }
-
-    const rec = new SpeechRecognition();
-    rec.continuous = true; // Tilbake til native continuous for å unngå loop-spam
-    rec.interimResults = true;
-    rec.lang = "nb-NO";
-
-    rec.onresult = (event: any) => {
-      const fullTranscript = Array.from(event.results)
-        .map((res: any) => res[0].transcript)
-        .join(" ");
-      setTranscribedText(fullTranscript);
-    };
-
-    rec.onerror = (event: any) => {
-      console.error("Speech Recognition Error:", event.error);
-      if (event.error === "not-allowed") {
-        toast.error("Mangler tilgang til mikrofon.");
-        isRecordingRef.current = false;
-        setIsRecording(false);
-      }
-    };
-
-    rec.onend = () => {
-      // Vi restarter Bare hvis det stoppet uventet mens vi liksom skulle ta opp
-      if (isRecordingRef.current) {
-          console.log("STT uventet stoppet, prøver én restart...");
-          try { rec.start(); } catch(e) {}
-      } else {
-          setIsRecording(false);
-          recognitionRef.current = null;
-      }
-    };
+    // Hindre dobbel oppstart
+    if (recognitionRef.current) return;
 
     try {
-      rec.start();
+      const rec = new SpeechRecognition();
+      rec.continuous = true;
+      rec.interimResults = true;
+      rec.lang = "nb-NO";
+
+      rec.onstart = () => {
+        console.log("Speech recognition started");
+        setIsRecording(true);
+        isRecordingRef.current = true;
+      };
+
+      rec.onresult = (event: any) => {
+        let interimTranscript = "";
+        let finalTranscript = "";
+
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+          const transcript = event.results[i][0].transcript;
+          if (event.results[i].isFinal) {
+            finalTranscript += transcript + " ";
+          } else {
+            interimTranscript += transcript;
+          }
+        }
+        
+        if (finalTranscript || interimTranscript) {
+          setTranscribedText(prev => {
+            // Vi legger til ny tekst på slutten hvis det er ferdig snakket
+            return finalTranscript ? prev + finalTranscript : prev + interimTranscript;
+          });
+        }
+      };
+
+      rec.onerror = (event: any) => {
+        console.error("Speech Recognition Error:", event.error);
+        if (event.error === "not-allowed") {
+           toast.error("Mangler tilgang til mikrofon. Sjekk personverninnstillinger.");
+        }
+        stopAndCleanup();
+      };
+
+      rec.onend = () => {
+        console.log("Speech recognition ended");
+        // Hvis vi ikke stoppet med vilje, prøv én rolig restart etter et sekund
+        if (isRecordingRef.current) {
+          setTimeout(() => {
+            if (isRecordingRef.current) rec.start();
+          }, 1000);
+        } else {
+          stopAndCleanup();
+        }
+      };
+
       recognitionRef.current = rec;
-      if (!isRecording) {
-          setIsRecording(true);
-          isRecordingRef.current = true;
-          toast.info("Lytter... (V6)", { duration: 2000 });
-      }
+      rec.start();
+      toast.info("Lytter... (V7)", { duration: 2000 });
     } catch (e) {
-      console.error("Failed to start speech recognition:", e);
-      setIsRecording(false);
-      isRecordingRef.current = false;
+      console.error("STT Init Error:", e);
+      toast.error("Kunne ikke starte mikrofon.");
+      stopAndCleanup();
+    }
+  };
+
+  const stopAndCleanup = () => {
+    isRecordingRef.current = false;
+    setIsRecording(false);
+    if (recognitionRef.current) {
+      try { recognitionRef.current.stop(); } catch(e) {}
+      recognitionRef.current = null;
     }
   };
 
   const toggleRecording = () => {
     if (isRecording) {
-      isRecordingRef.current = false;
-      setIsRecording(false);
-      if (recognitionRef.current) {
-        recognitionRef.current.stop();
-        recognitionRef.current = null;
-      }
+      stopAndCleanup();
       toast.success("Opptak avsluttet.");
     } else {
       setTranscribedText("");
