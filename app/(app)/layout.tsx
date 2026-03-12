@@ -33,14 +33,14 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   if (!subChecked) {
     return (
-      <div className="min-h-screen bg-[#f2efe3] flex items-center justify-center">
+      <div className="min-h-screen bg-[#f2efe3] dark:bg-[#0a0a0a] flex items-center justify-center">
         <div className="w-6 h-6 border-2 border-[#09fe94] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#f2efe3]">
+    <div className="min-h-screen bg-[#f2efe3] dark:bg-[#0a0a0a]">
       <Sidebar />
       {sidebarOpen && (
         <div
@@ -48,7 +48,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           onClick={() => setSidebarOpen(false)}
         />
       )}
-      <main className="md:ml-60 min-h-screen">
+      <main className="md:ml-60 min-h-screen bg-[#f2efe3] dark:bg-[#0a0a0a]">
         {children}
       </main>
       <OnboardingModal />

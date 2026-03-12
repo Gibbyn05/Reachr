@@ -186,7 +186,7 @@ export default function KalenderPage() {
   const upcomingTasks = tasks.filter((t) => !t.isToday);
 
   return (
-    <div className="min-h-screen bg-[#F8F9FC] dark:bg-[#0a0a0a] transition-colors duration-500">
+    <div className="min-h-screen bg-[#f2efe3] dark:bg-[#0a0a0a] transition-colors duration-500">
       <TopBar title="Oppgaver & Kalender" subtitle="Loggfør anrop, book møter og følg opp dine leads" />
 
       <div className="p-4 sm:p-8 max-w-7xl mx-auto">
