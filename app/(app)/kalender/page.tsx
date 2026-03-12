@@ -44,26 +44,19 @@ export default function KalenderPage() {
 
     if (recognitionRef.current) {
         try { recognitionRef.current.abort(); } catch(e) {}
+        recognitionRef.current = null;
     }
 
     const rec = new SpeechRecognition();
-    rec.continuous = false; 
+    rec.continuous = true; // Tilbake til native continuous for å unngå loop-spam
     rec.interimResults = true;
     rec.lang = "nb-NO";
 
-    // Vi må fange opp teksten slik den er NÅ før vi starter en ny runde
-    let currentFinal = transcribedText;
-
     rec.onresult = (event: any) => {
-      let interimTranscript = "";
-      for (let i = event.resultIndex; i < event.results.length; ++i) {
-        if (event.results[i].isFinal) {
-          currentFinal += event.results[i][0].transcript + " ";
-        } else {
-          interimTranscript += event.results[i][0].transcript;
-        }
-      }
-      setTranscribedText(currentFinal + interimTranscript);
+      const fullTranscript = Array.from(event.results)
+        .map((res: any) => res[0].transcript)
+        .join(" ");
+      setTranscribedText(fullTranscript);
     };
 
     rec.onerror = (event: any) => {
@@ -76,9 +69,10 @@ export default function KalenderPage() {
     };
 
     rec.onend = () => {
+      // Vi restarter Bare hvis det stoppet uventet mens vi liksom skulle ta opp
       if (isRecordingRef.current) {
-          // Restart umiddelbart for å simulere continuous mode stabilt
-          startSpeechRecognition();
+          console.log("STT uventet stoppet, prøver én restart...");
+          try { rec.start(); } catch(e) {}
       } else {
           setIsRecording(false);
           recognitionRef.current = null;
@@ -91,7 +85,7 @@ export default function KalenderPage() {
       if (!isRecording) {
           setIsRecording(true);
           isRecordingRef.current = true;
-          toast.info("Lytter... (V5)", { duration: 2000 });
+          toast.info("Lytter... (V6)", { duration: 2000 });
       }
     } catch (e) {
       console.error("Failed to start speech recognition:", e);
