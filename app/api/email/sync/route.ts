@@ -85,100 +85,133 @@ export async function POST(req: NextRequest) {
       }
 
       const foundConversations: { email: string, snippet: string }[] = [];
+      console.log(`[Sync] Checking connection: ${conn.provider} (${conn.user_email})`);
 
       if (conn.provider === "gmail") {
-        const listRes = await fetch(`https://gmail.googleapis.com/gmail/v1/users/me/messages?q=${encodeURIComponent("is:unread in:inbox")}&maxResults=10`, {
+        const q = encodeURIComponent("is:unread"); // Broader than just inbox
+        const listRes = await fetch(`https://gmail.googleapis.com/gmail/v1/users/me/messages?q=${q}&maxResults=10`, {
           headers: { Authorization: `Bearer ${accessToken}` }
         });
         if (listRes.ok) {
           const listData = await listRes.json();
           const messages = listData.messages || [];
+          console.log(`[Sync] Found ${messages.length} unread Gmail messages`);
+          
           for (const msg of messages) {
             const detailRes = await fetch(`https://gmail.googleapis.com/gmail/v1/users/me/messages/${msg.id}`, {
               headers: { Authorization: `Bearer ${accessToken}` }
             });
             if (detailRes.ok) {
               const detail = await detailRes.json();
-              const fromHeader = detail.payload.headers.find((h: any) => h.name === "From")?.value || "";
+              const headers = detail.payload.headers;
+              const fromHeader = headers.find((h: any) => h.name === "From")?.value || "";
               const match = fromHeader.match(/<(.+)>|(\S+@\S+)/);
               const email = (match ? (match[1] || match[2]) : fromHeader).toLowerCase().trim();
+              
               if (email) {
-                foundConversations.push({ email, snippet: detail.snippet || "" });
+                console.log(`[Sync] Processed Gmail message from ${email}`);
+                foundConversations.push({ email, snippet: detail.snippet || detail.bodyPreview || "" });
               }
             }
           }
+        } else {
+          console.error(`[Sync] Gmail API Error: ${listRes.status}`);
         }
       } else if (conn.provider === "outlook") {
-        const listRes = await fetch(`https://graph.microsoft.com/v1.0/me/mailFolders/inbox/messages?$filter=isRead eq false&$top=10&$select=from,bodyPreview`, {
+        // Broad filter for unread
+        const listRes = await fetch(`https://graph.microsoft.com/v1.0/me/messages?$filter=isRead eq false&$top=10&$select=from,bodyPreview`, {
           headers: { Authorization: `Bearer ${accessToken}` }
         });
         if (listRes.ok) {
           const data = await listRes.json();
           const messages = data.value || [];
+          console.log(`[Sync] Found ${messages.length} unread Outlook messages`);
+          
           for (const msg of messages) {
-            const email = msg.from?.emailAddress?.address?.toLowerCase();
+            const email = msg.from?.emailAddress?.address?.toLowerCase().trim();
             if (email) {
+              console.log(`[Sync] Processed Outlook message from ${email}`);
               foundConversations.push({ email, snippet: msg.bodyPreview || "" });
             }
           }
+        } else {
+           const err = await listRes.json().catch(() => ({}));
+           console.error(`[Sync] Outlook API Error: ${listRes.status}`, err);
         }
       }
 
       // Match found emails to leads and analyze intent with AI
       for (const conv of foundConversations) {
         const lead = leadEmailMap.get(conv.email);
+        
         if (lead) {
+          console.log(`[Sync] Match found for lead: ${lead.name} (${conv.email})`);
           // AI Intent Detection
           let status = "Kontaktet";
           let meetingDate = null;
 
           try {
+            console.log(`[Sync] Analyzing snippet with AI: "${conv.snippet.substring(0, 50)}..."`);
             const aiResponse = await anthropic.messages.create({
               model: "claude-3-haiku-20240307",
-              max_tokens: 100,
-              system: "Du er en AI som analyserer salgs-eposter. Din jobb er å oppdage om kunden ønsker et møte og trekke ut datoen.",
+              max_tokens: 200,
+              system: "Du er en AI som analyserer salgs-eposter. Din jobb er å oppdage om kunden ønsker et møte og trekke ut datoen. Svar alltid med korrekt JSON.",
               messages: [{
                 role: "user", 
                 content: `Analyser denne e-post-snutten: "${conv.snippet}". 
-                Svar KUN i JSON-format med disse feltene:
+                
+                Instrukser:
+                1. Sjekk om kunden foreslår eller takker ja til et møte/prat.
+                2. Hvis de nevner en dato (f.eks "23. mars", "neste mandag", "23.03.2026"), konverter den til formatet YYYY-MM-DD.
+                
+                Svar KUN i JSON-format:
                 {
                   "isMeetingRequested": boolean,
-                  "date": string | null (format YYYY-MM-DD),
-                  "summary": string (kort norsk oppsummering)
+                  "date": string | null,
+                  "summary": "norsk oppsummering"
                 }`
               }],
             });
 
             const content = aiResponse.content[0].type === 'text' ? aiResponse.content[0].text : '';
             const analysis = JSON.parse(content);
+            console.log(`[Sync] AI Analysis for ${conv.email}:`, analysis);
 
             if (analysis.isMeetingRequested) {
               status = "Booket møte";
               meetingDate = analysis.date;
             }
           } catch (e) {
-            console.error("AI Analysis failed:", e);
+            console.error("[Sync] AI Analysis failed:", e);
           }
 
           // 1. Update Lead Status and Meeting Date
-          await db.from("leads").update({ 
+          const { error: updateError } = await db.from("leads").update({ 
             status: status,
             meeting_date: meetingDate || lead.meeting_date,
             last_contacted: new Date().toISOString()
           }).eq("id", lead.id);
 
+          if (updateError) {
+            console.error(`[Sync] Failed to update lead ${lead.id}:`, updateError);
+          } else {
+            console.log(`[Sync] Successfully updated lead ${lead.name} to status: ${status}`);
+          }
+
           // 2. Stop any active sequences for this lead
-          const { data: enrollment } = await db
+          await db
             .from("email_sequence_enrollments")
             .update({ status: "completed" })
             .eq("lead_id", lead.id)
-            .eq("status", "active")
-            .select();
+            .eq("status", "active");
 
           foundRepliesCount++;
+        } else {
+          console.log(`[Sync] No lead found for email: ${conv.email}`);
         }
       }
     }
+
 
 
     return NextResponse.json({ 
