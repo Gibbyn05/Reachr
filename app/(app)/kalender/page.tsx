@@ -19,8 +19,6 @@ export default function KalenderPage() {
   const [selectedLeadId, setSelectedLeadId] = useState("");
   const [leadSearch, setLeadSearch] = useState("");
   const recognitionRef = useRef<any>(null);
-  const isRecordingRef = useRef(false);
-  const lastStartTimeRef = useRef(0);
 
   const filteredLeadsForSelect = leads.filter(l => 
     l.name.toLowerCase().includes(leadSearch.toLowerCase()) ||
@@ -36,103 +34,74 @@ export default function KalenderPage() {
     };
   }, []);
 
-  const startSpeechRecognition = () => {
-    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (!SpeechRecognition) {
-      toast.error("Nettleseren din støtter ikke tale-til-tekst. Prøv Chrome.");
+  const toggleRecording = () => {
+    if (isRecording) {
+      // Stopp opptak
+      if (recognitionRef.current) {
+        try { recognitionRef.current.stop(); } catch(e) {}
+        recognitionRef.current = null;
+      }
+      setIsRecording(false);
+      toast.success("Opptak stoppet.");
       return;
     }
 
-    if (recognitionRef.current) return;
+    // Start opptak
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      toast.error("Nettleseren støtter ikke tale-til-tekst. Bruk Chrome.");
+      return;
+    }
+
+    setTranscribedText("");
+
+    const rec = new SpeechRecognition();
+    rec.continuous = true;
+    rec.interimResults = true;
+    rec.lang = "nb-NO";
+    recognitionRef.current = rec;
+
+    rec.onstart = () => {
+      setIsRecording(true);
+      toast.info("🎤 Lytter...", { duration: 2000 });
+    };
+
+    let accumulated = "";
+    rec.onresult = (event: any) => {
+      let interim = "";
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const t = event.results[i][0].transcript;
+        if (event.results[i].isFinal) {
+          accumulated += t + " ";
+        } else {
+          interim = t;
+        }
+      }
+      setTranscribedText(accumulated + interim);
+    };
+
+    rec.onerror = (e: any) => {
+      console.error("STT error:", e.error);
+      if (e.error === "not-allowed") {
+        toast.error("🚫 Mikrofontilgang nektet. Klikk hengelåsen i adressefeltet og tillat mikrofon.");
+      } else if (e.error === "network") {
+        toast.warning("Nettverksproblem med tale-APIet. Prøv igjen.");
+      } else if (e.error !== "no-speech") {
+        toast.error(`Mikrofonproblem: ${e.error}`);
+      }
+    };
+
+    rec.onend = () => {
+      recognitionRef.current = null;
+      setIsRecording(false);
+    };
 
     try {
-      const rec = new SpeechRecognition();
-      rec.continuous = true;
-      rec.interimResults = true;
-      rec.lang = "nb-NO";
-
-      let lastFinalText = transcribedText;
-
-      rec.onstart = () => {
-        setIsRecording(true);
-        isRecordingRef.current = true;
-        lastStartTimeRef.current = Date.now();
-      };
-
-      rec.onresult = (event: any) => {
-        let interim = "";
-        let final = "";
-        for (let i = event.resultIndex; i < event.results.length; ++i) {
-          const transcript = event.results[i][0].transcript;
-          if (event.results[i].isFinal) final += transcript + " ";
-          else interim += transcript;
-        }
-        if (final) lastFinalText += final;
-        setTranscribedText(lastFinalText + interim);
-      };
-
-      rec.onerror = (event: any) => {
-        const duration = Date.now() - lastStartTimeRef.current;
-        console.warn(`STT Error: ${event.error} (after ${duration}ms)`);
-        
-        if (event.error === "not-allowed") {
-          toast.error("Mikrofontilgang nektet. Sjekk hengelåsen i adressefeltet.");
-          isRecordingRef.current = false;
-        } else if (event.error === "audio-capture") {
-          toast.error("Kunne ikke finne mikrofon. Er den koblet til?");
-          isRecordingRef.current = false;
-        } else if (duration < 2000) {
-          // Hvis den feiler umiddelbart, er det ofte en hardware-konflikt
-          console.error("Hardware/System error detected");
-          isRecordingRef.current = false;
-        }
-      };
-
-      rec.onend = () => {
-        const duration = Date.now() - lastStartTimeRef.current;
-        
-        // Hvis den har gått i mindre enn 3 sekunder, er det noe galt.
-        // Vi stopper loopen for å unngå flimmer.
-        if (isRecordingRef.current && duration > 3000 && recognitionRef.current === rec) {
-           recognitionRef.current = null;
-           setTimeout(() => {
-             if (isRecordingRef.current) startSpeechRecognition();
-           }, 500);
-        } else {
-           if (isRecordingRef.current && duration <= 3000) {
-             toast.error("Opptaket stoppet uventet. Prøv å sjekke om andre apper bruker mikrofonen.");
-           }
-           stopAndCleanup();
-        }
-      };
-
-      recognitionRef.current = rec;
       rec.start();
-      if (transcribedText === "") {
-          toast.info("Lytter... (V11)", { duration: 2500 });
-      }
     } catch (e) {
-      console.error("STT Crash:", e);
-      stopAndCleanup();
-    }
-  };
-
-  const stopAndCleanup = () => {
-    isRecordingRef.current = false;
-    setIsRecording(false);
-    if (recognitionRef.current) {
-      try { recognitionRef.current.stop(); } catch(e) {}
+      toast.error("Kunne ikke starte mikrofon. Prøv igjen.");
       recognitionRef.current = null;
-    }
-  };
-
-  const toggleRecording = () => {
-    if (isRecording) {
-      stopAndCleanup();
-      toast.success("Opptak avsluttet.");
-    } else {
-      setTranscribedText("");
-      startSpeechRecognition();
+      setIsRecording(false);
     }
   };
 
