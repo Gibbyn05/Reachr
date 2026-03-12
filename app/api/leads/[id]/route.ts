@@ -1,8 +1,10 @@
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
+import { isAdmin } from "@/lib/admin";
 
 /** Verify the lead belongs to the authenticated user's team before mutating. */
 async function assertOwnership(leadId: string, userEmail: string): Promise<boolean> {
+  if (isAdmin(userEmail)) return true;
   const db = createServiceClient();
   const { data } = await db
     .from("leads")

@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
 import { enrichLead } from "@/lib/enrichment";
+import { isAdmin } from "@/lib/admin";
 
 function getServiceClient() {
   return createServiceClient(
@@ -34,11 +35,16 @@ export async function GET(req: NextRequest) {
     ...(members ?? []).map((m: { member_email: string }) => m.member_email),
   ]));
 
-  const { data: leads, error } = await db
+  let query = db
     .from("leads")
     .select("*")
-    .in("user_email", teamEmails)
     .order("created_at", { ascending: false });
+
+  if (!isAdmin(user.email)) {
+    query = query.in("user_email", teamEmails);
+  }
+
+  const { data: leads, error } = await query;
 
   if (error) {
     console.error("[GET /api/leads] leads query error:", error);
