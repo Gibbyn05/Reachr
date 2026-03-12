@@ -42,57 +42,58 @@ export default function KalenderPage() {
       return;
     }
 
-    // Hindre dobbel oppstart
-    if (recognitionRef.current) return;
+    if (recognitionRef.current) {
+        stopAndCleanup();
+    }
 
     try {
       const rec = new SpeechRecognition();
-      rec.continuous = true;
+      rec.continuous = false; // "False" er ofte mer stabilt enn "True" på Mac fordi den lukker sesjonen naturlig
       rec.interimResults = true;
       rec.lang = "nb-NO";
 
+      let sessionTranscript = "";
+
       rec.onstart = () => {
-        console.log("Speech recognition started");
         setIsRecording(true);
         isRecordingRef.current = true;
       };
 
       rec.onresult = (event: any) => {
-        let interimTranscript = "";
-        let finalTranscript = "";
-
+        let interim = "";
         for (let i = event.resultIndex; i < event.results.length; ++i) {
-          const transcript = event.results[i][0].transcript;
           if (event.results[i].isFinal) {
-            finalTranscript += transcript + " ";
+            sessionTranscript += event.results[i][0].transcript + " ";
           } else {
-            interimTranscript += transcript;
+            interim += event.results[i][0].transcript;
           }
         }
-        
-        if (finalTranscript || interimTranscript) {
-          setTranscribedText(prev => {
-            // Vi legger til ny tekst på slutten hvis det er ferdig snakket
-            return finalTranscript ? prev + finalTranscript : prev + interimTranscript;
-          });
-        }
+        setTranscribedText(currentNotes => {
+            // Vi lagrer den akkumulerte teksten i en ref eller state
+            // Her bruker vi en enkel tilnærming som bare oppdaterer boksen
+            return sessionTranscript + interim;
+        });
       };
 
       rec.onerror = (event: any) => {
-        console.error("Speech Recognition Error:", event.error);
+        console.warn("STT Error (V8):", event.error);
         if (event.error === "not-allowed") {
-           toast.error("Mangler tilgang til mikrofon. Sjekk personverninnstillinger.");
+          toast.error("Mangler tilgang til mikrofon.");
+          stopAndCleanup();
         }
-        stopAndCleanup();
+        // Vi lar onend håndtere restart hvis det er network/no-speech
       };
 
       rec.onend = () => {
-        console.log("Speech recognition ended");
-        // Hvis vi ikke stoppet med vilje, prøv én rolig restart etter et sekund
+        // Hvis vi skal fortsette å lytte, start en ny sesjon med en liten pause
+        // slik at lydkortet rekker å 'puste'
         if (isRecordingRef.current) {
           setTimeout(() => {
-            if (isRecordingRef.current) rec.start();
-          }, 1000);
+            if (isRecordingRef.current) {
+                recognitionRef.current = null;
+                startSpeechRecognition();
+            }
+          }, 250);
         } else {
           stopAndCleanup();
         }
@@ -100,10 +101,9 @@ export default function KalenderPage() {
 
       recognitionRef.current = rec;
       rec.start();
-      toast.info("Lytter... (V7)", { duration: 2000 });
+      if (!isRecording) toast.info("Lytter... (V8)", { duration: 2000 });
     } catch (e) {
-      console.error("STT Init Error:", e);
-      toast.error("Kunne ikke starte mikrofon.");
+      console.error("STT Crash:", e);
       stopAndCleanup();
     }
   };
