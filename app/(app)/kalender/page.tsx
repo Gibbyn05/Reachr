@@ -32,32 +32,63 @@ export default function KalenderPage() {
         rec.continuous = true;
         rec.interimResults = true;
         rec.lang = "nb-NO";
+
         rec.onresult = (event: any) => {
-          let transcript = "";
-          for (let i = 0; i < event.results.length; i++) {
-            transcript += event.results[i][0].transcript;
+          let currentTranscript = "";
+          for (let i = event.resultIndex; i < event.results.length; i++) {
+            currentTranscript += event.results[i][0].transcript;
           }
-          setTranscribedText(transcript);
+          if (currentTranscript) {
+            setTranscribedText(prev => {
+              // Only append if it's the final result, otherwise it's just interim
+              const isFinal = event.results[event.results.length - 1].isFinal;
+              if (isFinal) {
+                return (prev + " " + currentTranscript).trim();
+              }
+              // For interim, we'll just show it for now
+              return prev; 
+            });
+            // Also update interim for real-time feel
+            const fullRaw = Array.from(event.results)
+              .map((res: any) => res[0].transcript)
+              .join(" ");
+            setTranscribedText(fullRaw);
+          }
         };
-        (window as any)._rec = rec; // debug
+
+        rec.onerror = (event: any) => {
+          console.error("Speech Recognition Error:", event.error);
+          if (event.error !== "no-speech") {
+            toast.error("Mikrofon-feil: " + event.error);
+            setIsRecording(false);
+          }
+        };
+
+        (window as any)._rec = rec;
       }
     }
   }, []);
 
   const toggleRecording = () => {
     const rec = (window as any)._rec;
+    if (!rec) {
+      toast.error("Nettleseren din støtter ikke tale-til-tekst.");
+      return;
+    }
+
     if (isRecording) {
-      rec?.stop();
+      rec.stop();
       setIsRecording(false);
       toast.success("Opptak avsluttet.");
     } else {
       setTranscribedText("");
       try {
-        rec?.start();
+        rec.start();
         setIsRecording(true);
-        toast.info("Lytter til samtalen...", { duration: 2000 });
+        toast.info("Lytter nå... Snakk i vei!", { duration: 2000 });
       } catch (e) {
-        toast.error("Kunne ikke starte mikrofon. Prøv igjen.");
+        // Sometimes it's already started, just reset state
+        setIsRecording(true);
       }
     }
   };
