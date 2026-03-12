@@ -6,7 +6,7 @@
   --color-sidebar: #171717;
   --color-accent: #09fe94;
   --color-primary: #171717;
-  --color-muted: #ede9da;
+  --color-muted: #e8e4d8;
   --color-muted-foreground: #6b6660;
   --color-card: #faf8f2;
   --color-card-foreground: #171717;
@@ -31,121 +31,85 @@ html {
   -webkit-font-smoothing: antialiased;
 }
 
-/* Display heading utility – EB Garamond like native.no */
 .font-display {
   font-family: 'EB Garamond', 'Georgia', serif;
 }
 
-body {
-  background-color: #f2efe3;
-  color: #171717;
-}
-
-/* CSS vars for Glow component radial gradients */
+/* ── Design Tokens ───────────────────────────────────────────── */
+/* Light mode = Landing page colors (beige/cream palette) */
 :root {
-  --brand: 151 99% 52%;
-  --brand-foreground: 151 99% 70%;
+  --bg-page:          #f2efe3;   /* Same as landing page bg */
+  --bg-card:          #faf8f2;   /* Card / panel surfaces */
+  --bg-card-alt:      #f0ece0;   /* Slightly darker card variant */
+  --bg-muted:         #e8e4d8;   /* Muted chips, tags, badges */
+  --text-primary:     #171717;   /* Main text */
+  --text-secondary:   #3d3a34;   /* Secondary text */
+  --text-muted:       #6b6660;   /* Muted / placeholder text */
+  --text-xmuted:      #a09b8f;   /* Very muted, timestamps etc */
+  --rc-border:        #d8d3c5;   /* All borders */
+  --sidebar-bg:       #171717;   /* Sidebar always dark */
+  --topbar-bg:        #faf8f2;   /* Top navigation bar */
+  --btn-ghost-hover:  #e8e4d8;   /* Ghost button hover */
+  --accent:           #09fe94;   /* Primary accent green */
+  --accent-hover:     #00e882;   /* Accent hover */
+  --accent-danger:    #ff470a;   /* Danger / warning red-orange */
 }
 
-/* Animation delay utilities */
-.delay-100 { animation-delay: 100ms; }
-.delay-200 { animation-delay: 200ms; }
-.delay-300 { animation-delay: 300ms; }
-.delay-500 { animation-delay: 500ms; }
-.delay-700 { animation-delay: 700ms; }
-.delay-1000 { animation-delay: 1000ms; }
-
-@keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-12px); }
-}
-
-@keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes appear {
-  0% { opacity: 0; transform: translateY(10px); }
-  100% { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes appear-zoom {
-  0% { opacity: 0; transform: scale(0.95); }
-  100% { opacity: 1; transform: scale(1); }
-}
-
-@keyframes border-beam {
-  100% { offset-distance: 100%; }
-}
-
-@keyframes marquee {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
-}
-
-@keyframes marquee-reverse {
-  0% { transform: translateX(-50%); }
-  100% { transform: translateX(0); }
-}
-
-::-webkit-scrollbar { width: 5px; height: 5px; }
-::-webkit-scrollbar-track { background: #ede9da; }
-::-webkit-scrollbar-thumb { background: #c4bfb2; border-radius: 99px; }
-::-webkit-scrollbar-thumb:hover { background: #a09b8f; }
-
-/* ── Dark mode ─────────────────────────────────────────────── */
-:root {
-  --bg-page: #f2efe3;
-  --bg-card: #faf8f2;
-  --bg-card-alt: #f5f1e8;
-  --text-primary: #171717;
-  --text-secondary: #3d3a34;
-  --text-muted: #6b6660;
-  --rc-border: #d8d3c5;
-  --sidebar-bg: #171717;
-  --topbar-bg: #faf8f2;
-  --btn-ghost-hover: #e8e4d8;
-}
-
+/* Dark mode overrides */
 html.dark {
-  --bg-page: #0a0a0a;
-  --bg-card: #141414;
-  --bg-card-alt: #1a1a1a;
-  --text-primary: #ffffff;
-  --text-secondary: #e5e5e5;
-  --text-muted: #d1d1d1;
-  --rc-border: #262626;
-  --sidebar-bg: #000000;
-  --topbar-bg: #141414;
-  --btn-ghost-hover: #1f1f1f;
+  --bg-page:          #0a0a0a;
+  --bg-card:          #141414;
+  --bg-card-alt:      #1a1a1a;
+  --bg-muted:         #262626;
+  --text-primary:     #ffffff;
+  --text-secondary:   #e5e5e5;
+  --text-muted:       #a3a3a3;
+  --text-xmuted:      #737373;
+  --rc-border:        #262626;
+  --sidebar-bg:       #000000;
+  --topbar-bg:        #141414;
+  --btn-ghost-hover:  #1f1f1f;
+  --accent:           #09fe94;
+  --accent-hover:     #00e882;
+  --accent-danger:    #ff470a;
 }
 
-body { background-color: var(--bg-page); color: var(--text-primary); transition: background-color 0.3s, color 0.3s; }
+/* Apply tokens to body */
+body {
+  background-color: var(--bg-page);
+  color: var(--text-primary);
+  transition: background-color 0.3s, color 0.3s;
+}
 
-/* ── Global Component Overrides ── */
-.bg-\[\#faf8f2\] { background-color: var(--bg-card) !important; }
-.bg-\[\#f2efe3\] { background-color: var(--bg-page) !important; }
-.bg-white { background-color: var(--bg-card) !important; }
-.border-\[\#d8d3c5\], .border-\[\#e8e4d8\], .border-\[\#f0ece0\] { border-color: var(--rc-border) !important; }
-.text-\[\#171717\] { color: var(--text-primary) !important; }
-.text-\[\#6b6660\], .text-\[\#a09b8f\] { color: var(--text-muted) !important; }
-.hover\:bg-\[\#e8e4d8\]:hover { background-color: var(--btn-ghost-hover) !important; }
-.bg-\[\#f0ece0\] { background-color: var(--bg-card-alt) !important; }
+/* ── Scrollbar ────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: var(--bg-muted); }
+::-webkit-scrollbar-thumb { background: var(--rc-border); border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-xmuted); }
 
-/* Better contrast for secondary text in cards */
-html.dark .text-gray-500, 
+/* ── Global color overrides: map hardcoded hex to CSS vars ─────── */
+/* This ensures every component using these classes gets theme-aware */
+.bg-white                                 { background-color: var(--bg-card) !important; }
+.bg-\[\#faf8f2\]                          { background-color: var(--bg-card) !important; }
+.bg-\[\#f2efe3\]                          { background-color: var(--bg-page) !important; }
+.bg-\[\#f0ece0\]                          { background-color: var(--bg-card-alt) !important; }
+.bg-\[\#e8e4d8\]                          { background-color: var(--bg-muted) !important; }
+.border-\[\#d8d3c5\],
+.border-\[\#e8e4d8\],
+.border-\[\#f0ece0\]                       { border-color: var(--rc-border) !important; }
+.text-\[\#171717\]                         { color: var(--text-primary) !important; }
+.text-\[\#3d3a34\]                         { color: var(--text-secondary) !important; }
+.text-\[\#6b6660\]                         { color: var(--text-muted) !important; }
+.text-\[\#a09b8f\]                         { color: var(--text-xmuted) !important; }
+.hover\:bg-\[\#e8e4d8\]:hover             { background-color: var(--btn-ghost-hover) !important; }
+.hover\:bg-\[\#faf8f2\]:hover             { background-color: var(--bg-card-alt) !important; }
+
+/* Dark-mode specific helpers */
+html.dark .text-gray-500,
 html.dark .text-slate-500,
-html.dark .text-zinc-500 {
-  color: var(--text-muted) !important;
-}
-
+html.dark .text-zinc-500   { color: var(--text-muted) !important; }
 html.dark .text-gray-400,
-html.dark .text-slate-400 {
-  color: #a3a3a3 !important;
-}
-
-/* Sidebar stays dark mostly, but we can refine it */
+html.dark .text-slate-400  { color: var(--text-xmuted) !important; }
 html.dark .bg-\[\#171717\] { background-color: var(--sidebar-bg) !important; }
 
 html.dark input,
@@ -156,8 +120,48 @@ html.dark select {
   border-color: var(--rc-border) !important;
 }
 
-/* Modal specific fixes */
+html.dark .fixed.inset-0.bg-black\/50 { background-color: rgba(0,0,0,0.8) !important; }
+
+/* ── Animations ──────────────────────────────────────────────── */
+.delay-100  { animation-delay: 100ms; }
+.delay-200  { animation-delay: 200ms; }
+.delay-300  { animation-delay: 300ms; }
+.delay-500  { animation-delay: 500ms; }
+.delay-700  { animation-delay: 700ms; }
+.delay-1000 { animation-delay: 1000ms; }
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-12px); }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes appear {
+  0%   { opacity: 0; transform: translateY(10px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes appear-zoom {
+  0%   { opacity: 0; transform: scale(0.95); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes border-beam {
+  100% { offset-distance: 100%; }
+}
+
+@keyframes marquee {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+@keyframes marquee-reverse {
+  0%   { transform: translateX(-50%); }
+  100% { transform: translateX(0); }
+}
+/* Modal overlay */
 html.dark .fixed.inset-0.bg-black\/50 { background-color: rgba(0, 0, 0, 0.8) !important; }
-
-
-
