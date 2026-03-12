@@ -413,54 +413,7 @@ export default function InnstillingerPage() {
     <div>
       <TopBar title="Innstillinger" />
 
-      {/* Plan change modal */}
-      {showPlanModal && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50" onClick={() => setShowPlanModal(false)}>
-          <div className="bg-[#faf8f2] rounded-2xl shadow-2xl p-8 w-[480px] max-w-full" onClick={(e) => e.stopPropagation()}>
-            <h2 className="text-lg font-bold text-[#171717] mb-2">Velg plan</h2>
-            <p className="text-sm text-[#6b6660] mb-6">Velg planen som passer din bedrift.</p>
-            <div className="space-y-3">
-              {[
-                { name: "Starter", price: "99 kr/mnd", desc: "1 bruker · 50 leads · Leadsøk" },
-                { name: "Pro", price: "199 kr/mnd", desc: "5 brukere · Ubegrenset leads · Alt i Starter + e-postintegrasjon" },
-                { name: "Team", price: "499 kr/mnd", desc: "5 brukere · Prioritert support · Alt i Pro + API-tilgang" },
-              ].map((plan) => {
-                const isSelected = selectedPlan === plan.name;
-                return (
-                  <div
-                    key={plan.name}
-                    onClick={() => setSelectedPlan(plan.name)}
-                    className={`border-2 rounded-xl p-4 cursor-pointer transition-all ${isSelected ? "border-[#09fe94] bg-[#09fe94]/8" : "border-[#d8d3c5] hover:border-[#a09b8f]"}`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="font-semibold text-[#171717]">
-                          {plan.name}
-                          {isSelected && <span className="ml-2 text-xs text-[#05c472] font-medium">(Valgt)</span>}
-                        </p>
-                        <p className="text-xs text-[#6b6660] mt-0.5">{plan.desc}</p>
-                      </div>
-                      <p className="font-bold text-[#171717] text-sm">{plan.price}</p>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-            <div className="flex gap-3 mt-6">
-              <button onClick={() => setShowPlanModal(false)} className="flex-1 py-2.5 border border-[#d8d3c5] rounded-xl text-sm font-semibold text-[#6b6660] hover:bg-[#e8e4d8]">Avbryt</button>
-              <button
-                onClick={() => {
-                  toast.success(`Plan endret til ${selectedPlan}!`);
-                  setShowPlanModal(false);
-                }}
-                className="flex-1 py-2.5 bg-[#09fe94] text-[#171717] rounded-xl text-sm font-semibold hover:bg-[#00e882]"
-              >
-                Bytt til {selectedPlan}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Modal is no longer needed because we use Stripe Portal for plan changes */}
 
       <div className="p-4 sm:p-8">
         <div className="flex flex-col sm:flex-row gap-4 sm:gap-8">
@@ -892,7 +845,30 @@ export default function InnstillingerPage() {
 
                       {!stripeSubscription.cancel_at_period_end && (
                         <div className="flex gap-3 mt-6">
-                          <Button variant="secondary" size="md" onClick={() => setShowPlanModal(true)}>Endre abonnement</Button>
+                          <Button 
+                            variant="secondary" 
+                            size="md" 
+                            disabled={openingPortal}
+                            onClick={async () => {
+                              setOpeningPortal(true);
+                              try {
+                                const res = await fetch("/api/stripe/portal", { method: "POST" });
+                                const data = await res.json();
+                                if (data.url) {
+                                  window.location.href = data.url;
+                                } else {
+                                  toast.error("Kunne ikke åpne Stripe-portalen: " + (data.error || "Ukjent feil"));
+                                }
+                              } catch (err: any) {
+                                toast.error("Nettverksfeil: " + err.message);
+                              } finally {
+                                setOpeningPortal(false);
+                              }
+                            }}
+                          >
+                            {openingPortal ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+                            Endre abonnement
+                          </Button>
                           <Button variant="ghost" size="md" className="text-red-500 hover:text-red-600 hover:bg-red-50"
                             disabled={openingPortal}
                             onClick={async () => {

@@ -6,9 +6,9 @@ import { Button } from "@/components/ui/button";
 import { useAppStore } from "@/store/app-store";
 import { Lead } from "@/lib/mock-data";
 import {
-  Bell, Phone, Calendar, Clock, Check, RotateCcw, X,
+  Bell, PhoneCall, CalendarCheck2, Clock, Check, RotateCcw, X,
   ChevronRight, ChevronDown, CheckCircle2,
-  Building2, Users, MapPin, TrendingUp, Hash, Mail, PhoneCall, Send,
+  Building2, Contact, MapPin, BarChart3, Hash, Inbox, Send,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
@@ -24,23 +24,23 @@ interface ComputedNotif {
 }
 
 const typeIcons: Record<NotifType, typeof Bell> = {
-  "follow-up": Phone,
+  "follow-up": PhoneCall,
   reminder: Clock,
-  meeting: Calendar,
+  meeting: CalendarCheck2,
 };
 const typeColors: Record<NotifType, string> = {
   "follow-up": "bg-[#ff470a]/10 text-[#ff470a]",
-  reminder: "bg-[#09fe94]/10 text-[#05c472]",
+  reminder: "bg-accent-dark/10 text-accent-dark",
   meeting: "bg-[#ffad0a]/12 text-[#c47e00]",
 };
 const typeBorderColors: Record<NotifType, string> = {
   "follow-up": "border-[#ff470a]/20",
-  reminder: "border-[#09fe94]/30",
+  reminder: "border-accent-dark/30",
   meeting: "border-[#ffad0a]/30",
 };
 const typeHeaderColors: Record<NotifType, string> = {
   "follow-up": "bg-[#ff470a]/8 border-b border-[#ff470a]/15",
-  reminder: "bg-[#09fe94]/8 border-b border-[#09fe94]/20",
+  reminder: "bg-accent-dark/8 border-b border-accent-dark/20",
   meeting: "bg-[#ffad0a]/8 border-b border-[#ffad0a]/20",
 };
 const typeLabels: Record<NotifType, string> = {
@@ -103,12 +103,12 @@ function LeadInfoDropdown({ lead }: { lead: Lead }) {
       )}
       {lead.employees > 0 && (
         <div className="flex items-center gap-1.5 text-xs text-[#6b6660]">
-          <Users className="w-3 h-3 text-[#a09b8f] shrink-0" /><span>{lead.employees} ansatte</span>
+          <Contact className="w-3 h-3 text-[#a09b8f] shrink-0" /><span>{lead.employees} ansatte</span>
         </div>
       )}
       {lead.revenue > 0 && (
         <div className="flex items-center gap-1.5 text-xs text-[#6b6660]">
-          <TrendingUp className="w-3 h-3 text-[#a09b8f] shrink-0" /><span>{(lead.revenue / 1_000_000).toFixed(1)} MNOK</span>
+          <BarChart3 className="w-3 h-3 text-[#a09b8f] shrink-0" /><span>{(lead.revenue / 1_000_000).toFixed(1)} MNOK</span>
         </div>
       )}
       {lead.phone && lead.phone !== "—" && (
@@ -118,7 +118,7 @@ function LeadInfoDropdown({ lead }: { lead: Lead }) {
       )}
       {lead.email && lead.email !== "—" && (
         <div className="flex items-center gap-1.5 text-xs text-[#6b6660] col-span-2">
-          <Mail className="w-3 h-3 text-[#a09b8f] shrink-0" /><span className="truncate">{lead.email}</span>
+          <Inbox className="w-3 h-3 text-[#a09b8f] shrink-0" /><span className="truncate">{lead.email}</span>
         </div>
       )}
     </div>

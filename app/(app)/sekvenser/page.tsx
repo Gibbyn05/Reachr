@@ -1,6 +1,6 @@
 "use client";
 import { TopBar } from "@/components/layout/top-bar";
-import { Zap, Plus, ArrowRight, Settings2, Play, Users, Search, MousePointerClick, Reply, FileText, Clock, Trash2 } from "lucide-react";
+import { FastForward, Plus, ArrowRight, Settings, Play, Contact, Search, MousePointer2, Reply, FileText, Clock, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
@@ -29,12 +29,12 @@ export default function SekvenserPage() {
             <input 
               type="text" 
               placeholder="Søk etter sekvens..." 
-              className="w-full pl-9 pr-4 py-2 bg-white border border-[#d8d3c5] rounded-xl text-sm focus:outline-none focus:border-[#09fe94] transition-colors"
+              className="w-full pl-9 pr-4 py-2 bg-white border border-[#d8d3c5] rounded-xl text-sm focus:outline-none focus:border-accent-dark transition-colors"
             />
           </div>
           <div className="flex gap-3">
             <Button variant="secondary" size="md" onClick={() => toast.info("Innstillinger for sekvenser kommer snart!")}>
-              <Settings2 className="w-4 h-4 mr-2" />
+              <Settings className="w-4 h-4 mr-2" />
               Innstillinger
             </Button>
             <Link href="/sekvenser/ny">
@@ -54,7 +54,7 @@ export default function SekvenserPage() {
           <div className="p-8 lg:p-12 flex flex-col lg:flex-row items-center gap-10">
             <div className="flex-1 text-white">
               <Badge className="bg-[#09fe94] text-[#171717] hover:bg-[#09fe94] font-bold mb-4 border-none shadow-lg">
-                <Zap className="w-3.5 h-3.5 mr-1" />
+                <FastForward className="w-3.5 h-3.5 mr-1" />
                 Ny funksjon
               </Badge>
               <h2 className="text-3xl lg:text-4xl font-bold mb-4" style={{ fontFamily: "'EB Garamond', Georgia, serif" }}>
@@ -162,17 +162,17 @@ export default function SekvenserPage() {
                     </td>
                     <td className="p-4">
                       <div className="flex items-center gap-2">
-                        <Users className="w-4 h-4 text-[#a09b8f]" />
+                        <Contact className="w-4 h-4 text-[#a09b8f]" />
                         <span className="text-sm font-semibold text-[#171717]">{seq.enrolled}</span>
                       </div>
                     </td>
                     <td className="p-4 hidden sm:table-cell w-64 text-sm font-medium">
                       <div className="grid grid-cols-2 gap-4">
                         <div className="text-accent-foreground flex items-center gap-1.5">
-                          <MousePointerClick className="w-4 h-4" />
+                          <MousePointer2 className="w-4 h-4" />
                           {seq.enrolled > 0 ? Math.round((seq.opened / seq.enrolled) * 100) : 0}%
                         </div>
-                        <div className="text-accent flex items-center gap-1.5">
+                        <div className="text-accent-dark flex items-center gap-1.5">
                           <Reply className="w-4 h-4" />
                           {seq.enrolled > 0 ? Math.round((seq.replied / seq.enrolled) * 100) : 0}%
                         </div>

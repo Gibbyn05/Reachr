@@ -6,10 +6,10 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
-  Users, TrendingUp, Calendar, Star, Search, ChevronDown,
-  X, Phone, Mail, MessageSquare, ChevronRight, Trash2,
-  UserCheck, Clock, Building2, Bell, Check, Loader2, Sparkles, Send, Copy, ExternalLink,
-  Upload, Download, RefreshCw, Layers, CheckCircle2
+  Contact, BarChart3, CalendarCheck2, ShieldCheck, Search, ChevronDown,
+  X, Phone, Inbox, MessageSquareText, ChevronRight, Trash2,
+  UserCheck, Clock, Building2, BellRing, Check, Loader2, Sparkles, Send, Copy, ExternalLink,
+  FileUp, FileDown, RefreshCw, Layers, CheckCircle2
 } from "lucide-react";
 import { useAppStore } from "@/store/app-store";
 import { Lead, LeadStatus } from "@/lib/mock-data";
@@ -322,7 +322,7 @@ function AiEmailModal({
         <div className="flex items-center justify-between p-5 border-b border-[#e8e4d8]">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 bg-accent/10 rounded-lg flex items-center justify-center">
-              <Sparkles className="w-4 h-4 text-accent" />
+              <Sparkles className="w-4 h-4 text-accent-dark" />
             </div>
             <div>
               <h3 className="text-sm font-bold text-[#171717]">AI-utkast til {lead.name}</h3>
@@ -337,7 +337,7 @@ function AiEmailModal({
         <div className="p-5 space-y-4">
           {generating ? (
             <div className="flex items-center justify-center py-12 gap-3 text-muted-foreground">
-              <Loader2 className="w-5 h-5 animate-spin text-accent" />
+              <Loader2 className="w-5 h-5 animate-spin text-accent-dark" />
               <span className="text-sm">Skriver e-post med AI…</span>
             </div>
           ) : sentOk ? (
@@ -370,7 +370,7 @@ function AiEmailModal({
                       {enriching ? (
                         <><Loader2 className="w-3 h-3 animate-spin" /> Søker…</>
                       ) : (
-                        <><Search className="w-3 h-3" /> Finn e-post automatisk</>
+                        <><Inbox className="w-3 h-3" /> Finn e-post automatisk</>
                       )}
                     </button>
 
@@ -740,8 +740,8 @@ function LeadRow({
         {/* Meeting date */}
         <td className="hidden md:table-cell px-4 py-3.5 text-sm whitespace-nowrap">
           {meetingDate ? (
-            <span className="flex items-center gap-1 text-accent font-bold text-xs">
-              <Calendar className="w-3 h-3" />
+            <span className="flex items-center gap-1 text-accent-dark font-bold text-xs">
+              <CalendarCheck2 className="w-3 h-3" />
               {new Date(meetingDate).toLocaleString("nb-NO", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
             </span>
           ) : <span className="text-muted-foreground/30">—</span>}
@@ -843,17 +843,17 @@ function LeadRow({
                   <div className="space-y-2">
                     <a
                       href={`tel:${lead.phone}`}
-                      className="flex items-center gap-2 text-sm text-[#6b6660] hover:text-green-600"
+                      className="flex items-center gap-2 text-sm text-[#4a4a4a] hover:text-accent-dark"
                     >
-                      <Phone className="w-4 h-4 text-[#a09b8f]" />
+                      <Phone className="w-4 h-4 text-[#6b6660]" />
                       {lead.phone !== "—" ? lead.phone : <span className="text-gray-300 italic">Ingen telefon</span>}
                     </a>
                     {lead.email !== "—" ? (
                       <a
                         href={`mailto:${lead.email}`}
-                        className="flex items-center gap-2 text-sm text-[#6b6660] hover:text-green-600"
+                        className="flex items-center gap-2 text-sm text-[#4a4a4a] hover:text-accent-dark"
                       >
-                        <Mail className="w-4 h-4 text-[#a09b8f]" />
+                        <Inbox className="w-4 h-4 text-[#6b6660]" />
                         {lead.email}
                       </a>
                     ) : (
@@ -862,9 +862,9 @@ function LeadRow({
                         <button
                           onClick={(e) => { e.stopPropagation(); handleFindEmail(); }}
                           disabled={findingEmail}
-                          className="text-xs px-2 py-1 bg-[#09fe94]/10 text-[#05c472] rounded hover:bg-[#09fe94]/20 transition-colors disabled:opacity-50 flex items-center gap-1"
+                          className="text-xs px-2 py-1 bg-[#09fe94]/10 text-accent-dark rounded hover:bg-[#09fe94]/20 transition-colors disabled:opacity-50 flex items-center gap-1"
                         >
-                          {findingEmail ? <Loader2 className="w-3 h-3 animate-spin" /> : <Mail className="w-3 h-3" />}
+                          {findingEmail ? <Loader2 className="w-3 h-3 animate-spin" /> : <Inbox className="w-3 h-3" />}
                           Finn e-post
                         </button>
                       </div>
@@ -876,14 +876,14 @@ function LeadRow({
                   <div className="mt-3 flex items-center gap-2">
                   <button
                     onClick={(e) => { e.stopPropagation(); setEmailModalOpen(true); }}
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-accent/10 text-accent text-xs font-semibold rounded-lg hover:bg-accent/20 transition-colors border border-accent/20"
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-accent-dark/10 text-accent-dark text-xs font-semibold rounded-lg hover:bg-accent-dark/20 transition-colors border border-accent-dark/20"
                   >
                     <Sparkles className="w-3.5 h-3.5" />
                     Skriv AI-e-post
                   </button>
                   <button
                     onClick={(e) => { e.stopPropagation(); setSmsModalOpen(true); }}
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-[#09fe94]/10 text-[#05c472] text-xs font-semibold rounded-lg hover:bg-[#09fe94]/20 transition-colors border border-[#09fe94]/20"
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-[#09fe94]/10 text-accent-dark text-xs font-semibold rounded-lg hover:bg-[#09fe94]/20 transition-colors border border-[#09fe94]/20"
                   >
                     <Phone className="w-3.5 h-3.5" />
                     Skriv AI-SMS
@@ -894,8 +894,8 @@ function LeadRow({
                       onClick={(e) => { e.stopPropagation(); setSeqDropdownOpen(!seqDropdownOpen); }}
                       className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors border ${
                         lead.enrolledSequenceId 
-                          ? "bg-accent/10 text-accent border-accent/20 hover:bg-accent/20" 
-                          : "bg-white border-[#d8d3c5] hover:bg-[#faf8f2]"
+                          ? "bg-accent-dark/10 text-accent-dark border-accent-dark/20 hover:bg-accent-dark/20" 
+                          : "bg-white border-[#d8d3c5] text-[#6b6660] hover:bg-[#f0ece0]"
                       }`}
                     >
                       <Layers className="w-3.5 h-3.5" />
@@ -970,15 +970,15 @@ function LeadRow({
                       type="date"
                       value={lead.lastContacted ?? ""}
                       onChange={(e) => onLastContactedChange(lead.id, e.target.value || null)}
-                      className="text-sm border border-[#d8d3c5] rounded-lg px-2 py-1.5 text-gray-700 focus:outline-none focus:border-[#09fe94]/60 bg-[#faf8f2] w-full"
+                      className="text-sm border border-[#d8d3c5] rounded-lg px-2 py-1.5 text-gray-700 focus:outline-none focus:border-accent bg-[#faf8f2] w-full"
                     />
                   </div>
 
                   {/* Meeting date */}
                   {(lead.status === "Booket møte" || meetingDate) && (
                     <div className="mt-4 p-3 bg-accent/10 rounded-xl border border-accent/20">
-                      <p className="text-xs font-bold text-accent uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                        <Calendar className="w-3.5 h-3.5" /> Planlagt møte
+                      <p className="text-xs font-bold text-accent-dark uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                        <CalendarCheck2 className="w-3.5 h-3.5" /> Planlagt møte
                       </p>
                       <input
                         type="datetime-local"
@@ -996,7 +996,7 @@ function LeadRow({
                 <div>
                   <div className="flex items-center justify-between mb-3">
                     <p className="text-xs font-semibold text-[#a09b8f] uppercase tracking-wider flex items-center gap-1.5">
-                      <MessageSquare className="w-3.5 h-3.5" /> Notater
+                      <MessageSquareText className="w-3.5 h-3.5" /> Notater
                     </p>
                     {!editingNotes && (
                       <button
@@ -1042,10 +1042,10 @@ function LeadRow({
                     </div>
                   ) : (
                     <div
-                      className="text-sm text-[#6b6660] bg-[#faf8f2] border border-gray-100 rounded-lg p-3 min-h-[80px] cursor-text"
+                      className="text-sm text-[#4a4a4a] bg-[#faf8f2] border border-gray-100 rounded-lg p-3 min-h-[80px] cursor-text"
                       onClick={() => setEditingNotes(true)}
                     >
-                      {notes || <span className="italic text-gray-300">Klikk for å legge til notater…</span>}
+                      {notes || <span className="italic text-gray-400">Klikk for å legge til notater…</span>}
                     </div>
                   )}
                 </div>
@@ -1111,7 +1111,7 @@ function LeadRow({
                               onAssignedChange(lead.id, assignedDraft.trim() || lead.assignedTo);
                               setEditingAssigned(false);
                             }}
-                            className="px-2 py-1.5 bg-green-500 text-white rounded-lg text-xs font-semibold hover:bg-green-600"
+                            className="px-2 py-1.5 bg-accent text-accent-foreground rounded-lg text-xs font-semibold hover:bg-accent-hover"
                           >
                             OK
                           </button>
@@ -1126,7 +1126,7 @@ function LeadRow({
                           onClick={() => setReminderOpen(true)}
                           className="flex items-center gap-1.5 text-xs text-[#ff470a] hover:text-[#d63b08] font-medium"
                         >
-                          <Bell className="w-3.5 h-3.5" />
+                          <BellRing className="w-3.5 h-3.5" />
                           Send påminnelse til {lead.assignedTo}
                         </button>
                       ) : reminderSent ? (
@@ -1150,7 +1150,7 @@ function LeadRow({
                               disabled={reminderSending}
                               className="flex items-center gap-1 px-2 py-1 bg-accent text-accent-foreground rounded text-xs font-semibold hover:bg-accent/90 disabled:opacity-60"
                             >
-                              {reminderSending ? <Loader2 className="w-3 h-3 animate-spin" /> : <Bell className="w-3 h-3" />}
+                              {reminderSending ? <Loader2 className="w-3 h-3 animate-spin" /> : <BellRing className="w-3 h-3" />}
                               Send
                             </button>
                             <button
@@ -1458,26 +1458,26 @@ function MineLeadsContent() {
   const thisWeek = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
 
   const stats = [
-    { label: "Totalt leads", value: leads.length, icon: Users, color: "text-[#05c472]", bg: "bg-[#09fe94]/10" },
+    { label: "Totalt leads", value: leads.length, icon: Contact, color: "text-[#05c472]", bg: "bg-[#09fe94]/10" },
     {
       label: "Nye denne uken",
       value: leads.filter((l) => l.addedDate >= thisWeek).length,
-      icon: TrendingUp,
+      icon: BarChart3,
       color: "text-green-600",
       bg: "bg-[#09fe94]/10",
     },
     {
       label: "Booket møte",
       value: leads.filter((l) => l.status === "Booket møte").length,
-      icon: Calendar,
-      color: "text-accent",
+      icon: CalendarCheck2,
+      color: "text-accent-dark",
       bg: "bg-accent/10",
     },
     {
       label: "Kunder",
       value: leads.filter((l) => l.status === "Kunde").length,
-      icon: Star,
-      color: "text-accent",
+      icon: ShieldCheck,
+      color: "text-accent-dark",
       bg: "bg-accent/10",
     },
   ];
@@ -1489,11 +1489,11 @@ function MineLeadsContent() {
         <div className="flex items-center gap-2 pb-4 sm:pb-0 px-4 sm:px-0 flex-shrink-0">
           <input type="file" ref={fileInputRef} onChange={handleImportCSV} accept=".csv" className="hidden" />
           <Button variant="secondary" size="sm" onClick={() => fileInputRef.current?.click()} disabled={isImporting} className="bg-white border-[#d8d3c5] text-[#6b6660] hover:bg-[#faf8f2] hover:text-[#171717]">
-            {isImporting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Upload className="w-4 h-4 mr-2" />}
+            {isImporting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <FileUp className="w-4 h-4 mr-2" />}
             {isImporting ? "Importerer..." : "Importér CSV"}
           </Button>
           <Button variant="secondary" size="sm" onClick={handleExportCSV} className="bg-white border-[#d8d3c5] text-[#6b6660] hover:bg-[#faf8f2] hover:text-[#171717]">
-            <Download className="w-4 h-4 mr-2" />
+            <FileDown className="w-4 h-4 mr-2" />
             Eksportér CSV
           </Button>
           <Button variant="primary" size="sm" onClick={handleSyncEmails} disabled={isSyncing} className="bg-[#09fe94] text-[#171717] hover:bg-[#00e882] shadow-sm font-semibold">
@@ -1620,7 +1620,7 @@ function MineLeadsContent() {
 
             {filteredLeads.length === 0 && (
               <div className="text-center py-16">
-                <Users className="w-10 h-10 text-gray-300 mx-auto mb-3" />
+                <Contact className="w-10 h-10 text-gray-300 mx-auto mb-3" />
                 <p className="text-[#6b6660] font-medium">
                   {leads.length === 0 ? "Ingen leads ennå" : "Ingen leads matcher filteret"}
                 </p>

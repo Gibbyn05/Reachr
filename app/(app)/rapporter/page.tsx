@@ -3,17 +3,17 @@ import { useEffect, useState } from "react";
 import { TopBar } from "@/components/layout/top-bar";
 import { useAppStore } from "@/store/app-store";
 import { 
-  TrendingUp, 
-  Calendar, 
-  Star, 
-  Users, 
+  BarChart3, 
+  CalendarCheck2, 
+  Contact, 
   AlertCircle, 
   ArrowUpRight, 
   CheckCircle2, 
   MousePointer2, 
-  Zap,
-  Mail,
-  MessageSquare
+  FastForward,
+  Inbox,
+  MessageSquareText,
+  Target
 } from "lucide-react";
 
 interface SellerStats {
@@ -121,10 +121,10 @@ export default function RapporterPage() {
         
         {/* Top Key Stats */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <StatCard label="Totalt leads" value={totalLeads} sub={`+${newThisWeek} nye denne uken`} icon={Users} color="bg-[#09fe94]/10 text-[#05c472]" />
-          <StatCard label="Pipeline verdi" value={`${(totalLeads * 14500).toLocaleString()} kr`} sub="Estimert verdi (mock)" icon={TrendingUp} color="bg-[#09fe94]/10 text-[#05c472]" />
-          <StatCard label="Bookede møter" value={totalMeetings} sub={`${totalLeads > 0 ? Math.round((totalMeetings / totalLeads) * 100) : 0}% konvertering`} icon={Calendar} color="bg-[#ffad0a]/12 text-[#c47e00]" />
-          <StatCard label="Aktive sekvenser" value={activeEnrollments} sub="Leads i automatisert løp" icon={Zap} color="bg-[#ff470a]/10 text-[#ff470a]" />
+          <StatCard label="Totalt leads" value={totalLeads} sub={`+${newThisWeek} nye denne uken`} icon={Contact} color="bg-[#09fe94]/10 text-accent-dark" />
+          <StatCard label="Pipeline verdi" value="0 kr" sub="Basert på estimerte avtaler" icon={Target} color="bg-[#09fe94]/10 text-accent-dark" />
+          <StatCard label="Bookede møter" value={totalMeetings} sub={`${totalLeads > 0 ? Math.round((totalMeetings / totalLeads) * 100) : 0}% konvertering`} icon={CalendarCheck2} color="bg-[#ffad0a]/12 text-[#c47e00]" />
+          <StatCard label="Aktive sekvenser" value={activeEnrollments} sub="Leads i automatisert løp" icon={FastForward} color="bg-[#ff470a]/10 text-[#ff470a]" />
         </div>
 
         {/* Sales Funnel & Visuals */}
@@ -134,10 +134,10 @@ export default function RapporterPage() {
           <div className="lg:col-span-2 bg-[#faf8f2] rounded-2xl border border-[#d8d3c5] p-6" style={{ boxShadow: "0 4px 6px -1px rgba(0,0,0,0.05)" }}>
             <div className="flex items-center justify-between mb-8">
               <h3 className="font-bold text-[#171717] flex items-center gap-2">
-                <TrendingUp className="w-4 h-4 text-[#05c472]" />
+                <BarChart3 className="w-4 h-4 text-accent-dark" />
                 Salgs-trakt (Funnel)
               </h3>
-              <span className="text-xs font-semibold text-[#a09b8f] uppercase tracking-wider">Siste 30 dager</span>
+              <span className="text-xs font-semibold text-[#6b6660] uppercase tracking-wider">Siste 30 dager</span>
             </div>
 
             <div className="space-y-4">
@@ -145,7 +145,7 @@ export default function RapporterPage() {
                 { label: "Importerte Leads", count: totalLeads, color: "bg-[#171717]", pct: 100 },
                 { label: "Beslutningstakere kontaktet", count: totalContacted, color: "bg-[#453c29]", pct: totalLeads > 0 ? (totalContacted/totalLeads)*100 : 0 },
                 { label: "Bookede Møter", count: totalMeetings, color: "bg-[#ffad0a]", pct: totalLeads > 0 ? (totalMeetings/totalLeads)*100 : 0 },
-                { label: "Nye Kunder", count: totalCustomers, color: "bg-[#09fe94]", pct: totalLeads > 0 ? (totalCustomers/totalLeads)*100 : 0 },
+                { label: "Nye Kunder", count: totalCustomers, color: "bg-accent-dark", pct: totalLeads > 0 ? (totalCustomers/totalLeads)*100 : 0 },
               ].map((stage, i) => (
                 <div key={stage.label} className="relative">
                   <div className="flex items-center justify-between mb-1.5 px-1">
@@ -173,13 +173,13 @@ export default function RapporterPage() {
             <div className="bg-[#171717] rounded-2xl p-6 text-white overflow-hidden relative group">
               <div className="relative z-10">
                 <p className="text-xs font-semibold text-[#09fe94] uppercase tracking-wider mb-1">AI Effekt</p>
-                <h4 className="text-xl font-bold mb-4 italic">"AI-skribenten har spart deg for ca. 42 timer denne måneden."</h4>
+                <h4 className="text-xl font-bold mb-4 italic">"AI-skribenten hjelper deg med å skrive utkast raskere."</h4>
                 <div className="flex items-center gap-2 text-sm text-white/60">
                   <CheckCircle2 className="w-4 h-4 text-[#09fe94]" />
-                  <span>248 utkast generert</span>
+                  <span>0 utkast denne måneden</span>
                 </div>
               </div>
-              <Zap className="absolute -bottom-4 -right-4 w-24 h-24 text-white/5 group-hover:text-white/10 transition-colors" />
+              <FastForward className="absolute -bottom-4 -right-4 w-24 h-24 text-white/5 group-hover:text-white/10 transition-colors" />
             </div>
 
             <div className="bg-[#faf8f2] rounded-2xl border border-[#d8d3c5] p-6">
@@ -187,16 +187,16 @@ export default function RapporterPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
                   <p className="text-[10px] text-[#a09b8f] uppercase font-bold">Åpningsrate</p>
-                  <p className="text-lg font-extrabold text-[#171717]">64%</p>
+                  <p className="text-lg font-extrabold text-[#171717]">0%</p>
                   <div className="h-1 w-full bg-[#e8e4d8] rounded-full">
-                    <div className="h-full bg-[#09fe94] rounded-full w-[64%]" />
+                    <div className="h-full bg-[#09fe94] rounded-full w-0" />
                   </div>
                 </div>
                 <div className="space-y-1">
                   <p className="text-[10px] text-[#a09b8f] uppercase font-bold">Svar-rate</p>
-                  <p className="text-lg font-extrabold text-[#171717]">{totalContacted > 0 ? "12%" : "0%"}</p>
+                  <p className="text-lg font-extrabold text-[#171717]">0%</p>
                   <div className="h-1 w-full bg-[#e8e4d8] rounded-full">
-                    <div className="h-full bg-[#05c472] rounded-full w-[12%]" />
+                    <div className="h-full bg-accent-dark rounded-full w-0" />
                   </div>
                 </div>
               </div>
@@ -212,7 +212,7 @@ export default function RapporterPage() {
               <h3 className="font-bold text-[#171717]">Selger-toppliste</h3>
               <p className="text-xs text-[#a09b8f] mt-0.5">Rangert etter antall bookede møter</p>
             </div>
-            <Users className="w-5 h-5 text-[#d8d3c5]" />
+            <Contact className="w-5 h-5 text-[#d8d3c5]" />
           </div>
 
           <div className="overflow-x-auto">
@@ -253,7 +253,7 @@ export default function RapporterPage() {
                       <div className="flex items-center justify-end gap-3">
                         <div className="w-24 h-1.5 bg-[#e8e4d8] rounded-full overflow-hidden">
                           <div
-                            className={`h-full rounded-full transition-all duration-1000 ${s.followUpRate > 70 ? "bg-[#09fe94]" : "bg-[#ffad0a]"}`}
+                            className={`h-full rounded-full transition-all duration-1000 ${s.followUpRate > 70 ? "bg-accent" : "bg-accent-dark"}`}
                             style={{ width: `${s.followUpRate}%` }}
                           />
                         </div>
@@ -267,36 +267,12 @@ export default function RapporterPage() {
           </div>
         </div>
 
-        {/* Key Insights Panel */}
+        {/* Key Insights Panel — Hidden until real data is available */}
+        {/*
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-           <div className="bg-white rounded-2xl p-6 border border-[#d8d3c5] flex flex-col gap-4">
-              <div className="bg-[#09fe94]/10 w-10 h-10 rounded-xl flex items-center justify-center text-[#05c472]">
-                <Mail className="w-5 h-5" />
-              </div>
-              <div>
-                <h4 className="font-bold text-[#171717]">Beste tid å sende e-post</h4>
-                <p className="text-sm text-[#6b6660] mt-1">Analyser viser at tirsdager kl. 09:30 har høyest svarrate for dine kampanjer.</p>
-              </div>
-           </div>
-           <div className="bg-white rounded-2xl p-6 border border-[#d8d3c5] flex flex-col gap-4">
-              <div className="bg-orange-50 w-10 h-10 rounded-xl flex items-center justify-center text-orange-600">
-                <MessageSquare className="w-5 h-5" />
-              </div>
-              <div>
-                <h4 className="font-bold text-[#171717]">Mest brukte CTA</h4>
-                <p className="text-sm text-[#6b6660] mt-1">"Har du sjanse til et kort møte?" fungerer bedre enn "Når passer det å snakkes?" i dine sekvenser.</p>
-              </div>
-           </div>
-           <div className="bg-[#171717] rounded-2xl p-6 border border-[#171717] flex flex-col gap-4 text-white">
-              <div className="bg-[#09fe94]/20 w-10 h-10 rounded-xl flex items-center justify-center text-[#09fe94]">
-                <TrendingUp className="w-5 h-5" />
-              </div>
-              <div>
-                <h4 className="font-bold">Prognose</h4>
-                <p className="text-sm text-white/60 mt-1">Basert på nåværende fart vil du booke ca. {totalMeetings + 3} møter til før månedsslutt.</p>
-              </div>
-           </div>
+           ...
         </div>
+        */}
 
       </div>
     </div>

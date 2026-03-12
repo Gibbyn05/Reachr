@@ -1,6 +1,6 @@
 "use client";
 import { TopBar } from "@/components/layout/top-bar";
-import { TrendingUp, Users, Calendar, Star, ArrowUpRight, ArrowRight, Phone, Mail, AlertCircle, BarChart, Trophy, Target } from "lucide-react";
+import { BarChart3, Contact, CalendarCheck2, ShieldCheck, ArrowUpRight, ArrowRight, Phone, Mail, AlertCircle, Trophy, Target, LayoutDashboard } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -70,25 +70,25 @@ export default function DashboardPage() {
       value: leads.length,
       change: `${leads.filter((l) => l.addedDate >= thisWeek).length} denne uken`,
       positive: true,
-      icon: Users,
+      icon: Contact,
       color: "bg-[#09fe94]/10",
-      iconColor: "text-[#05c472]",
+      iconColor: "text-accent-dark",
     },
     {
       title: "Nye denne uken",
       value: leads.filter((l) => l.addedDate >= thisWeek).length,
       change: "Lagt til via leadsøk",
       positive: true,
-      icon: TrendingUp,
+      icon: BarChart3,
       color: "bg-[#09fe94]/10",
-      iconColor: "text-[#05c472]",
+      iconColor: "text-accent-dark",
     },
     {
       title: "Bookede møter",
       value: leads.filter((l) => l.status === "Booket møte").length,
       change: "Aktive møtebookinger",
       positive: true,
-      icon: Calendar,
+      icon: CalendarCheck2,
       color: "bg-[#ffad0a]/12",
       iconColor: "text-[#c47e00]",
     },
@@ -97,7 +97,7 @@ export default function DashboardPage() {
       value: leads.filter((l) => l.status === "Kunde").length,
       change: "Konverterte leads",
       positive: true,
-      icon: Star,
+      icon: ShieldCheck,
       color: "bg-[#ff470a]/10",
       iconColor: "text-[#ff470a]",
     },
@@ -105,11 +105,11 @@ export default function DashboardPage() {
 
   const pipelineCounts = [
     { label: "Ikke kontaktet", count: leads.filter((l) => l.status === "Ikke kontaktet").length, color: "bg-[#e8e4d8]", textColor: "text-[#6b6660]" },
-    { label: "Kontaktet", count: leads.filter((l) => l.status === "Kontaktet").length, color: "bg-[#09fe94]/20", textColor: "text-[#05c472]" },
+    { label: "Kontaktet", count: leads.filter((l) => l.status === "Kontaktet").length, color: "bg-[#09fe94]/20", textColor: "text-accent-dark" },
     { label: "Ikke svar", count: leads.filter((l) => l.status === "Kontaktet - ikke svar").length, color: "bg-[#ffad0a]/20", textColor: "text-[#c47e00]" },
     { label: "Booket møte", count: leads.filter((l) => l.status === "Booket møte").length, color: "bg-[#ffad0a]/30", textColor: "text-[#a06000]" },
     { label: "Avslått", count: leads.filter((l) => l.status === "Avslått").length, color: "bg-[#ff470a]/15", textColor: "text-[#ff470a]" },
-    { label: "Kunde", count: leads.filter((l) => l.status === "Kunde").length, color: "bg-[#171717]", textColor: "text-[#09fe94]" },
+    { label: "Kunde", count: leads.filter((l) => l.status === "Kunde").length, color: "bg-[#171717]", textColor: "text-accent" },
   ];
 
   // --- ANALYTICS / METRICS CALCULATIONS ---
@@ -168,7 +168,7 @@ export default function DashboardPage() {
               </div>
               <p className="text-3xl font-extrabold text-[#171717] mb-1">{value}</p>
               <p className="text-sm text-[#6b6660]">{title}</p>
-              <p className={`text-xs mt-2 font-medium ${positive ? "text-green-600" : "text-red-500"}`}>
+              <p className={`text-xs mt-2 font-medium ${positive ? "text-accent-dark" : "text-red-600"}`}>
                 {change}
               </p>
             </div>
@@ -192,10 +192,10 @@ export default function DashboardPage() {
           </div>
           {needsFollowUp.length === 0 ? (
             <div className="text-center py-12 text-[#a09b8f]">
-              <Users className="w-10 h-10 mx-auto mb-3 text-gray-200" />
+              <Contact className="w-10 h-10 mx-auto mb-3 text-gray-200" />
               <p className="text-sm font-medium text-[#6b6660]">Ingen leads trenger oppfølging akkurat nå</p>
               <p className="text-xs mt-1">
-                <Link href="/leadsok" className="text-green-600 hover:underline font-medium">Søk etter leads</Link> for å komme i gang.
+                <Link href="/leadsok" className="text-accent-dark hover:underline font-medium">Søk etter leads</Link> for å komme i gang.
               </p>
             </div>
           ) : (
@@ -268,7 +268,7 @@ export default function DashboardPage() {
           {/* Hit Rate / Conversion Card */}
           <div className="bg-[#faf8f2] rounded-xl border border-[#d8d3c5] p-6 lg:p-8 flex flex-col items-center justify-center text-center" style={{boxShadow: "0 1px 3px rgba(0,0,0,0.08)"}}>
             <h3 className="font-semibold text-[#171717] w-full text-left mb-6 flex items-center gap-2">
-              <BarChart className="w-5 h-5 text-gray-500" />
+              <BarChart3 className="w-5 h-5 text-gray-500" />
               Salgskonvertering (Hit Rate)
             </h3>
             

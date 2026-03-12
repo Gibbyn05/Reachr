@@ -19,7 +19,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           return;
         }
         const data = await r.json();
-        if (!data.subscription) {
+        const sub = data.subscription;
+        const isActive = sub && (sub.status === "active" || sub.status === "trialing");
+        
+        if (!isActive) {
           router.replace("/onboarding/betaling");
         } else {
           setSubChecked(true);

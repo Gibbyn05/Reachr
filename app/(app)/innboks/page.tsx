@@ -7,7 +7,7 @@ import {
   Search, 
   RefreshCw, 
   Loader2, 
-  Mail, 
+  Inbox, 
   CheckCircle2, 
   Star, 
   Trash2, 
@@ -18,7 +18,7 @@ import {
   ExternalLink,
   Phone,
   LayoutDashboard,
-  Users,
+  Contact,
   Plus
 } from "lucide-react";
 import { useAppStore } from "@/store/app-store";
@@ -257,7 +257,8 @@ export default function InboxPage() {
           {!selectedEmail ? (
             <div className="flex-1 flex flex-col items-center justify-center gap-4 p-8 text-center">
               <div className="w-16 h-16 bg-[#faf8f2] border border-[#d8d3c5] rounded-3xl flex items-center justify-center animate-float">
-                <Mail className="w-8 h-8 text-[#a09b8f]" />
+                <Inbox 
+className="w-8 h-8 text-[#a09b8f]" />
               </div>
               <h2 className="text-lg font-bold text-[#171717]">Velg en e-post for å lese</h2>
               <p className="text-sm text-[#a09b8f] max-w-xs">Hold kontakten med dine leads direkte fra Reachr innboksen.</p>
@@ -306,7 +307,8 @@ export default function InboxPage() {
                       <div className="bg-white rounded-2xl border border-[#09fe94]/30 p-4 shadow-sm flex items-center justify-between">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 bg-[#09fe94]/20 rounded-xl flex items-center justify-center">
-                            <Users className="w-5 h-5 text-[#05c472]" />
+                            <Contact 
+className="w-5 h-5 text-[#05c472]" />
                           </div>
                           <div>
                             <p className="text-sm font-bold text-[#171717]">{lead.name}</p>

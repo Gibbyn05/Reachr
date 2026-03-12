@@ -1,7 +1,7 @@
 "use client";
 import { TopBar } from "@/components/layout/top-bar";
 import { useAppStore } from "@/store/app-store";
-import { CalendarDays, CheckCircle2, Clock, Phone, Mail, ArrowRight, User, Mic, Square, Search, Sparkles, TrendingUp, Plus, Calendar } from "lucide-react";
+import { CalendarCheck2, CheckCircle2, Clock, Phone, Inbox, ArrowRight, User, Mic, Square, Search, Sparkles, BarChart3, Plus } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { useState, useEffect, useRef } from "react";
@@ -193,13 +193,13 @@ export default function KalenderPage() {
         {/* Header Section */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
            <div>
-              <p className="text-sm font-bold text-[#05c472] uppercase tracking-[0.2em] mb-1">Dagsplan</p>
+              <p className="text-sm font-bold text-accent-dark uppercase tracking-[0.2em] mb-1">Dagsplan</p>
               <h1 className="text-3xl font-black text-[#171717] dark:text-white">
                  God dag, {currentUser?.name?.split(" ")[0] || "Selger"}! 👋
               </h1>
            </div>
            <div className="flex items-center gap-3 bg-white dark:bg-[#141414] border border-[#e8e4d8] dark:border-[#262626] rounded-2xl px-5 py-3 shadow-sm">
-              <Calendar className="w-5 h-5 text-[#05c472]" />
+              <CalendarCheck2 className="w-5 h-5 text-accent-dark" />
               <div className="flex flex-col">
                  <span className="text-[10px] uppercase font-bold text-[#a09b8f]">I dag</span>
                  <span className="text-sm font-bold text-[#171717] dark:text-white">
@@ -225,7 +225,7 @@ export default function KalenderPage() {
                    </div>
                 </div>
                 <div className="flex items-center gap-2">
-                   <Badge className="bg-[#09fe94]/10 text-[#05c472] border-none font-bold px-3 py-1">
+                   <Badge className="bg-[#09fe94]/10 text-accent-dark border-none font-bold px-3 py-1">
                       {todayTasks.length - completedTasks.filter(id => todayTasks.find(t => t.id === id)).length} Gjenstår
                    </Badge>
                 </div>
@@ -234,10 +234,10 @@ export default function KalenderPage() {
               {todayTasks.length === 0 ? (
                 <div className="text-center py-16 bg-[#faf8f2] dark:bg-[#1a1a1a] rounded-[2rem] border-2 border-dashed border-[#d8d3c5] dark:border-[#262626]">
                   <div className="w-16 h-16 bg-[#09fe94]/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                     <CheckCircle2 className="w-8 h-8 text-[#05c472]" />
+                     <CheckCircle2 className="w-8 h-8 text-accent-dark" />
                   </div>
                   <p className="text-lg font-black text-[#171717] dark:text-white italic">Du er helt à jour!</p>
-                  <p className="text-[#a09b8f] text-sm mt-1">Ingen flere planlagte oppgaver for resten av dagen.</p>
+                  <p className="text-muted-foreground text-sm mt-1">Ingen flere planlagte oppgaver for resten av dagen.</p>
                 </div>
               ) : (
                 <div className="space-y-4">
@@ -266,7 +266,7 @@ export default function KalenderPage() {
                         <div className="flex-1 min-w-0">
                            <div className="flex items-center gap-2 mb-1">
                               {task.type === "meeting" ? (
-                                <CalendarDays className="w-3.5 h-3.5 text-purple-500" />
+                                <CalendarCheck2 className="w-3.5 h-3.5 text-purple-600" />
                               ) : (
                                 <Phone className="w-3.5 h-3.5 text-accent-danger" />
                               )}
@@ -288,7 +288,7 @@ export default function KalenderPage() {
                         <div className="flex items-center gap-4">
                             <div className="text-right shrink-0">
                                <span className={`text-[11px] font-black px-3 py-1.5 rounded-xl uppercase tracking-wider ${
-                                 task.type === "meeting" ? "bg-accent/10 text-accent" : 
+                                 task.type === "meeting" ? "bg-accent/10 text-accent-dark" : 
                                  "bg-accent-danger/10 text-accent-danger"
                                }`}>
                                  {task.time}
@@ -313,7 +313,7 @@ export default function KalenderPage() {
             
             <div className="bg-white dark:bg-[#141414] border border-[#e8e4d8] dark:border-[#262626] rounded-[2rem] p-8 shadow-sm">
               <h2 className="text-lg font-black text-primary flex items-center gap-2 mb-6">
-                <CalendarDays className="w-6 h-6 text-accent" />
+                <CalendarCheck2 className="w-6 h-6 text-accent-dark" />
                 Planlagt (Senere)
               </h2>
               {upcomingTasks.length === 0 ? (
@@ -327,9 +327,9 @@ export default function KalenderPage() {
                         <div className="min-w-0">
                           <p className="text-sm font-bold text-primary truncate">{task.title}</p>
                           <p className="text-[11px] text-muted-foreground font-medium">{task.leadName}</p>
-                        </div>
+                         </div>
                       </div>
-                      <span className="text-[10px] bg-accent/10 text-accent font-black px-2 py-1 rounded-lg uppercase whitespace-nowrap">{task.time}</span>
+                      <span className="text-[10px] bg-accent/10 text-accent-dark font-black px-2 py-1 rounded-lg uppercase whitespace-nowrap">{task.time}</span>
                     </div>
                   ))}
                 </div>
@@ -345,7 +345,7 @@ export default function KalenderPage() {
               <div className="flex items-center justify-between mb-4">
                  <h3 className="font-black text-sm text-[#171717] dark:text-white uppercase tracking-wider">Status (I dag)</h3>
                  <div className="p-2 bg-[#09fe94]/10 rounded-xl">
-                    <TrendingUp className="w-4 h-4 text-[#05c472]" />
+                    <BarChart3 className="w-4 h-4 text-accent-dark" />
                  </div>
               </div>
               <div className="space-y-5">
@@ -389,8 +389,8 @@ export default function KalenderPage() {
                  href="/innboks" 
                  className="group relative overflow-hidden bg-card border border-border p-4 rounded-2xl flex flex-col gap-3 hover:scale-[1.02] active:scale-95 transition-all shadow-sm"
                >
-                 <div className="p-2.5 bg-accent/10 rounded-xl w-fit">
-                    <Mail className="w-5 h-5 text-accent" />
+                 <div className="p-2.5 bg-accent-dark/10 rounded-xl w-fit">
+                    <Inbox className="w-5 h-5 text-accent-dark" />
                  </div>
                  <span className="text-[11px] lg:text-sm font-black text-primary text-left">Ny e-post</span>
                </Link>
@@ -399,8 +399,8 @@ export default function KalenderPage() {
                  onClick={() => setShowMeetingModal(true)} 
                  className="group relative overflow-hidden bg-card border border-border p-4 rounded-2xl flex flex-col gap-3 hover:scale-[1.02] active:scale-95 transition-all shadow-sm"
                >
-                 <div className="p-2.5 bg-accent/10 rounded-xl w-fit">
-                    <Plus className="w-5 h-5 text-accent" />
+                 <div className="p-2.5 bg-accent-dark/10 rounded-xl w-fit">
+                    <Plus className="w-5 h-5 text-accent-dark" />
                  </div>
                  <span className="text-[11px] lg:text-sm font-black text-primary text-left">Nytt møte</span>
                </button>
@@ -409,7 +409,7 @@ export default function KalenderPage() {
             {/* Compact Meetings List */}
             <div className="bg-card border border-border rounded-3xl p-6 shadow-sm">
               <h3 className="font-black text-sm text-primary uppercase tracking-wider mb-5 flex items-center gap-2">
-                <CalendarDays className="w-4 h-4 text-accent" />
+                <CalendarCheck2 className="w-4 h-4 text-accent-dark" />
                 Møteoversikt
               </h3>
               <div className="space-y-4">
@@ -425,7 +425,7 @@ export default function KalenderPage() {
                     .map(meeting => (
                       <div key={meeting.id} className="flex items-start gap-3 p-3 bg-muted hover:bg-muted/80 rounded-2xl transition-colors">
                         <div className="p-2 bg-card rounded-xl shadow-sm border border-border">
-                           <Calendar className="w-3.5 h-3.5 text-accent" />
+                           <CalendarCheck2 className="w-3.5 h-3.5 text-accent-dark" />
                         </div>
                         <div className="min-w-0">
                            <p className="text-xs font-black text-primary truncate">{meeting.leadName}</p>
@@ -509,7 +509,7 @@ export default function KalenderPage() {
                      className={`flex items-center gap-2 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all border ${
                        isRecording 
                          ? "bg-red-500 text-white border-red-400 shadow-[0_0_20px_rgba(239,68,68,0.3)] animate-pulse" 
-                         : "bg-white dark:bg-[#141414] text-[#05c472] border-[#e8e4d8] dark:border-[#262626] hover:border-[#09fe94] shadow-sm"
+                         : "bg-white dark:bg-[#141414] text-accent-dark border-[#e8e4d8] dark:border-[#262626] hover:border-[#09fe94] shadow-sm"
                      }`}
                    >
                      {isRecording ? <Square className="w-3.5 h-3.5 fill-current" /> : <Mic className="w-3.5 h-3.5" />}
@@ -561,8 +561,8 @@ export default function KalenderPage() {
           <div className="bg-white dark:bg-[#141414] rounded-[2.5rem] shadow-2xl w-full max-w-md overflow-hidden border border-[#e8e4d8] dark:border-[#262626] animate-in fade-in zoom-in duration-300">
             <div className="p-8 border-b border-border flex justify-between items-center bg-card">
                <div className="flex items-center gap-4">
-                 <div className="p-3 bg-accent/10 rounded-2xl">
-                    <CalendarDays className="w-6 h-6 text-accent" />
+                 <div className="p-3 bg-accent-dark/10 rounded-2xl">
+                    <CalendarCheck2 className="w-6 h-6 text-accent-dark" />
                  </div>
                  <div>
                     <h3 className="text-xl font-black text-primary">Nytt møte</h3>

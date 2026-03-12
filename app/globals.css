@@ -43,14 +43,15 @@ html {
   --bg-card-alt:      #f0ece0;   /* Slightly darker card variant */
   --bg-muted:         #e8e4d8;   /* Muted chips, tags, badges */
   --text-primary:     #171717;   /* Main text */
-  --text-secondary:   #3d3a34;   /* Secondary text */
-  --text-muted:       #6b6660;   /* Muted / placeholder text */
-  --text-xmuted:      #a09b8f;   /* Very muted, timestamps etc */
+  --text-secondary:   #2d2d2d;   /* Secondary text (darkened) */
+  --text-muted:       #4a4a4a;   /* Muted / placeholder text (darkened for contrast) */
+  --text-xmuted:      #6b6660;   /* Very muted, timestamps etc (darkened for contrast) */
   --rc-border:        #d8d3c5;   /* All borders */
   --sidebar-bg:       #f2efe3;   /* Light beige sidebar like landing page */
   --topbar-bg:        #faf8f2;   /* Top navigation bar */
   --btn-ghost-hover:  #e8e4d8;   /* Ghost button hover */
   --accent:           #09fe94;   /* Primary accent green */
+  --accent-dark:      #008f52;   /* Darker green for text on light backgrounds (AA accessible) */
   --accent-foreground: #171717;  /* Text on accent green */
   --accent-hover:     #00e882;   /* Accent hover */
   --accent-danger:    #ff470a;   /* Danger / warning red-orange */
@@ -97,6 +98,7 @@ body {
 .text-secondary                          { color: var(--text-secondary) !important; }
 .text-muted-foreground                   { color: var(--text-muted) !important; }
 .text-accent                             { color: var(--accent) !important; }
+.text-accent-dark                        { color: var(--accent-dark) !important; }
 .border-border                           { border-color: var(--rc-border) !important; }
 
 /* Global overrides for hardcoded Tailwind hex classes */

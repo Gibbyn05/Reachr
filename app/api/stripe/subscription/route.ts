@@ -53,22 +53,15 @@ export async function GET() {
           .single();
         if (ownerSub) return NextResponse.json({ subscription: { ...ownerSub, via_team_owner: ownerEmail } });
 
-        // Final fallback: if team_members row exists, grant access
-        const { data: confirmedMember } = await serviceClient
-          .from("team_members")
-          .select("status")
-          .eq("owner_email", ownerEmail)
-          .eq("member_email", user.email)
-          .in("status", ["pending", "active"])
-          .single();
-        if (confirmedMember) {
+        // Admin bypass for team members too
+        if (isAdmin(ownerEmail)) {
           return NextResponse.json({
             subscription: {
-              id: "team_member",
+              id: "admin_team_member",
               status: "active",
               plan: "team",
-              interval: "monthly",
-              current_period_end: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+              interval: "yearly",
+              current_period_end: "2099-01-01T00:00:00.000Z",
               cancel_at_period_end: false,
               via_team_owner: ownerEmail,
             },
@@ -159,24 +152,15 @@ export async function GET() {
         return NextResponse.json({ subscription: { ...ownerSub, via_team_owner: teamOwnerEmail } });
       }
 
-      // Final fallback: if team_members row confirms the invite, grant access.
-      // This covers cases where the owner's subscription can't be found in Stripe/Supabase
-      // (e.g. new owner still setting up payment, Stripe email mismatch, etc.)
-      const { data: confirmedMember } = await serviceClient
-        .from("team_members")
-        .select("status")
-        .eq("owner_email", teamOwnerEmail)
-        .eq("member_email", user.email)
-        .in("status", ["pending", "active"])
-        .single();
-      if (confirmedMember) {
+      // Admin bypass for team members too
+      if (isAdmin(teamOwnerEmail)) {
         return NextResponse.json({
           subscription: {
-            id: "team_member",
+            id: "admin_team_member",
             status: "active",
             plan: "team",
-            interval: "monthly",
-            current_period_end: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+            interval: "yearly",
+            current_period_end: "2099-01-01T00:00:00.000Z",
             cancel_at_period_end: false,
             via_team_owner: teamOwnerEmail,
           },
