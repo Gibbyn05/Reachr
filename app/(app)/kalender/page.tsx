@@ -57,7 +57,8 @@ export default function KalenderPage() {
       console.error("Speech Recognition Error:", event.error);
       
       if (event.error === "network") {
-        toast.error("Nettverksfeil: Tale-til-tekst mistet forbindelsen. Prøv å starte på nytt.");
+        toast.error("Nettverksfeil: Tale-til-tekst mistet forbindelsen. Sjekk internett og prøv å starte på nytt.");
+        console.warn("Speech recognition network error - attempting clean state.");
       } else if (event.error === "not-allowed") {
         toast.error("Mangler tilgang: Du må tillate mikrofonen i nettleseren din.");
       } else if (event.error !== "no-speech") {
@@ -65,6 +66,9 @@ export default function KalenderPage() {
       }
       
       setIsRecording(false);
+      if (recognitionRef.current) {
+        try { recognitionRef.current.abort(); } catch(e) {}
+      }
       recognitionRef.current = null;
     };
 
