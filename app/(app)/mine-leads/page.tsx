@@ -321,8 +321,8 @@ function AiEmailModal({
         {/* Header */}
         <div className="flex items-center justify-between p-5 border-b border-[#e8e4d8]">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-purple-50 rounded-lg flex items-center justify-center">
-              <Sparkles className="w-4 h-4 text-purple-600" />
+            <div className="w-8 h-8 bg-accent/10 rounded-lg flex items-center justify-center">
+              <Sparkles className="w-4 h-4 text-accent" />
             </div>
             <div>
               <h3 className="text-sm font-bold text-[#171717]">AI-utkast til {lead.name}</h3>
@@ -336,8 +336,8 @@ function AiEmailModal({
 
         <div className="p-5 space-y-4">
           {generating ? (
-            <div className="flex items-center justify-center py-12 gap-3 text-[#6b6660]">
-              <Loader2 className="w-5 h-5 animate-spin text-purple-500" />
+            <div className="flex items-center justify-center py-12 gap-3 text-muted-foreground">
+              <Loader2 className="w-5 h-5 animate-spin text-accent" />
               <span className="text-sm">Skriver e-post med AI…</span>
             </div>
           ) : sentOk ? (
@@ -434,7 +434,7 @@ function AiEmailModal({
                   type="text"
                   value={subject}
                   onChange={(e) => setSubject(e.target.value)}
-                  className="w-full text-sm border border-[#d8d3c5] rounded-lg px-3 py-2 focus:outline-none focus:border-purple-400 bg-[#faf8f2]"
+                  className="w-full text-sm border border-border rounded-lg px-3 py-2 focus:outline-none focus:border-accent bg-card"
                 />
               </div>
 
@@ -445,7 +445,7 @@ function AiEmailModal({
                   value={body}
                   onChange={(e) => setBody(e.target.value)}
                   rows={8}
-                  className="w-full text-sm border border-[#d8d3c5] rounded-lg px-3 py-2 focus:outline-none focus:border-purple-400 bg-[#faf8f2] resize-none"
+                  className="w-full text-sm border border-border rounded-lg px-3 py-2 focus:outline-none focus:border-accent bg-card resize-none"
                 />
               </div>
 
@@ -463,7 +463,7 @@ function AiEmailModal({
                   />
                   <button
                     onClick={generateDraft}
-                    className="flex items-center gap-1 text-xs text-purple-600 hover:text-purple-800 font-medium border border-purple-200 rounded-lg px-3 py-2 bg-purple-50 hover:bg-purple-100 whitespace-nowrap"
+                    className="flex items-center gap-1 text-xs text-accent hover:text-accent-hover font-medium border border-accent/30 rounded-lg px-3 py-2 bg-accent/10 hover:bg-accent/20 whitespace-nowrap"
                   >
                     <Sparkles className="w-3 h-3" />
                     Generer på nytt
@@ -502,7 +502,7 @@ function AiEmailModal({
                       size="sm"
                       onClick={handleSend}
                       disabled={sending || !toEmail || !subject || !body}
-                      className="bg-purple-600 hover:bg-purple-700 ml-auto"
+                      className="bg-accent hover:bg-accent-hover text-accent-foreground ml-auto"
                     >
                       {sending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
                       Send e-post
@@ -532,11 +532,11 @@ function AiEmailModal({
 
 const DEFAULT_STATUS_COLORS: Record<string, "gray" | "blue" | "yellow" | "purple" | "red" | "green"> = {
   "Ikke kontaktet": "gray",
-  "Kontaktet": "blue",
+  "Kontaktet": "green",
   "Kontaktet - ikke svar": "yellow",
-  "Booket møte": "purple",
+  "Booket møte": "yellow",
   "Avslått": "red",
-  "Kunde": "green",
+  "Kunde": "purple",
 };
 
 function getStatusColor(status: string): "gray" | "blue" | "yellow" | "purple" | "red" | "green" {
@@ -740,11 +740,11 @@ function LeadRow({
         {/* Meeting date */}
         <td className="hidden md:table-cell px-4 py-3.5 text-sm whitespace-nowrap">
           {meetingDate ? (
-            <span className="flex items-center gap-1 text-purple-600 font-bold text-xs">
+            <span className="flex items-center gap-1 text-accent font-bold text-xs">
               <Calendar className="w-3 h-3" />
               {new Date(meetingDate).toLocaleString("nb-NO", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
             </span>
-          ) : <span className="text-gray-300">—</span>}
+          ) : <span className="text-muted-foreground/30">—</span>}
         </td>
 
         {/* Assigned */}
@@ -817,14 +817,14 @@ function LeadRow({
                       }`}
                       style={lead.status === s ? {
                         backgroundColor: {
-                          "Ikke kontaktet": "#F3F4F6", "Kontaktet": "#DBEAFE",
-                          "Kontaktet - ikke svar": "#FEF3C7", "Booket møte": "#EDE9FE",
-                          "Avslått": "#FEE2E2", "Kunde": "#DCFCE7",
+                          "Ikke kontaktet": "#e8e4d8", "Kontaktet": "#09fe94",
+                          "Kontaktet - ikke svar": "#ffad0a", "Booket møte": "#ffad0a",
+                          "Avslått": "#ff470a", "Kunde": "#171717",
                         }[s] as string,
                         color: {
-                          "Ikke kontaktet": "#374151", "Kontaktet": "#1D4ED8",
-                          "Kontaktet - ikke svar": "#92400E", "Booket møte": "#6D28D9",
-                          "Avslått": "#B91C1C", "Kunde": "#15803D",
+                          "Ikke kontaktet": "#6b6660", "Kontaktet": "#171717",
+                          "Kontaktet - ikke svar": "#171717", "Booket møte": "#171717",
+                          "Avslått": "#ffffff", "Kunde": "#09fe94",
                         }[s] as string,
                       } : {}}
                     >
@@ -876,7 +876,7 @@ function LeadRow({
                   <div className="mt-3 flex items-center gap-2">
                   <button
                     onClick={(e) => { e.stopPropagation(); setEmailModalOpen(true); }}
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-purple-50 text-purple-700 text-xs font-semibold rounded-lg hover:bg-purple-100 transition-colors border border-purple-100"
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-accent/10 text-accent text-xs font-semibold rounded-lg hover:bg-accent/20 transition-colors border border-accent/20"
                   >
                     <Sparkles className="w-3.5 h-3.5" />
                     Skriv AI-e-post
@@ -894,8 +894,8 @@ function LeadRow({
                       onClick={(e) => { e.stopPropagation(); setSeqDropdownOpen(!seqDropdownOpen); }}
                       className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors border ${
                         lead.enrolledSequenceId 
-                          ? "bg-blue-50 text-blue-700 border-blue-100 hover:bg-blue-100" 
-                          : "bg-orange-50 text-orange-700 border-orange-100 hover:bg-orange-100"
+                          ? "bg-accent/10 text-accent border-accent/20 hover:bg-accent/20" 
+                          : "bg-white border-[#d8d3c5] hover:bg-[#faf8f2]"
                       }`}
                     >
                       <Layers className="w-3.5 h-3.5" />
@@ -932,7 +932,7 @@ function LeadRow({
                                     error: (err) => `Feil: ${err.message}`,
                                   });
                                 }}
-                                className={`w-full text-left px-3 py-2 text-xs hover:bg-[#f0ece0] flex items-center justify-between ${lead.enrolledSequenceId === seq.id ? "bg-blue-50 text-blue-700 font-medium" : "text-[#6b6660]"}`}
+                                  className={`w-full text-left px-3 py-2 text-xs hover:bg-[#f0ece0] flex items-center justify-between ${lead.enrolledSequenceId === seq.id ? "bg-accent/10 text-accent font-medium" : "text-[#6b6660]"}`}
                               >
                                 {seq.name}
                                 {lead.enrolledSequenceId === seq.id && <Check className="w-3 h-3" />}
@@ -976,17 +976,17 @@ function LeadRow({
 
                   {/* Meeting date */}
                   {(lead.status === "Booket møte" || meetingDate) && (
-                    <div className="mt-4 p-3 bg-purple-50 rounded-xl border border-purple-100">
-                      <p className="text-xs font-bold text-purple-700 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                    <div className="mt-4 p-3 bg-accent/10 rounded-xl border border-accent/20">
+                      <p className="text-xs font-bold text-accent uppercase tracking-wider mb-2 flex items-center gap-1.5">
                         <Calendar className="w-3.5 h-3.5" /> Planlagt møte
                       </p>
                       <input
                         type="datetime-local"
                         value={formatDT(meetingDate)}
                         onChange={(e) => onMeetingDateSave(lead.id, e.target.value)}
-                        className="text-sm border border-purple-200 rounded-lg px-2 py-1.5 text-purple-900 focus:outline-none focus:border-purple-400 bg-white w-full"
+                        className="text-sm border border-accent/20 rounded-lg px-2 py-1.5 text-primary focus:outline-none focus:border-accent bg-card w-full"
                       />
-                      <p className="text-[10px] text-purple-500 mt-1">Automatisk oppdaget fra e-post eller satt manuelt.</p>
+                      <p className="text-[10px] text-muted-foreground mt-1">Automatisk oppdaget fra e-post eller satt manuelt.</p>
                     </div>
                   )}
                 </div>
@@ -1140,7 +1140,7 @@ function LeadRow({
                             value={reminderMsg}
                             onChange={(e) => setReminderMsg(e.target.value)}
                             placeholder={`Husk å følge opp ${lead.name}...`}
-                            className="w-full text-xs border border-[#d8d3c5] rounded-lg px-2 py-1.5 focus:outline-none focus:border-blue-400 resize-none bg-[#faf8f2]"
+                            className="w-full text-xs border border-[#d8d3c5] rounded-lg px-2 py-1.5 focus:outline-none focus:border-accent resize-none bg-[#faf8f2]"
                             rows={2}
                             autoFocus
                           />
@@ -1148,7 +1148,7 @@ function LeadRow({
                             <button
                               onClick={handleSendReminder}
                               disabled={reminderSending}
-                              className="flex items-center gap-1 px-2 py-1 bg-blue-500 text-white rounded text-xs font-semibold hover:bg-blue-600 disabled:opacity-60"
+                              className="flex items-center gap-1 px-2 py-1 bg-accent text-accent-foreground rounded text-xs font-semibold hover:bg-accent/90 disabled:opacity-60"
                             >
                               {reminderSending ? <Loader2 className="w-3 h-3 animate-spin" /> : <Bell className="w-3 h-3" />}
                               Send
@@ -1470,15 +1470,15 @@ function MineLeadsContent() {
       label: "Booket møte",
       value: leads.filter((l) => l.status === "Booket møte").length,
       icon: Calendar,
-      color: "text-purple-600",
-      bg: "bg-purple-50",
+      color: "text-accent",
+      bg: "bg-accent/10",
     },
     {
       label: "Kunder",
       value: leads.filter((l) => l.status === "Kunde").length,
       icon: Star,
-      color: "text-yellow-600",
-      bg: "bg-yellow-50",
+      color: "text-accent",
+      bg: "bg-accent/10",
     },
   ];
 

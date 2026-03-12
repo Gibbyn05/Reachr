@@ -49,7 +49,7 @@ export default function SekvenserPage() {
         {/* Builder Preview (Hero Element) */}
         <div className="bg-[#171717] rounded-2xl overflow-hidden shadow-2xl relative">
           <div className="absolute top-0 right-0 w-64 h-64 bg-[#09fe94] rounded-full blur-[100px] opacity-20 pointer-events-none"></div>
-          <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-500 rounded-full blur-[100px] opacity-20 pointer-events-none"></div>
+          <div className="absolute bottom-0 left-0 w-64 h-64 bg-[#ff470a] rounded-full blur-[100px] opacity-10 pointer-events-none"></div>
           
           <div className="p-8 lg:p-12 flex flex-col lg:flex-row items-center gap-10">
             <div className="flex-1 text-white">
@@ -81,8 +81,8 @@ export default function SekvenserPage() {
                 {/* Step 1 */}
                 <div className="bg-white/10 border border-white/20 rounded-xl p-4 backdrop-blur-md relative transform transition-transform hover:scale-[1.02]">
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-blue-500 flex items-center justify-center">
-                      <FileText className="w-4 h-4 text-white" />
+                    <div className="w-8 h-8 rounded-lg bg-[#171717] flex items-center justify-center">
+                      <FileText className="w-4 h-4 text-[#09fe94]" />
                     </div>
                     <div>
                       <p className="text-sm font-bold text-white">Steg 1: Intro E-post</p>
@@ -109,8 +109,8 @@ export default function SekvenserPage() {
                 {/* Step 2 */}
                 <div className="bg-white/10 border border-white/20 rounded-xl p-4 backdrop-blur-md relative transform transition-transform hover:scale-[1.02]">
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-orange-500 flex items-center justify-center">
-                      <Reply className="w-4 h-4 text-white" />
+                    <div className="w-8 h-8 rounded-lg bg-[#09fe94]/10 flex items-center justify-center">
+                      <Reply className="w-4 h-4 text-[#05c472]" />
                     </div>
                     <div>
                       <p className="text-sm font-bold text-white">Steg 2: Oppfølging hvis ikke svar</p>
@@ -131,7 +131,7 @@ export default function SekvenserPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="bg-gray-50 border-b border-[#e8e4d8] text-xs font-semibold text-[#a09b8f] uppercase tracking-wider">
+                <tr className="bg-[#fcfbf7] border-b border-[#e8e4d8] text-xs font-semibold text-[#a09b8f] uppercase tracking-wider">
                   <th className="p-4 pl-6">Sekvensnavn</th>
                   <th className="p-4">Status</th>
                   <th className="p-4">Mottakere</th>
@@ -168,11 +168,11 @@ export default function SekvenserPage() {
                     </td>
                     <td className="p-4 hidden sm:table-cell w-64 text-sm font-medium">
                       <div className="grid grid-cols-2 gap-4">
-                        <div className="text-blue-600 flex items-center gap-1.5">
+                        <div className="text-accent-foreground flex items-center gap-1.5">
                           <MousePointerClick className="w-4 h-4" />
                           {seq.enrolled > 0 ? Math.round((seq.opened / seq.enrolled) * 100) : 0}%
                         </div>
-                        <div className="text-green-600 flex items-center gap-1.5">
+                        <div className="text-accent flex items-center gap-1.5">
                           <Reply className="w-4 h-4" />
                           {seq.enrolled > 0 ? Math.round((seq.replied / seq.enrolled) * 100) : 0}%
                         </div>

@@ -157,7 +157,7 @@ export default function InboxPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#F8F9FC]">
+    <div className="min-h-screen flex flex-col bg-background">
       <TopBar title="Innboks" subtitle="Siste e-poster fra dine tilkoblede kontoer" />
 
       <div className="flex-1 flex overflow-hidden">
@@ -310,7 +310,7 @@ export default function InboxPage() {
                           </div>
                           <div>
                             <p className="text-sm font-bold text-[#171717]">{lead.name}</p>
-                            <p className="text-xs text-[#a09b8f]">Nåværende status: <Badge variant={lead.status === "Booket møte" ? "purple" : "blue"} className="ml-1">{lead.status}</Badge></p>
+                            <p className="text-xs text-[#a09b8f]">Nåværende status: <Badge className="ml-1 bg-accent/20 text-accent-foreground border-none font-bold">{lead.status}</Badge></p>
                           </div>
                         </div>
                         <div className="flex gap-2">

@@ -132,7 +132,7 @@ export default function NySekvensPage() {
                 <div className="bg-white rounded-xl border border-[#d8d3c5] shadow-sm overflow-hidden group">
                   <div className="bg-[#fcfbf9] px-4 py-3 border-b border-[#e8e4d8] flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center text-blue-600">
+                      <div className="w-8 h-8 rounded-lg bg-[#09fe94]/10 flex items-center justify-center text-[#05c472]">
                         <Mail className="w-4 h-4" />
                       </div>
                       <span className="font-semibold text-[#171717]">Steg {index + 1}: Send e-post</span>
@@ -141,7 +141,7 @@ export default function NySekvensPage() {
                       <button 
                         onClick={() => generateAiStep(index)} 
                         disabled={generatingStepIds.has(step.id)}
-                        className="flex items-center gap-1.5 px-2 py-1 text-xs font-bold text-blue-600 hover:bg-blue-50 rounded transition-colors disabled:opacity-50"
+                        className="flex items-center gap-1.5 px-2 py-1 text-xs font-bold text-[#05c472] hover:bg-[#09fe94]/10 rounded transition-colors disabled:opacity-50"
                       >
                         {generatingStepIds.has(step.id) ? (
                           <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -166,7 +166,7 @@ export default function NySekvensPage() {
                           newSteps[index].subject = e.target.value;
                           setSteps(newSteps);
                         }}
-                        className="w-full border border-[#d8d3c5] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500" 
+                        className="w-full border border-[#d8d3c5] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#09fe94]" 
                         placeholder="Emne..."
                       />
                     </div>

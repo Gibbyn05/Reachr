@@ -122,7 +122,7 @@ export default function RapporterPage() {
         {/* Top Key Stats */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <StatCard label="Totalt leads" value={totalLeads} sub={`+${newThisWeek} nye denne uken`} icon={Users} color="bg-[#09fe94]/10 text-[#05c472]" />
-          <StatCard label="Pipeline verdi" value={`${(totalLeads * 14500).toLocaleString()} kr`} sub="Estimert verdi (mock)" icon={TrendingUp} color="bg-blue-50 text-blue-600" />
+          <StatCard label="Pipeline verdi" value={`${(totalLeads * 14500).toLocaleString()} kr`} sub="Estimert verdi (mock)" icon={TrendingUp} color="bg-[#09fe94]/10 text-[#05c472]" />
           <StatCard label="Bookede møter" value={totalMeetings} sub={`${totalLeads > 0 ? Math.round((totalMeetings / totalLeads) * 100) : 0}% konvertering`} icon={Calendar} color="bg-[#ffad0a]/12 text-[#c47e00]" />
           <StatCard label="Aktive sekvenser" value={activeEnrollments} sub="Leads i automatisert løp" icon={Zap} color="bg-[#ff470a]/10 text-[#ff470a]" />
         </div>
@@ -189,7 +189,7 @@ export default function RapporterPage() {
                   <p className="text-[10px] text-[#a09b8f] uppercase font-bold">Åpningsrate</p>
                   <p className="text-lg font-extrabold text-[#171717]">64%</p>
                   <div className="h-1 w-full bg-[#e8e4d8] rounded-full">
-                    <div className="h-full bg-blue-500 rounded-full w-[64%]" />
+                    <div className="h-full bg-[#09fe94] rounded-full w-[64%]" />
                   </div>
                 </div>
                 <div className="space-y-1">
@@ -270,7 +270,7 @@ export default function RapporterPage() {
         {/* Key Insights Panel */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
            <div className="bg-white rounded-2xl p-6 border border-[#d8d3c5] flex flex-col gap-4">
-              <div className="bg-blue-50 w-10 h-10 rounded-xl flex items-center justify-center text-blue-600">
+              <div className="bg-[#09fe94]/10 w-10 h-10 rounded-xl flex items-center justify-center text-[#05c472]">
                 <Mail className="w-5 h-5" />
               </div>
               <div>

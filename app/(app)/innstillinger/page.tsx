@@ -668,9 +668,8 @@ export default function InnstillingerPage() {
                               Admin
                             </span>
                           ) : (
-                            <span className="bg-blue-100 text-blue-700 text-xs px-2 py-0.5 rounded-full font-semibold flex items-center gap-1">
-                              <Users className="w-2.5 h-2.5" />
-                              Medlem
+                            <span className="bg-[#09fe94]/10 text-[#05c472] text-xs px-2 py-0.5 rounded-full font-semibold flex items-center gap-1">
+                              <CheckCircle2 className="w-3 h-3" /> Aktiv
                             </span>
                           )}
                         </div>
@@ -784,7 +783,7 @@ export default function InnstillingerPage() {
                             <a
                               href="/api/email/google/connect"
                               onClick={() => setEmailConnecting("gmail")}
-                              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-blue-600 border border-blue-200 rounded-lg hover:bg-blue-50 transition-colors"
+                              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-[#05c472] border border-[#09fe94]/20 rounded-lg hover:bg-[#09fe94]/10 transition-colors"
                             >
                               <Link2 className="w-3 h-3" />
                               Koble til Gmail
@@ -800,10 +799,8 @@ export default function InnstillingerPage() {
                       return (
                         <div className="flex items-center justify-between p-4 border border-[#d8d3c5] rounded-xl">
                           <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center">
-                              <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none">
-                                <path d="M7.88 12.04q0 .45-.11.87-.1.41-.33.74-.22.33-.58.52-.37.2-.87.2t-.85-.2q-.35-.21-.57-.55-.22-.33-.33-.75-.1-.42-.1-.86t.1-.87q.1-.43.34-.76.22-.34.59-.54.36-.2.87-.2t.86.2q.35.21.57.55.22.34.31.77.1.43.1.88zM24 12v9.38q0 .46-.33.8-.33.32-.8.32H7.13q-.46 0-.8-.33-.32-.33-.32-.8V18H1q-.41 0-.7-.3-.3-.29-.3-.7V7q0-.41.3-.7Q.58 6 1 6h6.1V2.55q0-.44.3-.75.3-.3.75-.3h12.5q.44 0 .75.3.3.3.3.75V10.85l1.24.72h.01q.1.07.14.18.04.1.01.21z" fill="#0078D4"/>
-                              </svg>
+                            <div className="w-10 h-10 bg-[#09fe94]/10 rounded-xl flex items-center justify-center">
+                              <Mail className="w-5 h-5 text-[#05c472]" />
                             </div>
                             <div>
                               <p className="text-sm font-semibold text-[#171717]">Outlook</p>
@@ -829,7 +826,7 @@ export default function InnstillingerPage() {
                             <a
                               href="/api/email/microsoft/connect"
                               onClick={() => setEmailConnecting("outlook")}
-                              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-blue-600 border border-blue-200 rounded-lg hover:bg-blue-50 transition-colors"
+                              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-[#05c472] border border-[#09fe94]/20 rounded-lg hover:bg-[#09fe94]/10 transition-colors"
                             >
                               <Link2 className="w-3 h-3" />
                               Koble til Outlook
@@ -879,8 +876,8 @@ export default function InnstillingerPage() {
                               ? "Avbestilt — tilgang til: " + new Date(stripeSubscription.current_period_end).toLocaleDateString("nb-NO", { day: "numeric", month: "long", year: "numeric" })
                               : "Fornyes: " + new Date(stripeSubscription.current_period_end).toLocaleDateString("nb-NO", { day: "numeric", month: "long", year: "numeric" })}
                           </p>
-                          <span className={`text-xs px-3 py-1 rounded-full font-semibold ${stripeSubscription.cancel_at_period_end ? "bg-yellow-400 text-[#171717]" : stripeSubscription.status === "trialing" ? "bg-blue-400 text-white" : "bg-[#09fe94] text-[#171717]"}`}>
-                            {stripeSubscription.cancel_at_period_end ? "Avbestilt" : stripeSubscription.status === "trialing" ? "Prøveperiode" : "Aktiv"}
+                          <span className={`text-xs px-3 py-1 rounded-full font-semibold ${stripeSubscription.cancel_at_period_end ? "bg-yellow-400 text-[#171717]" : stripeSubscription.status === "trialing" ? "bg-orange-400 text-white" : "bg-[#09fe94] text-[#171717]"}`}>
+                            {stripeSubscription.status === "trialing" ? "Prøveperiode" : stripeSubscription.cancel_at_period_end ? "Kansellert" : "Aktiv"}
                           </span>
                         </div>
                       </div>

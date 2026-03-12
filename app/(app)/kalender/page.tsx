@@ -216,8 +216,8 @@ export default function KalenderPage() {
             <div className="bg-white dark:bg-[#141414] border border-[#e8e4d8] dark:border-[#262626] rounded-[2rem] p-8 shadow-sm">
               <div className="flex items-center justify-between mb-8">
                 <div className="flex items-center gap-3">
-                   <div className="p-3 bg-orange-500/10 rounded-2xl">
-                      <Clock className="w-6 h-6 text-orange-500" />
+                   <div className="p-3 bg-accent-danger/10 rounded-2xl">
+                      <Clock className="w-6 h-6 text-accent-danger" />
                    </div>
                    <div>
                       <h2 className="text-xl font-black text-[#171717] dark:text-white">Dagens oppgaver</h2>
@@ -268,9 +268,9 @@ export default function KalenderPage() {
                               {task.type === "meeting" ? (
                                 <CalendarDays className="w-3.5 h-3.5 text-purple-500" />
                               ) : (
-                                <Phone className="w-3.5 h-3.5 text-orange-500" />
+                                <Phone className="w-3.5 h-3.5 text-accent-danger" />
                               )}
-                              <span className="text-[10px] font-black uppercase tracking-widest text-[#a09b8f]">
+                              <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
                                  {task.type === "meeting" ? "Møte" : "Oppfølging"}
                               </span>
                            </div>
@@ -286,14 +286,14 @@ export default function KalenderPage() {
                         </div>
 
                         <div className="flex items-center gap-4">
-                           <div className="text-right shrink-0">
-                              <span className={`text-[11px] font-black px-3 py-1.5 rounded-xl uppercase tracking-wider ${
-                                task.type === "meeting" ? "bg-purple-100 dark:bg-purple-500/10 text-purple-700 dark:text-purple-400" : 
-                                "bg-orange-100 dark:bg-orange-500/10 text-orange-700 dark:text-orange-400"
-                              }`}>
-                                {task.time}
-                              </span>
-                           </div>
+                            <div className="text-right shrink-0">
+                               <span className={`text-[11px] font-black px-3 py-1.5 rounded-xl uppercase tracking-wider ${
+                                 task.type === "meeting" ? "bg-accent/10 text-accent" : 
+                                 "bg-accent-danger/10 text-accent-danger"
+                               }`}>
+                                 {task.time}
+                               </span>
+                            </div>
 
                            <div className="flex items-center gap-2 border-l border-[#e8e4d8] dark:border-[#262626] pl-4">
                               <Link 
@@ -312,8 +312,8 @@ export default function KalenderPage() {
             </div>
             
             <div className="bg-white dark:bg-[#141414] border border-[#e8e4d8] dark:border-[#262626] rounded-[2rem] p-8 shadow-sm">
-              <h2 className="text-lg font-black text-[#171717] dark:text-white flex items-center gap-2 mb-6">
-                <CalendarDays className="w-6 h-6 text-blue-500" />
+              <h2 className="text-lg font-black text-primary flex items-center gap-2 mb-6">
+                <CalendarDays className="w-6 h-6 text-accent" />
                 Planlagt (Senere)
               </h2>
               {upcomingTasks.length === 0 ? (
@@ -321,15 +321,15 @@ export default function KalenderPage() {
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {upcomingTasks.map((task) => (
-                    <div key={task.id} className="group flex items-center justify-between p-4 rounded-2xl bg-white dark:bg-[#1a1a1a] border border-[#e8e4d8] dark:border-[#262626] hover:border-blue-400/50 transition-all">
+                    <div key={task.id} className="group flex items-center justify-between p-4 rounded-2xl bg-card border border-border hover:border-accent/50 transition-all">
                       <div className="flex items-center gap-3">
-                        <div className="w-2.5 h-2.5 rounded-full bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)]"></div>
+                        <div className="w-2.5 h-2.5 rounded-full bg-accent shadow-[0_0_10px_rgba(9,254,148,0.5)]"></div>
                         <div className="min-w-0">
-                          <p className="text-sm font-bold text-[#171717] dark:text-white truncate">{task.title}</p>
-                          <p className="text-[11px] text-[#a09b8f] font-medium">{task.leadName}</p>
+                          <p className="text-sm font-bold text-primary truncate">{task.title}</p>
+                          <p className="text-[11px] text-muted-foreground font-medium">{task.leadName}</p>
                         </div>
                       </div>
-                      <span className="text-[10px] bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 font-black px-2 py-1 rounded-lg uppercase whitespace-nowrap">{task.time}</span>
+                      <span className="text-[10px] bg-accent/10 text-accent font-black px-2 py-1 rounded-lg uppercase whitespace-nowrap">{task.time}</span>
                     </div>
                   ))}
                 </div>
@@ -407,9 +407,9 @@ export default function KalenderPage() {
             </div>
 
             {/* Compact Meetings List */}
-            <div className="bg-white dark:bg-[#141414] border border-[#e8e4d8] dark:border-[#262626] rounded-3xl p-6 shadow-sm">
-              <h3 className="font-black text-sm text-[#171717] dark:text-white uppercase tracking-wider mb-5 flex items-center gap-2">
-                <CalendarDays className="w-4 h-4 text-purple-500" />
+            <div className="bg-card border border-border rounded-3xl p-6 shadow-sm">
+              <h3 className="font-black text-sm text-primary uppercase tracking-wider mb-5 flex items-center gap-2">
+                <CalendarDays className="w-4 h-4 text-accent" />
                 Møteoversikt
               </h3>
               <div className="space-y-4">
@@ -423,13 +423,13 @@ export default function KalenderPage() {
                     .sort((a, b) => (a.fullDate?.getTime() || 0) - (b.fullDate?.getTime() || 0))
                     .slice(0, 5)
                     .map(meeting => (
-                      <div key={meeting.id} className="flex items-start gap-3 p-3 bg-purple-50 dark:bg-purple-500/5 hover:bg-purple-100 dark:hover:bg-purple-500/10 rounded-2xl transition-colors">
-                        <div className="p-2 bg-white dark:bg-[#1a1a1a] rounded-xl shadow-sm">
-                           <Calendar className="w-3.5 h-3.5 text-purple-500" />
+                      <div key={meeting.id} className="flex items-start gap-3 p-3 bg-muted hover:bg-muted/80 rounded-2xl transition-colors">
+                        <div className="p-2 bg-card rounded-xl shadow-sm border border-border">
+                           <Calendar className="w-3.5 h-3.5 text-accent" />
                         </div>
                         <div className="min-w-0">
-                           <p className="text-xs font-black text-purple-900 dark:text-purple-300 truncate">{meeting.leadName}</p>
-                           <p className="text-[10px] text-purple-600 dark:text-purple-400/80 font-bold flex items-center gap-1 mt-0.5">
+                           <p className="text-xs font-black text-primary truncate">{meeting.leadName}</p>
+                           <p className="text-[10px] text-muted-foreground font-bold flex items-center gap-1 mt-0.5">
                               {meeting.time}
                            </p>
                         </div>
@@ -559,14 +559,14 @@ export default function KalenderPage() {
       {showMeetingModal && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white dark:bg-[#141414] rounded-[2.5rem] shadow-2xl w-full max-w-md overflow-hidden border border-[#e8e4d8] dark:border-[#262626] animate-in fade-in zoom-in duration-300">
-            <div className="p-8 border-b border-[#e8e4d8] dark:border-[#262626] flex justify-between items-center bg-[#faf8f2] dark:bg-[#1a1a1a]">
+            <div className="p-8 border-b border-border flex justify-between items-center bg-card">
                <div className="flex items-center gap-4">
-                 <div className="p-3 bg-purple-500/10 rounded-2xl">
-                    <CalendarDays className="w-6 h-6 text-purple-500" />
+                 <div className="p-3 bg-accent/10 rounded-2xl">
+                    <CalendarDays className="w-6 h-6 text-accent" />
                  </div>
                  <div>
-                    <h3 className="text-xl font-black text-[#171717] dark:text-white">Nytt møte</h3>
-                    <p className="text-xs text-[#a09b8f]">Planlegg din neste kaffeprat</p>
+                    <h3 className="text-xl font-black text-primary">Nytt møte</h3>
+                    <p className="text-xs text-muted-foreground">Planlegg din neste kaffeprat</p>
                  </div>
               </div>
               <button onClick={() => setShowMeetingModal(false)} className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-black/5 dark:hover:bg-white/5 text-gray-400 hover:text-black dark:hover:text-white transition-colors">
@@ -605,12 +605,12 @@ export default function KalenderPage() {
                  >
                     Avbryt
                  </button>
-                 <button 
-                    onClick={() => { setShowMeetingModal(false); toast.success("Møte opprettet!"); }} 
-                    className="flex-[2] bg-purple-600 hover:bg-purple-500 text-white font-black py-4 rounded-2xl transition-all shadow-lg shadow-purple-500/20 uppercase tracking-widest text-[10px]"
-                 >
-                    Bekreft
-                 </button>
+                  <button 
+                     onClick={() => { setShowMeetingModal(false); toast.success("Møte opprettet!"); }} 
+                     className="flex-[2] bg-accent hover:bg-accent-hover text-accent-foreground font-black py-4 rounded-2xl transition-all shadow-lg shadow-accent/20 uppercase tracking-widest text-[10px]"
+                  >
+                     Bekreft
+                  </button>
               </div>
             </div>
           </div>

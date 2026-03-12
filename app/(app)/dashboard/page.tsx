@@ -9,11 +9,11 @@ import { Lead } from "@/lib/mock-data";
 
 const statusColors: Record<string, "gray" | "blue" | "yellow" | "purple" | "red" | "green"> = {
   "Ikke kontaktet": "gray",
-  "Kontaktet": "blue",
+  "Kontaktet": "green",
   "Kontaktet - ikke svar": "yellow",
-  "Booket møte": "purple",
+  "Booket møte": "yellow",
   "Avslått": "red",
-  "Kunde": "green",
+  "Kunde": "purple",
 };
 
 function needsFollowUpReason(lead: Lead): string | null {
@@ -218,11 +218,11 @@ export default function DashboardPage() {
                   </div>
                   <div className="hidden sm:flex items-center gap-2 text-gray-300 flex-shrink-0">
                     {lead.phone && lead.phone !== "—" && (
-                      <a href={`tel:${lead.phone}`} className="p-1.5 hover:bg-gray-100 rounded-lg hover:text-blue-500 transition-colors">
+                      <a href={`tel:${lead.phone}`} className="p-1.5 hover:bg-gray-100 rounded-lg hover:text-accent transition-colors">
                         <Phone className="w-3.5 h-3.5" />
                       </a>
                     )}
-                    <button className="p-1.5 hover:bg-gray-100 rounded-lg hover:text-green-500 transition-colors">
+                    <button className="p-1.5 hover:bg-gray-100 rounded-lg hover:text-accent transition-colors">
                       <Mail className="w-3.5 h-3.5" />
                     </button>
                   </div>
