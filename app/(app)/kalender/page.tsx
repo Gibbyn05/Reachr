@@ -24,60 +24,8 @@ export default function KalenderPage() {
     l.contactPerson?.toLowerCase().includes(leadSearch.toLowerCase())
   );
 
+  // Cleanup on unmount
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-      if (SpeechRecognition) {
-        const rec = new SpeechRecognition();
-        rec.continuous = true;
-        rec.interimResults = true;
-        rec.lang = "nb-NO";
-
-        rec.onresult = (event: any) => {
-          let currentTranscript = "";
-          for (let i = event.resultIndex; i < event.results.length; i++) {
-            currentTranscript += event.results[i][0].transcript;
-          }
-          if (currentTranscript) {
-            setTranscribedText(prev => {
-              const isFinal = event.results[event.results.length - 1].isFinal;
-              if (isFinal) {
-                // Return accumulated text plus new final result
-                return (prev + " " + currentTranscript).trim();
-              }
-              // For interim, we'll wait for final to append, but update UI
-              return prev; 
-            });
-            
-            // For real-time feedback, show the full raw transcript
-            const fullRaw = Array.from(event.results)
-              .map((res: any) => res[0].transcript)
-              .join(" ");
-            setTranscribedText(fullRaw);
-          }
-        };
-
-        rec.onerror = (event: any) => {
-          console.error("Speech Recognition Error:", event.error);
-          setIsRecording(false);
-          
-          if (event.error === "network") {
-            toast.error("Nettverksfeil: Tale-til-tekst mistet forbindelsen. Prøv å starte på nytt eller sjekk internett.");
-          } else if (event.error === "not-allowed") {
-            toast.error("Mangler tilgang: Du må tillate mikrofonen i nettleseren din.");
-          } else if (event.error !== "no-speech") {
-            toast.error(`Feil med mikrofonen: ${event.error}`);
-          }
-        };
-
-        rec.onend = () => {
-          setIsRecording(false);
-        };
-
-        recognitionRef.current = rec;
-      }
-    }
-    
     return () => {
       if (recognitionRef.current) {
         recognitionRef.current.stop();
@@ -85,28 +33,66 @@ export default function KalenderPage() {
     };
   }, []);
 
-  const toggleRecording = () => {
-    const rec = recognitionRef.current;
-    if (!rec) {
+  const startSpeechRecognition = () => {
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognition) {
       toast.error("Nettleseren din støtter ikke tale-til-tekst. Prøv Chrome.");
       return;
     }
 
+    const rec = new SpeechRecognition();
+    rec.continuous = true;
+    rec.interimResults = true;
+    rec.lang = "nb-NO";
+
+    rec.onresult = (event: any) => {
+      const fullTranscript = Array.from(event.results)
+        .map((res: any) => res[0].transcript)
+        .join(" ");
+      setTranscribedText(fullTranscript);
+    };
+
+    rec.onerror = (event: any) => {
+      console.error("Speech Recognition Error:", event.error);
+      
+      if (event.error === "network") {
+        toast.error("Nettverksfeil: Tale-til-tekst mistet forbindelsen. Prøv å starte på nytt.");
+      } else if (event.error === "not-allowed") {
+        toast.error("Mangler tilgang: Du må tillate mikrofonen i nettleseren din.");
+      } else if (event.error !== "no-speech") {
+        toast.error(`Feil med mikrofonen: ${event.error}`);
+      }
+      
+      setIsRecording(false);
+      recognitionRef.current = null;
+    };
+
+    rec.onend = () => {
+      setIsRecording(false);
+      recognitionRef.current = null;
+    };
+
+    try {
+      rec.start();
+      recognitionRef.current = rec;
+      setIsRecording(true);
+      toast.info("Lytter nå... Snakk i vei!", { duration: 3000 });
+    } catch (e) {
+      console.error("Failed to start speech recognition:", e);
+      setIsRecording(false);
+    }
+  };
+
+  const toggleRecording = () => {
     if (isRecording) {
-      rec.stop();
+      if (recognitionRef.current) {
+        recognitionRef.current.stop();
+      }
       setIsRecording(false);
       toast.success("Opptak avsluttet.");
     } else {
       setTranscribedText("");
-      try {
-        rec.start();
-        setIsRecording(true);
-        toast.info("Lytter nå... Snakk i vei!", { duration: 3000 });
-      } catch (e) {
-        console.error("Failed to start recognition:", e);
-        // If already started, just update UI
-        setIsRecording(true);
-      }
+      startSpeechRecognition();
     }
   };
 
