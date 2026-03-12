@@ -4,7 +4,7 @@ import { useAppStore } from "@/store/app-store";
 import { CalendarDays, CheckCircle2, Clock, Phone, Mail, ArrowRight, User, Mic, Square, Search } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 
 export default function KalenderPage() {
@@ -24,20 +24,41 @@ export default function KalenderPage() {
     l.contactPerson?.toLowerCase().includes(leadSearch.toLowerCase())
   );
 
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+      if (SpeechRecognition) {
+        const rec = new SpeechRecognition();
+        rec.continuous = true;
+        rec.interimResults = true;
+        rec.lang = "nb-NO";
+        rec.onresult = (event: any) => {
+          let transcript = "";
+          for (let i = 0; i < event.results.length; i++) {
+            transcript += event.results[i][0].transcript;
+          }
+          setTranscribedText(transcript);
+        };
+        (window as any)._rec = rec; // debug
+      }
+    }
+  }, []);
+
   const toggleRecording = () => {
+    const rec = (window as any)._rec;
     if (isRecording) {
+      rec?.stop();
       setIsRecording(false);
       toast.success("Opptak avsluttet.");
     } else {
-      setIsRecording(true);
-      toast.info("Lytter til samtalen...", { duration: 4000 });
-      setTimeout(() => {
-        setIsRecording(false);
-        if (!transcribedText) {
-          setTranscribedText("Sammendrag: Kunden er interessert i oppfølging. (Demo-tekst)");
-        }
-        toast.success("AI ferdig med å lytte!");
-      }, 3000);
+      setTranscribedText("");
+      try {
+        rec?.start();
+        setIsRecording(true);
+        toast.info("Lytter til samtalen...", { duration: 2000 });
+      } catch (e) {
+        toast.error("Kunne ikke starte mikrofon. Prøv igjen.");
+      }
     }
   };
 
@@ -346,15 +367,17 @@ export default function KalenderPage() {
               <div className="relative">
                 <div className="flex justify-between items-center mb-1">
                   <label className="text-xs font-semibold text-[#a09b8f] block">Samtalenotater</label>
-                  <button 
-                    onClick={toggleRecording} 
-                    className={`flex items-center gap-1.5 px-2 py-1 rounded text-xs font-bold transition-colors ${
-                      isRecording ? "bg-red-100 text-red-600 animate-pulse" : "bg-blue-50 text-blue-600 hover:bg-blue-100"
-                    }`}
-                  >
-                    {isRecording ? <Square className="w-3 h-3" /> : <Mic className="w-3 h-3" />}
-                    {isRecording ? "Avslutt opptak" : "AI Transkribering"}
-                  </button>
+                   <button 
+                     onClick={toggleRecording} 
+                     className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all border shadow-sm ${
+                       isRecording 
+                         ? "bg-red-500 text-white border-red-600 animate-pulse" 
+                         : "bg-white text-blue-600 border-blue-200 hover:border-blue-400"
+                     }`}
+                   >
+                     {isRecording ? <Square className="w-3 h-3 fill-current" /> : <Mic className="w-3 h-3" />}
+                     {isRecording ? "STOPP OPPTAK" : "START AI LYTTING"}
+                   </button>
                 </div>
                 <textarea 
                   rows={4} 

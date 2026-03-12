@@ -1248,7 +1248,26 @@ function LeadRow({
 }
 
 export default function MineLeadsPage() {
-  const { leads, loadLeads, addLead, updateLeadStatus, updateLeadNotes, updateLeadAssigned, updateLeadLastContacted, removeLead, meetingDates, setMeetingDate, currentUser, pipelineStages } = useAppStore();
+  const { leads, loadLeads, addLead, updateLeadStatus: updateLeadStatusRaw, updateLeadNotes, updateLeadAssigned, updateLeadLastContacted, removeLead, meetingDates, setMeetingDate, currentUser, pipelineStages } = useAppStore();
+
+  const updateLeadStatus = async (id: string, status: string) => {
+    // If changing to "Kunde", show celebration
+    if (status === "Kunde") {
+      import("canvas-confetti").then(confetti => {
+        confetti.default({
+          particleCount: 150,
+          spread: 70,
+          origin: { y: 0.6 },
+          colors: ["#09fe94", "#171717", "#ffffff"],
+        });
+      });
+      toast.success("GRATULERER MED SALG! 🏆🥳", {
+        style: { background: "#171717", color: "#09fe94", border: "1px solid #09fe94" },
+        duration: 5000
+      });
+    }
+    await updateLeadStatusRaw(id, status);
+  };
   const [search, setSearch] = useState("");
   const [teamMembers, setTeamMembers] = useState<string[]>([]);
   const [isImporting, setIsImporting] = useState(false);

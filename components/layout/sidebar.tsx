@@ -15,6 +15,14 @@ import {
   ShieldCheck,
   CalendarDays,
   Zap,
+  Mail,
+  Reply,
+  Send,
+  ChevronRight,
+  Sparkles,
+  ExternalLink,
+  Phone,
+  Plus
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState, useEffect } from "react";
@@ -28,6 +36,7 @@ const mainNavItems = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
   { href: "/leadsok", icon: Search, label: "Leadsøk" },
   { href: "/mine-leads", icon: Users, label: "Mine Leads" },
+  { href: "/innboks", icon: Mail, label: "Innboks" },
   { href: "/kalender", icon: CalendarDays, label: "Kalender" },
   { href: "/sekvenser", icon: Zap, label: "Sekvenser" },
   { href: "/varsler", icon: Bell, label: "Varsler" },

@@ -103,39 +103,48 @@ body {
   --text-secondary: #3d3a34;
   --text-muted: #6b6660;
   --rc-border: #d8d3c5;
+  --sidebar-bg: #171717;
+  --topbar-bg: #faf8f2;
+  --btn-ghost-hover: #e8e4d8;
 }
 
 html.dark {
-  --bg-page: #0D1117;
-  --bg-card: #161B22;
-  --bg-card-alt: #1C2128;
-  --text-primary: #E6EDF3;
-  --text-secondary: #C9D1D9;
-  --text-muted: #8B949E;
-  --rc-border: #30363D;
+  --bg-page: #0a0a0a;
+  --bg-card: #141414;
+  --bg-card-alt: #1a1a1a;
+  --text-primary: #f5f5f5;
+  --text-secondary: #d4d4d4;
+  --text-muted: #a3a3a3;
+  --rc-border: #262626;
+  --sidebar-bg: #000000;
+  --topbar-bg: #141414;
+  --btn-ghost-hover: #1f1f1f;
 }
 
-html.dark body { background-color: var(--bg-page); color: var(--text-primary); }
+body { background-color: var(--bg-page); color: var(--text-primary); transition: background-color 0.3s, color 0.3s; }
 
-/* ── Generic Tailwind overrides ── */
-html.dark .bg-white { background-color: var(--bg-card) !important; }
-html.dark .bg-gray-50 { background-color: var(--bg-card-alt) !important; }
-html.dark .bg-slate-50 { background-color: var(--bg-card-alt) !important; }
-html.dark .text-slate-900 { color: var(--text-primary) !important; }
-html.dark .text-gray-600,
-html.dark .text-gray-700 { color: var(--text-secondary) !important; }
-html.dark .text-gray-400,
-html.dark .text-gray-500 { color: var(--text-muted) !important; }
-html.dark .border-gray-200,
-html.dark .border-gray-100 { border-color: var(--rc-border) !important; }
-html.dark header.bg-white { background-color: var(--bg-card) !important; border-color: var(--rc-border) !important; }
-html.dark .hover\:bg-gray-50:hover,
-html.dark .hover\:bg-gray-100:hover { background-color: var(--bg-card-alt) !important; }
+/* ── Global Component Overrides ── */
+.bg-\[\#faf8f2\] { background-color: var(--bg-card) !important; }
+.bg-\[\#f2efe3\] { background-color: var(--bg-page) !important; }
+.bg-white { background-color: var(--bg-card) !important; }
+.border-\[\#d8d3c5\], .border-\[\#e8e4d8\], .border-\[\#f0ece0\] { border-color: var(--rc-border) !important; }
+.text-\[\#171717\] { color: var(--text-primary) !important; }
+.text-\[\#6b6660\], .text-\[\#a09b8f\] { color: var(--text-muted) !important; }
+.hover\:bg-\[\#e8e4d8\]:hover { background-color: var(--btn-ghost-hover) !important; }
+.bg-\[\#f0ece0\] { background-color: var(--bg-card-alt) !important; }
+
+/* Sidebar stays dark mostly, but we can refine it */
+html.dark .bg-\[\#171717\] { background-color: var(--sidebar-bg) !important; }
+
 html.dark input,
 html.dark textarea,
 html.dark select {
-  background-color: var(--bg-card) !important;
+  background-color: var(--bg-card-alt) !important;
   color: var(--text-primary) !important;
   border-color: var(--rc-border) !important;
 }
+
+/* Modal specific fixes */
+html.dark .fixed.inset-0.bg-black\/50 { background-color: rgba(0, 0, 0, 0.8) !important; }
+
 
