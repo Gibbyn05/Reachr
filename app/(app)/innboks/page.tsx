@@ -144,9 +144,9 @@ export default function InboxPage() {
   }, []);
 
   const filteredEmails = emails.filter(e => 
-    e.subject.toLowerCase().includes(search.toLowerCase()) ||
-    e.from.toLowerCase().includes(search.toLowerCase()) ||
-    e.snippet?.toLowerCase().includes(search.toLowerCase())
+    (e.subject || "").toLowerCase().includes(search.toLowerCase()) ||
+    (e.from || "").toLowerCase().includes(search.toLowerCase()) ||
+    (e.snippet || "").toLowerCase().includes(search.toLowerCase())
   );
 
   const getLeadForEmail = (fromStr: string) => {
