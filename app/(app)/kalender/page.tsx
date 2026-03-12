@@ -15,10 +15,12 @@ export default function KalenderPage() {
   const [showMeetingModal, setShowMeetingModal] = useState(false);
   // Audio recording & Lead select state
   const [isRecording, setIsRecording] = useState(false);
+  const [isTranscribing, setIsTranscribing] = useState(false);
   const [transcribedText, setTranscribedText] = useState("");
   const [selectedLeadId, setSelectedLeadId] = useState("");
   const [leadSearch, setLeadSearch] = useState("");
-  const recognitionRef = useRef<any>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
 
   const filteredLeadsForSelect = leads.filter(l => 
     l.name.toLowerCase().includes(leadSearch.toLowerCase()) ||
@@ -28,80 +30,73 @@ export default function KalenderPage() {
   // Cleanup on unmount
   useEffect(() => {
     return () => {
-      if (recognitionRef.current) {
-        recognitionRef.current.stop();
+      if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
+        mediaRecorderRef.current.stop();
       }
     };
   }, []);
 
-  const toggleRecording = () => {
+  const toggleRecording = async () => {
     if (isRecording) {
       // Stopp opptak
-      if (recognitionRef.current) {
-        try { recognitionRef.current.stop(); } catch(e) {}
-        recognitionRef.current = null;
+      if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
+        mediaRecorderRef.current.stop();
       }
       setIsRecording(false);
-      toast.success("Opptak stoppet.");
       return;
     }
 
-    // Start opptak
-    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (!SpeechRecognition) {
-      toast.error("Nettleseren støtter ikke tale-til-tekst. Bruk Chrome.");
-      return;
-    }
-
-    setTranscribedText("");
-
-    const rec = new SpeechRecognition();
-    rec.continuous = true;
-    rec.interimResults = true;
-    rec.lang = "nb-NO";
-    recognitionRef.current = rec;
-
-    rec.onstart = () => {
-      setIsRecording(true);
-      toast.info("🎤 Lytter...", { duration: 2000 });
-    };
-
-    let accumulated = "";
-    rec.onresult = (event: any) => {
-      let interim = "";
-      for (let i = event.resultIndex; i < event.results.length; i++) {
-        const t = event.results[i][0].transcript;
-        if (event.results[i].isFinal) {
-          accumulated += t + " ";
-        } else {
-          interim = t;
-        }
-      }
-      setTranscribedText(accumulated + interim);
-    };
-
-    rec.onerror = (e: any) => {
-      console.error("STT error:", e.error);
-      if (e.error === "not-allowed") {
-        toast.error("🚫 Mikrofontilgang nektet. Klikk hengelåsen i adressefeltet og tillat mikrofon.");
-      } else if (e.error === "network") {
-        toast.warning("Nettverksproblem med tale-APIet. Prøv igjen.");
-      } else if (e.error !== "no-speech") {
-        toast.error(`Mikrofonproblem: ${e.error}`);
-      }
-    };
-
-    rec.onend = () => {
-      recognitionRef.current = null;
-      setIsRecording(false);
-    };
-
+    // Start opptak med MediaRecorder (ingen Google-servere!)
     try {
-      rec.start();
-    } catch (e) {
-      toast.error("Kunne ikke starte mikrofon. Prøv igjen.");
-      recognitionRef.current = null;
-      setIsRecording(false);
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const recorder = new MediaRecorder(stream);
+      audioChunksRef.current = [];
+      mediaRecorderRef.current = recorder;
+
+      recorder.ondataavailable = (e) => {
+        if (e.data.size > 0) audioChunksRef.current.push(e.data);
+      };
+
+      recorder.onstop = async () => {
+        // Stopp alle mikrofon-strømmer
+        stream.getTracks().forEach(t => t.stop());
+        
+        const audioBlob = new Blob(audioChunksRef.current, { type: "audio/webm" });
+        if (audioBlob.size < 1000) {
+          toast.warning("Opptaket var tomt. Prøv igjen.");
+          return;
+        }
+
+        setIsTranscribing(true);
+        toast.info("✨ Transkriberer med AI...", { duration: 4000 });
+
+        try {
+          const formData = new FormData();
+          formData.append("audio", audioBlob, "recording.webm");
+          const res = await fetch("/api/transcribe", { method: "POST", body: formData });
+          const data = await res.json();
+          if (data.transcript) {
+            setTranscribedText(prev => prev + (prev ? " " : "") + data.transcript.trim());
+            toast.success("Transkribert!");
+          } else {
+            toast.error("Klarte ikke transkribere. Prøv igjen.");
+          }
+        } catch {
+          toast.error("Serverfeil ved transkribering.");
+        } finally {
+          setIsTranscribing(false);
+        }
+      };
+
+      recorder.start();
+      setIsRecording(true);
+      toast.info("🎤 Tar opp... Trykk STOPP når du er ferdig.", { duration: 3000 });
+    } catch (e: any) {
+      if (e.name === "NotAllowedError") {
+        toast.error("🚫 Mikrofontilgang nektet. Klikk hengelåsen i adressefeltet og tillat mikrofon.");
+      } else {
+        toast.error("Kunne ikke starte mikrofon: " + e.message);
+      }
     }
   };
 
@@ -529,7 +524,7 @@ export default function KalenderPage() {
                      className={`w-full bg-[#faf8f2] dark:bg-[#0a0a0a] border rounded-[1.5rem] px-5 py-4 text-sm font-medium focus:outline-none transition-all resize-none dark:text-white ${
                        isRecording ? "border-red-400 ring-4 ring-red-400/5 shadow-inner" : "border-[#d8d3c5] dark:border-[#262626] focus:border-[#09fe94]"
                      }`} 
-                     placeholder={isRecording ? "Lytter til samtalen..." : "Her dukker samtalen opp automatisk, eller skriv selv..."}
+                     placeholder={isRecording ? "🎤 Tar opp lyd... Trykk STOPP når du er ferdig." : isTranscribing ? "✨ AI transkriberer opptaket..." : "Start opptak, eller skriv notater her..."}
                    />
                    {isRecording && (
                       <div className="absolute bottom-4 right-4 flex gap-1">
