@@ -4,7 +4,7 @@ import { useAppStore } from "@/store/app-store";
 import { CalendarDays, CheckCircle2, Clock, Phone, Mail, ArrowRight, User, Mic, Square, Search } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
 
 export default function KalenderPage() {
@@ -12,12 +12,12 @@ export default function KalenderPage() {
   const [completedTasks, setCompletedTasks] = useState<string[]>([]);
   const [showCallModal, setShowCallModal] = useState(false);
   const [showMeetingModal, setShowMeetingModal] = useState(false);
-  
   // Audio recording & Lead select state
   const [isRecording, setIsRecording] = useState(false);
   const [transcribedText, setTranscribedText] = useState("");
   const [selectedLeadId, setSelectedLeadId] = useState("");
   const [leadSearch, setLeadSearch] = useState("");
+  const recognitionRef = useRef<any>(null);
 
   const filteredLeadsForSelect = leads.filter(l => 
     l.name.toLowerCase().includes(leadSearch.toLowerCase()) ||
@@ -40,15 +40,16 @@ export default function KalenderPage() {
           }
           if (currentTranscript) {
             setTranscribedText(prev => {
-              // Only append if it's the final result, otherwise it's just interim
               const isFinal = event.results[event.results.length - 1].isFinal;
               if (isFinal) {
+                // Return accumulated text plus new final result
                 return (prev + " " + currentTranscript).trim();
               }
-              // For interim, we'll just show it for now
+              // For interim, we'll wait for final to append, but update UI
               return prev; 
             });
-            // Also update interim for real-time feel
+            
+            // For real-time feedback, show the full raw transcript
             const fullRaw = Array.from(event.results)
               .map((res: any) => res[0].transcript)
               .join(" ");
@@ -58,21 +59,36 @@ export default function KalenderPage() {
 
         rec.onerror = (event: any) => {
           console.error("Speech Recognition Error:", event.error);
-          if (event.error !== "no-speech") {
-            toast.error("Mikrofon-feil: " + event.error);
-            setIsRecording(false);
+          setIsRecording(false);
+          
+          if (event.error === "network") {
+            toast.error("Nettverksfeil: Tale-til-tekst mistet forbindelsen. Prøv å starte på nytt eller sjekk internett.");
+          } else if (event.error === "not-allowed") {
+            toast.error("Mangler tilgang: Du må tillate mikrofonen i nettleseren din.");
+          } else if (event.error !== "no-speech") {
+            toast.error(`Feil med mikrofonen: ${event.error}`);
           }
         };
 
-        (window as any)._rec = rec;
+        rec.onend = () => {
+          setIsRecording(false);
+        };
+
+        recognitionRef.current = rec;
       }
     }
+    
+    return () => {
+      if (recognitionRef.current) {
+        recognitionRef.current.stop();
+      }
+    };
   }, []);
 
   const toggleRecording = () => {
-    const rec = (window as any)._rec;
+    const rec = recognitionRef.current;
     if (!rec) {
-      toast.error("Nettleseren din støtter ikke tale-til-tekst.");
+      toast.error("Nettleseren din støtter ikke tale-til-tekst. Prøv Chrome.");
       return;
     }
 
@@ -85,9 +101,10 @@ export default function KalenderPage() {
       try {
         rec.start();
         setIsRecording(true);
-        toast.info("Lytter nå... Snakk i vei!", { duration: 2000 });
+        toast.info("Lytter nå... Snakk i vei!", { duration: 3000 });
       } catch (e) {
-        // Sometimes it's already started, just reset state
+        console.error("Failed to start recognition:", e);
+        // If already started, just update UI
         setIsRecording(true);
       }
     }
