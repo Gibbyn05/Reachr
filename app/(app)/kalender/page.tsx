@@ -35,28 +35,32 @@ export default function KalenderPage() {
     };
   }, []);
 
-  const startSpeechRecognition = () => {
+  const startSpeechRecognition = (isInitial = true) => {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SpeechRecognition) {
       toast.error("Nettleseren din støtter ikke tale-til-tekst. Prøv Chrome.");
       return;
     }
 
-    if (recognitionRef.current) {
+    // Hindre flere aktive sesjoner samtidig
+    if (isInitial && recognitionRef.current) {
         stopAndCleanup();
     }
 
     try {
       const rec = new SpeechRecognition();
-      rec.continuous = false; // "False" er ofte mer stabilt enn "True" på Mac fordi den lukker sesjonen naturlig
+      rec.continuous = false; 
       rec.interimResults = true;
       rec.lang = "nb-NO";
 
       let sessionTranscript = "";
 
       rec.onstart = () => {
-        setIsRecording(true);
-        isRecordingRef.current = true;
+        if (isInitial) {
+            setIsRecording(true);
+            isRecordingRef.current = true;
+            toast.info("Lytter... (V9)", { duration: 2000 });
+        }
       };
 
       rec.onresult = (event: any) => {
@@ -69,41 +73,38 @@ export default function KalenderPage() {
           }
         }
         setTranscribedText(currentNotes => {
-            // Vi lagrer den akkumulerte teksten i en ref eller state
-            // Her bruker vi en enkel tilnærming som bare oppdaterer boksen
             return sessionTranscript + interim;
         });
       };
 
       rec.onerror = (event: any) => {
-        console.warn("STT Error (V8):", event.error);
         if (event.error === "not-allowed") {
           toast.error("Mangler tilgang til mikrofon.");
           stopAndCleanup();
         }
-        // Vi lar onend håndtere restart hvis det er network/no-speech
+        // Andre feil (som network) håndteres av onend restart-logikk
       };
 
       rec.onend = () => {
-        // Hvis vi skal fortsette å lytte, start en ny sesjon med en liten pause
-        // slik at lydkortet rekker å 'puste'
-        if (isRecordingRef.current) {
+        // KRITISK: Sjekk at denne instansen (rec) faktisk er den som er "aktiv" i ref-en
+        // Hvis ikke, er dette en gammel sesjon som dør ut, og vi skal ikke restarte fra den.
+        if (isRecordingRef.current && recognitionRef.current === rec) {
           setTimeout(() => {
             if (isRecordingRef.current) {
+                // Vi nullstiller ref-en her slik at startSpeechRecognition slipper gjennom
                 recognitionRef.current = null;
-                startSpeechRecognition();
+                startSpeechRecognition(false); // false = ikke vis Toast på nytt
             }
-          }, 250);
-        } else {
+          }, 300);
+        } else if (!isRecordingRef.current) {
           stopAndCleanup();
         }
       };
 
       recognitionRef.current = rec;
       rec.start();
-      if (!isRecording) toast.info("Lytter... (V8)", { duration: 2000 });
     } catch (e) {
-      console.error("STT Crash:", e);
+      console.error("STT Session Start Error:", e);
       stopAndCleanup();
     }
   };
@@ -123,7 +124,7 @@ export default function KalenderPage() {
       toast.success("Opptak avsluttet.");
     } else {
       setTranscribedText("");
-      startSpeechRecognition();
+      startSpeechRecognition(true);
     }
   };
 
