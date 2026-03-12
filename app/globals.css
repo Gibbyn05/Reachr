@@ -112,9 +112,9 @@ html.dark {
   --bg-page: #0a0a0a;
   --bg-card: #141414;
   --bg-card-alt: #1a1a1a;
-  --text-primary: #f5f5f5;
-  --text-secondary: #d4d4d4;
-  --text-muted: #a3a3a3;
+  --text-primary: #ffffff;
+  --text-secondary: #e5e5e5;
+  --text-muted: #d1d1d1;
   --rc-border: #262626;
   --sidebar-bg: #000000;
   --topbar-bg: #141414;
@@ -133,6 +133,18 @@ body { background-color: var(--bg-page); color: var(--text-primary); transition:
 .hover\:bg-\[\#e8e4d8\]:hover { background-color: var(--btn-ghost-hover) !important; }
 .bg-\[\#f0ece0\] { background-color: var(--bg-card-alt) !important; }
 
+/* Better contrast for secondary text in cards */
+html.dark .text-gray-500, 
+html.dark .text-slate-500,
+html.dark .text-zinc-500 {
+  color: var(--text-muted) !important;
+}
+
+html.dark .text-gray-400,
+html.dark .text-slate-400 {
+  color: #a3a3a3 !important;
+}
+
 /* Sidebar stays dark mostly, but we can refine it */
 html.dark .bg-\[\#171717\] { background-color: var(--sidebar-bg) !important; }
 
@@ -146,5 +158,6 @@ html.dark select {
 
 /* Modal specific fixes */
 html.dark .fixed.inset-0.bg-black\/50 { background-color: rgba(0, 0, 0, 0.8) !important; }
+
 
 

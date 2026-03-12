@@ -21,6 +21,7 @@ import {
   Plus
 } from "lucide-react";
 import { useAppStore } from "@/store/app-store";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -36,12 +37,45 @@ interface Email {
 }
 
 export default function InboxPage() {
+  const router = useRouter();
   const { leads } = useAppStore();
   const [emails, setEmails] = useState<Email[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [search, setSearch] = useState("");
   const [selectedEmail, setSelectedEmail] = useState<Email | null>(null);
+  const [starredIds, setStarredIds] = useState<Set<string>>(new Set());
+
+  const handleStar = (id: string, e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    setStarredIds(prev => {
+      const next = new Set(prev);
+      const isStarred = next.has(id);
+      if (isStarred) {
+        next.delete(id);
+        toast.success("Fjernet stjerne");
+      } else {
+        next.add(id);
+        toast.success("Markert med stjerne");
+      }
+      return next;
+    });
+  };
+
+  const handleDelete = (id: string, e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    setEmails(prev => prev.filter(email => email.id !== id));
+    if (selectedEmail?.id === id) setSelectedEmail(null);
+    toast.success("E-post slettet");
+  };
+
+  const handleViewProfile = (leadId: string) => {
+    router.push(`/mine-leads?id=${leadId}`);
+  };
+
+  const handleReply = () => {
+    toast.info("Svar-funksjonalitet kommer snart! Foreløpig kan du svare direkte fra Gmail/Outlook.");
+  };
 
   const fetchEmails = async (isRefresh = false) => {
     setLoading(true);
@@ -154,12 +188,17 @@ export default function InboxPage() {
                     <p className="text-xs text-[#a09b8f] line-clamp-2 leading-relaxed">
                       {email.snippet}
                     </p>
-                    {lead && (
-                      <div className="mt-2 flex items-center gap-1.5 px-2 py-0.5 bg-[#09fe94]/10 rounded-full w-fit">
-                        <Sparkles className="w-3 h-3 text-[#05c472]" />
-                        <span className="text-[10px] font-bold text-[#05c472]">Lead: {lead.name}</span>
-                      </div>
-                    )}
+                    <div className="mt-2 flex items-center gap-2">
+                      {lead && (
+                        <div className="flex items-center gap-1.5 px-2 py-0.5 bg-[#09fe94]/10 rounded-full w-fit">
+                          <Sparkles className="w-3 h-3 text-[#05c472]" />
+                          <span className="text-[10px] font-bold text-[#05c472]">Lead: {lead.name}</span>
+                        </div>
+                      )}
+                      {starredIds.has(email.id) && (
+                        <Star className="w-3.5 h-3.5 text-yellow-500 fill-current" />
+                      )}
+                    </div>
                   </button>
                 );
               })
@@ -194,8 +233,22 @@ export default function InboxPage() {
                     </div>
                   </div>
                   <div className="flex gap-2">
-                    <Button variant="outline" size="sm" className="bg-white border-[#d8d3c5]"><Star className="w-4 h-4" /></Button>
-                    <Button variant="outline" size="sm" className="bg-white border-[#d8d3c5]"><Trash2 className="w-4 h-4" /></Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className={`bg-white border-[#d8d3c5] ${starredIds.has(selectedEmail.id) ? "text-yellow-500" : ""}`}
+                      onClick={() => handleStar(selectedEmail.id)}
+                    >
+                      <Star className={`w-4 h-4 ${starredIds.has(selectedEmail.id) ? "fill-current" : ""}`} />
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="bg-white border-[#d8d3c5] text-red-500 hover:bg-red-50"
+                      onClick={() => handleDelete(selectedEmail.id)}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
                   </div>
                 </div>
 
@@ -215,7 +268,7 @@ export default function InboxPage() {
                           </div>
                         </div>
                         <div className="flex gap-2">
-                           <Button variant="secondary" size="sm" onClick={() => toast.info("Åpner CRM-profil...")}>
+                           <Button variant="secondary" size="sm" onClick={() => handleViewProfile(lead.id)}>
                               Se lead profil <ChevronRight className="w-4 h-4 ml-1" />
                            </Button>
                         </div>
@@ -250,11 +303,11 @@ export default function InboxPage() {
 
               {/* Action Floating Bar */}
               <div className="p-4 border-t border-[#e8e4d8] bg-white flex items-center justify-center gap-3 sticky bottom-0">
-                  <Button variant="primary" className="bg-[#09fe94] text-black font-bold h-11 px-8">
+                  <Button variant="primary" className="bg-[#09fe94] text-black font-bold h-11 px-8" onClick={handleReply}>
                      <Reply className="w-4 h-4 mr-2" />
                      Svar på e-post
                   </Button>
-                  <Button variant="outline" className="border-[#d8d3c5] h-11 px-8">
+                  <Button variant="outline" className="border-[#d8d3c5] h-11 px-8" onClick={handleReply}>
                      <Send className="w-4 h-4 mr-2" />
                      Videresend
                   </Button>

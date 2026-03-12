@@ -1,6 +1,7 @@
 "use client";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, Suspense } from "react";
 import { TopBar } from "@/components/layout/top-bar";
+import { useSearchParams } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -692,7 +693,8 @@ function LeadRow({
   return (
     <>
       <tr
-        className="hover:bg-[#f0ece0] transition-colors cursor-pointer"
+        id={`lead-${lead.id}`}
+        className="hover:bg-[#f0ece0] transition-colors cursor-pointer scroll-mt-24"
         onClick={() => setExpanded(!expanded)}
       >
         {/* Name */}
@@ -1247,8 +1249,26 @@ function LeadRow({
   );
 }
 
-export default function MineLeadsPage() {
+function MineLeadsContent() {
   const { leads, loadLeads, addLead, updateLeadStatus: updateLeadStatusRaw, updateLeadNotes, updateLeadAssigned, updateLeadLastContacted, removeLead, meetingDates, setMeetingDate, currentUser, pipelineStages } = useAppStore();
+  const searchParams = useSearchParams();
+  const highlightId = searchParams.get("id");
+
+  useEffect(() => {
+    if (highlightId && leads.length > 0) {
+      setTimeout(() => {
+        const el = document.getElementById(`lead-${highlightId}`);
+        if (el) {
+          el.scrollIntoView({ behavior: "smooth", block: "center" });
+          el.classList.add("bg-[#09fe94]/10");
+          setTimeout(() => el.classList.remove("bg-[#09fe94]/10"), 4000);
+          // Auto-expand if the lead row supports it?
+          // Since we can't easily trigger the state of the child without refs,
+          // usually just scrolling and highlighting is enough.
+        }
+      }, 500);
+    }
+  }, [highlightId, leads]);
 
   const updateLeadStatus = async (id: string, status: string) => {
     // If changing to "Kunde", show celebration
@@ -1621,5 +1641,19 @@ export default function MineLeadsPage() {
         </div>
       </div>
     </div>
+  );
+}
+export default function MineLeadsPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-[#f2efe3]">
+        <div className="flex flex-col items-center gap-3">
+          <Loader2 className="w-8 h-8 animate-spin text-[#09fe94]" />
+          <p className="text-sm font-medium text-[#6b6660]">Laster dine leads...</p>
+        </div>
+      </div>
+    }>
+      <MineLeadsContent />
+    </Suspense>
   );
 }
