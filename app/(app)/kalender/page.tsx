@@ -41,47 +41,63 @@ export default function KalenderPage() {
       return;
     }
 
+    if (recognitionRef.current) {
+        try { recognitionRef.current.abort(); } catch(e) {}
+    }
+
     const rec = new SpeechRecognition();
-    rec.continuous = true;
+    rec.continuous = false; // Bytte til false + manuelt restart-loop er ofte mer stabilt enn true
     rec.interimResults = true;
     rec.lang = "nb-NO";
 
+    let finalTranscript = transcribedText;
+
     rec.onresult = (event: any) => {
-      const fullTranscript = Array.from(event.results)
-        .map((res: any) => res[0].transcript)
-        .join(" ");
-      setTranscribedText(fullTranscript);
+      let interimTranscript = "";
+      for (let i = event.resultIndex; i < event.results.length; ++i) {
+        if (event.results[i].isFinal) {
+          finalTranscript += event.results[i][0].transcript + " ";
+        } else {
+          interimTranscript += event.results[i][0].transcript;
+        }
+      }
+      setTranscribedText(finalTranscript + interimTranscript);
     };
 
     rec.onerror = (event: any) => {
       console.error("Speech Recognition Error:", event.error);
       
       if (event.error === "network") {
-        toast.error("Nettverks-problem (V3): Tale-til-tekst mistet forbindelsen. Sjekk internett og prøv på nytt.");
-        console.warn("STT Network error - clean cleanup.");
+        console.warn("STT Network error - will attempt restart.");
+        // Vi logger ikke feil lenger her her, vi bare prøver å fortsette i onend
       } else if (event.error === "not-allowed") {
         toast.error("Mangler tilgang: Du må tillate mikrofonen i nettleseren.");
-      } else if (event.error !== "no-speech") {
-        toast.error(`Mic-feil (${event.error})`);
+        setIsRecording(false);
+      } else if (event.error === "aborted") {
+          console.log("STT aborted manually");
+      } else {
+        console.warn("STT error:", event.error);
       }
-      
-      setIsRecording(false);
-      if (recognitionRef.current) {
-        try { recognitionRef.current.abort(); } catch(e) {}
-      }
-      recognitionRef.current = null;
     };
 
     rec.onend = () => {
-      setIsRecording(false);
-      recognitionRef.current = null;
+      // Hvis vi fortsatt skal ta opp, start en ny instans umiddelbart
+      if (isRecording && recognitionRef.current === rec) {
+          console.log("Restarting STT session for stability...");
+          startSpeechRecognition();
+      } else {
+          setIsRecording(false);
+          recognitionRef.current = null;
+      }
     };
 
     try {
       rec.start();
       recognitionRef.current = rec;
-      setIsRecording(true);
-      toast.info("Lytter nå... Snakk i vei!", { duration: 3000 });
+      if (!isRecording) {
+          setIsRecording(true);
+          toast.info("Lytter... (V4)", { duration: 2000 });
+      }
     } catch (e) {
       console.error("Failed to start speech recognition:", e);
       setIsRecording(false);
@@ -90,10 +106,11 @@ export default function KalenderPage() {
 
   const toggleRecording = () => {
     if (isRecording) {
+      setIsRecording(false);
       if (recognitionRef.current) {
         recognitionRef.current.stop();
+        recognitionRef.current = null;
       }
-      setIsRecording(false);
       toast.success("Opptak avsluttet.");
     } else {
       setTranscribedText("");
