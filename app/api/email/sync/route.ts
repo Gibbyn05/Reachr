@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createServiceClient } from "@/lib/supabase/server";
+import { createClient, createServiceClient } from "@/lib/supabase/server";
 
 async function refreshGoogleToken(refreshToken: string) {
   const res = await fetch("https://oauth2.googleapis.com/token", {
@@ -31,14 +31,16 @@ async function refreshMicrosoftToken(refreshToken: string) {
 }
 
 export async function POST(req: NextRequest) {
-  const db = createServiceClient();
-  const { data: { user } } = await db.auth.getUser();
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) {
     return NextResponse.json({ error: "Ikke autorisert" }, { status: 401 });
   }
 
+  const db = createServiceClient();
   try {
+
     const { data: connections } = await db
       .from("email_connections")
       .select("*")

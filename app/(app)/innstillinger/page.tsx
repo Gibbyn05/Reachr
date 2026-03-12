@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAppStore } from "@/store/app-store";
 import { createClient } from "@/lib/supabase/client";
+import { toast } from "sonner";
 import {
   User,
   Users,
@@ -392,10 +393,10 @@ export default function InnstillingerPage() {
       if (res.ok) {
         setTeamMembers(prev => prev.filter(m => m.member_email !== memberEmail));
       } else {
-        alert("Kunne ikke fjerne medlemmet.");
+        toast.error("Kunne ikke fjerne medlemmet.");
       }
     } catch {
-      alert("Nettverksfeil. Sjekk tilkoblingen.");
+      toast.error("Nettverksfeil. Sjekk tilkoblingen.");
     } finally {
       setRemovingMember(null);
     }
@@ -449,7 +450,7 @@ export default function InnstillingerPage() {
               <button onClick={() => setShowPlanModal(false)} className="flex-1 py-2.5 border border-[#d8d3c5] rounded-xl text-sm font-semibold text-[#6b6660] hover:bg-[#e8e4d8]">Avbryt</button>
               <button
                 onClick={() => {
-                  alert(`Plan endret til ${selectedPlan}!`);
+                  toast.success(`Plan endret til ${selectedPlan}!`);
                   setShowPlanModal(false);
                 }}
                 className="flex-1 py-2.5 bg-[#09fe94] text-[#171717] rounded-xl text-sm font-semibold hover:bg-[#00e882]"
@@ -905,10 +906,10 @@ export default function InnstillingerPage() {
                                 if (data.url) {
                                   window.location.href = data.url;
                                 } else {
-                                  alert("Kunne ikke åpne Stripe-portalen: " + (data.error || "Ukjent feil"));
+                                  toast.error("Kunne ikke åpne Stripe-portalen: " + (data.error || "Ukjent feil"));
                                 }
                               } catch (err: any) {
-                                alert("Nettverksfeil: " + err.message);
+                                toast.error("Nettverksfeil: " + err.message);
                               } finally {
                                 setOpeningPortal(false);
                               }

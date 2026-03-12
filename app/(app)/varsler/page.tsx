@@ -1,5 +1,6 @@
 "use client";
 import { useState, useMemo } from "react";
+import { toast } from "sonner";
 import { TopBar } from "@/components/layout/top-bar";
 import { Button } from "@/components/ui/button";
 import { useAppStore } from "@/store/app-store";
@@ -197,7 +198,7 @@ function NotifCard({
                     </button>
                   )
                 )}
-                <button onClick={() => alert("Utsatt til i morgen")}
+                <button onClick={() => toast.success("Utsatt til i morgen")}
                   className="p-1.5 rounded-lg text-[#a09b8f] hover:text-[#6b6660] hover:bg-[#e8e4d8] transition-all" title="Utsett">
                   <RotateCcw className="w-3.5 h-3.5" />
                 </button>

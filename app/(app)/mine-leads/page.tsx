@@ -1231,12 +1231,12 @@ export default function MineLeadsPage() {
       const res = await fetch("/api/email/sync", { method: "POST" });
       const data = await res.json();
       if (res.ok) {
-        alert(data.message || "E-poster synkronisert for svar!");
+        toast.success(data.message || "E-poster synkronisert for svar!");
       } else {
-        alert(data.error || "Ugyldig eller utløpt token, vennligst autentiser på nytt i Innstillinger.");
+        toast.error(data.error || "Ugyldig eller utløpt token, vennligst autentiser på nytt i Innstillinger.");
       }
     } catch {
-      alert("Feil under synkronisering med e-postleverandør.");
+      toast.error("Feil under synkronisering med e-postleverandør.");
     } finally {
       setIsSyncing(false);
     }
@@ -1334,9 +1334,9 @@ export default function MineLeadsPage() {
             // sequentially add to avoid overwhelming API immediately
             await addLead(newLead);
         }
-        alert("Leads importert suksessfullt!");
+        toast.success("Leads importert suksessfullt!");
       } catch (err) {
-        alert("En feil oppstod under import. Sjekk at CSV-filen er i riktig format.");
+        toast.error("En feil oppstod under import. Sjekk at CSV-filen er i riktig format.");
       } finally {
         setIsImporting(false);
         if (fileInputRef.current) fileInputRef.current.value = "";
