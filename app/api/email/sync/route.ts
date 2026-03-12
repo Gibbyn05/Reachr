@@ -105,8 +105,7 @@ export async function POST(req: NextRequest) {
 
       try {
         if (conn.provider === "gmail") {
-          // Changed query to be more inclusive but still unread
-          const q = encodeURIComponent("label:unread");
+          const q = encodeURIComponent("is:unread");
           const listRes = await fetch(`https://gmail.googleapis.com/gmail/v1/users/me/messages?q=${q}&maxResults=15`, {
             headers: { Authorization: `Bearer ${accessToken}` }
           });
@@ -123,7 +122,6 @@ export async function POST(req: NextRequest) {
               if (detailRes.ok) {
                 const detail = await detailRes.json();
                 const headers = detail.payload.headers;
-                // Get From header case-insensitively
                 const fromHeader = headers.find((h: any) => h.name.toLowerCase() === "from")?.value || "";
                 const match = fromHeader.match(/<(.+)>|(\S+@\S+)/);
                 const email = (match ? (match[1] || match[2]) : fromHeader).toLowerCase().trim();
@@ -134,6 +132,8 @@ export async function POST(req: NextRequest) {
                 }
               }
             }
+          } else if (listRes.status === 403) {
+            apiDiagnostics.push("Gmail: Mangler tilgang (vennligst koble til på nytt i innstillinger)");
           } else {
             apiDiagnostics.push(`Gmail API feil: ${listRes.status}`);
           }
