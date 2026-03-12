@@ -20,6 +20,7 @@ export default function KalenderPage() {
   const [leadSearch, setLeadSearch] = useState("");
   const recognitionRef = useRef<any>(null);
   const isRecordingRef = useRef(false);
+  const lastStartTimeRef = useRef(0);
 
   const filteredLeadsForSelect = leads.filter(l => 
     l.name.toLowerCase().includes(leadSearch.toLowerCase()) ||
@@ -42,7 +43,6 @@ export default function KalenderPage() {
       return;
     }
 
-    // Hindre flere samtidige start-forsøk
     if (recognitionRef.current) return;
 
     try {
@@ -51,68 +51,68 @@ export default function KalenderPage() {
       rec.interimResults = true;
       rec.lang = "nb-NO";
 
-      // Bruk en stabil referanse for å unngå tekst-tap
       let lastFinalText = transcribedText;
 
       rec.onstart = () => {
-        console.log("STT OnStart");
         setIsRecording(true);
         isRecordingRef.current = true;
+        lastStartTimeRef.current = Date.now();
       };
 
       rec.onresult = (event: any) => {
         let interim = "";
         let final = "";
-        
         for (let i = event.resultIndex; i < event.results.length; ++i) {
           const transcript = event.results[i][0].transcript;
-          if (event.results[i].isFinal) {
-            final += transcript + " ";
-          } else {
-            interim += transcript;
-          }
+          if (event.results[i].isFinal) final += transcript + " ";
+          else interim += transcript;
         }
-        
-        if (final) {
-           lastFinalText += final;
-        }
+        if (final) lastFinalText += final;
         setTranscribedText(lastFinalText + interim);
       };
 
       rec.onerror = (event: any) => {
-        console.warn("STT Error (V10):", event.error);
+        const duration = Date.now() - lastStartTimeRef.current;
+        console.warn(`STT Error: ${event.error} (after ${duration}ms)`);
+        
         if (event.error === "not-allowed") {
-          toast.error("Mangler tilgang til mikrofon.");
-          stopAndCleanup();
+          toast.error("Mikrofontilgang nektet. Sjekk hengelåsen i adressefeltet.");
+          isRecordingRef.current = false;
+        } else if (event.error === "audio-capture") {
+          toast.error("Kunne ikke finne mikrofon. Er den koblet til?");
+          isRecordingRef.current = false;
+        } else if (duration < 2000) {
+          // Hvis den feiler umiddelbart, er det ofte en hardware-konflikt
+          console.error("Hardware/System error detected");
+          isRecordingRef.current = false;
         }
-        // Network/no-speech feil håndteres av onend
       };
 
       rec.onend = () => {
-        console.log("STT OnEnd");
-        // Hvis vi skal fortsette (isRecordingRef er true), men instansen er ferdig
-        // Prøv en rolig restart etter 1 sekund for å unngå flimmer-vulkaner
-        if (isRecordingRef.current && recognitionRef.current === rec) {
+        const duration = Date.now() - lastStartTimeRef.current;
+        
+        // Hvis den har gått i mindre enn 3 sekunder, er det noe galt.
+        // Vi stopper loopen for å unngå flimmer.
+        if (isRecordingRef.current && duration > 3000 && recognitionRef.current === rec) {
            recognitionRef.current = null;
            setTimeout(() => {
-             if (isRecordingRef.current) {
-               startSpeechRecognition();
-             }
-           }, 1000);
+             if (isRecordingRef.current) startSpeechRecognition();
+           }, 500);
         } else {
-            stopAndCleanup();
+           if (isRecordingRef.current && duration <= 3000) {
+             toast.error("Opptaket stoppet uventet. Prøv å sjekke om andre apper bruker mikrofonen.");
+           }
+           stopAndCleanup();
         }
       };
 
       recognitionRef.current = rec;
       rec.start();
-      
-      // Kun vis toast første gang vi starter
       if (transcribedText === "") {
-          toast.info("Lytter... (V10)", { duration: 2500 });
+          toast.info("Lytter... (V11)", { duration: 2500 });
       }
     } catch (e) {
-      console.error("STT Failed:", e);
+      console.error("STT Crash:", e);
       stopAndCleanup();
     }
   };
