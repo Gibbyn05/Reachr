@@ -42,17 +42,24 @@ export default function KalenderPage() {
     
     // Task: Meetings today or upcoming
     const meetingDate = meetingDates[lead.id];
-    if (meetingDate && lead.status === "Booket møte") {
-      const isToday = meetingDate.startsWith(todayStr);
-      leadTasks.push({
-        id: `meet-${lead.id}`,
-        type: "meeting",
-        title: `Møte med ${lead.contactPerson || "kontaktperson"}`,
-        leadName: lead.name,
-        time: meetingDate.split("T")[1]?.substring(0, 5) || "Tidspunkt ukjent",
-        isToday,
-        leadId: lead.id,
-      });
+    if (meetingDate && (lead.status === "Booket møte" || lead.status === "Kunde")) {
+      const d = new Date(meetingDate);
+      if (!isNaN(d.getTime())) {
+        const isToday = d.toISOString().split("T")[0] === todayStr;
+        const timeStr = d.toLocaleTimeString("nb-NO", { hour: "2-digit", minute: "2-digit" });
+        const dateStr = d.toLocaleDateString("nb-NO", { day: "numeric", month: "short" });
+        
+        leadTasks.push({
+          id: `meet-${lead.id}`,
+          type: "meeting",
+          title: `Møte med ${lead.contactPerson || "kontaktperson"}`,
+          leadName: lead.name,
+          time: isToday ? timeStr : `${dateStr}, ${timeStr}`,
+          isToday,
+          leadId: lead.id,
+          fullDate: d
+        });
+      }
     }
 
     // Task: Follow up on "Kontaktet - ikke svar" after 2 days
@@ -203,6 +210,31 @@ export default function KalenderPage() {
                   <CalendarDays className="w-4 h-4 text-[#09fe94]" />
                   Opprett eget møte
                 </button>
+              </div>
+            </div>
+
+            <div className="bg-[#faf8f2] border border-[#d8d3c5] rounded-xl p-6 shadow-sm">
+              <h3 className="font-bold mb-4 text-[#171717] flex items-center gap-2">
+                <CalendarDays className="w-5 h-5 text-purple-500" />
+                Kommende møter
+              </h3>
+              <div className="space-y-4">
+                {tasks.filter(t => t.type === "meeting").length === 0 ? (
+                  <p className="text-xs text-[#a09b8f] italic">Ingen møter booket ennå.</p>
+                ) : (
+                  tasks
+                    .filter(t => t.type === "meeting")
+                    .sort((a, b) => (a.fullDate?.getTime() || 0) - (b.fullDate?.getTime() || 0))
+                    .map(meeting => (
+                      <div key={meeting.id} className="flex flex-col gap-1 p-3 bg-purple-50 border border-purple-100 rounded-lg">
+                        <p className="text-xs font-bold text-purple-900">{meeting.leadName}</p>
+                        <p className="text-[10px] text-purple-700 font-medium flex items-center gap-1">
+                          <Clock className="w-3 h-3" />
+                          {meeting.time}
+                        </p>
+                      </div>
+                    ))
+                )}
               </div>
             </div>
 

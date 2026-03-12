@@ -58,14 +58,13 @@ export async function POST(req: NextRequest) {
     // Get all leads for this user to match senders
     const { data: leads } = await db
       .from("leads")
-      .select("id, email, name, meeting_date")
+      .select("id, email, name, meeting_date, notes")
       .eq("user_email", user.email);
 
     if (!leads) return NextResponse.json({ success: true, message: "Ingen leads å sjekke mot." });
 
     const leadEmailMap = new Map(leads.map(l => [l.email?.toLowerCase().trim(), l]));
     const monitoredEmails = Array.from(leadEmailMap.keys());
-    console.log(`[Sync] Monitoring ${leads.length} leads. Leads with emails:`, monitoredEmails.length);
 
     let foundRepliesCount = 0;
     let totalUnreadMessagesSeen = 0;
@@ -152,6 +151,7 @@ export async function POST(req: NextRequest) {
           foundRepliesCount++;
           let status = "Kontaktet";
           let meetingDate = null;
+          let aiReason = "";
 
           if (process.env.ANTHROPIC_API_KEY) {
             try {
@@ -163,7 +163,7 @@ export async function POST(req: NextRequest) {
                 
                 Instrukser for tidsuthenting:
                 - "kl 17" betyr 17:00.
-                - "neste mandag" skal beregnes ut fra dagens dato (${now.toISOString().split('T')[0]}).
+                - "neste mandag" skal beregnes ut fra dagens dato.
                 - Bruk ISO format: YYYY-MM-DDTHH:mm.`,
                 messages: [{
                   role: "user", 
@@ -184,6 +184,7 @@ export async function POST(req: NextRequest) {
               if (analysis.isMeetingRequested) {
                 status = "Booket møte";
                 meetingDate = analysis.datetime;
+                aiReason = analysis.reason;
                 foundMeetingsCount++;
               }
             } catch (e) {
@@ -191,11 +192,27 @@ export async function POST(req: NextRequest) {
             }
           }
 
+          // Create Note
+          const nowStr = new Date().toLocaleString("nb-NO");
+          let newNoteContent = `Svar mottatt via e-post (${nowStr}):\n"${conv.snippet}"`;
+          
+          if (status === "Booket møte" && meetingDate) {
+            const displayDate = new Date(meetingDate).toLocaleString("nb-NO", {
+              day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit"
+            });
+            newNoteContent = `🎯 MØTE BOOKET (${nowStr})\n Foreslått tid: ${displayDate}\n Beskrivelse: ${aiReason}\n\nSvar: "${conv.snippet}"`;
+          }
+
+          const combinedNotes = lead.notes && lead.notes !== "—"
+            ? `${newNoteContent}\n\n---\n\n${lead.notes}`
+            : newNoteContent;
+
           // Update Lead
           await db.from("leads").update({ 
             status: status,
             meeting_date: meetingDate || lead.meeting_date,
-            last_contacted: new Date().toISOString()
+            last_contacted: new Date().toISOString(),
+            notes: combinedNotes
           }).eq("id", lead.id);
 
           // Stop sequence
@@ -206,6 +223,7 @@ export async function POST(req: NextRequest) {
         }
       }
     }
+
 
     if (foundRepliesCount > 0) {
       let msg = `Vellykket! Fant svar fra ${foundRepliesCount} leads.`;

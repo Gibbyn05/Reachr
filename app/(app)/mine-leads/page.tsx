@@ -602,6 +602,16 @@ function LeadRow({
     onNotesChange(lead.id, combined);
     setNotes(combined);
   };
+
+  const formatDT = (dt?: string) => {
+    if (!dt) return "";
+    try {
+      const d = new Date(dt);
+      if (isNaN(d.getTime())) return "";
+      return d.toISOString().slice(0, 16); // format for datetime-local: YYYY-MM-DDTHH:mm
+    } catch { return ""; }
+  };
+
   const [expanded, setExpanded] = useState(false);
   const [editingNotes, setEditingNotes] = useState(false);
   const [notes, setNotes] = useState(lead.notes);
@@ -959,7 +969,7 @@ function LeadRow({
                       </p>
                       <input
                         type="datetime-local"
-                        value={meetingDate || ""}
+                        value={formatDT(meetingDate)}
                         onChange={(e) => onMeetingDateSave(lead.id, e.target.value)}
                         className="text-sm border border-purple-200 rounded-lg px-2 py-1.5 text-purple-900 focus:outline-none focus:border-purple-400 bg-white w-full"
                       />
@@ -1241,6 +1251,7 @@ export default function MineLeadsPage() {
       const data = await res.json();
       if (res.ok) {
         toast.success(data.message || "E-poster synkronisert for svar!");
+        loadLeads(); // Oppdaterer leads slik at nye notater og status vises
       } else {
         toast.error(data.error || "Ugyldig eller utløpt token, vennligst autentiser på nytt i Innstillinger.");
       }
