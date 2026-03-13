@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    body {
+      width: 300px;
+      padding: 16px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: #f2efe3;
+      color: #171717;
+    }
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .logo { width: 24px; height: 24px; }
+    .title { font-weight: bold; font-size: 16px; }
+    .card {
+      background: white;
+      border: 1px border #d8d3c5;
+      padding: 12px;
+      border-radius: 12px;
+      margin-bottom: 16px;
+    }
+    .label { font-size: 10px; color: #a09b8f; text-transform: uppercase; font-weight: bold; }
+    .value { font-size: 13px; margin-bottom: 8px; }
+    button {
+      width: 100%;
+      padding: 10px;
+      background-color: #09fe94;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      color: #171717;
+      transition: background 0.2s;
+    }
+    button:hover { background-color: #00e882; }
+    button:disabled { background-color: #e8e4d8; cursor: not-allowed; }
+    .status { font-size: 12px; text-align: center; margin-top: 8px; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <img src="https://www.reachr.no/logo.svg" class="logo">
+    <span class="title">Reachr Lead</span>
+  </div>
+
+  <div id="loading" class="status">Henter profil-data...</div>
+
+  <div id="content" style="display:none">
+    <div class="card">
+      <div class="label">Navn</div>
+      <div id="name" class="value"></div>
+      
+      <div class="label">Tittel</div>
+      <div id="title" class="value"></div>
+      
+      <div class="label">Bedrift</div>
+      <div id="company" class="value"></div>
+    </div>
+
+    <button id="addBtn">Legg til i Reachr</button>
+  </div>
+
+  <div id="statusMsg" class="status"></div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

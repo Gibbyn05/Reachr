@@ -35,15 +35,55 @@ export async function sendEmail({
   to,
   subject,
   body,
-  provider
+  provider,
+  leadId,
+  sequenceId,
+  stepId
 }: {
   ownerEmail: string;
   to: string;
   subject: string;
   body: string;
   provider: "gmail" | "outlook";
+  leadId?: string;
+  sequenceId?: string;
+  stepId?: string;
 }) {
   const db = createServiceClient();
+  const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://www.reachr.no";
+
+  // 1. Create email log
+  const { data: log, error: logErr } = await db.from("email_logs").insert({
+    user_email: ownerEmail,
+    lead_id: leadId,
+    recipient_email: to,
+    subject: subject,
+    sequence_id: sequenceId,
+    step_id: stepId
+  }).select("id").single();
+
+  if (logErr) console.error("Could not create email log:", logErr);
+  const logId = log?.id;
+
+  // 2. Prepare HTML body with tracking
+  let htmlBody = body.replace(/\n/g, "<br />");
+
+  if (logId) {
+    // Wrap links
+    const linkRegex = /<a\s+(?:[^>]*?\s+)?href=(["'])(.*?)\1/gi;
+    htmlBody = htmlBody.replace(linkRegex, (match, quote, url) => {
+      if (url.startsWith("http")) {
+        const trackedUrl = `${APP_URL}/api/tracking/click/${logId}?url=${encodeURIComponent(url)}`;
+        return match.replace(url, trackedUrl);
+      }
+      return match;
+    });
+
+    // Also find plain text URLs and wrap them? No, let's stick to <a> for now.
+    
+    // Inject open tracking pixel
+    htmlBody += `<img src="${APP_URL}/api/tracking/open/${logId}" width="1" height="1" style="display:none !important;" alt="" />`;
+  }
   const { data: conn } = await db
     .from("email_connections")
     .select("*")
@@ -79,10 +119,10 @@ export async function sendEmail({
       `To: ${to}`,
       `Subject: =?UTF-8?B?${Buffer.from(subject).toString("base64")}?=`,
       "MIME-Version: 1.0",
-      "Content-Type: text/plain; charset=UTF-8",
+      "Content-Type: text/html; charset=UTF-8",
       "Content-Transfer-Encoding: base64",
       "",
-      Buffer.from(body).toString("base64"),
+      Buffer.from(htmlBody).toString("base64"),
     ];
     const raw = Buffer.from(emailLines.join("\r\n"))
       .toString("base64")
@@ -114,7 +154,7 @@ export async function sendEmail({
       body: JSON.stringify({
         message: {
           subject,
-          body: { contentType: "Text", content: body },
+          body: { contentType: "HTML", content: htmlBody },
           toRecipients: [{ emailAddress: { address: to } }],
         },
         saveToSentItems: true,

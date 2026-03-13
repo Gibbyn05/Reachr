@@ -9,11 +9,13 @@ import {
   Contact, BarChart3, CalendarCheck2, ShieldCheck, Search, ChevronDown,
   X, Phone, Inbox, MessageSquareText, ChevronRight, Trash2,
   UserCheck, Clock, Building2, BellRing, Check, Loader2, Sparkles, Send, Copy, ExternalLink,
-  FileUp, FileDown, RefreshCw, Layers, CheckCircle2
+  FileUp, FileDown, RefreshCw, Layers, CheckCircle2,
+  MousePointer2, Eye
 } from "lucide-react";
 import { useAppStore } from "@/store/app-store";
 import { Lead, LeadStatus } from "@/lib/mock-data";
 import { toast } from "sonner";
+import { ActivityTimeline } from "@/components/leads/activity-timeline";
 
 /* ── Meeting date modal ───────────────────────────────────── */
 function MeetingDateModal({
@@ -636,6 +638,19 @@ function LeadRow({
   const [reminderSending, setReminderSending] = useState(false);
   const [reminderSent, setReminderSent] = useState(false);
   const [findingEmail, setFindingEmail] = useState(false);
+  const [activities, setActivities] = useState<any[]>([]);
+  const [loadingActivities, setLoadingActivities] = useState(false);
+
+  useEffect(() => {
+    if (expanded) {
+      setLoadingActivities(true);
+      fetch(`/api/leads/${lead.id}/activities`)
+        .then(r => r.json())
+        .then(data => setActivities(Array.isArray(data) ? data : []))
+        .catch(() => setActivities([]))
+        .finally(() => setLoadingActivities(false));
+    }
+  }, [expanded, lead.id]);
 
   const openStatusDropdown = () => {
     const rect = statusBtnRef.current?.getBoundingClientRect();
@@ -1047,6 +1062,20 @@ function LeadRow({
                     >
                       {notes || <span className="italic text-gray-400">Klikk for å legge til notater…</span>}
                     </div>
+                  )}
+                </div>
+
+                {/* Activity Timeline */}
+                <div className="sm:col-span-1">
+                  <p className="text-xs font-semibold text-[#a09b8f] uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                    <Clock className="w-3.5 h-3.5" /> Aktivitet
+                  </p>
+                  {loadingActivities ? (
+                    <div className="flex items-center justify-center py-8">
+                      <Loader2 className="w-5 h-5 animate-spin text-accent" />
+                    </div>
+                  ) : (
+                    <ActivityTimeline activities={activities} />
                   )}
                 </div>
 

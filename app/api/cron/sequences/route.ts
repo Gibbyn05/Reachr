@@ -65,6 +65,9 @@ export async function GET(req: NextRequest) {
         subject: step.subject,
         body,
         provider: (connection?.provider as any) ?? "gmail",
+        leadId: enrollment.lead_id,
+        sequenceId: enrollment.sequence_id,
+        stepId: step.id,
       });
 
       sent++;
