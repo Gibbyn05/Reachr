@@ -1,7 +1,8 @@
 "use client";
-import { Bell, Menu } from "lucide-react";
+import { Menu } from "lucide-react";
 import Link from "next/link";
 import { useAppStore } from "@/store/app-store";
+import { NotificationDropdown } from "../notifications/notification-dropdown";
 
 interface TopBarProps {
   title: string;
@@ -26,9 +27,7 @@ export function TopBar({ title, subtitle }: TopBarProps) {
         {subtitle && <p className="text-xs text-[#a09b8f] truncate">{subtitle}</p>}
       </div>
       <div className="flex items-center gap-3 shrink-0">
-        <Link href="/varsler" className="relative p-2 rounded-lg hover:bg-[#e8e4d8] transition-colors">
-          <Bell className="w-5 h-5 text-[#6b6660]" />
-        </Link>
+        <NotificationDropdown />
       </div>
     </header>
   );
