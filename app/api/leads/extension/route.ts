@@ -20,20 +20,26 @@ export async function POST(req: NextRequest) {
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     );
 
-    // Create the lead
+    // Create the lead — map LinkedIn data to the correct leads table columns:
+    // - lead.name = company/org name
+    // - contact_person = the actual person's name from LinkedIn
+    // - industry = their job title
+    // - notes = LinkedIn URL + context
     const { data, error } = await db
       .from("leads")
       .insert({
         user_email: user.email,
-        name: name || company || "Ny lead",
-        contact_person: name || "",
-        company: company || "",
+        name: company || name || "Ny lead",       // company name
+        contact_person: name || "—",              // person's name
         email: email || "—",
         phone: phone || "—",
-        industry: title || "Hentet fra LinkedIn",
+        industry: title || "—",                   // job title as industry
+        city: "—",
         status: "Ikke kontaktet",
-        notes: `Hentet via Chrome Extension fra ${linkedin_url || "LinkedIn"}`,
-        added_date: new Date().toISOString().split("T")[0]
+        notes: `Hentet fra LinkedIn${linkedin_url ? `: ${linkedin_url}` : ""}`,
+        added_date: new Date().toISOString().split("T")[0],
+        revenue: 0,
+        employees: 0,
       })
       .select()
       .single();
