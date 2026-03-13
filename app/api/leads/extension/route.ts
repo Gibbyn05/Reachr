@@ -28,6 +28,7 @@ export async function POST(req: NextRequest) {
     const { data, error } = await db
       .from("leads")
       .insert({
+        id: crypto.randomUUID(),
         user_email: user.email,
         name: company || name || "Ny lead",       // company name
         contact_person: name || "—",              // person's name
