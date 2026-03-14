@@ -24,13 +24,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     statusEl.style.display = 'none';
     document.getElementById('content').style.display = 'block';
 
-    document.getElementById('name').innerText     = response.name     || "—";
-    document.getElementById('company').innerText  = response.company  || "—";
-    document.getElementById('location').innerText = response.location || "—";
+    const setField = (id, val) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      const isEmpty = !val || val === "—";
+      el.innerText = isEmpty ? "Ikke funnet" : val;
+      el.className = isEmpty ? "value muted" : "value";
+    };
 
-    const linkedinLink = document.getElementById('linkedin-link');
-    linkedinLink.href        = response.linkedin_url || "#";
-    linkedinLink.innerText   = (response.linkedin_url || "").replace("https://www.", "").replace("https://", "");
+    setField('name',     response.name);
+    setField('company',  response.company);
+    setField('email',    response.email);
+    setField('phone',    response.phone);
+    setField('location', response.location);
 
     document.getElementById('addBtn').onclick = async () => {
       const addBtn = document.getElementById('addBtn');

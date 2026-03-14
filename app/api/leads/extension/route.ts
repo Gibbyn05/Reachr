@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { name, company, location, linkedin_url } = body;
+    const { name, company, location, email, phone, linkedin_url } = body;
 
     const db = createServiceClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -32,8 +32,8 @@ export async function POST(req: NextRequest) {
         user_email: user.email,
         name: company || name || "Ny lead",       // company name as lead name
         contact_person: name || "—",              // person's name
-        email: "—",
-        phone: "—",
+        email: (email && email !== "—") ? email : "—",
+        phone: (phone && phone !== "—") ? phone : "—",
         industry: "—",
         city: location || "—",
         status: "Ikke kontaktet",

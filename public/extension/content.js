@@ -1,115 +1,144 @@
-function scrapeLinkedIn() {
-  // ── NAME ─────────────────────────────────────────────────────
-  // LinkedIn page title is always "Firstname Lastname - Headline | LinkedIn"
-  let name = "";
+// Helper: wait for a DOM element to appear
+function waitForElement(selector, timeout = 3000) {
+  return new Promise((resolve) => {
+    const el = document.querySelector(selector);
+    if (el) return resolve(el);
+
+    const observer = new MutationObserver(() => {
+      const found = document.querySelector(selector);
+      if (found) {
+        observer.disconnect();
+        resolve(found);
+      }
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+    setTimeout(() => { observer.disconnect(); resolve(null); }, timeout);
+  });
+}
+
+// Helper: get text from first matching selector
+function getText(selectors) {
+  for (const sel of selectors) {
+    try {
+      const el = document.querySelector(sel);
+      if (el) {
+        const t = (el.innerText || el.textContent || "").trim();
+        if (t) return t;
+      }
+    } catch(e) {}
+  }
+  return "";
+}
+
+async function scrapeLinkedIn() {
+  // ── NAME (from page title — most reliable) ────────────────────
   const titleParts = document.title.split(/[|\-–]/);
-  if (titleParts.length >= 1) {
-    name = titleParts[0].trim().replace(/\s*\(.*?\)\s*/g, "").trim();
-  }
-  if (!name) {
-    name = (document.querySelector("h1")?.innerText || "").trim();
-  }
+  let name = titleParts[0]?.trim().replace(/\s*\(.*?\)\s*/g, "").trim() || "";
+  if (!name) name = getText(["h1"]);
 
-  // ── COMPANY ──────────────────────────────────────────────────
+  // ── COMPANY (find "Company · Role" dot-pattern lines) ─────────
   let company = "";
-
-  // Search text nodes for "Company · Role" patterns
-  const walker = document.createTreeWalker(
-    document.body,
-    NodeFilter.SHOW_TEXT,
-    null,
-    false
-  );
+  const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null, false);
   const dotLines = [];
   let node;
   while ((node = walker.nextNode())) {
-    const text = (node.nodeValue || "").trim();
-    if (
-      text.includes("·") &&
-      text.length > 2 &&
-      text.length < 100 &&
-      !text.includes("followers") &&
-      !text.includes("connections") &&
-      !text.includes("http")
-    ) {
-      dotLines.push(text);
+    const t = (node.nodeValue || "").trim();
+    if (t.includes("·") && t.length > 2 && t.length < 100 &&
+        !t.includes("followers") && !t.includes("connections") && !t.includes("http")) {
+      dotLines.push(t);
     }
   }
-  if (dotLines.length > 0) {
-    company = dotLines[0].split("·")[0].trim();
-  }
-
-  // Fallback: try h1 siblings/nearby paragraphs for employer mention
-  if (!company) {
-    const headline = titleParts[1]?.trim() || "";
-    const atMatch = headline.match(/(?:at|@|hos)\s+([A-Z][^\|\n·]{2,40})/i);
-    if (atMatch) company = atMatch[1].trim();
-  }
+  if (dotLines.length > 0) company = dotLines[0].split("·")[0].trim();
 
   // ── LOCATION ─────────────────────────────────────────────────
-  // LinkedIn shows "City, Region, Country" on the profile card
   let location = "";
-
-  // Common location selectors on LinkedIn profile page
-  const locCandidates = document.querySelectorAll(
-    ".pv-text-details__left-panel .text-body-small, " +
-    ".ph5 .mt2 span.text-body-small, " +
-    ".pv-top-card--list .pv-top-card--list-bullet"
-  );
-  for (const el of locCandidates) {
-    const text = (el.innerText || el.textContent || "").trim();
-    // Locations typically contain comma and are short
-    if (
-      text &&
-      text.length > 3 &&
-      text.length < 80 &&
-      !text.includes("followers") &&
-      !text.includes("connections") &&
-      !text.includes("·") &&
-      (text.includes(",") || text.match(/\b(nigeria|norway|usa|uk|germany|sweden|denmark|india|australia|canada)\b/i))
-    ) {
-      location = text;
+  const walker2 = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null, false);
+  let n2;
+  while ((n2 = walker2.nextNode())) {
+    const t = (n2.nodeValue || "").trim();
+    if (t.includes(",") && t.length > 4 && t.length < 60 &&
+        !t.includes("·") && !t.includes("@") && !t.includes("http") &&
+        !t.includes("followers") && /[A-Z]/.test(t)) {
+      location = t;
       break;
     }
   }
 
-  // Fallback: find text between name and first "·" line that looks like a location
-  if (!location) {
-    // Walk text and find short comma-separated strings
-    const walker2 = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null, false);
-    let n2;
-    while ((n2 = walker2.nextNode())) {
-      const t = (n2.nodeValue || "").trim();
-      if (
-        t.includes(",") &&
-        t.length > 4 &&
-        t.length < 60 &&
-        !t.includes("·") &&
-        !t.includes("@") &&
-        !t.includes("http") &&
-        !t.includes("followers") &&
-        /[A-Z]/.test(t)
-      ) {
-        location = t;
-        break;
+  // ── CONTACT INFO (click modal, scrape, close) ─────────────────
+  let email = "";
+  let phone = "";
+
+  try {
+    // Find the "Contact info" link/button — LinkedIn uses an <a> tag with this text
+    const contactBtn = [...document.querySelectorAll("a, button")].find(el => {
+      const t = (el.innerText || el.textContent || "").trim().toLowerCase();
+      return t === "contact info" || t === "kontaktinfo" || t === "vis kontaktinfo";
+    });
+
+    if (contactBtn) {
+      contactBtn.click();
+
+      // Wait for the modal to open
+      const modal = await waitForElement(
+        ".pv-contact-info, [data-test-modal], .artdeco-modal, section.ci-vanity-url",
+        3000
+      );
+
+      if (modal) {
+        await new Promise(r => setTimeout(r, 600)); // Let content render
+
+        // Scrape all text from modal
+        const modalText = modal.innerText || modal.textContent || "";
+        const modalLines = modalText.split("\n").map(l => l.trim()).filter(Boolean);
+
+        for (const line of modalLines) {
+          // Email pattern
+          if (!email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(line)) {
+            email = line;
+          }
+          // Phone: digits, spaces, +, (, ) — at least 7 chars
+          if (!phone && /^[\d\s\+\(\)\-]{7,20}$/.test(line)) {
+            phone = line;
+          }
+        }
+
+        // Also check for <a href="tel:..."> and <a href="mailto:...">
+        if (!phone) {
+          const telLink = modal.querySelector("a[href^='tel:']");
+          if (telLink) phone = telLink.href.replace("tel:", "").trim();
+        }
+        if (!email) {
+          const mailLink = modal.querySelector("a[href^='mailto:']");
+          if (mailLink) email = mailLink.href.replace("mailto:", "").trim();
+        }
+
+        // Close the modal
+        const closeBtn = modal.closest("[data-test-modal-container]")?.querySelector("[data-test-modal-close-btn], button[aria-label='Dismiss'], .artdeco-modal__dismiss");
+        if (closeBtn) closeBtn.click();
+        else {
+          // fallback: press Escape
+          document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", keyCode: 27, bubbles: true }));
+        }
       }
     }
+  } catch (e) {
+    console.warn("Reachr: Could not fetch contact info", e);
   }
-
-  // ── LINKEDIN URL ──────────────────────────────────────────────
-  const linkedinUrl = window.location.href;
 
   return {
     name:         name     || "—",
     company:      company  || "—",
     location:     location || "—",
-    linkedin_url: linkedinUrl,
+    email:        email    || "—",
+    phone:        phone    || "—",
+    linkedin_url: window.location.href,
   };
 }
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === "scrape") {
-    sendResponse(scrapeLinkedIn());
+    // Must return true for async response
+    scrapeLinkedIn().then(sendResponse);
+    return true;
   }
-  return true;
 });
