@@ -7,26 +7,30 @@ document.addEventListener('DOMContentLoaded', async () => {
     return;
   }
 
-  statusEl.innerText = "Henter profil-data...";
+  statusEl.innerText = "Henter info...";
 
-  // Give content script a moment to load if page just loaded
+  // Give content script a moment if page just loaded
   await new Promise(r => setTimeout(r, 500));
 
   try {
-    // Send message to already-injected content script (declared in manifest)
     const response = await chrome.tabs.sendMessage(tab.id, { action: "scrape" });
 
-    if (!response || (!response.name && !response.title)) {
-      statusEl.innerText = "Klarte ikke lese profil. Prøv å refreshe LinkedIn-siden.";
+    if (!response || response.name === "—") {
+      statusEl.innerText = "Klarte ikke lese profil. Refresh LinkedIn og prøv igjen.";
       return;
     }
 
     // Show content
     statusEl.style.display = 'none';
     document.getElementById('content').style.display = 'block';
-    document.getElementById('name').innerText    = response.name    || "—";
-    document.getElementById('title').innerText   = response.title   || "—";
-    document.getElementById('company').innerText = response.company || "—";
+
+    document.getElementById('name').innerText     = response.name     || "—";
+    document.getElementById('company').innerText  = response.company  || "—";
+    document.getElementById('location').innerText = response.location || "—";
+
+    const linkedinLink = document.getElementById('linkedin-link');
+    linkedinLink.href        = response.linkedin_url || "#";
+    linkedinLink.innerText   = (response.linkedin_url || "").replace("https://www.", "").replace("https://", "");
 
     document.getElementById('addBtn').onclick = async () => {
       const addBtn = document.getElementById('addBtn');
@@ -48,13 +52,13 @@ document.addEventListener('DOMContentLoaded', async () => {
           document.getElementById('statusMsg').style.color = "#008f52";
           addBtn.style.display = "none";
         } else {
-          document.getElementById('statusMsg').innerText = "❌ " + (data.error || "Noe gikk galt");
+          document.getElementById('statusMsg').innerText = "❌ " + (data.error || "Noe gikk galt. Logg inn på Reachr.");
           document.getElementById('statusMsg').style.color = "#ff470a";
           addBtn.disabled = false;
           addBtn.innerText = "Prøv igjen";
         }
       } catch (e) {
-        document.getElementById('statusMsg').innerText = "❌ Ikke tilkobling til Reachr. Logg inn og prøv igjen.";
+        document.getElementById('statusMsg').innerText = "❌ Kan ikke nå Reachr. Er du logget inn?";
         document.getElementById('statusMsg').style.color = "#ff470a";
         addBtn.disabled = false;
         addBtn.innerText = "Prøv igjen";
