@@ -785,9 +785,64 @@ function LeadRow({
           </div>
         </td>
 
-        {/* Notes preview */}
-        <td className="hidden lg:table-cell px-4 py-3.5 text-sm text-[#a09b8f] max-w-xs truncate">
-          {lead.notes || <span className="text-gray-300 italic">Ingen notater</span>}
+        {/* Notes preview + delete */}
+        <td className="hidden lg:table-cell px-4 py-3.5 text-sm text-[#a09b8f] max-w-xs" onClick={(e) => e.stopPropagation()}>
+          <div className="flex items-center justify-between gap-2">
+            <span className="truncate">{lead.notes || <span className="text-gray-300 italic">Ingen notater</span>}</span>
+            {confirmDelete ? (
+              <div className="flex items-center gap-1 shrink-0">
+                <span className="text-xs text-red-500 font-medium whitespace-nowrap">Sikker?</span>
+                <button
+                  onClick={() => onRemove(lead.id)}
+                  className="px-2 py-1 bg-red-500 text-white rounded text-xs font-semibold hover:bg-red-600"
+                >
+                  Ja
+                </button>
+                <button
+                  onClick={() => setConfirmDelete(false)}
+                  className="px-2 py-1 border border-[#d8d3c5] rounded text-xs text-[#6b6660] hover:bg-[#f0ece0]"
+                >
+                  Nei
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => setConfirmDelete(true)}
+                className="shrink-0 opacity-0 group-hover:opacity-100 p-1.5 rounded-lg text-[#a09b8f] hover:text-red-500 hover:bg-red-50 transition-all"
+                title="Fjern lead"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+              </button>
+            )}
+          </div>
+        </td>
+
+        {/* Delete button — visible on mobile/tablet where notes col is hidden */}
+        <td className="lg:hidden px-2 py-3.5" onClick={(e) => e.stopPropagation()}>
+          {confirmDelete ? (
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => onRemove(lead.id)}
+                className="px-2 py-1 bg-red-500 text-white rounded text-xs font-semibold hover:bg-red-600"
+              >
+                Slett
+              </button>
+              <button
+                onClick={() => setConfirmDelete(false)}
+                className="px-2 py-1 border border-[#d8d3c5] rounded text-xs text-[#6b6660]"
+              >
+                Nei
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={() => setConfirmDelete(true)}
+              className="p-1.5 rounded-lg text-[#d8d3c5] hover:text-red-500 hover:bg-red-50 transition-all"
+              title="Fjern lead"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+          )}
         </td>
       </tr>
 
@@ -827,7 +882,7 @@ function LeadRow({
       {/* Expanded detail panel */}
       {expanded && (
         <tr>
-          <td colSpan={7} className="bg-slate-50 border-b border-[#e8e4d8]" onClick={(e) => e.stopPropagation()}>
+          <td colSpan={8} className="bg-slate-50 border-b border-[#e8e4d8]" onClick={(e) => e.stopPropagation()}>
             <div className="px-6 py-5 space-y-5">
 
               {/* Quick status buttons */}
@@ -1769,6 +1824,7 @@ function MineLeadsContent() {
                   <th className="hidden md:table-cell px-4 py-3 text-left text-xs font-semibold text-[#6b6660] uppercase tracking-wider">Møtedato</th>
                   <th className="hidden md:table-cell px-4 py-3 text-left text-xs font-semibold text-[#6b6660] uppercase tracking-wider">Ansvarlig</th>
                   <th className="hidden lg:table-cell px-4 py-3 text-left text-xs font-semibold text-[#6b6660] uppercase tracking-wider">Notater</th>
+                  <th className="lg:hidden px-2 py-3"></th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
