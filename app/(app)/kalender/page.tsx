@@ -1,12 +1,24 @@
 "use client";
 import { TopBar } from "@/components/layout/top-bar";
 import { useAppStore } from "@/store/app-store";
-import { CalendarCheck2, CheckCircle2, Clock, Phone, Inbox, ArrowRight, User, Mic, Square, Search, Sparkles, BarChart3, Plus } from "lucide-react";
+import { CalendarCheck2, CheckCircle2, Clock, Phone, Inbox, ArrowRight, User, Mic, Square, Search, Sparkles, BarChart3, Plus, ExternalLink } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+
+function makeGoogleCalendarUrl(title: string, datetime: string): string {
+  const start = new Date(datetime);
+  const end = new Date(start.getTime() + 60 * 60000);
+  const fmt = (d: Date) => d.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
+  return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(title)}&dates=${fmt(start)}/${fmt(end)}`;
+}
+function makeOutlookCalendarUrl(title: string, datetime: string): string {
+  const start = new Date(datetime);
+  const end = new Date(start.getTime() + 60 * 60000);
+  return `https://outlook.live.com/calendar/0/deeplink/compose?subject=${encodeURIComponent(title)}&startdt=${start.toISOString()}&enddt=${end.toISOString()}&allday=false&path=%2Fcalendar%2Faction%2Fcompose`;
+}
 
 export default function KalenderPage() {
   const { currentUser, leads, meetingDates, updateLeadNotes } = useAppStore();
@@ -285,19 +297,30 @@ export default function KalenderPage() {
                            </div>
                         </div>
 
-                        <div className="flex items-center gap-4">
-                            <div className="text-right shrink-0">
-                               <span className={`text-[11px] font-black px-3 py-1.5 rounded-xl uppercase tracking-wider ${
-                                 task.type === "meeting" ? "bg-accent/10 text-accent-dark" : 
-                                 "bg-accent-danger/10 text-accent-danger"
-                               }`}>
-                                 {task.time}
-                               </span>
-                            </div>
+                        <div className="flex items-center gap-3 shrink-0">
+                            <span className={`text-[11px] font-black px-3 py-1.5 rounded-xl uppercase tracking-wider whitespace-nowrap ${
+                              task.type === "meeting" ? "bg-accent/10 text-accent-dark" :
+                              "bg-accent-danger/10 text-accent-danger"
+                            }`}>
+                              {task.time}
+                            </span>
 
-                           <div className="flex items-center gap-2 border-l border-[#e8e4d8] dark:border-[#262626] pl-4">
-                              <Link 
-                                href={`/mine-leads?id=${task.leadId}`} 
+                           <div className="flex items-center gap-1 border-l border-[#e8e4d8] dark:border-[#262626] pl-3">
+                              {task.type === "meeting" && meetingDates[task.leadId] && (
+                                <>
+                                  <a
+                                    href={makeGoogleCalendarUrl(`Møte med ${task.leadName}`, meetingDates[task.leadId])}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="hidden sm:flex w-8 h-8 items-center justify-center bg-[#faf8f2] dark:bg-[#202020] hover:bg-[#09fe94]/20 text-[#6b6660] hover:text-accent-dark rounded-xl transition-all duration-300 border border-[#e8e4d8]"
+                                    title="Legg til i Google Kalender"
+                                  >
+                                    <ExternalLink className="w-3.5 h-3.5" />
+                                  </a>
+                                </>
+                              )}
+                              <Link
+                                href={`/mine-leads?id=${task.leadId}`}
                                 className="w-10 h-10 flex items-center justify-center bg-[#faf8f2] dark:bg-[#202020] hover:bg-[#09fe94] text-[#6b6660] hover:text-black rounded-xl transition-all duration-300"
                               >
                                 <ArrowRight className="w-5 h-5" />
@@ -422,19 +445,45 @@ export default function KalenderPage() {
                     .filter(t => t.type === "meeting")
                     .sort((a, b) => (a.fullDate?.getTime() || 0) - (b.fullDate?.getTime() || 0))
                     .slice(0, 5)
-                    .map(meeting => (
-                      <div key={meeting.id} className="flex items-start gap-3 p-3 bg-muted hover:bg-muted/80 rounded-2xl transition-colors">
-                        <div className="p-2 bg-card rounded-xl shadow-sm border border-border">
-                           <CalendarCheck2 className="w-3.5 h-3.5 text-accent-dark" />
+                    .map(meeting => {
+                      const lead = leads.find(l => l.id === meeting.leadId);
+                      const meetingDatetime = lead ? meetingDates[lead.id] : undefined;
+                      return (
+                        <div key={meeting.id} className="p-3 bg-muted hover:bg-muted/80 rounded-2xl transition-colors">
+                          <div className="flex items-start gap-3">
+                            <div className="p-2 bg-card rounded-xl shadow-sm border border-border shrink-0">
+                               <CalendarCheck2 className="w-3.5 h-3.5 text-accent-dark" />
+                            </div>
+                            <div className="min-w-0 flex-1">
+                               <p className="text-xs font-black text-primary truncate">{meeting.leadName}</p>
+                               <p className="text-[10px] text-muted-foreground font-bold flex items-center gap-1 mt-0.5">
+                                  {meeting.time}
+                               </p>
+                            </div>
+                          </div>
+                          {meetingDatetime && (
+                            <div className="flex gap-2 mt-2 ml-10">
+                              <a
+                                href={makeGoogleCalendarUrl(`Møte med ${meeting.leadName}`, meetingDatetime)}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center gap-1 text-[9px] font-semibold text-muted-foreground hover:text-primary border border-border rounded-lg px-2 py-1 bg-card transition-colors"
+                              >
+                                <ExternalLink className="w-2.5 h-2.5" /> Google
+                              </a>
+                              <a
+                                href={makeOutlookCalendarUrl(`Møte med ${meeting.leadName}`, meetingDatetime)}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center gap-1 text-[9px] font-semibold text-muted-foreground hover:text-primary border border-border rounded-lg px-2 py-1 bg-card transition-colors"
+                              >
+                                <ExternalLink className="w-2.5 h-2.5" /> Outlook
+                              </a>
+                            </div>
+                          )}
                         </div>
-                        <div className="min-w-0">
-                           <p className="text-xs font-black text-primary truncate">{meeting.leadName}</p>
-                           <p className="text-[10px] text-muted-foreground font-bold flex items-center gap-1 mt-0.5">
-                              {meeting.time}
-                           </p>
-                        </div>
-                      </div>
-                    ))
+                      );
+                    })
                 )}
               </div>
             </div>

@@ -156,8 +156,20 @@ export default function RapporterPage() {
       .finally(() => setLoadingEmail(false));
   }, []);
 
-  const thisWeek = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
-  const twoDaysAgo = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000);
+  const now = new Date();
+  const thisWeek = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
+  const twoDaysAgo = new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000);
+
+  // Compute weekly leads data (last 8 weeks)
+  const weeklyLeadsData = Array.from({ length: 8 }, (_, i) => {
+    const weekEnd = new Date(now.getTime() - i * 7 * 24 * 60 * 60 * 1000);
+    const weekStart = new Date(weekEnd.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const weekStartStr = weekStart.toISOString().split("T")[0];
+    const weekEndStr = weekEnd.toISOString().split("T")[0];
+    const count = leads.filter(l => l.addedDate >= weekStartStr && l.addedDate < weekEndStr).length;
+    const label = weekEnd.toLocaleDateString("nb-NO", { day: "numeric", month: "short" });
+    return { label, count };
+  }).reverse();
 
   const sellerMap = new Map<string, SellerStats>();
   for (const lead of leads) {
@@ -219,10 +231,10 @@ export default function RapporterPage() {
     <div className="min-h-screen pb-12">
       <TopBar title="Salgsanalyser" subtitle="Full innsikt i teamets prestasjoner og kampanjer" />
 
-      <div className="p-4 sm:p-8 space-y-8 max-w-7xl mx-auto">
+      <div className="p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8 max-w-7xl mx-auto">
 
         {/* --- Top Key Stats --- */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           <StatCard
             label="Totalt leads"
             value={totalLeads}
@@ -311,6 +323,35 @@ export default function RapporterPage() {
               </div>
             </div>
           )}
+        </div>
+
+        {/* --- Weekly Leads Trend --- */}
+        <div className="bg-[#faf8f2] rounded-2xl border border-[#d8d3c5] p-6" style={{ boxShadow: "0 4px 6px -1px rgba(0,0,0,0.05)" }}>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-bold text-[#171717] flex items-center gap-2 text-sm">
+              <BarChart3 className="w-4 h-4 text-accent-dark" />
+              Leads lagt til (siste 8 uker)
+            </h3>
+            <span className="text-xs text-[#a09b8f] font-semibold">{leads.length} totalt</span>
+          </div>
+          <div className="flex items-end gap-2 h-24 w-full">
+            {weeklyLeadsData.map((week, i) => {
+              const max = Math.max(...weeklyLeadsData.map(w => w.count), 1);
+              const pct = (week.count / max) * 100;
+              return (
+                <div key={i} className="flex-1 flex flex-col items-center gap-1 group relative">
+                  <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-[#171717] text-white text-[9px] px-2 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10 pointer-events-none">
+                    {week.count} leads
+                  </div>
+                  <div
+                    className="w-full bg-[#171717] rounded-sm transition-all duration-700 ease-out hover:bg-[#09fe94] hover:shadow-sm"
+                    style={{ height: `${Math.max(pct, 4)}%` }}
+                  />
+                  <span className="text-[9px] text-[#a09b8f] whitespace-nowrap overflow-hidden">{week.label}</span>
+                </div>
+              );
+            })}
+          </div>
         </div>
 
         {/* --- Sales Funnel --- */}
@@ -451,20 +492,20 @@ export default function RapporterPage() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="bg-[#fcfbf7] border-b border-[#e8e4d8]">
-                    <th className="text-left px-6 py-4 text-[10px] font-bold text-[#a09b8f] uppercase tracking-wider">#  Selger</th>
-                    <th className="text-center px-4 py-4 text-[10px] font-bold text-[#a09b8f] uppercase tracking-wider">Leads</th>
-                    <th className="text-center px-4 py-4 text-[10px] font-bold text-[#a09b8f] uppercase tracking-wider">Samtaler</th>
+                    <th className="text-left px-4 sm:px-6 py-4 text-[10px] font-bold text-[#a09b8f] uppercase tracking-wider">#  Selger</th>
+                    <th className="hidden sm:table-cell text-center px-4 py-4 text-[10px] font-bold text-[#a09b8f] uppercase tracking-wider">Leads</th>
+                    <th className="hidden md:table-cell text-center px-4 py-4 text-[10px] font-bold text-[#a09b8f] uppercase tracking-wider">Samtaler</th>
                     <th className="text-center px-4 py-4 text-[10px] font-bold text-[#a09b8f] uppercase tracking-wider">Møter</th>
-                    <th className="text-center px-4 py-4 text-[10px] font-bold text-[#a09b8f] uppercase tracking-wider">Kunder</th>
-                    <th className="text-right px-6 py-4 text-[10px] font-bold text-[#a09b8f] uppercase tracking-wider">Effektivitet</th>
+                    <th className="hidden sm:table-cell text-center px-4 py-4 text-[10px] font-bold text-[#a09b8f] uppercase tracking-wider">Kunder</th>
+                    <th className="text-right px-4 sm:px-6 py-4 text-[10px] font-bold text-[#a09b8f] uppercase tracking-wider">Effektivitet</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#f2efe3]">
                   {sellers.map((s, i) => (
                     <tr key={s.name} className="hover:bg-white/50 transition-colors group">
-                      <td className="px-6 py-4">
+                      <td className="px-4 sm:px-6 py-4">
                         <div className="flex items-center gap-3">
-                          <div className="relative">
+                          <div className="relative shrink-0">
                             <div className="w-9 h-9 rounded-xl bg-[#171717] flex items-center justify-center text-[10px] font-black text-[#09fe94] shadow-sm">
                               {s.name.split(" ").map((w) => w[0]).join("").toUpperCase().slice(0, 2)}
                             </div>
@@ -472,35 +513,35 @@ export default function RapporterPage() {
                               <span className="absolute -top-1 -right-1 text-[10px]">🏆</span>
                             )}
                           </div>
-                          <div>
-                            <p className="font-bold text-[#171717]">{s.name}</p>
+                          <div className="min-w-0">
+                            <p className="font-bold text-[#171717] truncate">{s.name}</p>
                             <p className="text-[10px] text-[#a09b8f]">{i === 0 ? "Toppleder" : `#${i + 1} på listen`}</p>
                           </div>
                         </div>
                       </td>
-                      <td className="px-4 py-4 text-center font-bold text-slate-800">{s.totalLeads}</td>
-                      <td className="px-4 py-4 text-center text-slate-500">{s.contacted}</td>
+                      <td className="hidden sm:table-cell px-4 py-4 text-center font-bold text-[#171717]">{s.totalLeads}</td>
+                      <td className="hidden md:table-cell px-4 py-4 text-center text-[#6b6660]">{s.contacted}</td>
                       <td className="px-4 py-4 text-center">
                         <span
                           className={`px-2.5 py-1 rounded-lg font-black text-xs ${
-                            s.meetingsBooked > 0 ? "bg-[#ffad0a]/10 text-[#c47e00]" : "text-slate-300"
+                            s.meetingsBooked > 0 ? "bg-[#ffad0a]/10 text-[#c47e00]" : "text-[#d8d3c5]"
                           }`}
                         >
                           {s.meetingsBooked}
                         </span>
                       </td>
-                      <td className="px-4 py-4 text-center text-slate-500 font-bold">{s.customers}</td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center justify-end gap-3">
-                          <div className="w-24 h-1.5 bg-[#e8e4d8] rounded-full overflow-hidden">
+                      <td className="hidden sm:table-cell px-4 py-4 text-center text-[#6b6660] font-bold">{s.customers}</td>
+                      <td className="px-4 sm:px-6 py-4">
+                        <div className="flex items-center justify-end gap-2">
+                          <div className="hidden sm:block w-20 h-1.5 bg-[#e8e4d8] rounded-full overflow-hidden">
                             <div
                               className={`h-full rounded-full transition-all duration-1000 ${
-                                s.followUpRate > 70 ? "bg-accent" : "bg-accent-dark"
+                                s.followUpRate > 70 ? "bg-[#09fe94]" : "bg-[#05c472]"
                               }`}
                               style={{ width: `${s.followUpRate}%` }}
                             />
                           </div>
-                          <span className="text-[11px] font-black text-[#171717] min-w-[30px]">
+                          <span className="text-[11px] font-black text-[#171717] min-w-[30px] text-right">
                             {s.followUpRate}%
                           </span>
                         </div>

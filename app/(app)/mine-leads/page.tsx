@@ -10,12 +10,25 @@ import {
   X, Phone, Inbox, MessageSquareText, ChevronRight, Trash2,
   UserCheck, Clock, Building2, BellRing, Check, Loader2, Sparkles, Send, Copy, ExternalLink,
   FileUp, FileDown, RefreshCw, Layers, CheckCircle2,
-  MousePointer2, Eye
+  MousePointer2, Eye, SlidersHorizontal
 } from "lucide-react";
 import { useAppStore } from "@/store/app-store";
 import { Lead, LeadStatus } from "@/lib/mock-data";
 import { toast } from "sonner";
 import { ActivityTimeline } from "@/components/leads/activity-timeline";
+
+/* ── Calendar URL helpers ─────────────────────────────────── */
+function makeGoogleCalendarUrl(title: string, datetime: string): string {
+  const start = new Date(datetime);
+  const end = new Date(start.getTime() + 60 * 60000);
+  const fmt = (d: Date) => d.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
+  return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(title)}&dates=${fmt(start)}/${fmt(end)}`;
+}
+function makeOutlookCalendarUrl(title: string, datetime: string): string {
+  const start = new Date(datetime);
+  const end = new Date(start.getTime() + 60 * 60000);
+  return `https://outlook.live.com/calendar/0/deeplink/compose?subject=${encodeURIComponent(title)}&startdt=${start.toISOString()}&enddt=${end.toISOString()}&allday=false&path=%2Fcalendar%2Faction%2Fcompose`;
+}
 
 /* ── Meeting date modal ───────────────────────────────────── */
 function MeetingDateModal({
@@ -849,7 +862,7 @@ function LeadRow({
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                 {/* Contact info */}
                 <div>
                   <p className="text-xs font-semibold text-[#a09b8f] uppercase tracking-wider mb-3 flex items-center gap-1.5">
@@ -1001,6 +1014,26 @@ function LeadRow({
                         onChange={(e) => onMeetingDateSave(lead.id, e.target.value)}
                         className="text-sm border border-accent/20 rounded-lg px-2 py-1.5 text-primary focus:outline-none focus:border-accent bg-card w-full"
                       />
+                      {meetingDate && (
+                        <div className="flex flex-wrap gap-2 mt-2">
+                          <a
+                            href={makeGoogleCalendarUrl(`Møte med ${lead.name}`, meetingDate)}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-1 px-2 py-1 bg-[#faf8f2] border border-[#d8d3c5] rounded-lg text-[10px] font-semibold text-[#6b6660] hover:bg-[#f0ece0] hover:text-[#171717] transition-colors"
+                          >
+                            <ExternalLink className="w-3 h-3" /> Google Kalender
+                          </a>
+                          <a
+                            href={makeOutlookCalendarUrl(`Møte med ${lead.name}`, meetingDate)}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-1 px-2 py-1 bg-[#faf8f2] border border-[#d8d3c5] rounded-lg text-[10px] font-semibold text-[#6b6660] hover:bg-[#f0ece0] hover:text-[#171717] transition-colors"
+                          >
+                            <ExternalLink className="w-3 h-3" /> Outlook
+                          </a>
+                        </div>
+                      )}
                       <p className="text-[10px] text-muted-foreground mt-1">Automatisk oppdaget fra e-post eller satt manuelt.</p>
                     </div>
                   )}
@@ -1075,7 +1108,7 @@ function LeadRow({
                       <Loader2 className="w-5 h-5 animate-spin text-accent" />
                     </div>
                   ) : (
-                    <ActivityTimeline activities={activities} />
+                    <ActivityTimeline activities={activities} notes={lead.notes} />
                   )}
                 </div>
 
@@ -1469,10 +1502,15 @@ function MineLeadsContent() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentUser?.name]);
   const [statusFilter, setStatusFilter] = useState<string>("Alle");
+  const [lastContactedFilter, setLastContactedFilter] = useState("Alle");
+  const [addedDateFilter, setAddedDateFilter] = useState("Alle");
+  const [revenueFilter, setRevenueFilter] = useState("Alle");
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
 
   const assignedOptions = ["Alle", ...Array.from(new Set(leads.map((l) => l.assignedTo)))];
   const [assignedFilter, setAssignedFilter] = useState<string>("Alle");
 
+  const now = new Date();
   const filteredLeads = leads.filter((lead) => {
     const matchSearch =
       !search ||
@@ -1481,10 +1519,36 @@ function MineLeadsContent() {
       lead.orgNumber.includes(search);
     const matchStatus = statusFilter === "Alle" || lead.status === statusFilter;
     const matchAssigned = assignedFilter === "Alle" || lead.assignedTo === assignedFilter;
-    return matchSearch && matchStatus && matchAssigned;
+
+    let matchLastContacted = true;
+    if (lastContactedFilter === "Aldri") {
+      matchLastContacted = !lead.lastContacted;
+    } else if (lastContactedFilter === "Siste 3 dager") {
+      matchLastContacted = !!lead.lastContacted && new Date(lead.lastContacted) >= new Date(now.getTime() - 3 * 86400000);
+    } else if (lastContactedFilter === "Siste uke") {
+      matchLastContacted = !!lead.lastContacted && new Date(lead.lastContacted) >= new Date(now.getTime() - 7 * 86400000);
+    } else if (lastContactedFilter === "Siste 2 uker") {
+      matchLastContacted = !!lead.lastContacted && new Date(lead.lastContacted) >= new Date(now.getTime() - 14 * 86400000);
+    }
+
+    let matchAddedDate = true;
+    if (addedDateFilter === "Siste uke") {
+      matchAddedDate = lead.addedDate >= new Date(now.getTime() - 7 * 86400000).toISOString().split("T")[0];
+    } else if (addedDateFilter === "Siste måned") {
+      matchAddedDate = lead.addedDate >= new Date(now.getTime() - 30 * 86400000).toISOString().split("T")[0];
+    } else if (addedDateFilter === "Siste 3 måneder") {
+      matchAddedDate = lead.addedDate >= new Date(now.getTime() - 90 * 86400000).toISOString().split("T")[0];
+    }
+
+    let matchRevenue = true;
+    if (revenueFilter === "0–5M") matchRevenue = lead.revenue < 5_000_000;
+    else if (revenueFilter === "5–50M") matchRevenue = lead.revenue >= 5_000_000 && lead.revenue < 50_000_000;
+    else if (revenueFilter === "50M+") matchRevenue = lead.revenue >= 50_000_000;
+
+    return matchSearch && matchStatus && matchAssigned && matchLastContacted && matchAddedDate && matchRevenue;
   });
 
-  const thisWeek = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
+  const thisWeek = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
 
   const stats = [
     { label: "Totalt leads", value: leads.length, icon: Contact, color: "text-[#05c472]", bg: "bg-[#09fe94]/10" },
@@ -1552,8 +1616,9 @@ function MineLeadsContent() {
 
         {/* Filters */}
         <div className="bg-[#faf8f2] rounded-xl border border-[#d8d3c5] p-4" style={{boxShadow: "0 1px 3px rgba(0,0,0,0.08)"}}>
-          <div className="flex flex-wrap items-center gap-3">
-            <div className="flex-1 min-w-48">
+          {/* Row 1: Search + advanced toggle */}
+          <div className="flex items-center gap-3 mb-3">
+            <div className="flex-1 min-w-0">
               <Input
                 placeholder="Søk etter bedrift, kontakt eller org.nr..."
                 icon={<Search className="w-4 h-4" />}
@@ -1561,54 +1626,134 @@ function MineLeadsContent() {
                 onChange={(e) => setSearch(e.target.value)}
               />
             </div>
+            <button
+              onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+              className={`flex items-center gap-1.5 px-3 py-2 rounded-lg border text-xs font-medium transition-all shrink-0 ${
+                showAdvancedFilters
+                  ? "bg-[#0F1729] text-white border-[#0F1729]"
+                  : "bg-[#faf8f2] text-[#6b6660] border-[#d8d3c5] hover:bg-[#f0ece0]"
+              }`}
+            >
+              <SlidersHorizontal className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Filtre</span>
+              {(lastContactedFilter !== "Alle" || addedDateFilter !== "Alle" || revenueFilter !== "Alle" || assignedFilter !== "Alle") && (
+                <span className="w-4 h-4 bg-[#09fe94] text-[#171717] rounded-full text-[9px] font-black flex items-center justify-center">
+                  {[lastContactedFilter, addedDateFilter, revenueFilter, assignedFilter].filter(f => f !== "Alle").length}
+                </span>
+              )}
+            </button>
+          </div>
 
-            {/* Status filter */}
-            <div className="flex flex-wrap gap-1.5">
-              {["Alle", ...pipelineStages].map((s) => (
-                <button
-                  key={s}
-                  onClick={() => setStatusFilter(s)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                    statusFilter === s
-                      ? "bg-[#0F1729] text-white"
-                      : "bg-[#e8e4d8] text-[#6b6660] hover:bg-[#d8d3c5]"
-                  }`}
-                >
-                  {s}
-                </button>
-              ))}
-            </div>
+          {/* Row 2: Status pills */}
+          <div className="flex flex-wrap gap-1.5">
+            {["Alle", ...pipelineStages].map((s) => (
+              <button
+                key={s}
+                onClick={() => setStatusFilter(s)}
+                className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all ${
+                  statusFilter === s
+                    ? "bg-[#0F1729] text-white"
+                    : "bg-[#e8e4d8] text-[#6b6660] hover:bg-[#d8d3c5]"
+                }`}
+              >
+                {s}
+              </button>
+            ))}
+          </div>
 
-            {/* Assigned filter */}
-            {assignedOptions.length > 1 && (
-              <div className="relative">
-                <select
-                  value={assignedFilter}
-                  onChange={(e) => setAssignedFilter(e.target.value)}
-                  className="appearance-none pl-3 pr-8 py-1.5 rounded-lg border border-[#d8d3c5] text-sm text-[#6b6660] focus:outline-none focus:border-[#09fe94]/60 cursor-pointer bg-[#faf8f2]"
-                >
-                  {assignedOptions.map((m) => (
-                    <option key={m}>{m}</option>
-                  ))}
-                </select>
-                <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-[#a09b8f] pointer-events-none" />
+          {/* Advanced filters panel */}
+          {showAdvancedFilters && (
+            <div className="mt-3 pt-3 border-t border-[#e8e4d8] grid grid-cols-2 sm:grid-cols-4 gap-3">
+              {/* Assigned filter */}
+              <div>
+                <label className="block text-[10px] font-bold text-[#a09b8f] uppercase tracking-wider mb-1.5">Ansvarlig</label>
+                <div className="relative">
+                  <select
+                    value={assignedFilter}
+                    onChange={(e) => setAssignedFilter(e.target.value)}
+                    className="w-full appearance-none pl-3 pr-7 py-1.5 rounded-lg border border-[#d8d3c5] text-xs text-[#6b6660] focus:outline-none focus:border-[#09fe94]/60 bg-[#faf8f2]"
+                  >
+                    {assignedOptions.map((m) => (
+                      <option key={m}>{m}</option>
+                    ))}
+                  </select>
+                  <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#a09b8f] pointer-events-none" />
+                </div>
               </div>
-            )}
 
-            {(statusFilter !== "Alle" || assignedFilter !== "Alle" || search) && (
+              {/* Last contacted filter */}
+              <div>
+                <label className="block text-[10px] font-bold text-[#a09b8f] uppercase tracking-wider mb-1.5">Sist kontaktet</label>
+                <div className="relative">
+                  <select
+                    value={lastContactedFilter}
+                    onChange={(e) => setLastContactedFilter(e.target.value)}
+                    className="w-full appearance-none pl-3 pr-7 py-1.5 rounded-lg border border-[#d8d3c5] text-xs text-[#6b6660] focus:outline-none focus:border-[#09fe94]/60 bg-[#faf8f2]"
+                  >
+                    {["Alle", "Aldri", "Siste 3 dager", "Siste uke", "Siste 2 uker"].map((o) => (
+                      <option key={o}>{o}</option>
+                    ))}
+                  </select>
+                  <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#a09b8f] pointer-events-none" />
+                </div>
+              </div>
+
+              {/* Added date filter */}
+              <div>
+                <label className="block text-[10px] font-bold text-[#a09b8f] uppercase tracking-wider mb-1.5">Lagt til</label>
+                <div className="relative">
+                  <select
+                    value={addedDateFilter}
+                    onChange={(e) => setAddedDateFilter(e.target.value)}
+                    className="w-full appearance-none pl-3 pr-7 py-1.5 rounded-lg border border-[#d8d3c5] text-xs text-[#6b6660] focus:outline-none focus:border-[#09fe94]/60 bg-[#faf8f2]"
+                  >
+                    {["Alle", "Siste uke", "Siste måned", "Siste 3 måneder"].map((o) => (
+                      <option key={o}>{o}</option>
+                    ))}
+                  </select>
+                  <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#a09b8f] pointer-events-none" />
+                </div>
+              </div>
+
+              {/* Revenue filter */}
+              <div>
+                <label className="block text-[10px] font-bold text-[#a09b8f] uppercase tracking-wider mb-1.5">Omsetning</label>
+                <div className="relative">
+                  <select
+                    value={revenueFilter}
+                    onChange={(e) => setRevenueFilter(e.target.value)}
+                    className="w-full appearance-none pl-3 pr-7 py-1.5 rounded-lg border border-[#d8d3c5] text-xs text-[#6b6660] focus:outline-none focus:border-[#09fe94]/60 bg-[#faf8f2]"
+                  >
+                    {["Alle", "0–5M", "5–50M", "50M+"].map((o) => (
+                      <option key={o}>{o}</option>
+                    ))}
+                  </select>
+                  <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#a09b8f] pointer-events-none" />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Reset */}
+          {(statusFilter !== "Alle" || assignedFilter !== "Alle" || search || lastContactedFilter !== "Alle" || addedDateFilter !== "Alle" || revenueFilter !== "Alle") && (
+            <div className="mt-3 flex items-center justify-between">
+              <span className="text-xs text-[#a09b8f]">{filteredLeads.length} av {leads.length} leads vises</span>
               <button
                 onClick={() => {
                   setStatusFilter("Alle");
                   setAssignedFilter("Alle");
                   setSearch("");
+                  setLastContactedFilter("Alle");
+                  setAddedDateFilter("Alle");
+                  setRevenueFilter("Alle");
                 }}
-                className="flex items-center gap-1.5 text-xs text-[#6b6660] hover:text-gray-700"
+                className="flex items-center gap-1.5 text-xs text-[#ff470a] hover:text-[#d63b08] font-medium"
               >
                 <X className="w-3.5 h-3.5" />
-                Nullstill filtre
+                Nullstill alle filtre
               </button>
-            )}
-          </div>
+            </div>
+          )}
         </div>
 
         {/* Table */}
