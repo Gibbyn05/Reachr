@@ -88,9 +88,7 @@ function NotifSettingsTab() {
       if (data.error) {
         toast.error(data.error);
       } else {
-        const ok = Object.values(data.results as Record<string, { ok: boolean }>).filter(r => r.ok).length;
-        const total = Object.keys(data.results).length;
-        toast.success(`${ok}/${total} teste-poster sendt til ${data.sentTo}`);
+        toast.success(`Test-e-post med alle 5 varseltyper sendt til ${data.sentTo}`);
       }
     } catch {
       toast.error("Noe gikk galt. Prøv igjen.");
