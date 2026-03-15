@@ -349,11 +349,11 @@ export default function KalenderPage() {
                             key={m.id}
                             className={`text-[9px] font-black px-1 py-0.5 rounded-md truncate text-left ${
                               isSelected
-                                ? "bg-[#09fe94]/20 text-[#09fe94] dark:text-black dark:bg-black/20"
-                                : "bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300"
+                                ? "bg-white/20 text-black dark:text-black"
+                                : "bg-[#09fe94]/20 text-[#09fe94] dark:bg-[#09fe94]/15 dark:text-[#09fe94]"
                             }`}
                           >
-                            {m.leadName}
+                            <span className="opacity-60">Møte· </span>{m.leadName}
                           </div>
                         ))}
                         {followups.slice(0, 1).map(f => (
@@ -361,11 +361,11 @@ export default function KalenderPage() {
                             key={f.id}
                             className={`text-[9px] font-black px-1 py-0.5 rounded-md truncate text-left ${
                               isSelected
-                                ? "bg-orange-400/20 text-orange-300"
-                                : "bg-orange-100 dark:bg-orange-900/40 text-orange-600 dark:text-orange-300"
+                                ? "bg-white/20 text-black dark:text-black"
+                                : "bg-[#ffad0a]/20 text-[#b87a00] dark:bg-[#ffad0a]/15 dark:text-[#ffad0a]"
                             }`}
                           >
-                            {f.leadName}
+                            <span className="opacity-60">Opf· </span>{f.leadName}
                           </div>
                         ))}
                         {events.length > 2 && (
@@ -381,11 +381,11 @@ export default function KalenderPage() {
             {/* Legend */}
             <div className="flex items-center gap-4 mt-4 pt-4 border-t border-[#d8d3c5] dark:border-[#262626]">
               <div className="flex items-center gap-1.5">
-                <div className="w-3 h-3 rounded bg-purple-200 dark:bg-purple-900/60" />
+                <div className="w-3 h-3 rounded bg-[#09fe94]/30" />
                 <span className="text-[10px] font-bold text-[#6b6660]">Møte</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <div className="w-3 h-3 rounded bg-orange-200 dark:bg-orange-900/60" />
+                <div className="w-3 h-3 rounded bg-[#ffad0a]/30" />
                 <span className="text-[10px] font-bold text-[#6b6660]">Oppfølging</span>
               </div>
               <div className="flex items-center gap-1.5">
@@ -432,10 +432,10 @@ export default function KalenderPage() {
                         className="p-3 bg-white dark:bg-[#1a1a1a] border border-[#d8d3c5] dark:border-[#262626] rounded-2xl"
                       >
                         <div className="flex items-start gap-3">
-                          <div className={`p-2 rounded-xl shrink-0 ${event.type === "meeting" ? "bg-purple-100 dark:bg-purple-900/30" : "bg-orange-100 dark:bg-orange-900/30"}`}>
+                          <div className={`p-2 rounded-xl shrink-0 ${event.type === "meeting" ? "bg-[#09fe94]/15" : "bg-[#ffad0a]/15"}`}>
                             {event.type === "meeting"
-                              ? <CalendarCheck2 className="w-3.5 h-3.5 text-purple-600 dark:text-purple-300" />
-                              : <Phone className="w-3.5 h-3.5 text-orange-600 dark:text-orange-300" />
+                              ? <CalendarCheck2 className="w-3.5 h-3.5 text-[#09fe94]" />
+                              : <Phone className="w-3.5 h-3.5 text-[#ffad0a]" />
                             }
                           </div>
                           <div className="flex-1 min-w-0">
