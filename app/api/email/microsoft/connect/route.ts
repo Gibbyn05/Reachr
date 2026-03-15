@@ -19,7 +19,7 @@ export async function GET(req: NextRequest) {
     client_id: clientId,
     redirect_uri: `${appUrl}/api/email/microsoft/callback`,
     response_type: "code",
-    scope: "https://graph.microsoft.com/Mail.Send https://graph.microsoft.com/Mail.Read https://graph.microsoft.com/User.Read offline_access",
+    scope: "https://graph.microsoft.com/Mail.Send https://graph.microsoft.com/Mail.Read https://graph.microsoft.com/User.Read https://graph.microsoft.com/Calendars.Read offline_access",
     response_mode: "query",
   });
 

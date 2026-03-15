@@ -19,7 +19,7 @@ export async function GET(req: NextRequest) {
     client_id: clientId,
     redirect_uri: `${appUrl}/api/email/google/callback`,
     response_type: "code",
-    scope: "https://www.googleapis.com/auth/gmail.send https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/gmail.modify https://www.googleapis.com/auth/userinfo.email",
+    scope: "https://www.googleapis.com/auth/gmail.send https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/gmail.modify https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/calendar.readonly",
     access_type: "offline",
     prompt: "consent",
   });

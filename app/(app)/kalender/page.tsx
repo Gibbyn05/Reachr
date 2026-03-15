@@ -63,6 +63,31 @@ export default function KalenderPage() {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
 
+  // External calendar events (Google / Outlook)
+  interface ExtEvent { id: string; title: string; start: string; end: string; allDay: boolean; source: "google" | "outlook"; location?: string; }
+  const [extEvents, setExtEvents] = useState<ExtEvent[]>([]);
+  const [connectedSources, setConnectedSources] = useState<string[]>([]);
+  const [syncingExt, setSyncingExt] = useState(false);
+
+  const fetchExternalEvents = async () => {
+    setSyncingExt(true);
+    try {
+      const from = new Date(viewYear, viewMonth - 1, 1).toISOString();
+      const to = new Date(viewYear, viewMonth + 2, 0).toISOString();
+      const res = await fetch(`/api/calendar/external-events?from=${from}&to=${to}`);
+      if (!res.ok) return;
+      const { events, connected } = await res.json();
+      setExtEvents(events ?? []);
+      setConnectedSources(connected ?? []);
+    } catch {
+      // silently fail — external calendars are optional
+    } finally {
+      setSyncingExt(false);
+    }
+  };
+
+  useEffect(() => { fetchExternalEvents(); }, [viewYear, viewMonth]); // eslint-disable-line react-hooks/exhaustive-deps
+
   // Calendar sync
   const [calFeedUrl, setCalFeedUrl] = useState<string | null>(null);
   const [calCopied, setCalCopied] = useState(false);
@@ -233,7 +258,16 @@ export default function KalenderPage() {
   const startDay = getStartDayOfMonth(viewYear, viewMonth);
   const totalCells = Math.ceil((startDay + daysInMonth) / 7) * 7;
 
-  // Build event map: "YYYY-MM-DD" → task[]
+  // Build external event map
+  const extEventsByDay: Record<string, ExtEvent[]> = {};
+  extEvents.forEach(ev => {
+    if (!ev.start) return;
+    const dayStr = ev.start.split("T")[0];
+    if (!extEventsByDay[dayStr]) extEventsByDay[dayStr] = [];
+    extEventsByDay[dayStr].push(ev);
+  });
+
+  // Build CRM event map: "YYYY-MM-DD" → task[]
   const eventsByDay: Record<string, typeof allTasks> = {};
   allTasks.forEach(t => {
     if (!eventsByDay[t.dayStr]) eventsByDay[t.dayStr] = [];
@@ -341,6 +375,8 @@ export default function KalenderPage() {
                 const events = dayStr ? (eventsByDay[dayStr] || []) : [];
                 const meetings = events.filter(e => e.type === "meeting");
                 const followups = events.filter(e => e.type === "followup");
+                const externalDay = dayStr ? (extEventsByDay[dayStr] || []) : [];
+                const totalCount = meetings.length + followups.length + externalDay.length;
 
                 return (
                   <button
@@ -395,8 +431,22 @@ export default function KalenderPage() {
                             <span className="opacity-50">Opf· </span>{f.leadName}
                           </div>
                         ))}
-                        {events.length > 2 && (
-                          <span className="text-[9px] font-bold text-[#a09b8f]">+{events.length - 2} til</span>
+                        {externalDay.slice(0, 1).map(ev => (
+                          <div
+                            key={ev.id}
+                            className={`text-[9px] font-black px-1 py-0.5 rounded-md truncate text-left ${
+                              isSelected
+                                ? "bg-white/20 text-black"
+                                : ev.source === "google"
+                                  ? "bg-[#4285F4]/15 text-[#4285F4]"
+                                  : "bg-[#0078D4]/15 text-[#0078D4]"
+                            }`}
+                          >
+                            <span className="opacity-60">{ev.source === "google" ? "G· " : "O· "}</span>{ev.title}
+                          </div>
+                        ))}
+                        {totalCount > 2 && (
+                          <span className="text-[9px] font-bold text-[#a09b8f]">+{totalCount - 2} til</span>
                         )}
                       </div>
                     )}
@@ -406,19 +456,41 @@ export default function KalenderPage() {
             </div>
 
             {/* Legend */}
-            <div className="flex items-center gap-4 mt-4 pt-4 border-t border-[#d8d3c5] dark:border-[#262626]">
+            <div className="flex flex-wrap items-center gap-4 mt-4 pt-4 border-t border-[#d8d3c5] dark:border-[#262626]">
               <div className="flex items-center gap-1.5">
                 <div className="w-3 h-3 rounded bg-[#09fe94]" />
-                <span className="text-[10px] font-bold text-[#6b6660]">Møte</span>
+                <span className="text-[10px] font-bold text-[#6b6660]">Møte (Reachr)</span>
               </div>
               <div className="flex items-center gap-1.5">
                 <div className="w-3 h-3 rounded bg-[#ffad0a]" />
                 <span className="text-[10px] font-bold text-[#6b6660]">Oppfølging</span>
               </div>
+              {connectedSources.includes("gmail") && (
+                <div className="flex items-center gap-1.5">
+                  <div className="w-3 h-3 rounded bg-[#4285F4]/40" />
+                  <span className="text-[10px] font-bold text-[#6b6660]">Google Kalender</span>
+                </div>
+              )}
+              {connectedSources.includes("outlook") && (
+                <div className="flex items-center gap-1.5">
+                  <div className="w-3 h-3 rounded bg-[#0078D4]/40" />
+                  <span className="text-[10px] font-bold text-[#6b6660]">Outlook Kalender</span>
+                </div>
+              )}
               <div className="flex items-center gap-1.5">
                 <div className="w-3 h-3 rounded border-2 border-[#09fe94] bg-[#09fe94]/10" />
                 <span className="text-[10px] font-bold text-[#6b6660]">I dag</span>
               </div>
+              {connectedSources.length > 0 && (
+                <button
+                  onClick={fetchExternalEvents}
+                  disabled={syncingExt}
+                  className="ml-auto flex items-center gap-1.5 text-[10px] font-black text-[#6b6660] hover:text-[#09fe94] transition-colors"
+                >
+                  <RefreshCw className={`w-3 h-3 ${syncingExt ? "animate-spin" : ""}`} />
+                  {syncingExt ? "Synkroniserer..." : "Synkroniser"}
+                </button>
+              )}
             </div>
           </div>
 
@@ -436,7 +508,7 @@ export default function KalenderPage() {
 
               {selectedDay === null ? (
                 <p className="text-xs text-[#a09b8f] italic">Klikk på en dag i kalenderen for å se detaljer.</p>
-              ) : selectedDayEvents.length === 0 ? (
+              ) : selectedDayEvents.length === 0 && (selectedDayStr ? (extEventsByDay[selectedDayStr] || []) : []).length === 0 ? (
                 <div className="text-center py-6 border-2 border-dashed border-[#d8d3c5] dark:border-[#262626] rounded-2xl">
                   <p className="text-xs text-[#a09b8f] italic">Ingen hendelser denne dagen.</p>
                   <button
@@ -451,6 +523,7 @@ export default function KalenderPage() {
                 </div>
               ) : (
                 <div className="space-y-3">
+                  {/* CRM events */}
                   {selectedDayEvents.map(event => {
                     const meetingDt = event.type === "meeting" ? meetingDates[event.leadId] : null;
                     return (
@@ -499,6 +572,38 @@ export default function KalenderPage() {
                             </a>
                           </div>
                         )}
+                      </div>
+                    );
+                  })}
+
+                  {/* External calendar events */}
+                  {(selectedDayStr ? (extEventsByDay[selectedDayStr] || []) : []).map(ev => {
+                    const timeStr = ev.allDay ? "Hele dagen" : new Date(ev.start).toLocaleTimeString("nb-NO", { hour: "2-digit", minute: "2-digit" });
+                    const isGoogle = ev.source === "google";
+                    return (
+                      <div key={ev.id} className="p-3 bg-white dark:bg-[#1a1a1a] border border-[#d8d3c5] dark:border-[#262626] rounded-2xl">
+                        <div className="flex items-start gap-3">
+                          <div
+                            className="p-2 rounded-xl shrink-0 text-white text-[9px] font-black w-7 h-7 flex items-center justify-center"
+                            style={{ backgroundColor: isGoogle ? "#4285F4" : "#0078D4" }}
+                          >
+                            {isGoogle ? "G" : "O"}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-1.5">
+                              <p className="text-xs font-black text-[#171717] dark:text-white truncate">{ev.title}</p>
+                              <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-md shrink-0" style={{ backgroundColor: isGoogle ? "#4285F420" : "#0078D420", color: isGoogle ? "#4285F4" : "#0078D4" }}>
+                                {isGoogle ? "Google" : "Outlook"}
+                              </span>
+                            </div>
+                            {ev.location && (
+                              <p className="text-[10px] text-[#6b6660] truncate mt-0.5">📍 {ev.location}</p>
+                            )}
+                            <p className="text-[10px] font-bold text-[#a09b8f] mt-0.5">
+                              <Clock className="w-3 h-3 inline mr-0.5" />{timeStr}
+                            </p>
+                          </div>
+                        </div>
                       </div>
                     );
                   })}
@@ -578,6 +683,42 @@ export default function KalenderPage() {
             <div>
               <h2 className="text-xl font-black text-[#171717] dark:text-white">Kalendersynkronisering</h2>
               <p className="text-xs text-[#a09b8f]">Abonner på møtene dine i Google Kalender, Outlook, Apple Kalender og mer</p>
+            </div>
+          </div>
+
+          {/* Connect Google / Outlook */}
+          <div className="mb-6 grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className={`flex items-center justify-between p-4 rounded-2xl border ${connectedSources.includes("gmail") ? "bg-[#4285F4]/5 border-[#4285F4]/30" : "bg-white dark:bg-[#1a1a1a] border-[#d8d3c5] dark:border-[#262626]"}`}>
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-xl flex items-center justify-center text-white text-sm font-black" style={{ backgroundColor: "#4285F4" }}>G</div>
+                <div>
+                  <p className="text-xs font-black text-[#171717] dark:text-white">Google Kalender</p>
+                  <p className="text-[10px] text-[#a09b8f]">{connectedSources.includes("gmail") ? "Koblet til — hendelser vises i kalenderen" : "Ikke koblet til"}</p>
+                </div>
+              </div>
+              {connectedSources.includes("gmail") ? (
+                <span className="text-[10px] font-black text-[#09fe94] bg-[#09fe94]/10 px-2 py-1 rounded-lg">Aktiv</span>
+              ) : (
+                <a href="/api/email/google/connect" className="text-[10px] font-black text-white bg-[#4285F4] hover:bg-[#3367d6] px-3 py-2 rounded-xl transition-colors">
+                  Koble til
+                </a>
+              )}
+            </div>
+            <div className={`flex items-center justify-between p-4 rounded-2xl border ${connectedSources.includes("outlook") ? "bg-[#0078D4]/5 border-[#0078D4]/30" : "bg-white dark:bg-[#1a1a1a] border-[#d8d3c5] dark:border-[#262626]"}`}>
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-xl flex items-center justify-center text-white text-sm font-black" style={{ backgroundColor: "#0078D4" }}>O</div>
+                <div>
+                  <p className="text-xs font-black text-[#171717] dark:text-white">Outlook Kalender</p>
+                  <p className="text-[10px] text-[#a09b8f]">{connectedSources.includes("outlook") ? "Koblet til — hendelser vises i kalenderen" : "Ikke koblet til"}</p>
+                </div>
+              </div>
+              {connectedSources.includes("outlook") ? (
+                <span className="text-[10px] font-black text-[#09fe94] bg-[#09fe94]/10 px-2 py-1 rounded-lg">Aktiv</span>
+              ) : (
+                <a href="/api/email/microsoft/connect" className="text-[10px] font-black text-white bg-[#0078D4] hover:bg-[#006bb3] px-3 py-2 rounded-xl transition-colors">
+                  Koble til
+                </a>
+              )}
             </div>
           </div>
 
