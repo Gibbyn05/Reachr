@@ -9,10 +9,11 @@ export async function GET(req: NextRequest) {
   }
 
   const clientId = process.env.MICROSOFT_CLIENT_ID;
+  const tenantId = process.env.MICROSOFT_TENANT_ID;
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 
-  if (!clientId) {
-    return NextResponse.json({ error: "Microsoft OAuth ikke konfigurert" }, { status: 500 });
+  if (!clientId || !tenantId) {
+    return NextResponse.redirect(`${appUrl}/innstillinger?tab=epost&error=not_configured`);
   }
 
   const params = new URLSearchParams({
@@ -23,9 +24,7 @@ export async function GET(req: NextRequest) {
     response_mode: "query",
   });
 
-
-  const tenant = process.env.MICROSOFT_TENANT_ID ?? "common";
   return NextResponse.redirect(
-    `https://login.microsoftonline.com/${tenant}/oauth2/v2.0/authorize?${params}`
+    `https://login.microsoftonline.com/${tenantId}/oauth2/v2.0/authorize?${params}`
   );
 }

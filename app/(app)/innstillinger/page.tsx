@@ -260,6 +260,8 @@ export default function InnstillingerPage() {
           toast.error("Tilkobling feilet: ingen autorisasjonskode mottatt.");
         } else if (error === "token_failed") {
           toast.error("Tilkobling feilet: kunne ikke hente tilgangstoken.");
+        } else if (error === "not_configured") {
+          toast.error("Outlook er ikke konfigurert på serveren. Kontakt support.");
         } else {
           const msg = errorDesc ? decodeURIComponent(errorDesc) : error;
           toast.error(`Tilkobling feilet: ${msg}`);

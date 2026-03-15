@@ -18,7 +18,10 @@ export async function GET(req: NextRequest) {
   }
 
   // Exchange code for tokens
-  const tenant = process.env.MICROSOFT_TENANT_ID ?? "common";
+  const tenant = process.env.MICROSOFT_TENANT_ID;
+  if (!tenant) {
+    return NextResponse.redirect(`${appUrl}/innstillinger?tab=epost&error=not_configured`);
+  }
   const tokenRes = await fetch(`https://login.microsoftonline.com/${tenant}/oauth2/v2.0/token`, {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
