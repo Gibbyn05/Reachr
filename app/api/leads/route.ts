@@ -126,6 +126,17 @@ export async function POST(req: NextRequest) {
   // Start enrichment in background (don't await)
   enrichLead(body.id).catch(err => console.error("[Background Enrichment Error]", err));
 
+  // Send new-lead email notification in background if it's a new lead (not an update)
+  const isNew = !body.id || body.status === "Ikke kontaktet";
+  if (isNew) {
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+    fetch(`${baseUrl}/api/notifications/new-lead`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", cookie: req.headers.get("cookie") ?? "" },
+      body: JSON.stringify({ leadName: body.name, industry: body.industry, city: body.city }),
+    }).catch(() => {});
+  }
+
   return NextResponse.json({ ok: true });
 }
 

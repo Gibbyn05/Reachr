@@ -57,6 +57,7 @@ function NotifSettingsTab() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [testSending, setTestSending] = useState(false);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
@@ -75,33 +76,66 @@ function NotifSettingsTab() {
     setTimeout(() => setSaved(false), 2500);
   }
 
+  async function sendTestEmails() {
+    setTestSending(true);
+    try {
+      const res = await fetch("/api/notifications/test", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({}),
+      });
+      const data = await res.json();
+      if (data.error) {
+        toast.error(data.error);
+      } else {
+        const ok = Object.values(data.results as Record<string, { ok: boolean }>).filter(r => r.ok).length;
+        const total = Object.keys(data.results).length;
+        toast.success(`${ok}/${total} teste-poster sendt til ${data.sentTo}`);
+      }
+    } catch {
+      toast.error("Noe gikk galt. Prøv igjen.");
+    } finally {
+      setTestSending(false);
+    }
+  }
+
   if (loading) return <div className="py-8 text-center text-sm text-[#a09b8f]">Laster innstillinger…</div>;
 
   return (
-    <div className="bg-[#faf8f2] rounded-xl border border-[#d8d3c5] p-6" style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.08)" }}>
-      <h2 className="text-base font-semibold text-[#171717] mb-6">Varslingsinnstillinger</h2>
-      <div className="space-y-1">
-        {NOTIFICATION_ITEMS.map(item => (
-          <div key={item.key} className="flex items-center justify-between py-3 border-b border-[#e8e4d8] last:border-0">
-            <div>
-              <p className="text-sm font-medium text-[#171717]">{item.label}</p>
-              <p className="text-xs text-[#a09b8f] mt-0.5">{item.desc}</p>
+    <div className="space-y-4">
+      <div className="bg-[#faf8f2] rounded-xl border border-[#d8d3c5] p-6" style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.08)" }}>
+        <h2 className="text-base font-semibold text-[#171717] mb-6">Varslingsinnstillinger</h2>
+        <div className="space-y-1">
+          {NOTIFICATION_ITEMS.map(item => (
+            <div key={item.key} className="flex items-center justify-between py-3 border-b border-[#e8e4d8] last:border-0">
+              <div>
+                <p className="text-sm font-medium text-[#171717]">{item.label}</p>
+                <p className="text-xs text-[#a09b8f] mt-0.5">{item.desc}</p>
+              </div>
+              <button
+                onClick={() => setSettings(s => ({ ...s, [item.key]: !s[item.key] }))}
+                className={`relative w-12 h-6 rounded-full transition-colors focus:outline-none shrink-0 ${settings[item.key] ? "bg-[#09fe94]" : "bg-[#d8d3c5]"}`}
+              >
+                <span className="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-sm transition-transform duration-200"
+                  style={{ transform: settings[item.key] ? "translateX(24px)" : "translateX(0)" }} />
+              </button>
             </div>
-            <button
-              onClick={() => setSettings(s => ({ ...s, [item.key]: !s[item.key] }))}
-              className={`relative w-12 h-6 rounded-full transition-colors focus:outline-none shrink-0 ${settings[item.key] ? "bg-[#09fe94]" : "bg-[#d8d3c5]"}`}
-            >
-              <span className="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-sm transition-transform duration-200"
-                style={{ transform: settings[item.key] ? "translateX(24px)" : "translateX(0)" }} />
-            </button>
-          </div>
-        ))}
+          ))}
+        </div>
+        <div className="mt-6 flex items-center gap-3">
+          <Button variant="primary" size="md" onClick={save} disabled={saving}>
+            {saving ? "Lagrer…" : "Lagre innstillinger"}
+          </Button>
+          {saved && <span className="text-sm text-[#09fe94] flex items-center gap-1"><Check className="w-3.5 h-3.5" />Lagret</span>}
+        </div>
       </div>
-      <div className="mt-6 flex items-center gap-3">
-        <Button variant="primary" size="md" onClick={save} disabled={saving}>
-          {saving ? "Lagrer…" : "Lagre innstillinger"}
+
+      <div className="bg-[#faf8f2] rounded-xl border border-[#d8d3c5] p-6" style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.08)" }}>
+        <h3 className="text-sm font-semibold text-[#171717] mb-1">Test varsler</h3>
+        <p className="text-xs text-[#6b6660] mb-4">Send en test-e-post for alle 5 varseltyper til din registrerte e-postadresse for å bekrefte at varsler fungerer.</p>
+        <Button variant="secondary" size="md" onClick={sendTestEmails} disabled={testSending}>
+          {testSending ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Sender…</> : <><ArrowRight className="w-3.5 h-3.5" /> Send test e-post</>}
         </Button>
-        {saved && <span className="text-sm text-[#09fe94] flex items-center gap-1"><Check className="w-3.5 h-3.5" />Lagret</span>}
       </div>
     </div>
   );
