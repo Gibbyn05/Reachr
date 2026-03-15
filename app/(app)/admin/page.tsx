@@ -5,8 +5,17 @@ import { useAppStore } from "@/store/app-store";
 import { isAdmin } from "@/lib/admin";
 import {
   Users, CreditCard, TrendingUp, AlertCircle,
-  CheckCircle2, Clock, XCircle, ShieldCheck, Building2,
+  CheckCircle2, Clock, XCircle, ShieldCheck, Building2, Eye, BarChart2,
 } from "lucide-react";
+
+interface PageviewStats {
+  total: number;
+  today: number;
+  week: number;
+  month: number;
+  uniqueMonth: number;
+  daily: { date: string; views: number; unique: number }[];
+}
 
 interface UserRow {
   id: string;
@@ -57,6 +66,7 @@ export default function AdminPage() {
   const [mrr, setMrr] = useState(0);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [pageviews, setPageviews] = useState<PageviewStats | null>(null);
 
   const allowed = isAdmin(currentUser?.email);
 
@@ -66,6 +76,9 @@ export default function AdminPage() {
       .then(r => r.json())
       .then(data => { setUsers(data.users ?? []); setMrr(data.mrr ?? 0); })
       .finally(() => setLoading(false));
+    fetch("/api/admin/pageviews")
+      .then(r => r.json())
+      .then(data => setPageviews(data));
   }, [allowed]);
 
   if (!allowed) {
@@ -126,6 +139,61 @@ export default function AdminPage() {
             <p className="text-sm text-[#6b6660]">I prøveperiode</p>
           </div>
         </div>
+
+        {/* Pageview stats */}
+        {pageviews && (
+          <div className="bg-[#faf8f2] rounded-xl border border-[#d8d3c5] p-6 space-y-4" style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.08)" }}>
+            <div className="flex items-center gap-2 mb-2">
+              <BarChart2 className="w-4 h-4 text-[#6b6660]" />
+              <h3 className="font-semibold text-[#171717]">Sidebesøk</h3>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              <div className="bg-[#f2efe3] rounded-lg p-4">
+                <p className="text-xs text-[#6b6660] mb-1">I dag</p>
+                <p className="text-2xl font-extrabold text-[#171717]">{pageviews.today.toLocaleString("nb-NO")}</p>
+              </div>
+              <div className="bg-[#f2efe3] rounded-lg p-4">
+                <p className="text-xs text-[#6b6660] mb-1">Siste 7 dager</p>
+                <p className="text-2xl font-extrabold text-[#171717]">{pageviews.week.toLocaleString("nb-NO")}</p>
+              </div>
+              <div className="bg-[#f2efe3] rounded-lg p-4">
+                <p className="text-xs text-[#6b6660] mb-1">Siste 30 dager</p>
+                <p className="text-2xl font-extrabold text-[#171717]">{pageviews.month.toLocaleString("nb-NO")}</p>
+              </div>
+              <div className="bg-[#f2efe3] rounded-lg p-4">
+                <div className="flex items-center gap-1 mb-1">
+                  <Eye className="w-3 h-3 text-[#6b6660]" />
+                  <p className="text-xs text-[#6b6660]">Unike (30 dager)</p>
+                </div>
+                <p className="text-2xl font-extrabold text-[#09fe94]">{pageviews.uniqueMonth.toLocaleString("nb-NO")}</p>
+              </div>
+            </div>
+            {/* Mini bar chart */}
+            <div>
+              <p className="text-xs text-[#a09b8f] mb-3">Siste 7 dager — daglige visninger</p>
+              <div className="flex items-end gap-1.5 h-16">
+                {pageviews.daily.map(d => {
+                  const max = Math.max(...pageviews.daily.map(x => x.views), 1);
+                  const heightPct = Math.round((d.views / max) * 100);
+                  const label = new Date(d.date).toLocaleDateString("nb-NO", { weekday: "short" });
+                  return (
+                    <div key={d.date} className="flex-1 flex flex-col items-center gap-1">
+                      <span className="text-[10px] text-[#a09b8f]">{d.views > 0 ? d.views : ""}</span>
+                      <div className="w-full rounded-sm bg-[#09fe94]/20 flex items-end" style={{ height: "40px" }}>
+                        <div
+                          className="w-full rounded-sm bg-[#09fe94]"
+                          style={{ height: `${heightPct}%`, minHeight: d.views > 0 ? "4px" : "0" }}
+                        />
+                      </div>
+                      <span className="text-[10px] text-[#a09b8f] capitalize">{label}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+            <p className="text-xs text-[#a09b8f]">Totalt alle tider: <span className="font-semibold text-[#6b6660]">{pageviews.total.toLocaleString("nb-NO")} visninger</span></p>
+          </div>
+        )}
 
         {/* Users table */}
         <div className="bg-[#faf8f2] rounded-xl border border-[#d8d3c5] overflow-hidden" style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.08)" }}>
