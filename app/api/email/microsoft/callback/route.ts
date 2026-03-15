@@ -6,6 +6,13 @@ export async function GET(req: NextRequest) {
   const code = searchParams.get("code");
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 
+  const msError = searchParams.get("error");
+  if (msError) {
+    const desc = searchParams.get("error_description") ?? msError;
+    const safeDesc = encodeURIComponent(desc.substring(0, 200));
+    return NextResponse.redirect(`${appUrl}/innstillinger?tab=epost&error=${msError}&error_description=${safeDesc}`);
+  }
+
   if (!code) {
     return NextResponse.redirect(`${appUrl}/innstillinger?tab=epost&error=no_code`);
   }

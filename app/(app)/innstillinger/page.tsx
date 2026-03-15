@@ -247,6 +247,24 @@ export default function InnstillingerPage() {
     const params = new URLSearchParams(window.location.search);
     if (params.get("tab") === "epost") {
       setActiveTab("epost");
+      const connected = params.get("connected");
+      const error = params.get("error");
+      const errorDesc = params.get("error_description");
+      if (connected) {
+        const providerName = connected === "gmail" ? "Gmail" : "Outlook";
+        toast.success(`${providerName} ble koblet til`);
+      } else if (error) {
+        if (error === "access_denied") {
+          toast.error("Tilgang avslått. Du avbrøt autorisasjonen.");
+        } else if (error === "no_code") {
+          toast.error("Tilkobling feilet: ingen autorisasjonskode mottatt.");
+        } else if (error === "token_failed") {
+          toast.error("Tilkobling feilet: kunne ikke hente tilgangstoken.");
+        } else {
+          const msg = errorDesc ? decodeURIComponent(errorDesc) : error;
+          toast.error(`Tilkobling feilet: ${msg}`);
+        }
+      }
       window.history.replaceState({}, "", "/innstillinger");
     }
   }, []);
