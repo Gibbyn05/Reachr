@@ -4,7 +4,7 @@ import { useAppStore } from "@/store/app-store";
 import {
   CalendarCheck2, CheckCircle2, Clock, Phone, ArrowRight, User,
   Mic, Square, Search, Sparkles, BarChart3, Plus, ExternalLink,
-  ChevronLeft, ChevronRight, Inbox
+  ChevronLeft, ChevronRight, Inbox, RefreshCw, Copy, Check, Link2
 } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
@@ -62,6 +62,33 @@ export default function KalenderPage() {
   const [leadSearch, setLeadSearch] = useState("");
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
+
+  // Calendar sync
+  const [calFeedUrl, setCalFeedUrl] = useState<string | null>(null);
+  const [calCopied, setCalCopied] = useState(false);
+  const [calTokenLoading, setCalTokenLoading] = useState(false);
+
+  const loadCalToken = async () => {
+    if (calFeedUrl) return;
+    setCalTokenLoading(true);
+    try {
+      const res = await fetch("/api/calendar/token");
+      const { token } = await res.json();
+      const base = window.location.origin;
+      setCalFeedUrl(`${base}/api/calendar/feed?token=${token}`);
+    } catch {
+      toast.error("Klarte ikke generere kalenderlenke.");
+    } finally {
+      setCalTokenLoading(false);
+    }
+  };
+
+  const copyCalUrl = async () => {
+    if (!calFeedUrl) return;
+    await navigator.clipboard.writeText(calFeedUrl);
+    setCalCopied(true);
+    setTimeout(() => setCalCopied(false), 2500);
+  };
 
   // New meeting form state
   const [meetingLeadId, setMeetingLeadId] = useState("");
@@ -539,6 +566,124 @@ export default function KalenderPage() {
                 <span className="text-[10px] font-black text-[#171717] dark:text-white text-left leading-tight">Nytt møte</span>
               </button>
             </div>
+          </div>
+        </div>
+
+        {/* ── Calendar Sync ── */}
+        <div className="bg-[#faf8f2] dark:bg-[#141414] border border-[#d8d3c5] dark:border-[#262626] rounded-[2rem] p-8 shadow-sm">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="p-3 bg-[#09fe94]/10 rounded-2xl">
+              <RefreshCw className="w-6 h-6 text-[#09fe94]" />
+            </div>
+            <div>
+              <h2 className="text-xl font-black text-[#171717] dark:text-white">Kalendersynkronisering</h2>
+              <p className="text-xs text-[#a09b8f]">Abonner på møtene dine i Google Kalender, Outlook, Apple Kalender og mer</p>
+            </div>
+          </div>
+
+          {/* Feed URL */}
+          <div className="mb-6">
+            <label className="text-[10px] uppercase tracking-widest font-black text-[#a09b8f] mb-2 block">Din private kalender-URL (iCal / .ics)</label>
+            {calFeedUrl ? (
+              <div className="flex gap-2">
+                <div className="flex-1 bg-white dark:bg-[#0a0a0a] border border-[#d8d3c5] dark:border-[#262626] rounded-2xl px-4 py-3 font-mono text-xs text-[#171717] dark:text-white truncate">
+                  {calFeedUrl}
+                </div>
+                <button
+                  onClick={copyCalUrl}
+                  className={`flex items-center gap-2 px-4 py-3 rounded-2xl font-black text-xs uppercase tracking-widest transition-all ${
+                    calCopied
+                      ? "bg-[#09fe94] text-black"
+                      : "bg-[#171717] dark:bg-white text-white dark:text-black hover:bg-[#333]"
+                  }`}
+                >
+                  {calCopied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                  {calCopied ? "Kopiert!" : "Kopier"}
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={loadCalToken}
+                disabled={calTokenLoading}
+                className="flex items-center gap-2 px-5 py-3 bg-[#09fe94] hover:bg-[#00e882] disabled:opacity-60 text-black font-black rounded-2xl text-xs uppercase tracking-widest transition-all shadow-lg shadow-[#09fe94]/20"
+              >
+                <Link2 className="w-4 h-4" />
+                {calTokenLoading ? "Genererer..." : "Generer kalender-URL"}
+              </button>
+            )}
+            <p className="text-[10px] text-[#a09b8f] mt-2">
+              Denne URL-en er unik for deg. Ikke del den med andre. Møtene oppdateres automatisk når du booker nye.
+            </p>
+          </div>
+
+          {/* Service instructions */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {[
+              {
+                name: "Google Kalender",
+                color: "#4285F4",
+                steps: [
+                  "Åpne Google Kalender",
+                  "Klikk + ved «Andre kalendere»",
+                  "Velg «Fra URL»",
+                  "Lim inn URL-en over",
+                ],
+                icon: "G",
+              },
+              {
+                name: "Microsoft Outlook",
+                color: "#0078D4",
+                steps: [
+                  "Gå til Outlook Kalender",
+                  "Klikk «Legg til kalender»",
+                  "Velg «Abonner fra nett»",
+                  "Lim inn URL-en over",
+                ],
+                icon: "O",
+              },
+              {
+                name: "Apple Kalender",
+                color: "#FF2D55",
+                steps: [
+                  "Åpne Kalender på Mac/iPhone",
+                  "Fil → Nytt kalenderabonnement",
+                  "Lim inn URL-en over",
+                  "Klikk Abonner",
+                ],
+                icon: "A",
+              },
+              {
+                name: "Andre apper",
+                color: "#ffad0a",
+                steps: [
+                  "Fantastical, Calendly m.fl.",
+                  "Søk etter «Legg til iCal-feed»",
+                  "Lim inn URL-en over",
+                  "Støttes av alle kalenderapper",
+                ],
+                icon: "✦",
+              },
+            ].map(service => (
+              <div key={service.name} className="bg-white dark:bg-[#1a1a1a] border border-[#d8d3c5] dark:border-[#262626] rounded-2xl p-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <div
+                    className="w-7 h-7 rounded-lg flex items-center justify-center text-white text-xs font-black shrink-0"
+                    style={{ backgroundColor: service.color }}
+                  >
+                    {service.icon}
+                  </div>
+                  <span className="text-xs font-black text-[#171717] dark:text-white">{service.name}</span>
+                </div>
+                <ol className="space-y-1">
+                  {service.steps.map((step, i) => (
+                    <li key={i} className="flex items-start gap-1.5 text-[10px] text-[#6b6660] dark:text-[#a09b8f]">
+                      <span className="font-black text-[#09fe94] shrink-0">{i + 1}.</span>
+                      {step}
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            ))}
           </div>
         </div>
 
