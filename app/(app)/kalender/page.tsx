@@ -349,11 +349,11 @@ export default function KalenderPage() {
                             key={m.id}
                             className={`text-[9px] font-black px-1 py-0.5 rounded-md truncate text-left ${
                               isSelected
-                                ? "bg-white/20 text-black dark:text-black"
-                                : "bg-[#09fe94]/20 text-[#09fe94] dark:bg-[#09fe94]/15 dark:text-[#09fe94]"
+                                ? "bg-[#09fe94] text-[#171717]"
+                                : "bg-[#09fe94] text-[#171717]"
                             }`}
                           >
-                            <span className="opacity-60">Møte· </span>{m.leadName}
+                            <span className="opacity-50">Møte· </span>{m.leadName}
                           </div>
                         ))}
                         {followups.slice(0, 1).map(f => (
@@ -361,11 +361,11 @@ export default function KalenderPage() {
                             key={f.id}
                             className={`text-[9px] font-black px-1 py-0.5 rounded-md truncate text-left ${
                               isSelected
-                                ? "bg-white/20 text-black dark:text-black"
-                                : "bg-[#ffad0a]/20 text-[#b87a00] dark:bg-[#ffad0a]/15 dark:text-[#ffad0a]"
+                                ? "bg-[#ffad0a] text-[#171717]"
+                                : "bg-[#ffad0a] text-[#171717]"
                             }`}
                           >
-                            <span className="opacity-60">Opf· </span>{f.leadName}
+                            <span className="opacity-50">Opf· </span>{f.leadName}
                           </div>
                         ))}
                         {events.length > 2 && (
@@ -381,11 +381,11 @@ export default function KalenderPage() {
             {/* Legend */}
             <div className="flex items-center gap-4 mt-4 pt-4 border-t border-[#d8d3c5] dark:border-[#262626]">
               <div className="flex items-center gap-1.5">
-                <div className="w-3 h-3 rounded bg-[#09fe94]/30" />
+                <div className="w-3 h-3 rounded bg-[#09fe94]" />
                 <span className="text-[10px] font-bold text-[#6b6660]">Møte</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <div className="w-3 h-3 rounded bg-[#ffad0a]/30" />
+                <div className="w-3 h-3 rounded bg-[#ffad0a]" />
                 <span className="text-[10px] font-bold text-[#6b6660]">Oppfølging</span>
               </div>
               <div className="flex items-center gap-1.5">
