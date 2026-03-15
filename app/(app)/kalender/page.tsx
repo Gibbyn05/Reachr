@@ -666,7 +666,7 @@ export default function KalenderPage() {
                     type="text"
                     value={leadSearch}
                     onChange={(e) => { setLeadSearch(e.target.value); if (selectedLeadId) setSelectedLeadId(""); }}
-                    className="w-full bg-[#faf8f2] dark:bg-[#0a0a0a] border border-[#d8d3c5] dark:border-[#262626] rounded-2xl pl-11 pr-4 py-4 text-sm font-bold focus:outline-none focus:border-[#09fe94] dark:text-white placeholder:text-[#a09b8f]/50 transition-all"
+                    className="w-full bg-[#faf8f2] dark:bg-[#0a0a0a] border border-[#d8d3c5] dark:border-[#262626] rounded-2xl pl-11 pr-4 py-4 text-sm font-bold focus:outline-none focus:border-[#09fe94] text-[#171717] dark:text-white placeholder:text-[#a09b8f]/50 transition-all"
                     placeholder="Søk etter navn eller bedrift..."
                   />
                   <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#a09b8f]" />
@@ -697,7 +697,7 @@ export default function KalenderPage() {
                 </div>
                 <div className="relative">
                   <textarea rows={5} value={transcribedText} onChange={(e) => setTranscribedText(e.target.value)}
-                    className={`w-full bg-[#faf8f2] dark:bg-[#0a0a0a] border rounded-[1.5rem] px-5 py-4 text-sm font-medium focus:outline-none transition-all resize-none dark:text-white ${
+                    className={`w-full bg-[#faf8f2] dark:bg-[#0a0a0a] border rounded-[1.5rem] px-5 py-4 text-sm font-medium focus:outline-none transition-all resize-none text-[#171717] dark:text-white ${
                       isRecording ? "border-red-400 ring-4 ring-red-400/5" : "border-[#d8d3c5] dark:border-[#262626] focus:border-[#09fe94]"
                     }`}
                     placeholder={isRecording ? "🎤 Tar opp lyd..." : isTranscribing ? "✨ AI transkriberer..." : "Start opptak, eller skriv notater her..."}
@@ -750,7 +750,7 @@ export default function KalenderPage() {
                     type="text"
                     value={meetingLeadSearch}
                     onChange={(e) => { setMeetingLeadSearch(e.target.value); if (meetingLeadId) setMeetingLeadId(""); }}
-                    className="w-full bg-[#faf8f2] dark:bg-[#0a0a0a] border border-[#d8d3c5] dark:border-[#262626] rounded-2xl pl-11 pr-4 py-4 text-sm font-bold focus:outline-none focus:border-[#09fe94] dark:text-white placeholder:text-[#a09b8f]/50 transition-all"
+                    className="w-full bg-[#faf8f2] dark:bg-[#0a0a0a] border border-[#d8d3c5] dark:border-[#262626] rounded-2xl pl-11 pr-4 py-4 text-sm font-bold focus:outline-none focus:border-[#09fe94] text-[#171717] dark:text-white placeholder:text-[#a09b8f]/50 transition-all"
                     placeholder="Søk etter bedrift..."
                   />
                   <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#a09b8f]" />
@@ -777,7 +777,7 @@ export default function KalenderPage() {
                     type="date"
                     value={meetingDate}
                     onChange={(e) => setMeetingDateState(e.target.value)}
-                    className="w-full bg-[#faf8f2] dark:bg-[#0a0a0a] border border-[#d8d3c5] dark:border-[#262626] rounded-2xl px-4 py-4 text-sm font-bold focus:outline-none focus:border-[#09fe94] dark:text-white transition-all"
+                    className="w-full bg-[#faf8f2] dark:bg-[#0a0a0a] border border-[#d8d3c5] dark:border-[#262626] rounded-2xl px-4 py-4 text-sm font-bold focus:outline-none focus:border-[#09fe94] text-[#171717] dark:text-white transition-all"
                   />
                 </div>
                 <div>
@@ -786,7 +786,7 @@ export default function KalenderPage() {
                     type="time"
                     value={meetingTime}
                     onChange={(e) => setMeetingTime(e.target.value)}
-                    className="w-full bg-[#faf8f2] dark:bg-[#0a0a0a] border border-[#d8d3c5] dark:border-[#262626] rounded-2xl px-4 py-4 text-sm font-bold focus:outline-none focus:border-[#09fe94] dark:text-white transition-all"
+                    className="w-full bg-[#faf8f2] dark:bg-[#0a0a0a] border border-[#d8d3c5] dark:border-[#262626] rounded-2xl px-4 py-4 text-sm font-bold focus:outline-none focus:border-[#09fe94] text-[#171717] dark:text-white transition-all"
                   />
                 </div>
               </div>

@@ -52,7 +52,7 @@ function MeetingDateModal({
           type="datetime-local"
           value={dt}
           onChange={(e) => setDt(e.target.value)}
-          className="w-full text-sm border border-[#d8d3c5] rounded-lg px-3 py-2 focus:outline-none focus:border-[#09fe94]/60 bg-[#faf8f2]"
+          className="w-full text-sm border border-[#d8d3c5] rounded-lg px-3 py-2 focus:outline-none focus:border-[#09fe94]/60 bg-[#faf8f2] text-[#171717]"
           autoFocus
         />
         <div className="flex gap-2 mt-4">
@@ -151,7 +151,7 @@ function AiSmsModal({
                   value={text}
                   onChange={(e) => setText(e.target.value)}
                   rows={4}
-                  className="w-full text-sm border border-[#d8d3c5] rounded-lg px-3 py-2 focus:outline-none focus:border-[#09fe94]/60 bg-[#faf8f2] resize-none"
+                  className="w-full text-sm border border-[#d8d3c5] rounded-lg px-3 py-2 focus:outline-none focus:border-[#09fe94]/60 bg-[#faf8f2] resize-none text-[#171717]"
                 />
               </div>
 
@@ -162,7 +162,7 @@ function AiSmsModal({
                   onChange={(e) => setComment(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && generateDraft()}
                   placeholder="F.eks. «kortere», «mer direkte»"
-                  className="flex-1 text-sm border border-[#d8d3c5] rounded-lg px-3 py-2 focus:outline-none focus:border-[#09fe94]/60 bg-[#faf8f2]"
+                  className="flex-1 text-sm border border-[#d8d3c5] rounded-lg px-3 py-2 focus:outline-none focus:border-[#09fe94]/60 bg-[#faf8f2] text-[#171717]"
                 />
                 <button
                   onClick={generateDraft}
@@ -370,7 +370,7 @@ function AiEmailModal({
                   value={toEmail}
                   onChange={(e) => setToEmail(e.target.value)}
                   placeholder="mottaker@bedrift.no"
-                  className="w-full text-sm border border-[#d8d3c5] rounded-lg px-3 py-2 focus:outline-none focus:border-purple-400 bg-[#faf8f2]"
+                  className="w-full text-sm border border-[#d8d3c5] rounded-lg px-3 py-2 focus:outline-none focus:border-purple-400 bg-[#faf8f2] text-[#171717]"
                 />
                 {!toEmail && (
                   <div className="mt-2 p-3 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-800 space-y-2">
@@ -449,7 +449,7 @@ function AiEmailModal({
                   type="text"
                   value={subject}
                   onChange={(e) => setSubject(e.target.value)}
-                  className="w-full text-sm border border-border rounded-lg px-3 py-2 focus:outline-none focus:border-accent bg-card"
+                  className="w-full text-sm border border-[#d8d3c5] rounded-lg px-3 py-2 focus:outline-none focus:border-[#09fe94]/60 bg-[#faf8f2] text-[#171717]"
                 />
               </div>
 
@@ -460,7 +460,7 @@ function AiEmailModal({
                   value={body}
                   onChange={(e) => setBody(e.target.value)}
                   rows={8}
-                  className="w-full text-sm border border-border rounded-lg px-3 py-2 focus:outline-none focus:border-accent bg-card resize-none"
+                  className="w-full text-sm border border-[#d8d3c5] rounded-lg px-3 py-2 focus:outline-none focus:border-[#09fe94]/60 bg-[#faf8f2] text-[#171717] resize-none"
                 />
               </div>
 
@@ -474,7 +474,7 @@ function AiEmailModal({
                     onChange={(e) => setComment(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && generateDraft()}
                     placeholder="F.eks. «gjør den kortere», «mer uformell», «fremhev pris»"
-                    className="flex-1 text-sm border border-[#d8d3c5] rounded-lg px-3 py-2 focus:outline-none focus:border-purple-400 bg-[#faf8f2]"
+                    className="flex-1 text-sm border border-[#d8d3c5] rounded-lg px-3 py-2 focus:outline-none focus:border-purple-400 bg-[#faf8f2] text-[#171717]"
                   />
                   <button
                     onClick={generateDraft}
@@ -498,7 +498,7 @@ function AiEmailModal({
                       <select
                         value={selectedProvider}
                         onChange={(e) => setSelectedProvider(e.target.value)}
-                        className="text-xs border border-[#d8d3c5] rounded-lg px-2 py-1.5 focus:outline-none bg-[#faf8f2] text-gray-700"
+                        className="text-xs border border-[#d8d3c5] rounded-lg px-2 py-1.5 focus:outline-none bg-[#faf8f2] text-[#171717]"
                       >
                         {connections.map((c) => (
                           <option key={c.provider} value={c.provider}>
@@ -1053,7 +1053,7 @@ function LeadRow({
                       type="date"
                       value={lead.lastContacted ?? ""}
                       onChange={(e) => onLastContactedChange(lead.id, e.target.value || null)}
-                      className="text-sm border border-[#d8d3c5] rounded-lg px-2 py-1.5 text-gray-700 focus:outline-none focus:border-accent bg-[#faf8f2] w-full"
+                      className="text-sm border border-[#d8d3c5] rounded-lg px-2 py-1.5 text-[#171717] focus:outline-none focus:border-[#09fe94]/60 bg-[#faf8f2] w-full"
                     />
                   </div>
 
@@ -1067,7 +1067,7 @@ function LeadRow({
                         type="datetime-local"
                         value={formatDT(meetingDate)}
                         onChange={(e) => onMeetingDateSave(lead.id, e.target.value)}
-                        className="text-sm border border-accent/20 rounded-lg px-2 py-1.5 text-primary focus:outline-none focus:border-accent bg-card w-full"
+                        className="text-sm border border-[#d8d3c5] rounded-lg px-2 py-1.5 text-[#171717] focus:outline-none focus:border-[#09fe94]/60 bg-[#faf8f2] w-full"
                       />
                       {meetingDate && (
                         <div className="flex flex-wrap gap-2 mt-2">
@@ -1181,7 +1181,7 @@ function LeadRow({
                           <select
                             value={lead.assignedTo}
                             onChange={(e) => onAssignedChange(lead.id, e.target.value)}
-                            className="w-full appearance-none pl-9 pr-8 py-1.5 text-sm border border-[#d8d3c5] rounded-lg focus:outline-none focus:border-[#09fe94]/60 bg-[#faf8f2] cursor-pointer text-gray-700"
+                            className="w-full appearance-none pl-9 pr-8 py-1.5 text-sm border border-[#d8d3c5] rounded-lg focus:outline-none focus:border-[#09fe94]/60 bg-[#faf8f2] cursor-pointer text-[#171717]"
                           >
                             {teamMembers.map((name) => (
                               <option key={name} value={name}>{name}</option>
@@ -1195,7 +1195,7 @@ function LeadRow({
                       ) : (
                         <button
                           onClick={() => { setAssignedDraft(lead.assignedTo); setEditingAssigned(true); }}
-                          className="flex items-center gap-2 text-sm text-gray-700 hover:text-green-600 group"
+                          className="flex items-center gap-2 text-sm text-[#171717] hover:text-[#09fe94] group"
                         >
                           <div className="w-6 h-6 bg-[#0F1729] rounded-full flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0">
                             {lead.assignedAvatar}
@@ -1220,7 +1220,7 @@ function LeadRow({
                                 setEditingAssigned(false);
                               }
                             }}
-                            className="flex-1 text-sm border border-[#d8d3c5] rounded-lg px-2 py-1.5 focus:outline-none focus:border-[#09fe94]/60 bg-[#faf8f2]"
+                            className="flex-1 text-sm border border-[#d8d3c5] rounded-lg px-2 py-1.5 focus:outline-none focus:border-[#09fe94]/60 bg-[#faf8f2] text-[#171717]"
                             autoFocus
                           />
                           <button
@@ -1257,7 +1257,7 @@ function LeadRow({
                             value={reminderMsg}
                             onChange={(e) => setReminderMsg(e.target.value)}
                             placeholder={`Husk å følge opp ${lead.name}...`}
-                            className="w-full text-xs border border-[#d8d3c5] rounded-lg px-2 py-1.5 focus:outline-none focus:border-accent resize-none bg-[#faf8f2]"
+                            className="w-full text-xs border border-[#d8d3c5] rounded-lg px-2 py-1.5 focus:outline-none focus:border-[#09fe94]/60 resize-none bg-[#faf8f2] text-[#171717]"
                             rows={2}
                             autoFocus
                           />

@@ -129,7 +129,7 @@ export default function NySekvensPage() {
               )}
               
               {step.type === "email" ? (
-                <div className="bg-white rounded-xl border border-[#d8d3c5] shadow-sm overflow-hidden group">
+                <div className="bg-[#faf8f2] rounded-xl border border-[#d8d3c5] shadow-sm overflow-hidden group">
                   <div className="bg-[#fcfbf9] px-4 py-3 border-b border-[#e8e4d8] flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 rounded-lg bg-[#09fe94]/10 flex items-center justify-center text-[#05c472]">
@@ -166,7 +166,7 @@ export default function NySekvensPage() {
                           newSteps[index].subject = e.target.value;
                           setSteps(newSteps);
                         }}
-                        className="w-full border border-[#d8d3c5] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#09fe94]" 
+                        className="w-full border border-[#d8d3c5] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#09fe94] bg-[#faf8f2] text-[#171717]"
                         placeholder="Emne..."
                       />
                     </div>
@@ -180,7 +180,7 @@ export default function NySekvensPage() {
                           newSteps[index].body = e.target.value;
                           setSteps(newSteps);
                         }}
-                        className="w-full border border-[#d8d3c5] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 resize-none" 
+                        className="w-full border border-[#d8d3c5] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#09fe94] bg-[#faf8f2] text-[#171717] resize-none"
                         placeholder="Skriv e-posten her..."
                       />
                     </div>
@@ -199,7 +199,7 @@ export default function NySekvensPage() {
                         newSteps[index].waitDays = parseInt(e.target.value) || 0;
                         setSteps(newSteps);
                       }}
-                      className="w-16 border border-[#d8d3c5] rounded px-2 py-1 text-sm bg-white text-center" 
+                      className="w-16 border border-[#d8d3c5] rounded px-2 py-1 text-sm bg-[#faf8f2] text-[#171717] text-center" 
                     />
                     <span className="text-sm font-medium text-[#6b6660]">dager</span>
                   </div>
