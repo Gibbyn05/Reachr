@@ -4,18 +4,34 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/lib/i18n/language-context";
 
-const navLinks = [
+const navLinksNo = [
   { name: "Funksjoner", href: "#features" },
   { name: "Priser", href: "#pricing" },
   { name: "Om oss", href: "#om-oss" },
   { name: "Kontakt", href: "#kontakt" },
 ];
 
+const navLinksEn = [
+  { name: "Features", href: "#features" },
+  { name: "Pricing", href: "#pricing" },
+  { name: "About", href: "#om-oss" },
+  { name: "Contact", href: "#kontakt" },
+];
+
 export function Navbar() {
-  const [activeTab, setActiveTab] = useState("Funksjoner");
+  const { lang, toggleLang } = useLanguage();
+  const navLinks = lang === "en" ? navLinksEn : navLinksNo;
+
+  const [activeTab, setActiveTab] = useState(navLinks[0].name);
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  useEffect(() => {
+    setActiveTab(navLinks[0].name);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lang]);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 10);
@@ -78,27 +94,41 @@ export function Navbar() {
 
         {/* CTAs — desktop */}
         <div className="hidden md:flex items-center gap-2 shrink-0">
+          {/* Language toggle */}
+          <button
+            onClick={toggleLang}
+            className="text-xs font-bold text-[#6b6660] hover:text-[#171717] border border-[#d8d3c5] hover:border-[#a09b8f] px-3 py-1.5 rounded-lg hover:bg-[#e8e4d8] transition-colors"
+            title={lang === "no" ? "Switch to English" : "Bytt til norsk"}
+          >
+            {lang === "no" ? "EN" : "NO"}
+          </button>
           <Link
             href="/login"
             className="text-sm font-semibold text-[#6b6660] hover:text-[#171717] px-4 py-2 rounded-lg hover:bg-[#e8e4d8] transition-colors"
           >
-            Logg inn
+            {lang === "en" ? "Log in" : "Logg inn"}
           </Link>
           <Link
             href="/register"
             className="text-sm font-bold text-[#171717] bg-[#09fe94] hover:bg-[#00e882] px-5 py-2.5 rounded-xl shadow-[0_1px_8px_rgba(9,254,148,0.4)] transition-all duration-200 hover:-translate-y-px"
           >
-            Start gratis
+            {lang === "en" ? "Start for free" : "Start gratis"}
           </Link>
         </div>
 
-        {/* Mobile: CTA + hamburger */}
+        {/* Mobile: lang toggle + CTA + hamburger */}
         <div className="flex md:hidden items-center gap-2">
+          <button
+            onClick={toggleLang}
+            className="text-xs font-bold text-[#6b6660] border border-[#d8d3c5] px-2.5 py-1.5 rounded-lg"
+          >
+            {lang === "no" ? "EN" : "NO"}
+          </button>
           <Link
             href="/register"
             className="text-sm font-bold text-[#171717] bg-[#09fe94] px-4 py-2 rounded-xl"
           >
-            Start gratis
+            {lang === "en" ? "Start free" : "Start gratis"}
           </Link>
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
@@ -136,7 +166,7 @@ export function Navbar() {
                   onClick={() => setMobileOpen(false)}
                   className="block px-4 py-3 text-sm font-semibold text-[#6b6660] hover:text-[#171717] hover:bg-[#e8e4d8] rounded-xl transition-colors"
                 >
-                  Logg inn
+                  {lang === "en" ? "Log in" : "Logg inn"}
                 </Link>
               </div>
             </div>

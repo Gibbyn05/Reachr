@@ -14,6 +14,7 @@ export const metadata: Metadata = {
 };
 
 import { Toaster } from "sonner";
+import { LanguageProvider } from "@/lib/i18n/language-context";
 
 export default function RootLayout({
   children,
@@ -31,8 +32,10 @@ export default function RootLayout({
         />
       </head>
       <body className="antialiased">
-        {children}
-        <Toaster position="bottom-right" />
+        <LanguageProvider>
+          {children}
+          <Toaster position="bottom-right" />
+        </LanguageProvider>
       </body>
     </html>
   );

@@ -22,17 +22,19 @@ import {
   Sparkles,
   ExternalLink,
   Phone,
-  Plus
+  Plus,
+  Languages
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState, useEffect } from "react";
 import { useAppStore } from "@/store/app-store";
 import { Lead } from "@/lib/mock-data";
 import { createClient } from "@/lib/supabase/client";
+import { useLanguage } from "@/lib/i18n/language-context";
 
 const ADMIN_EMAILS = ["fredriik8@gmail.com", "fredrik.nerlandsrem@gmail.com"];
 
-const mainNavItems = [
+const mainNavItemsNo = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
   { href: "/leadsok", icon: Search, label: "Leadsøk" },
   { href: "/mine-leads", icon: Contact, label: "Mine Leads" },
@@ -42,6 +44,20 @@ const mainNavItems = [
   { href: "/varsler", icon: BellRing, label: "Varsler" },
   { href: "/rapporter", icon: BarChart3, label: "Rapporter" },
 ];
+
+const mainNavItemsEn = [
+  { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
+  { href: "/leadsok", icon: Search, label: "Lead Search" },
+  { href: "/mine-leads", icon: Contact, label: "My Leads" },
+  { href: "/innboks", icon: Inbox, label: "Inbox" },
+  { href: "/kalender", icon: CalendarCheck2, label: "Calendar" },
+  { href: "/sekvenser", icon: FastForward, label: "Sequences" },
+  { href: "/varsler", icon: BellRing, label: "Alerts" },
+  { href: "/rapporter", icon: BarChart3, label: "Reports" },
+];
+
+// Used for notification badge — always match against Norwegian label keys
+const VARSLER_HREFS = ["/varsler"];
 
 function countNeedsFollowUp(leads: Lead[]): number {
   const now = new Date();
@@ -67,7 +83,9 @@ export function Sidebar() {
   const [planLabel, setPlanLabel] = useState<string | null>(null);
   const [isMember, setIsMember] = useState(false);
   const { currentUser, setCurrentUser, loadLeads, avatarUrl, leads, sidebarOpen, setSidebarOpen } = useAppStore();
+  const { lang, toggleLang } = useLanguage();
 
+  const mainNavItems = lang === "en" ? mainNavItemsEn : mainNavItemsNo;
   const notifCount = countNeedsFollowUp(leads);
   const userIsAdmin = ADMIN_EMAILS.includes(currentUser?.email?.toLowerCase() ?? "");
 
@@ -110,15 +128,16 @@ export function Sidebar() {
         if (!data?.subscription) return;
         const sub = data.subscription;
         if (sub.via_team_owner) {
-          setPlanLabel("Medlem");
+          setPlanLabel(lang === "en" ? "Member" : "Medlem");
           setIsMember(true);
         } else {
           const name = sub.plan === "team" ? "Team" : sub.plan === "solo" ? "Solo" : sub.plan;
-          setPlanLabel(name ? `${name}-plan` : null);
+          setPlanLabel(name ? `${name}-${lang === "en" ? "plan" : "plan"}` : null);
         }
       })
       .catch(() => {});
-  }, []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lang]);
 
   // Close sidebar on route change (mobile)
   useEffect(() => {
@@ -174,7 +193,7 @@ export function Sidebar() {
 
       {/* Main Nav */}
       <nav className="flex-1 p-4 space-y-1">
-        {[...mainNavItems.filter(item => !(isMember && item.label === "Rapporter")), ...(userIsAdmin ? [{ href: "/admin", icon: ShieldCheck, label: "Admin" }] : [])].map(({ href, icon: Icon, label }) => {
+        {[...mainNavItems.filter(item => !(isMember && item.href === "/rapporter")), ...(userIsAdmin ? [{ href: "/admin", icon: ShieldCheck, label: "Admin" }] : [])].map(({ href, icon: Icon, label }) => {
           const isActive = pathname === href || pathname.startsWith(href + "/");
           return (
             <Link
@@ -192,7 +211,7 @@ export function Sidebar() {
                 style={{ width: "18px", height: "18px" }}
               />
               {label}
-              {label === "Varsler" && notifCount > 0 && (
+              {href === "/varsler" && notifCount > 0 && (
                 <span className="ml-auto bg-accent text-accent-foreground text-xs rounded-full min-w-5 h-5 flex items-center justify-center font-semibold px-1 shadow-sm shadow-accent/20">
                   {notifCount}
                 </span>
@@ -211,7 +230,17 @@ export function Sidebar() {
           {dark
             ? <Sun style={{ width: "18px", height: "18px" }} />
             : <Moon style={{ width: "18px", height: "18px" }} />}
-          {dark ? "Lyst tema" : "Mørkt tema"}
+          {dark
+            ? (lang === "en" ? "Light theme" : "Lyst tema")
+            : (lang === "en" ? "Dark theme" : "Mørkt tema")}
+        </button>
+
+        <button
+          onClick={toggleLang}
+          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-muted-foreground hover:text-primary hover:bg-muted transition-all duration-200"
+        >
+          <Languages style={{ width: "18px", height: "18px" }} />
+          {lang === "no" ? "English" : "Norsk"}
         </button>
 
         <Link
@@ -227,7 +256,7 @@ export function Sidebar() {
             className={cn(pathname === "/innstillinger" ? "text-accent" : "text-current")}
             style={{ width: "18px", height: "18px" }}
           />
-          Innstillinger
+          {lang === "en" ? "Settings" : "Innstillinger"}
         </Link>
 
         <Link href="/innstillinger" className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-muted/50 transition-colors mt-1">
@@ -249,7 +278,7 @@ export function Sidebar() {
           className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-muted-foreground hover:text-red-500 hover:bg-red-500/5 text-sm transition-colors"
         >
           <LogOut className="w-4 h-4" />
-          Logg ut
+          {lang === "en" ? "Log out" : "Logg ut"}
         </button>
       </div>
     </aside>

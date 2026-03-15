@@ -4,8 +4,9 @@ import { ArrowRight, MapPin, Users, TrendingUp, Building2 } from "lucide-react";
 import { motion, useMotionValue, useAnimationFrame } from "framer-motion";
 import { useRef } from "react";
 import { WordRotate } from "@/components/ui/word-rotate";
+import { useLanguage } from "@/lib/i18n/language-context";
 
-const industries = [
+const industriesNo = [
   "rørleggere",
   "elektrikere",
   "byggfirmaer",
@@ -14,6 +15,17 @@ const industries = [
   "renholdsbyråer",
   "advokater",
   "eiendomsmeglere",
+];
+
+const industriesEn = [
+  "plumbers",
+  "electricians",
+  "construction firms",
+  "accounting firms",
+  "IT companies",
+  "cleaning services",
+  "lawyers",
+  "real estate agents",
 ];
 
 const leadCards = [
@@ -59,6 +71,8 @@ function LeadCard({ card }: { card: typeof leadCards[0] }) {
 }
 
 export function Hero() {
+  const { lang } = useLanguage();
+  const industries = lang === "en" ? industriesEn : industriesNo;
   const doubled = [...leadCards, ...leadCards];
   const trackRef = useRef<HTMLDivElement>(null);
   const x = useMotionValue(0);
@@ -72,35 +86,30 @@ export function Hero() {
 
   return (
     <section className="bg-[#f2efe3] pt-32 pb-0 overflow-hidden">
-      {/* Headline block */}
       <motion.div
         initial={{ opacity: 0, y: 28 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.7, ease: "easeOut" }}
         className="mx-auto max-w-4xl px-6 mb-12"
       >
-        {/* Native.no-style editorial headline */}
         <h1
           className="text-[clamp(2rem,4vw,3rem)] leading-[1.05] tracking-[-0.01em] text-[#171717]"
           style={{ fontFamily: "'EB Garamond', Georgia, serif" }}
         >
-          {/* Line 1 – upright serif */}
-          <span className="block font-[700]">Finn kunder</span>
+          <span className="block font-[700]">
+            {lang === "en" ? "Find customers" : "Finn kunder"}
+          </span>
 
-          {/* Line 2 – italic "for" + rotating word in accent + underline + cursor */}
           <span className="flex items-center gap-0 flex-nowrap">
             <span className="italic font-[500] text-[#171717] mr-3">for</span>
-            <span
-              className="border-b-2 border-[#ff470a] pb-0"
-              style={{ borderColor: "#ff470a" }}
-            >
+            <span className="border-b-2 border-[#ff470a] pb-0" style={{ borderColor: "#ff470a" }}>
               <WordRotate
+                key={lang}
                 words={industries}
                 duration={2000}
                 className="italic font-[600] text-[#ff470a]"
               />
             </span>
-            {/* blinking cursor */}
             <motion.span
               className="inline-block w-[2px] ml-1.5 rounded-sm bg-[#ff470a]"
               style={{ height: "0.8em", verticalAlign: "middle", marginBottom: "0.05em" }}
@@ -110,38 +119,38 @@ export function Hero() {
           </span>
         </h1>
 
-        {/* Sub-text */}
         <p
           className="mt-6 text-[1.1rem] text-[#6b6660] max-w-md leading-relaxed"
           style={{ fontFamily: "'Inter', sans-serif" }}
         >
-          Søk i 250 000+ norske bedrifter. Legg dem i pipeline.
-          La Reachr minne deg på oppfølging.
+          {lang === "en"
+            ? "Search 250,000+ Norwegian companies. Add them to your pipeline. Let Reachr remind you to follow up."
+            : "Søk i 250 000+ norske bedrifter. Legg dem i pipeline. La Reachr minne deg på oppfølging."}
         </p>
 
-        {/* CTA */}
         <div className="flex flex-wrap items-center gap-4 mt-9">
           <Link
             href="/register"
             className="inline-flex items-center gap-2 rounded-xl bg-[#09fe94] px-7 py-3.5 text-sm font-bold text-[#171717] shadow-[0_4px_20px_rgba(9,254,148,0.35)] transition-all duration-200 hover:bg-[#00e882] hover:-translate-y-0.5"
             style={{ fontFamily: "'Inter', sans-serif" }}
           >
-            Start gratis i dag <ArrowRight size={16} />
+            {lang === "en" ? "Start for free today" : "Start gratis i dag"} <ArrowRight size={16} />
           </Link>
           <Link
             href="/login"
             className="text-sm font-semibold text-[#6b6660] hover:text-[#171717] transition-colors"
             style={{ fontFamily: "'Inter', sans-serif" }}
           >
-            Logg inn →
+            {lang === "en" ? "Log in →" : "Logg inn →"}
           </Link>
         </div>
         <p className="mt-4 text-xs text-[#a09b8f]" style={{ fontFamily: "'Inter', sans-serif" }}>
-          3 dagers gratis prøveperiode · Ingen kredittkort
+          {lang === "en"
+            ? "3-day free trial · No credit card required"
+            : "3 dagers gratis prøveperiode · Ingen kredittkort"}
         </p>
       </motion.div>
 
-      {/* Scrolling marquee – lead cards */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}

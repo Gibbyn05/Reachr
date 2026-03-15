@@ -1,7 +1,22 @@
 "use client";
 import Link from "next/link";
+import { useLanguage } from "@/lib/i18n/language-context";
 
 export function Footer() {
+  const { lang } = useLanguage();
+
+  const columns = lang === "en"
+    ? [
+        { title: "Product", links: [["Features", "#features"], ["Pricing", "#pricing"], ["Updates", "/oppdateringer"]] },
+        { title: "Company", links: [["About", "#om-oss"], ["Contact", "#kontakt"], ["Support", "mailto:Help@reachr.no"]] },
+        { title: "Legal", links: [["Privacy", "/personvern"], ["Terms", "/vilkaar"], ["GDPR", "/personvern#gdpr"]] },
+      ]
+    : [
+        { title: "Produkt", links: [["Funksjoner", "#features"], ["Priser", "#pricing"], ["Oppdateringer", "/oppdateringer"]] },
+        { title: "Selskap", links: [["Om oss", "#om-oss"], ["Kontakt", "#kontakt"], ["Support", "mailto:Help@reachr.no"]] },
+        { title: "Juridisk", links: [["Personvern", "/personvern"], ["Vilkår", "/vilkaar"], ["GDPR", "/personvern#gdpr"]] },
+      ];
+
   return (
     <footer style={{ backgroundColor: "#171717", color: "white", padding: "72px 24px 40px" }}>
       <div style={{ maxWidth: 1200, margin: "0 auto" }}>
@@ -13,15 +28,13 @@ export function Footer() {
               <span style={{ fontWeight: 800, fontSize: 18, color: "white" }}>Reachr</span>
             </Link>
             <p style={{ fontSize: 14, color: "rgba(255,255,255,0.45)", lineHeight: 1.7, maxWidth: 260, margin: 0 }}>
-              Norges B2B-verktøy for leadsøk og salgspipeline. Hjelper hundrevis av bedrifter finne og lukke nye kunder.
+              {lang === "en"
+                ? "Norway's B2B tool for lead search and sales pipeline. Helping hundreds of companies find and close new customers."
+                : "Norges B2B-verktøy for leadsøk og salgspipeline. Hjelper hundrevis av bedrifter finne og lukke nye kunder."}
             </p>
           </div>
 
-          {[
-            { title: "Produkt", links: [["Funksjoner", "#features"], ["Priser", "#pricing"], ["Oppdateringer", "/oppdateringer"]] },
-            { title: "Selskap", links: [["Om oss", "#om-oss"], ["Kontakt", "#kontakt"], ["Support", "mailto:Help@reachr.no"]] },
-            { title: "Juridisk", links: [["Personvern", "/personvern"], ["Vilkår", "/vilkaar"], ["GDPR", "/personvern#gdpr"]] },
-          ].map(({ title, links }) => (
+          {columns.map(({ title, links }) => (
             <div key={title}>
               <p style={{ fontSize: 13, fontWeight: 700, color: "white", marginBottom: 16, textTransform: "uppercase", letterSpacing: "0.06em" }}>{title}</p>
               <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 10 }}>
@@ -39,7 +52,9 @@ export function Footer() {
         </div>
 
         <div style={{ borderTop: "1px solid rgba(255,255,255,0.1)", paddingTop: 28, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
-          <p style={{ fontSize: 13, color: "rgba(255,255,255,0.35)", margin: 0 }}>© 2026 Reachr AS. Alle rettigheter forbeholdt.</p>
+          <p style={{ fontSize: 13, color: "rgba(255,255,255,0.35)", margin: 0 }}>
+            {lang === "en" ? "© 2026 Reachr AS. All rights reserved." : "© 2026 Reachr AS. Alle rettigheter forbeholdt."}
+          </p>
           <p style={{ fontSize: 13, color: "rgba(255,255,255,0.35)", margin: 0 }}>Help@reachr.no</p>
         </div>
       </div>

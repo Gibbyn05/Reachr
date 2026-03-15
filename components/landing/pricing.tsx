@@ -1,8 +1,9 @@
 "use client";
 import { Check, Loader2 } from "lucide-react";
 import { useState } from "react";
+import { useLanguage } from "@/lib/i18n/language-context";
 
-const features = [
+const featuresNo = [
   "Ubegrenset leadsøk",
   "CRM-pipeline med 6 statusnivåer",
   "Automatiske oppfølgingsvarsler",
@@ -13,7 +14,16 @@ const features = [
   "Statistikk og dashboard",
 ];
 
-const platforms = ["Facebook", "Instagram", "LinkedIn"];
+const featuresEn = [
+  "Unlimited lead search",
+  "CRM pipeline with 6 status levels",
+  "Automatic follow-up alerts",
+  "Map view of companies",
+  "AI-generated sales emails",
+  "Team collaboration and assignment",
+  "Real-time Business Registry data",
+  "Statistics and dashboard",
+];
 
 async function startCheckout(plan: string, interval: string) {
   const res = await fetch("/api/stripe/checkout", {
@@ -26,6 +36,8 @@ async function startCheckout(plan: string, interval: string) {
 }
 
 export function Pricing() {
+  const { lang } = useLanguage();
+  const features = lang === "en" ? featuresEn : featuresNo;
   const [yearly, setYearly] = useState(false);
   const [loading, setLoading] = useState<string | null>(null);
 
@@ -45,15 +57,16 @@ export function Pricing() {
   return (
     <section id="pricing" className="bg-[#ede9da] py-28 px-6">
       <div className="mx-auto max-w-5xl">
-        {/* Header */}
         <div className="mb-16">
           <p className="text-sm font-bold uppercase tracking-widest text-[#a09b8f] mb-4">
-            Priser
+            {lang === "en" ? "Pricing" : "Priser"}
           </p>
           <h2 className="font-display text-[clamp(2.5rem,5vw,4.5rem)] font-bold leading-[0.95] tracking-[-0.01em] text-[#171717]">
-            Én pris.
+            {lang === "en" ? "One price." : "Én pris."}
             <br />
-            <span className="italic text-[#ff470a]">Ubegrenset salg.</span>
+            <span className="italic text-[#ff470a]">
+              {lang === "en" ? "Unlimited sales." : "Ubegrenset salg."}
+            </span>
           </h2>
         </div>
 
@@ -63,7 +76,7 @@ export function Pricing() {
             onClick={() => setYearly(false)}
             className={`text-sm font-semibold transition-colors ${!yearly ? "text-[#171717]" : "text-[#a09b8f]"}`}
           >
-            Månedlig
+            {lang === "en" ? "Monthly" : "Månedlig"}
           </button>
           <button
             onClick={() => setYearly(!yearly)}
@@ -79,7 +92,7 @@ export function Pricing() {
             onClick={() => setYearly(true)}
             className={`text-sm font-semibold transition-colors ${yearly ? "text-[#171717]" : "text-[#a09b8f]"}`}
           >
-            Årlig
+            {lang === "en" ? "Yearly" : "Årlig"}
             <span className="ml-1.5 text-xs font-bold text-[#05c472] bg-[#09fe94]/20 px-1.5 py-0.5 rounded-full">– 20%</span>
           </button>
         </div>
@@ -89,11 +102,13 @@ export function Pricing() {
           {/* Solo */}
           <div className="rounded-2xl border border-[#d8d3c5] bg-[#faf8f2] p-8">
             <p className="text-xs font-bold text-[#a09b8f] uppercase tracking-widest mb-1">Solo</p>
-            <p className="text-sm text-[#6b6660] mb-6">For deg som jobber alene med salg.</p>
+            <p className="text-sm text-[#6b6660] mb-6">
+              {lang === "en" ? "For those who work alone in sales." : "For deg som jobber alene med salg."}
+            </p>
             <div className="flex items-end gap-1 mb-6">
               <span className="text-5xl font-extrabold text-[#171717] leading-none">{soloPrice}</span>
               <span className="text-lg text-[#a09b8f] mb-1">kr</span>
-              <span className="text-xs text-[#a09b8f] mb-1.5">/mnd</span>
+              <span className="text-xs text-[#a09b8f] mb-1.5">/{lang === "en" ? "mo" : "mnd"}</span>
             </div>
             <button
               onClick={() => handleCheckout("solo")}
@@ -101,7 +116,7 @@ export function Pricing() {
               className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border border-[#d8d3c5] text-sm font-bold text-[#171717] hover:bg-[#e8e4d8] transition-colors mb-8 disabled:opacity-60"
             >
               {loading === "solo" ? <Loader2 size={14} className="animate-spin" /> : null}
-              Start gratis
+              {lang === "en" ? "Start for free" : "Start gratis"}
             </button>
             <ul className="flex flex-col gap-3">
               {features.slice(0, 5).map((f) => (
@@ -116,14 +131,16 @@ export function Pricing() {
           {/* Team – popular */}
           <div className="relative rounded-2xl border-2 border-[#09fe94] bg-[#faf8f2] p-8 shadow-[0_8px_40px_rgba(9,254,148,0.15)]">
             <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-[#09fe94] text-[#171717] text-xs font-extrabold px-4 py-1 rounded-full whitespace-nowrap">
-              Mest populær
+              {lang === "en" ? "Most popular" : "Mest populær"}
             </div>
             <p className="text-xs font-bold text-[#05c472] uppercase tracking-widest mb-1">Team</p>
-            <p className="text-sm text-[#6b6660] mb-6">2–5 brukere. Perfekt for salgsteam.</p>
+            <p className="text-sm text-[#6b6660] mb-6">
+              {lang === "en" ? "2–5 users. Perfect for sales teams." : "2–5 brukere. Perfekt for salgsteam."}
+            </p>
             <div className="flex items-end gap-1 mb-6">
               <span className="text-5xl font-extrabold text-[#171717] leading-none">{teamPrice}</span>
               <span className="text-lg text-[#a09b8f] mb-1">kr</span>
-              <span className="text-xs text-[#a09b8f] mb-1.5">/bruker/mnd</span>
+              <span className="text-xs text-[#a09b8f] mb-1.5">/{lang === "en" ? "user/mo" : "bruker/mnd"}</span>
             </div>
             <button
               onClick={() => handleCheckout("team")}
@@ -131,7 +148,7 @@ export function Pricing() {
               className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-[#09fe94] text-sm font-bold text-[#171717] hover:bg-[#00e882] transition-colors mb-8 shadow-[0_4px_16px_rgba(9,254,148,0.3)] disabled:opacity-60"
             >
               {loading === "team" ? <Loader2 size={14} className="animate-spin" /> : null}
-              Start gratis
+              {lang === "en" ? "Start for free" : "Start gratis"}
             </button>
             <ul className="flex flex-col gap-3">
               {features.map((f) => (
@@ -146,18 +163,27 @@ export function Pricing() {
           {/* Enterprise */}
           <div className="rounded-2xl border border-[#d8d3c5] bg-[#faf8f2] p-8">
             <p className="text-xs font-bold text-[#a09b8f] uppercase tracking-widest mb-1">Enterprise</p>
-            <p className="text-sm text-[#6b6660] mb-6">For store salgsavdelinger med egne behov.</p>
+            <p className="text-sm text-[#6b6660] mb-6">
+              {lang === "en" ? "For large sales departments with custom needs." : "For store salgsavdelinger med egne behov."}
+            </p>
             <div className="flex items-end gap-1 mb-6">
-              <span className="text-3xl font-extrabold text-[#171717] leading-none">Pris etter avtale</span>
+              <span className="text-3xl font-extrabold text-[#171717] leading-none">
+                {lang === "en" ? "Custom pricing" : "Pris etter avtale"}
+              </span>
             </div>
             <a
               href="#kontakt"
               className="block text-center py-3 rounded-xl border border-[#d8d3c5] text-sm font-bold text-[#171717] hover:bg-[#e8e4d8] transition-colors mb-8"
             >
-              Kontakt oss
+              {lang === "en" ? "Contact us" : "Kontakt oss"}
             </a>
             <ul className="flex flex-col gap-3">
-              {[...features, "Dedikert kundehåndterer", "API-tilgang", "SLA-garanti"].map((f) => (
+              {[
+                ...features,
+                lang === "en" ? "Dedicated account manager" : "Dedikert kundehåndterer",
+                lang === "en" ? "API access" : "API-tilgang",
+                lang === "en" ? "SLA guarantee" : "SLA-garanti",
+              ].map((f) => (
                 <li key={f} className="flex items-center gap-2.5 text-sm text-[#3d3a34]">
                   <Check size={14} className="text-[#05c472] shrink-0" />
                   {f}
@@ -168,7 +194,9 @@ export function Pricing() {
         </div>
 
         <p className="text-center text-xs text-[#a09b8f] mt-8">
-          Alle planer inkluderer 3 dagers gratis prøveperiode · Ingen kredittkort nødvendig · Kan avbestilles når som helst
+          {lang === "en"
+            ? "All plans include a 3-day free trial · No credit card required · Cancel anytime"
+            : "Alle planer inkluderer 3 dagers gratis prøveperiode · Ingen kredittkort nødvendig · Kan avbestilles når som helst"}
         </p>
       </div>
     </section>
