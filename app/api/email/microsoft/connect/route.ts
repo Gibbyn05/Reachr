@@ -24,7 +24,8 @@ export async function GET(req: NextRequest) {
   });
 
 
+  const tenant = process.env.MICROSOFT_TENANT_ID ?? "common";
   return NextResponse.redirect(
-    `https://login.microsoftonline.com/common/oauth2/v2.0/authorize?${params}`
+    `https://login.microsoftonline.com/${tenant}/oauth2/v2.0/authorize?${params}`
   );
 }
