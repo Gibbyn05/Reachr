@@ -243,7 +243,20 @@ function CtaMockup({ accent }: { accent: string }) {
 
 // ─── Phone frame ──────────────────────────────────────────────────────────────
 
-function PhoneMockup({ slide }: { slide: typeof slides[number] & { type: "phone" } }) {
+interface PhoneSlide {
+  type: "phone";
+  bg: string;
+  screenBg: string;
+  accent: string;
+  textColor: string;
+  headline: string;
+  sub: string;
+  mockup: string;
+  tag: string;
+  id: number;
+}
+
+function PhoneMockup({ slide }: { slide: PhoneSlide }) {
   return (
     <div
       className="relative"
@@ -509,7 +522,7 @@ export default function TiktokPage() {
         {/* Slide content */}
         {slide.type === "intro" && <IntroSlideContent accent={slide.accent} />}
         {slide.type === "final-cta" && <FinalCtaContent accent={slide.accent} />}
-        {slide.type === "phone" && <PhoneMockup slide={slide as typeof slides[number] & { type: "phone" }} />}
+        {slide.type === "phone" && <PhoneMockup slide={slide as PhoneSlide} />}
 
         {/* Bottom gradient */}
         <div
