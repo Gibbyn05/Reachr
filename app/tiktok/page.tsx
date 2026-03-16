@@ -1,356 +1,384 @@
 "use client";
 
+/**
+ * reachr.no/tiktok — TikTok slideshow preview
+ *
+ * TikTok safe zones (9:16 · 405×720):
+ *   Top      : 0–60px     (TikTok nav, always safe for logo)
+ *   Right    : 325–405px  (Like/comment/share/follow buttons)
+ *   Bottom   : 500–720px  (Username, caption, music ticker)
+ *
+ * All critical content → x: 24–318  ·  y: 60–490
+ */
+
+import Image from "next/image";
 import { useState } from "react";
 
-// ─────────────────────────────────────────────────────────────────────────────
-// SERIE 1 — MØRK DRAMATISK
-// Tema: Svart bakgrunn · Grønn aksent · Store hvite overskrifter
-// Caption: "Salgsjobben tar for lang tid — vi fikser det."
-// ─────────────────────────────────────────────────────────────────────────────
-
-const serie1 = [
-  {
-    eyebrow: "⏱  Problemet",
-    big: ["3 timer", "bortkastet", "hver dag."],
-    sub: "Gjennomsnittlig norsk selger bruker 3+ timer daglig på å finne og kvalifisere leads manuelt.",
-  },
-  {
-    eyebrow: "😤  Kjenner du deg igjen?",
-    big: ["Manuelt.", "Rotete.", "Effektivitets-", "dreper."],
-    sub: "Google. LinkedIn. Excel. Ringelister. Spredte notater. Alt er overalt.",
-  },
-  {
-    eyebrow: "⚡  Advarsel",
-    big: ["Mens du", "søker —", "lukker andre."],
-    sub: "Konkurrentene dine jobber smartere og vinner dealene du ikke rakk å kontakte.",
-  },
-  {
-    eyebrow: "✦  Løsningen",
-    big: ["250 000+", "norske", "bedrifter."],
-    sub: "Søkbart på 10 sekunder. Direkte fra Brønnøysundregistrene.",
-  },
-  {
-    eyebrow: "🤖  AI gjør jobben",
-    big: ["AI skriver.", "Du sender.", "Kunden", "svarer."],
-    sub: "Personlige salgsmeldinger generert basert på din pitch og kundens profil.",
-  },
-  {
-    eyebrow: "🚀  Start nå",
-    big: ["Gratis.", "Ingen", "binding."],
-    sub: "Bare leads.",
-    cta: "reachr.no →",
-  },
-];
-
-function S1Slide({ slide, idx, total }: { slide: typeof serie1[0]; idx: number; total: number }) {
+// ── Reachr Logo (from /public/logo.svg) ──────────────────────────────────────
+function Logo({ size = 32 }: { size?: number }) {
   return (
-    <div
-      className="absolute inset-0 flex flex-col justify-between px-10 py-12 select-none"
-      style={{ background: "#0f0f0f" }}
-    >
-      {/* Grid lines dekor */}
-      <div className="absolute inset-0 pointer-events-none" style={{ opacity: 0.04 }}>
-        {[1, 2, 3, 4, 5].map((i) => (
-          <div key={i} className="absolute inset-y-0" style={{ left: `${i * 20}%`, width: 1, background: "#fff" }} />
-        ))}
-        {[1, 2, 3, 4, 5, 6, 7].map((i) => (
-          <div key={i} className="absolute inset-x-0" style={{ top: `${i * (100 / 8)}%`, height: 1, background: "#fff" }} />
-        ))}
-      </div>
-
-      {/* Grønn glow */}
-      <div
-        className="absolute pointer-events-none"
+    <div className="flex items-center gap-2">
+      <Image src="/logo.svg" alt="Reachr" width={size} height={size} style={{ display: "block" }} />
+      <span
         style={{
-          width: 300, height: 300, borderRadius: "50%",
-          background: "radial-gradient(circle, #09fe9415 0%, transparent 70%)",
-          bottom: -60, right: -60,
+          fontFamily: "EB Garamond, Georgia, serif",
+          fontSize: size * 0.7,
+          fontWeight: 700,
+          fontStyle: "italic",
+          color: "#171717",
+          lineHeight: 1,
         }}
+      >
+        Reachr
+      </span>
+    </div>
+  );
+}
+
+// ── TikTok safe-zone overlay (dev helper, togglable) ──────────────────────────
+function SafeZoneOverlay() {
+  return (
+    <div className="absolute inset-0 pointer-events-none z-50">
+      {/* Right danger zone */}
+      <div
+        className="absolute top-0 bottom-0 right-0"
+        style={{ width: 80, background: "rgba(255,0,0,0.08)", borderLeft: "1px dashed rgba(255,0,0,0.3)" }}
       />
-
-      <div>
-        {/* Slide teller */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex gap-1.5">
-            {Array.from({ length: total }).map((_, i) => (
-              <div
-                key={i}
-                style={{
-                  width: i === idx ? 24 : 6, height: 4,
-                  borderRadius: 2,
-                  background: i === idx ? "#09fe94" : "#333",
-                  transition: "width 0.3s",
-                }}
-              />
-            ))}
-          </div>
-          <span style={{ color: "#444", fontSize: 11, letterSpacing: "0.08em" }}>
-            {idx + 1}/{total}
-          </span>
-        </div>
-
-        {/* Eyebrow */}
-        <p style={{ color: "#09fe94", fontSize: 12, fontWeight: 600, letterSpacing: "0.05em", marginBottom: 20 }}>
-          {slide.eyebrow}
-        </p>
-
-        {/* Headline */}
-        <div style={{ marginBottom: 28 }}>
-          {slide.big.map((line, i) => (
-            <p
-              key={i}
-              style={{
-                fontSize: 52,
-                fontWeight: 900,
-                color: "#fff",
-                lineHeight: 1.05,
-                letterSpacing: "-1.5px",
-                fontFamily: "Inter, system-ui, sans-serif",
-              }}
-            >
-              {line}
-            </p>
-          ))}
-        </div>
-
-        {/* Sub */}
-        <p style={{ color: "#666", fontSize: 14, lineHeight: 1.65, maxWidth: 300 }}>
-          {slide.sub}
-        </p>
-      </div>
-
-      <div className="flex items-end justify-between">
-        {/* CTA pill */}
-        {slide.cta ? (
-          <div
-            style={{
-              background: "#09fe94",
-              color: "#171717",
-              fontSize: 16,
-              fontWeight: 800,
-              padding: "14px 28px",
-              borderRadius: 16,
-            }}
-          >
-            {slide.cta}
-          </div>
-        ) : (
-          <div />
-        )}
-        {/* Branding */}
-        <span style={{ color: "#333", fontSize: 12, fontStyle: "italic", fontFamily: "EB Garamond, Georgia, serif" }}>
-          reachr.no
+      {/* Bottom danger zone */}
+      <div
+        className="absolute left-0 right-0 bottom-0"
+        style={{ height: 220, background: "rgba(255,0,0,0.08)", borderTop: "1px dashed rgba(255,0,0,0.3)" }}
+      />
+      {/* Top danger zone */}
+      <div
+        className="absolute left-0 right-0 top-0"
+        style={{ height: 60, background: "rgba(255,165,0,0.06)", borderBottom: "1px dashed rgba(255,165,0,0.3)" }}
+      />
+      {/* Safe zone label */}
+      <div
+        className="absolute text-center"
+        style={{
+          left: 0, right: 80, top: 60, bottom: 220,
+          display: "flex", alignItems: "flex-start", justifyContent: "center",
+          paddingTop: 8,
+        }}
+      >
+        <span style={{ fontSize: 9, background: "rgba(0,255,0,0.15)", color: "#09fe94", padding: "2px 6px", borderRadius: 4 }}>
+          ✓ SAFE ZONE
         </span>
       </div>
     </div>
   );
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// SERIE 2 — LYS EDITORIAL
-// Tema: Krem #f2efe3 bakgrunn · Oransje aksent · EB Garamond display
-// Caption: "Norsk B2B-salg gjort enkelt — se Reachr i aksjon."
-// ─────────────────────────────────────────────────────────────────────────────
-
-const serie2 = [
-  { tag: "Norsk B2B-salg", title: "Salg som\nfungerer.", body: "Møt Reachr — plattformen norske selgere bruker for å finne, kontakte og lukke deals raskere.", type: "intro" as const },
-  { tag: "🔍 Leadsøk", title: "Finn dine\nneste kunder.", body: "Søk blant 250 000+ norske bedrifter fra Brønnøysundregistrene. Filtrer på bransje, sted og omsetning.", type: "feature" as const, stat: "250 000+", statLabel: "bedrifter tilgjengelig" },
-  { tag: "📋 CRM", title: "Full oversikt\nover pipeline.", body: "Hold styr på alle leads fra første kontakt til lukket deal — i én enkel pipeline.", type: "feature" as const, stat: "6", statLabel: "pipeline-steg" },
-  { tag: "✦ AI", title: "AI skriver\nfor deg.", body: "Generer personlige salgsmeldinger basert på kundens profil og din pitch. E-post og SMS.", type: "feature" as const, stat: "30 sek", statLabel: "til ferdig melding" },
-  { tag: "🔔 Varsler", title: "Ingen lead\ngår tapt.", body: "Automatiske varsler når leads trenger oppfølging. Aldri gå glipp av en mulighet igjen.", type: "feature" as const, stat: "0", statLabel: "mistede muligheter" },
-  { tag: "🚀 Start nå", title: "Prøv gratis\ni dag.", body: "3 dagers prøveperiode. Ingen kredittkort. Ingen binding.", type: "cta" as const },
-];
-
-function S2Slide({ slide, idx, total }: { slide: typeof serie2[0]; idx: number; total: number }) {
-  const isCta = slide.type === "cta";
-  const isIntro = slide.type === "intro";
+// ── Slide shell (same cream bg + logo + dots for every serie) ─────────────────
+function SlideShell({
+  idx, total, children, showGuide,
+}: {
+  idx: number; total: number; children: React.ReactNode; showGuide: boolean;
+}) {
   return (
-    <div
-      className="absolute inset-0 flex flex-col justify-between px-9 py-11 select-none"
-      style={{ background: "#f2efe3" }}
-    >
-      {/* Dekor sirkel */}
-      <div
-        className="absolute pointer-events-none"
-        style={{
-          width: 280, height: 280, borderRadius: "50%",
-          border: "1px solid #d8d3c5",
-          top: -80, right: -80, opacity: 0.6,
-        }}
-      />
-      <div
-        className="absolute pointer-events-none"
-        style={{
-          width: 200, height: 200, borderRadius: "50%",
-          border: "1px solid #d8d3c5",
-          top: -40, right: -40, opacity: 0.5,
-        }}
-      />
-
-      <div>
-        {/* Slide teller */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex gap-1.5">
-            {Array.from({ length: total }).map((_, i) => (
-              <div
-                key={i}
-                style={{
-                  width: i === idx ? 22 : 6, height: 4,
-                  borderRadius: 2,
-                  background: i === idx ? "#ff470a" : "#d8d3c5",
-                  transition: "width 0.3s",
-                }}
-              />
-            ))}
-          </div>
-          <span
-            style={{
-              background: "#ff470a",
-              color: "#fff",
-              fontSize: 10,
-              fontWeight: 700,
-              padding: "3px 10px",
-              borderRadius: 99,
-              letterSpacing: "0.03em",
-            }}
-          >
-            {slide.tag}
-          </span>
-        </div>
-
-        {/* Headline */}
-        <h2
-          style={{
-            fontFamily: "EB Garamond, Georgia, serif",
-            fontSize: isIntro ? 62 : 54,
-            fontWeight: 700,
-            color: "#171717",
-            lineHeight: 1.05,
-            letterSpacing: "-0.5px",
-            whiteSpace: "pre-line",
-            marginBottom: 20,
-          }}
-        >
-          {slide.title}
-        </h2>
-
-        {/* Body */}
-        <p style={{ color: "#6b6660", fontSize: 14, lineHeight: 1.7, maxWidth: 300 }}>
-          {slide.body}
-        </p>
-      </div>
-
-      <div>
-        {/* Stat */}
-        {"stat" in slide && slide.stat && (
-          <div
-            style={{
-              background: "#faf8f2",
-              border: "1.5px solid #d8d3c5",
-              borderRadius: 20,
-              padding: "16px 24px",
-              marginBottom: 20,
-              display: "inline-block",
-            }}
-          >
-            <p style={{ fontFamily: "EB Garamond, Georgia, serif", fontSize: 40, fontWeight: 700, color: "#ff470a", lineHeight: 1 }}>
-              {slide.stat}
-            </p>
-            <p style={{ color: "#6b6660", fontSize: 12, marginTop: 4 }}>{slide.statLabel}</p>
-          </div>
-        )}
-
-        {/* CTA */}
-        {isCta && (
-          <div
-            style={{
-              background: "#09fe94",
-              color: "#171717",
-              fontSize: 18,
-              fontWeight: 800,
-              padding: "18px 0",
-              borderRadius: 18,
-              textAlign: "center",
-              fontFamily: "EB Garamond, Georgia, serif",
-              fontStyle: "italic",
-              letterSpacing: "-0.3px",
-              marginBottom: 16,
-            }}
-          >
-            reachr.no — start gratis →
-          </div>
-        )}
-
-        {/* Branding */}
-        <div className="flex items-center justify-between">
-          <span style={{ fontFamily: "EB Garamond, Georgia, serif", fontSize: 18, fontStyle: "italic", fontWeight: 700, color: "#171717" }}>
-            Reachr
-          </span>
-          <span style={{ color: "#a09b8f", fontSize: 11 }}>reachr.no</span>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// SERIE 3 — GRØNN IMPACT
-// Tema: Hel grønn #09fe94 bakgrunn · Mørk tekst · Massive tall
-// Caption: "Tallene snakker for seg selv."
-// ─────────────────────────────────────────────────────────────────────────────
-
-const serie3 = [
-  { number: "250 000", unit: "+", label: "norske bedrifter\nklar til å søke i" },
-  { number: "10", unit: "sek", label: "til første\nkvalifiserte lead" },
-  { number: "3", unit: "×", label: "flere meetings\nbooket i snitt" },
-  { number: "30", unit: "sek", label: "til en ferdig\nAI-melding" },
-  { number: "100", unit: "%", label: "norsk og\nGDPR-trygt" },
-  { number: "0", unit: "kr", label: "å komme\ni gang i dag" },
-];
-
-function S3Slide({ slide, idx, total }: { slide: typeof serie3[0]; idx: number; total: number }) {
-  return (
-    <div
-      className="absolute inset-0 flex flex-col items-center justify-center select-none"
-      style={{ background: "#09fe94" }}
-    >
-      {/* Subtle radial */}
+    <div className="absolute inset-0 select-none" style={{ background: "#f2efe3" }}>
+      {/* Subtle texture */}
       <div
         className="absolute inset-0 pointer-events-none"
-        style={{ background: "radial-gradient(circle at 70% 30%, #00e882 0%, transparent 60%)" }}
+        style={{ background: "radial-gradient(ellipse at 80% 0%, #e8e4d800 0%, #ede9da60 100%)" }}
       />
 
-      {/* Slide teller øverst */}
-      <div className="absolute top-10 left-10 right-10 flex items-center justify-between">
-        <div className="flex gap-1.5">
-          {Array.from({ length: total }).map((_, i) => (
-            <div
-              key={i}
-              style={{
-                width: i === idx ? 22 : 6, height: 4, borderRadius: 2,
-                background: i === idx ? "#171717" : "#171717",
-                opacity: i === idx ? 1 : 0.2,
-                transition: "width 0.3s",
-              }}
-            />
-          ))}
-        </div>
-        <span style={{ fontFamily: "EB Garamond, Georgia, serif", fontSize: 15, fontStyle: "italic", fontWeight: 700, color: "#171717" }}>
-          Reachr
-        </span>
+      {/* ── LOGO — top-left, within safe x zone ── */}
+      <div className="absolute" style={{ top: 28, left: 28 }}>
+        <Logo size={28} />
       </div>
 
-      {/* Nummer */}
-      <div className="relative z-10 text-center px-8">
-        <div className="flex items-start justify-center">
+      {/* ── SLIDE DOTS — top-right but capped at x:318 ── */}
+      <div
+        className="absolute flex items-center gap-1.5"
+        style={{ top: 36, right: 92 /* stays inside x:318 */ }}
+      >
+        {Array.from({ length: total }).map((_, i) => (
+          <div
+            key={i}
+            style={{
+              width: i === idx ? 18 : 5, height: 5, borderRadius: 3,
+              background: i === idx ? "#09fe94" : "#d8d3c5",
+              transition: "width 0.25s",
+            }}
+          />
+        ))}
+      </div>
+
+      {/* ── CONTENT (safe zone) ── */}
+      <div
+        className="absolute flex flex-col"
+        style={{ top: 80, left: 28, right: 92, bottom: 240 }}
+      >
+        {children}
+      </div>
+
+      {/* ── BOTTOM BRAND STRIP — at ~490px, just above caption danger zone ── */}
+      <div
+        className="absolute"
+        style={{ bottom: 232, left: 28, right: 92 }}
+      >
+        <div style={{ height: 1, background: "#d8d3c5", marginBottom: 10 }} />
+        <p style={{ fontSize: 10, color: "#a09b8f", letterSpacing: "0.06em" }}>reachr.no</p>
+      </div>
+
+      {showGuide && <SafeZoneOverlay />}
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SERIE 1 — PROBLEM/LØSNING (Dramatisk storytelling, cream)
+// Caption: "Salgsjobben tar for lang tid — vi fikser det."
+// ─────────────────────────────────────────────────────────────────────────────
+const s1Slides = [
+  {
+    tag: "⏱  Problemet",
+    headline: "3 timer\nbortkastet\nhver dag.",
+    body: "Gjennomsnittlig norsk selger bruker 3+ timer daglig på manuell leads-jakt.",
+  },
+  {
+    tag: "😤  Kjenner du dette?",
+    headline: "Google.\nExcel.\nLinkedIn.\nRotete.",
+    body: "Spredte notater, manuelle lister, ingenting er koblet sammen.",
+  },
+  {
+    tag: "⚡  Advarsel",
+    headline: "Mens du\nsøker —\nlukker andre.",
+    body: "Konkurrentene dine bruker smartere verktøy og vinner dealene du ikke rekker.",
+  },
+  {
+    tag: "✦  Løsningen",
+    headline: "250 000+\nnorske\nbedrifter.",
+    body: "Søkbart på 10 sekunder. Direkte fra Brønnøysundregistrene. Klart til bruk.",
+  },
+  {
+    tag: "🤖  AI gjør jobben",
+    headline: "AI skriver.\nDu sender.\nKunden svarer.",
+    body: "Personlige salgsmeldinger basert på din pitch og kundens profil — på sekunder.",
+  },
+  {
+    tag: "🚀  Start i dag",
+    headline: "Gratis.\nIngen\nbinding.",
+    body: "Start på reachr.no og ha første lead-liste klar på 10 minutter.",
+    cta: true,
+  },
+];
+
+function S1Slide({ slide, idx, total, showGuide }: { slide: typeof s1Slides[0]; idx: number; total: number; showGuide: boolean }) {
+  return (
+    <SlideShell idx={idx} total={total} showGuide={showGuide}>
+      {/* Tag */}
+      <div
+        style={{
+          display: "inline-flex", alignSelf: "flex-start",
+          background: "#09fe94", color: "#171717",
+          fontSize: 11, fontWeight: 700,
+          padding: "4px 12px", borderRadius: 99,
+          marginBottom: 22,
+        }}
+      >
+        {slide.tag}
+      </div>
+
+      {/* Headline */}
+      <div style={{ flex: 1 }}>
+        {slide.headline.split("\n").map((line, i) => (
+          <p
+            key={i}
+            style={{
+              fontFamily: "Inter, system-ui, sans-serif",
+              fontSize: 52,
+              fontWeight: 900,
+              color: "#171717",
+              lineHeight: 1.0,
+              letterSpacing: "-2px",
+            }}
+          >
+            {line}
+          </p>
+        ))}
+      </div>
+
+      {/* Body */}
+      <p style={{ color: "#6b6660", fontSize: 13, lineHeight: 1.65, marginTop: 20 }}>
+        {slide.body}
+      </p>
+
+      {/* CTA */}
+      {slide.cta && (
+        <div
+          style={{
+            marginTop: 20,
+            background: "#09fe94",
+            borderRadius: 14,
+            padding: "14px 24px",
+            fontWeight: 800,
+            fontSize: 16,
+            color: "#171717",
+            display: "inline-block",
+          }}
+        >
+          Start gratis →
+        </div>
+      )}
+    </SlideShell>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SERIE 2 — FEATURE SHOWCASE (Feature per slide, cream + card)
+// Caption: "Se Reachr i aksjon — ett verktøy for hele salgsprosessen."
+// ─────────────────────────────────────────────────────────────────────────────
+const s2Slides = [
+  {
+    tag: "Reachr",
+    title: "Salg som\nfungerer.",
+    body: "Ett verktøy for å finne, kontakte og lukke deals — for norske selgere.",
+    stat: null, statLabel: null,
+  },
+  {
+    tag: "🔍 Leadsøk",
+    title: "Finn din\nneste kunde.",
+    body: "Søk og filtrer 250 000+ norske bedrifter på bransje, sted og omsetning.",
+    stat: "250 000+", statLabel: "bedrifter klar til søk",
+  },
+  {
+    tag: "📋 CRM Pipeline",
+    title: "Full oversikt\nhver dag.",
+    body: "Flytt leads gjennom pipeline fra første kontakt til signert kontrakt.",
+    stat: "6 steg", statLabel: "fra søk til kunde",
+  },
+  {
+    tag: "✦ AI-meldinger",
+    title: "AI skriver,\ndu sender.",
+    body: "Automatisk genererte e-poster og SMS tilpasset hvert lead basert på din pitch.",
+    stat: "30 sek", statLabel: "til en ferdig melding",
+  },
+  {
+    tag: "🔔 Oppfølging",
+    title: "Ingen lead\ngår tapt.",
+    body: "Varsler når det er på tide å ta kontakt igjen. Aldri mist en mulighet.",
+    stat: "0", statLabel: "mistede oppfølginger",
+  },
+  {
+    tag: "🚀 Kom i gang",
+    title: "Prøv gratis\ni dag.",
+    body: "3 dager gratis. Ingen kredittkort. Norsk support.",
+    stat: null, statLabel: null, cta: true,
+  },
+];
+
+function S2Slide({ slide, idx, total, showGuide }: { slide: typeof s2Slides[0]; idx: number; total: number; showGuide: boolean }) {
+  return (
+    <SlideShell idx={idx} total={total} showGuide={showGuide}>
+      {/* Tag */}
+      <div
+        style={{
+          display: "inline-flex", alignSelf: "flex-start",
+          border: "1.5px solid #d8d3c5",
+          color: "#6b6660",
+          fontSize: 11, fontWeight: 600,
+          padding: "4px 12px", borderRadius: 99,
+          marginBottom: 22, background: "#faf8f2",
+        }}
+      >
+        {slide.tag}
+      </div>
+
+      {/* Headline — EB Garamond editorial */}
+      <div style={{ flex: 1 }}>
+        {slide.title.split("\n").map((line, i) => (
+          <p
+            key={i}
+            style={{
+              fontFamily: "EB Garamond, Georgia, serif",
+              fontSize: 58,
+              fontWeight: 700,
+              color: "#171717",
+              lineHeight: 1.0,
+              letterSpacing: "-0.5px",
+            }}
+          >
+            {line}
+          </p>
+        ))}
+      </div>
+
+      {/* Body */}
+      <p style={{ color: "#6b6660", fontSize: 13, lineHeight: 1.65, marginTop: 18 }}>
+        {slide.body}
+      </p>
+
+      {/* Stat card */}
+      {slide.stat && (
+        <div
+          style={{
+            marginTop: 20,
+            background: "#faf8f2",
+            border: "1.5px solid #d8d3c5",
+            borderRadius: 16,
+            padding: "14px 20px",
+            display: "inline-block",
+          }}
+        >
+          <p style={{ fontFamily: "EB Garamond, Georgia, serif", fontSize: 36, fontWeight: 700, color: "#ff470a", lineHeight: 1 }}>
+            {slide.stat}
+          </p>
+          <p style={{ fontSize: 11, color: "#6b6660", marginTop: 4 }}>{slide.statLabel}</p>
+        </div>
+      )}
+
+      {/* CTA */}
+      {"cta" in slide && slide.cta && (
+        <div
+          style={{
+            marginTop: 20,
+            background: "#09fe94",
+            borderRadius: 14,
+            padding: "14px 24px",
+            fontWeight: 800,
+            fontSize: 16,
+            color: "#171717",
+            textAlign: "center" as const,
+          }}
+        >
+          reachr.no — start gratis →
+        </div>
+      )}
+    </SlideShell>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SERIE 3 — STORE TALL (Massive stats, cream bakgrunn)
+// Caption: "Tallene bak Reachr — norsk B2B-salg i praksis."
+// ─────────────────────────────────────────────────────────────────────────────
+const s3Slides = [
+  { number: "250 000", unit: "+", label: "norske bedrifter\nklar til søk", color: "#09fe94" },
+  { number: "10",      unit: "sek", label: "til første\nkvalifiserte lead", color: "#09fe94" },
+  { number: "3",       unit: "×",   label: "flere møter\nbooket i snitt", color: "#ff470a" },
+  { number: "30",      unit: "sek", label: "til ferdig\nAI-melding", color: "#09fe94" },
+  { number: "100",     unit: "%",   label: "norsk og\nGDPR-trygt", color: "#09fe94" },
+  { number: "0",       unit: "kr",  label: "å starte\ni dag", color: "#ff470a" },
+];
+
+function S3Slide({ slide, idx, total, showGuide }: { slide: typeof s3Slides[0]; idx: number; total: number; showGuide: boolean }) {
+  return (
+    <SlideShell idx={idx} total={total} showGuide={showGuide}>
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center" }}>
+        {/* Big number */}
+        <div style={{ display: "flex", alignItems: "flex-start", gap: 6, marginBottom: 16 }}>
           <span
             style={{
               fontFamily: "Inter, system-ui, sans-serif",
-              fontSize: 110,
+              fontSize: 88,
               fontWeight: 900,
               color: "#171717",
               lineHeight: 0.9,
-              letterSpacing: "-4px",
+              letterSpacing: "-3px",
             }}
           >
             {slide.number}
@@ -358,25 +386,27 @@ function S3Slide({ slide, idx, total }: { slide: typeof serie3[0]; idx: number; 
           <span
             style={{
               fontFamily: "Inter, system-ui, sans-serif",
-              fontSize: 44,
+              fontSize: 36,
               fontWeight: 900,
-              color: "#171717",
-              marginTop: 12,
-              marginLeft: 4,
-              opacity: 0.7,
+              color: slide.color,
+              marginTop: 10,
             }}
           >
             {slide.unit}
           </span>
         </div>
+
+        {/* Divider with color accent */}
+        <div style={{ width: 60, height: 4, borderRadius: 2, background: slide.color, marginBottom: 20 }} />
+
+        {/* Label */}
         <p
           style={{
-            fontSize: 20,
+            fontFamily: "EB Garamond, Georgia, serif",
+            fontSize: 28,
             fontWeight: 600,
-            color: "#171717",
-            marginTop: 20,
-            lineHeight: 1.4,
-            opacity: 0.75,
+            color: "#6b6660",
+            lineHeight: 1.35,
             whiteSpace: "pre-line",
           }}
         >
@@ -384,338 +414,297 @@ function S3Slide({ slide, idx, total }: { slide: typeof serie3[0]; idx: number; 
         </p>
       </div>
 
-      {/* Bunn */}
-      <div className="absolute bottom-10 left-10 right-10 flex justify-between items-center">
-        <span style={{ fontSize: 11, color: "#171717", opacity: 0.5 }}>reachr.no</span>
-        <span style={{ fontSize: 11, fontWeight: 700, color: "#171717", opacity: 0.5 }}>
-          {idx + 1} / {total}
-        </span>
+      {/* Decorative large number bg */}
+      <div
+        className="absolute pointer-events-none"
+        style={{
+          bottom: 240, right: -10,
+          fontSize: 160,
+          fontWeight: 900,
+          color: "#d8d3c5",
+          lineHeight: 1,
+          opacity: 0.3,
+          userSelect: "none",
+          fontFamily: "Inter, system-ui, sans-serif",
+          letterSpacing: "-6px",
+        }}
+      >
+        {slide.number}
       </div>
-    </div>
+    </SlideShell>
   );
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// SERIE 4 — ORANSJE ENERGI
-// Tema: Oransje #ff470a bakgrunn · Hvit tekst · Punchy og rask
-// Caption: "Slutt å jakte leads manuelt — vi gjør det for deg."
+// SERIE 4 — SITAT / HOOK (EB Garamond quotes, cream)
+// Caption: "Salg handler ikke om å jobbe hardere — men smartere."
 // ─────────────────────────────────────────────────────────────────────────────
-
-const serie4 = [
-  { line1: "Slutt å jakte", line2: "leads manuelt.", emoji: "🎯" },
-  { line1: "Vi har", line2: "250 000+", line3: "norske bedrifter", line4: "klare for deg.", emoji: "🇳🇴" },
-  { line1: "Pipeline som", line2: "viser deg", line3: "nøyaktig hva", line4: "som må gjøres.", emoji: "📋" },
-  { line1: "AI-melding", line2: "skrevet på", line3: "30 sekunder.", line4: "Ikke spøk.", emoji: "🤖" },
-  { line1: "Norsk.", line2: "Trygt.", line3: "Enkelt.", line4: "GDPR-compliant.", emoji: "✅" },
-  { line1: "reachr.no", line2: "Start nå.", line3: "Det tar", line4: "2 minutter.", emoji: "⚡" },
+const s4Slides = [
+  {
+    type: "quote" as const,
+    quote: "Den beste selgeren vinner ikke med flest samtaler.",
+    attribution: "— med best tid brukt.",
+  },
+  {
+    type: "statement" as const,
+    line1: "Du trenger ikke",
+    line2: "ringe 100 bedrifter.",
+    line3: "Du trenger å",
+    line4: "ringe de riktige 10.",
+  },
+  {
+    type: "quote" as const,
+    quote: "Hvert minutt brukt på å lete etter kunder er et minutt du ikke selger.",
+    attribution: "— Reachr løser dette.",
+  },
+  {
+    type: "statement" as const,
+    line1: "Automatiser",
+    line2: "leting.",
+    line3: "Bruk tiden på",
+    line4: "lukking.",
+  },
+  {
+    type: "quote" as const,
+    quote: "Norske selgere fortjener et verktøy laget for det norske markedet.",
+    attribution: "— bygget i Norge, for Norge.",
+  },
+  {
+    type: "cta" as const,
+    quote: "Prøv Reachr gratis.",
+    attribution: "reachr.no →",
+  },
 ];
 
-function S4Slide({ slide, idx, total }: { slide: typeof serie4[0]; idx: number; total: number }) {
+function S4Slide({ slide, idx, total, showGuide }: { slide: typeof s4Slides[0]; idx: number; total: number; showGuide: boolean }) {
   return (
-    <div
-      className="absolute inset-0 flex flex-col justify-between px-10 py-12 select-none"
-      style={{ background: "#ff470a" }}
-    >
-      {/* Mønster-dekor */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <div
-          style={{
-            position: "absolute", bottom: -100, right: -100,
-            width: 350, height: 350, borderRadius: "50%",
-            border: "1px solid rgba(255,255,255,0.15)",
-          }}
-        />
-        <div
-          style={{
-            position: "absolute", bottom: -60, right: -60,
-            width: 250, height: 250, borderRadius: "50%",
-            border: "1px solid rgba(255,255,255,0.1)",
-          }}
-        />
-      </div>
-
-      <div>
-        {/* Teller */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex gap-1.5">
-            {Array.from({ length: total }).map((_, i) => (
-              <div
-                key={i}
-                style={{
-                  width: i === idx ? 22 : 6, height: 4, borderRadius: 2,
-                  background: "rgba(255,255,255,0.9)",
-                  opacity: i === idx ? 1 : 0.3,
-                  transition: "width 0.3s",
-                }}
-              />
-            ))}
-          </div>
-          <span style={{ fontSize: 24 }}>{slide.emoji}</span>
-        </div>
-
-        {/* Tekst */}
-        <div>
-          {[slide.line1, slide.line2, "line3" in slide ? slide.line3 : null, "line4" in slide ? slide.line4 : null]
-            .filter(Boolean)
-            .map((line, i) => (
+    <SlideShell idx={idx} total={total} showGuide={showGuide}>
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center" }}>
+        {slide.type === "quote" || slide.type === "cta" ? (
+          <>
+            {/* Opening quote mark */}
+            <p style={{ fontFamily: "EB Garamond, Georgia, serif", fontSize: 64, color: "#09fe94", lineHeight: 0.7, marginBottom: 16 }}>"</p>
+            <p
+              style={{
+                fontFamily: "EB Garamond, Georgia, serif",
+                fontSize: slide.type === "cta" ? 52 : 32,
+                fontWeight: 600,
+                color: "#171717",
+                lineHeight: 1.2,
+                marginBottom: 20,
+              }}
+            >
+              {slide.quote}
+            </p>
+            <p
+              style={{
+                fontFamily: "EB Garamond, Georgia, serif",
+                fontSize: slide.type === "cta" ? 24 : 18,
+                fontStyle: "italic",
+                color: slide.type === "cta" ? "#ff470a" : "#a09b8f",
+              }}
+            >
+              {slide.attribution}
+            </p>
+          </>
+        ) : (
+          /* Statement slides */
+          <div>
+            {"line1" in slide && [slide.line1, slide.line2, slide.line3, slide.line4].map((line, i) => (
               <p
                 key={i}
                 style={{
-                  fontFamily: "Inter, system-ui, sans-serif",
-                  fontSize: 48,
-                  fontWeight: 900,
-                  color: "#fff",
-                  lineHeight: 1.05,
-                  letterSpacing: "-1.5px",
-                  opacity: i === 0 ? 1 : i === 1 ? 1 : 0.85,
+                  fontFamily: "EB Garamond, Georgia, serif",
+                  fontSize: 46,
+                  fontWeight: i % 2 === 0 ? 400 : 700,
+                  fontStyle: i % 2 === 0 ? "italic" : "normal",
+                  color: i % 2 === 0 ? "#6b6660" : "#171717",
+                  lineHeight: 1.1,
                 }}
               >
                 {line}
               </p>
             ))}
-        </div>
+          </div>
+        )}
       </div>
 
-      <div className="flex items-center justify-between">
-        <span
-          style={{
-            fontFamily: "EB Garamond, Georgia, serif",
-            fontSize: 20,
-            fontStyle: "italic",
-            fontWeight: 700,
-            color: "rgba(255,255,255,0.8)",
-          }}
-        >
-          Reachr
-        </span>
-        <span style={{ color: "rgba(255,255,255,0.4)", fontSize: 11 }}>{idx + 1}/{total}</span>
-      </div>
-    </div>
+      {/* Accent line decoration */}
+      <div style={{ width: 40, height: 3, borderRadius: 2, background: "#09fe94", marginBottom: 8 }} />
+    </SlideShell>
   );
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// SERIE 5 — MØRK MINIMALISTISK
-// Tema: Mørk #171717 bakgrunn · Gyllen #ffad0a aksent · EB Garamond editorial
-// Caption: "Salg handler ikke om å jobbe hardere — men smartere."
+// SERIE 5 — TIPS & VERDI (Checklist / list, cream)
+// Caption: "5 grunner til at norske selgere velger Reachr."
 // ─────────────────────────────────────────────────────────────────────────────
-
-const serie5 = [
+const s5Slides = [
   {
-    quote: "Den beste selgeren vinner ikke med flest samtaler.",
-    attribution: "— med best tid brukt.",
-    type: "quote" as const,
+    eyebrow: "Hvorfor Reachr?",
+    title: "5 grunner til\nå bytte nå.",
+    items: null, cta: false,
   },
   {
-    label: "Reachr gir deg",
-    items: ["250 000+ bedrifter å søke i", "Automatisk oppfølging", "AI-genererte meldinger", "Full CRM-pipeline"],
-    type: "list" as const,
+    eyebrow: "01 / Tilgang",
+    title: null,
+    items: ["250 000+ norske bedrifter", "Direkte fra Brønnøysund", "Alltid oppdatert"],
+    cta: false,
   },
   {
-    big: "10",
-    unit: "minutter",
-    body: "Det er alt som trengs for å gå fra null til første lead-liste.",
-    type: "stat" as const,
+    eyebrow: "02 / Hastighet",
+    title: null,
+    items: ["Første lead på 10 sekunder", "AI-melding på 30 sekunder", "Pipeline klar på 2 minutter"],
+    cta: false,
   },
   {
-    big: "3×",
-    unit: "mer",
-    body: "Selgere på Reachr booker tre ganger så mange møter som de som jobber manuelt.",
-    type: "stat" as const,
+    eyebrow: "03 / AI",
+    title: null,
+    items: ["Personlige e-poster automatisk", "SMS-utsendelse innebygd", "Tilpasset din salgspitch"],
+    cta: false,
   },
   {
-    quote: "Hvert minutt du bruker på å lete etter kunder, er et minutt du ikke bruker på å selge.",
-    attribution: "— Reachr løser dette.",
-    type: "quote" as const,
+    eyebrow: "04 / Oppfølging",
+    title: null,
+    items: ["Varsler når leads trenger kontakt", "CRM pipeline med full oversikt", "Aldri mist en mulighet"],
+    cta: false,
   },
   {
-    label: "Kom i gang",
-    cta: "reachr.no",
-    sub: "Gratis · Ingen kredittkort · Norsk support",
-    type: "cta" as const,
+    eyebrow: "05 / Kom i gang",
+    title: "Gratis å starte.",
+    items: ["✓  3 dager gratis prøveperiode", "✓  Ingen kredittkort nødvendig", "✓  Norsk support inkludert"],
+    cta: true,
   },
 ];
 
-function S5Slide({ slide, idx, total }: { slide: typeof serie5[0]; idx: number; total: number }) {
+function S5Slide({ slide, idx, total, showGuide }: { slide: typeof s5Slides[0]; idx: number; total: number; showGuide: boolean }) {
   return (
-    <div
-      className="absolute inset-0 flex flex-col justify-between px-10 py-12 select-none"
-      style={{ background: "#171717" }}
-    >
-      {/* Dekor — horisontal linje */}
-      <div className="absolute left-0 right-0 pointer-events-none" style={{ top: "45%", height: 1, background: "rgba(255,173,10,0.08)" }} />
+    <SlideShell idx={idx} total={total} showGuide={showGuide}>
+      {/* Eyebrow */}
+      <p
+        style={{
+          fontSize: 11, fontWeight: 700, letterSpacing: "0.1em",
+          textTransform: "uppercase" as const,
+          color: "#ff470a", marginBottom: 16,
+        }}
+      >
+        {slide.eyebrow}
+      </p>
 
-      <div>
-        {/* Teller */}
-        <div className="flex items-center justify-between mb-10">
-          <div className="flex gap-1.5">
-            {Array.from({ length: total }).map((_, i) => (
-              <div
-                key={i}
-                style={{
-                  width: i === idx ? 22 : 6, height: 4, borderRadius: 2,
-                  background: i === idx ? "#ffad0a" : "#2a2a2a",
-                  transition: "width 0.3s",
-                }}
-              />
-            ))}
-          </div>
-          <span
-            style={{
-              fontFamily: "EB Garamond, Georgia, serif",
-              fontSize: 16,
-              fontStyle: "italic",
-              color: "#ffad0a",
-              fontWeight: 600,
-            }}
-          >
-            Reachr
-          </span>
-        </div>
-
-        {/* QUOTE */}
-        {slide.type === "quote" && (
-          <div>
-            <div style={{ color: "#ffad0a", fontSize: 48, lineHeight: 1, marginBottom: 20, opacity: 0.6 }}>"</div>
+      {/* Title if present */}
+      {slide.title && (
+        <div style={{ flex: slide.items ? 0 : 1 }}>
+          {slide.title.split("\n").map((line, i) => (
             <p
+              key={i}
               style={{
-                fontFamily: "EB Garamond, Georgia, serif",
-                fontSize: 34,
-                fontWeight: 600,
-                color: "#e8e4d8",
-                lineHeight: 1.25,
-                letterSpacing: "-0.3px",
-                marginBottom: 24,
+                fontFamily: "Inter, system-ui, sans-serif",
+                fontSize: 50,
+                fontWeight: 900,
+                color: "#171717",
+                lineHeight: 1.0,
+                letterSpacing: "-1.5px",
               }}
             >
-              {slide.quote}
+              {line}
             </p>
-            <p style={{ color: "#ffad0a", fontSize: 16, fontStyle: "italic", fontFamily: "EB Garamond, Georgia, serif" }}>
-              {slide.attribution}
-            </p>
-          </div>
-        )}
+          ))}
+        </div>
+      )}
 
-        {/* LIST */}
-        {slide.type === "list" && (
-          <div>
-            <p style={{ color: "#6b6660", fontSize: 12, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 24 }}>
-              {slide.label}
-            </p>
-            <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-              {slide.items.map((item, i) => (
-                <div key={i} style={{ display: "flex", alignItems: "center", gap: 16 }}>
-                  <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#ffad0a", flexShrink: 0 }} />
-                  <p style={{ color: "#e8e4d8", fontSize: 22, fontFamily: "EB Garamond, Georgia, serif", fontWeight: 500 }}>
-                    {item}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* STAT */}
-        {slide.type === "stat" && (
-          <div>
-            <div style={{ display: "flex", alignItems: "flex-end", gap: 8, marginBottom: 24 }}>
-              <span style={{ fontFamily: "Inter, system-ui", fontSize: 96, fontWeight: 900, color: "#ffad0a", lineHeight: 0.9, letterSpacing: "-3px" }}>
-                {slide.big}
-              </span>
-              <span style={{ fontSize: 28, fontWeight: 700, color: "#ffad0a", opacity: 0.6, marginBottom: 8 }}>
-                {slide.unit}
-              </span>
-            </div>
-            <p style={{ color: "#6b6660", fontSize: 15, lineHeight: 1.65 }}>{slide.body}</p>
-          </div>
-        )}
-
-        {/* CTA */}
-        {slide.type === "cta" && (
-          <div>
-            <p style={{ color: "#6b6660", fontSize: 12, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 20 }}>
-              {slide.label}
-            </p>
-            <div
-              style={{
-                background: "#ffad0a",
-                borderRadius: 20,
-                padding: "24px 32px",
-                marginBottom: 20,
-              }}
-            >
-              <p style={{ fontFamily: "EB Garamond, Georgia, serif", fontSize: 52, fontStyle: "italic", fontWeight: 700, color: "#171717", lineHeight: 1 }}>
-                {slide.cta}
-              </p>
-              <p style={{ fontSize: 14, fontWeight: 600, color: "#171717", opacity: 0.6, marginTop: 8 }}>
-                START GRATIS →
+      {/* Items list */}
+      {slide.items && (
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", gap: 16, marginTop: slide.title ? 24 : 0 }}>
+          {slide.items.map((item, i) => (
+            <div key={i} style={{ display: "flex", alignItems: "center", gap: 14 }}>
+              <div
+                style={{
+                  width: 32, height: 32, borderRadius: 10,
+                  background: "#09fe94",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  flexShrink: 0,
+                }}
+              >
+                <span style={{ fontSize: 14, fontWeight: 800, color: "#171717" }}>
+                  {slide.items && item.startsWith("✓") ? "✓" : i + 1}
+                </span>
+              </div>
+              <p style={{ fontSize: 16, fontWeight: 600, color: "#171717", lineHeight: 1.2 }}>
+                {item.replace("✓  ", "")}
               </p>
             </div>
-            <p style={{ color: "#444", fontSize: 12, textAlign: "center" }}>{slide.sub}</p>
-          </div>
-        )}
-      </div>
+          ))}
+        </div>
+      )}
 
-      <div style={{ color: "#2a2a2a", fontSize: 11 }}>
-        {idx + 1} / {total}
-      </div>
-    </div>
+      {/* CTA */}
+      {slide.cta && (
+        <div
+          style={{
+            marginTop: 20,
+            background: "#09fe94",
+            borderRadius: 14,
+            padding: "14px 24px",
+            fontWeight: 800,
+            fontSize: 16,
+            color: "#171717",
+            textAlign: "center" as const,
+          }}
+        >
+          reachr.no — start gratis →
+        </div>
+      )}
+    </SlideShell>
   );
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SERIE-KONFIG
 // ─────────────────────────────────────────────────────────────────────────────
-
-const seriesMeta = [
+const SERIES = [
   {
-    id: 0,
-    name: "Mørk dramatisk",
+    id: 0, name: "Problem/Løsning",
     caption: "Salgsjobben tar for lang tid — vi fikser det.",
-    slides: serie1,
-    Renderer: S1Slide as React.FC<{ slide: any; idx: number; total: number }>,
+    slides: s1Slides,
+    Renderer: S1Slide as React.FC<{ slide: any; idx: number; total: number; showGuide: boolean }>,
   },
   {
-    id: 1,
-    name: "Lys editorial",
-    caption: "Norsk B2B-salg gjort enkelt — se Reachr i aksjon.",
-    slides: serie2,
-    Renderer: S2Slide as React.FC<{ slide: any; idx: number; total: number }>,
+    id: 1, name: "Feature showcase",
+    caption: "Se Reachr i aksjon — ett verktøy for hele salgsprosessen.",
+    slides: s2Slides,
+    Renderer: S2Slide as React.FC<{ slide: any; idx: number; total: number; showGuide: boolean }>,
   },
   {
-    id: 2,
-    name: "Grønn impact",
-    caption: "Tallene snakker for seg selv.",
-    slides: serie3,
-    Renderer: S3Slide as React.FC<{ slide: any; idx: number; total: number }>,
+    id: 2, name: "Store tall",
+    caption: "Tallene bak Reachr — norsk B2B-salg i praksis.",
+    slides: s3Slides,
+    Renderer: S3Slide as React.FC<{ slide: any; idx: number; total: number; showGuide: boolean }>,
   },
   {
-    id: 3,
-    name: "Oransje energi",
-    caption: "Slutt å jakte leads manuelt — vi gjør det for deg.",
-    slides: serie4,
-    Renderer: S4Slide as React.FC<{ slide: any; idx: number; total: number }>,
-  },
-  {
-    id: 4,
-    name: "Mørk minimalistisk",
+    id: 3, name: "Sitat / Hook",
     caption: "Salg handler ikke om å jobbe hardere — men smartere.",
-    slides: serie5,
-    Renderer: S5Slide as React.FC<{ slide: any; idx: number; total: number }>,
+    slides: s4Slides,
+    Renderer: S4Slide as React.FC<{ slide: any; idx: number; total: number; showGuide: boolean }>,
+  },
+  {
+    id: 4, name: "Tips & Verdi",
+    caption: "5 grunner til at norske selgere velger Reachr.",
+    slides: s5Slides,
+    Renderer: S5Slide as React.FC<{ slide: any; idx: number; total: number; showGuide: boolean }>,
   },
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────
 // MAIN PAGE
 // ─────────────────────────────────────────────────────────────────────────────
-
 import React from "react";
 
 export default function TiktokPage() {
   const [seriesIdx, setSeriesIdx] = useState(0);
   const [slideIdx, setSlideIdx] = useState(0);
+  const [showGuide, setShowGuide] = useState(false);
 
-  const series = seriesMeta[seriesIdx];
+  const series = SERIES[seriesIdx];
   const { Renderer } = series;
   const total = series.slides.length;
 
@@ -727,32 +716,28 @@ export default function TiktokPage() {
   return (
     <div
       className="min-h-screen flex flex-col items-center justify-center gap-5 py-12 px-4"
-      style={{ background: "#111", fontFamily: "Inter, system-ui, sans-serif" }}
+      style={{ background: "#1a1a1a", fontFamily: "Inter, system-ui, sans-serif" }}
     >
       {/* Header */}
-      <div className="text-center">
-        <p style={{ color: "#555", fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase" }}>
-          TikTok Slideshow · 9×16
-        </p>
-      </div>
+      <p style={{ color: "#555", fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase" }}>
+        TikTok Slideshow · 9×16 · Lys krem-tema
+      </p>
 
-      {/* Serie-velger */}
-      <div className="flex flex-wrap justify-center gap-2 max-w-md">
-        {seriesMeta.map((s, i) => (
+      {/* Serie tabs */}
+      <div className="flex flex-wrap justify-center gap-2 max-w-lg">
+        {SERIES.map((s, i) => (
           <button
             key={s.id}
             onClick={() => changeSeries(i)}
             style={{
-              padding: "6px 16px",
-              borderRadius: 99,
-              fontSize: 12,
-              fontWeight: 600,
+              padding: "6px 16px", borderRadius: 99,
+              fontSize: 12, fontWeight: 600,
               border: "1.5px solid",
-              borderColor: i === seriesIdx ? "#fff" : "#2a2a2a",
-              background: i === seriesIdx ? "#fff" : "transparent",
-              color: i === seriesIdx ? "#111" : "#666",
+              borderColor: i === seriesIdx ? "#09fe94" : "#2a2a2a",
+              background: i === seriesIdx ? "#09fe94" : "transparent",
+              color: i === seriesIdx ? "#171717" : "#666",
               cursor: "pointer",
-              transition: "all 0.2s",
+              transition: "all 0.18s",
             }}
           >
             {i + 1}. {s.name}
@@ -761,33 +746,33 @@ export default function TiktokPage() {
       </div>
 
       {/* Caption */}
-      <p style={{ color: "#555", fontSize: 13, fontStyle: "italic", textAlign: "center", maxWidth: 360 }}>
+      <p style={{ color: "#555", fontSize: 13, fontStyle: "italic", textAlign: "center", maxWidth: 380 }}>
         "{series.caption}"
       </p>
 
-      {/* 9:16 Slide */}
+      {/* ── 9:16 slide canvas ── */}
       <div
         style={{
-          width: 405,
-          height: 720,
-          borderRadius: 28,
+          width: 405, height: 720,
+          borderRadius: 24,
           overflow: "hidden",
           position: "relative",
-          boxShadow: "0 0 100px rgba(0,0,0,0.9), 0 0 0 1px #222",
+          boxShadow: "0 0 80px rgba(0,0,0,0.8), 0 0 0 1px #2a2a2a",
           flexShrink: 0,
         }}
       >
-        <Renderer slide={series.slides[slideIdx]} idx={slideIdx} total={total} />
+        <Renderer slide={series.slides[slideIdx]} idx={slideIdx} total={total} showGuide={showGuide} />
       </div>
 
-      {/* Navigasjon */}
+      {/* Navigation */}
       <div className="flex items-center gap-4">
         <button
           onClick={() => setSlideIdx((i) => Math.max(0, i - 1))}
           disabled={slideIdx === 0}
           style={{
-            padding: "10px 22px", borderRadius: 12, fontSize: 13, fontWeight: 600,
-            background: slideIdx === 0 ? "#1a1a1a" : "#2a2a2a",
+            padding: "10px 22px", borderRadius: 12,
+            fontSize: 13, fontWeight: 600,
+            background: slideIdx === 0 ? "#111" : "#2a2a2a",
             color: slideIdx === 0 ? "#333" : "#fff",
             border: "1.5px solid #333",
             cursor: slideIdx === 0 ? "not-allowed" : "pointer",
@@ -805,8 +790,7 @@ export default function TiktokPage() {
                 width: i === slideIdx ? 20 : 8, height: 8,
                 borderRadius: 4,
                 background: i === slideIdx ? "#09fe94" : "#333",
-                border: "none",
-                cursor: "pointer",
+                border: "none", cursor: "pointer",
                 transition: "width 0.2s",
               }}
             />
@@ -817,8 +801,9 @@ export default function TiktokPage() {
           onClick={() => setSlideIdx((i) => Math.min(total - 1, i + 1))}
           disabled={slideIdx === total - 1}
           style={{
-            padding: "10px 22px", borderRadius: 12, fontSize: 13, fontWeight: 600,
-            background: slideIdx === total - 1 ? "#1a1a1a" : "#09fe94",
+            padding: "10px 22px", borderRadius: 12,
+            fontSize: 13, fontWeight: 600,
+            background: slideIdx === total - 1 ? "#111" : "#09fe94",
             color: slideIdx === total - 1 ? "#333" : "#171717",
             border: "1.5px solid #333",
             cursor: slideIdx === total - 1 ? "not-allowed" : "pointer",
@@ -828,10 +813,26 @@ export default function TiktokPage() {
         </button>
       </div>
 
-      {/* Export hint */}
-      <p style={{ color: "#333", fontSize: 11, textAlign: "center", maxWidth: 340, lineHeight: 1.6 }}>
-        Tips: Høyreklikk på slide → «Inspect» → «Capture node screenshot» i DevTools for å eksportere som PNG til TikTok.
-      </p>
+      {/* Dev tools */}
+      <div className="flex items-center gap-4">
+        <button
+          onClick={() => setShowGuide((v) => !v)}
+          style={{
+            padding: "6px 16px", borderRadius: 99,
+            fontSize: 11, fontWeight: 600,
+            background: showGuide ? "#ff470a22" : "#2a2a2a",
+            color: showGuide ? "#ff470a" : "#666",
+            border: `1.5px solid ${showGuide ? "#ff470a44" : "#333"}`,
+            cursor: "pointer",
+          }}
+        >
+          {showGuide ? "⚠ Safe zone: på" : "Safe zone guide"}
+        </button>
+
+        <p style={{ color: "#333", fontSize: 11 }}>
+          Høyreklikk på slide → Inspect → «Capture node screenshot»
+        </p>
+      </div>
     </div>
   );
 }
