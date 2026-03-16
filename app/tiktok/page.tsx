@@ -28,9 +28,9 @@ const slides = [
   {
     id: 3,
     bg: "#1a1a1a",
-    screenBg: "#171717",
+    screenBg: "#f2efe3",
     accent: "#09fe94",
-    textColor: "#f2efe3",
+    textColor: "#171717",
     headline: "AI skriver\ne-posten for deg",
     sub: "Generer personlige salgsmeldinger basert på din pitch og kundens profil — på sekunder.",
     mockup: "email",
@@ -40,7 +40,7 @@ const slides = [
     id: 4,
     bg: "#1a1a1a",
     screenBg: "#f2efe3",
-    accent: "#ff470a",
+    accent: "#09fe94",
     textColor: "#171717",
     headline: "Ikke mist en\noppfølging",
     sub: "Få varsler når leads trenger kontakt. Aldri gå glipp av en mulighet igjen.",
@@ -50,8 +50,8 @@ const slides = [
   {
     id: 5,
     bg: "#1a1a1a",
-    screenBg: "#09fe94",
-    accent: "#171717",
+    screenBg: "#f2efe3",
+    accent: "#09fe94",
     textColor: "#171717",
     headline: "Selg mer.\nBruk mindre tid.",
     sub: "Reachr samler søk, CRM og AI i én enkel plattform for norske selgere.",
@@ -163,11 +163,11 @@ function EmailMockup({ accent }: { accent: string }) {
     <div className="w-full flex flex-col gap-2.5">
       <div
         className="rounded-2xl p-4"
-        style={{ background: "#1e1e1e", border: "1.5px solid #333" }}
+        style={{ background: "#faf8f2", border: "1.5px solid #d8d3c5" }}
       >
         <div className="text-xs text-[#a09b8f] mb-1">Til: kontakt@bergenbygg.no</div>
-        <div className="text-xs font-semibold text-[#f2efe3] mb-3">Emne: Spar tid på prosjektstyring</div>
-        <div className="text-xs text-[#a09b8f] leading-relaxed">
+        <div className="text-xs font-semibold text-[#171717] mb-3">Emne: Spar tid på prosjektstyring</div>
+        <div className="text-xs text-[#6b6660] leading-relaxed">
           Hei Lars,
           <br /><br />
           Jeg så at Bergen Bygg & Anlegg nylig har vokst til 8 ansatte — gratulerer! Vi hjelper byggebransjen med å automatisere kundeoppfølging…
