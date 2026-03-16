@@ -1,10 +1,15 @@
 "use client";
 import Link from "next/link";
-import { ArrowRight, MapPin, Users, TrendingUp, Building2 } from "lucide-react";
-import { motion, useMotionValue, useAnimationFrame } from "framer-motion";
-import { useRef } from "react";
+import { ArrowRight } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useState } from "react";
 import { WordRotate } from "@/components/ui/word-rotate";
 import { useLanguage } from "@/lib/i18n/language-context";
+import { SlidesConceptOne } from "./slides-concept-1";
+import { SlidesConceptTwo } from "./slides-concept-2";
+import { SlidesConceptThree } from "./slides-concept-3";
+import { SlidesConceptFour } from "./slides-concept-4";
+import { SlidesConceptFive } from "./slides-concept-5";
 
 const industriesNo = [
   "rørleggere",
@@ -28,61 +33,48 @@ const industriesEn = [
   "real estate agents",
 ];
 
-const leadCards = [
-  { name: "Bjørnstad & Sønner AS", industry: "Rørlegger", city: "Oslo", employees: 12, revenue: "8,2 mill", status: "Ikke kontaktet", statusColor: "#e8e4d8", statusText: "#6b6660" },
-  { name: "Nordic Print Solutions", industry: "Trykk & Design", city: "Bergen", employees: 7, revenue: "4,5 mill", status: "Kontaktet", statusColor: "#09fe94", statusText: "#065c3a" },
-  { name: "Vestland Elektro AS", industry: "Elektriker", city: "Stavanger", employees: 24, revenue: "18,1 mill", status: "Booket møte", statusColor: "#ffad0a", statusText: "#7a4f00" },
-  { name: "Hav & Kyst Reklame", industry: "Reklame", city: "Tromsø", employees: 5, revenue: "2,9 mill", status: "Ikke kontaktet", statusColor: "#e8e4d8", statusText: "#6b6660" },
-  { name: "Kjeldsberg Bygg AS", industry: "Bygg & Anlegg", city: "Trondheim", employees: 38, revenue: "42,0 mill", status: "Kunde", statusColor: "#171717", statusText: "#09fe94" },
-  { name: "Norsk Logistikk Drift", industry: "Transport", city: "Drammen", employees: 19, revenue: "11,3 mill", status: "Kontaktet", statusColor: "#09fe94", statusText: "#065c3a" },
-  { name: "Fjord Tech Solutions", industry: "IT & Software", city: "Ålesund", employees: 11, revenue: "6,8 mill", status: "Booket møte", statusColor: "#ffad0a", statusText: "#7a4f00" },
-  { name: "Bakke & Lund Advokater", industry: "Juridisk", city: "Oslo", employees: 8, revenue: "9,4 mill", status: "Ikke kontaktet", statusColor: "#e8e4d8", statusText: "#6b6660" },
-  { name: "Polaris Renhold AS", industry: "Renhold", city: "Bodø", employees: 31, revenue: "14,7 mill", status: "Kunde", statusColor: "#171717", statusText: "#09fe94" },
-  { name: "Sunnfjord Catering", industry: "Mat & Drikke", city: "Florø", employees: 6, revenue: "3,1 mill", status: "Avslått", statusColor: "#ff470a", statusText: "#fff" },
+const concepts = [
+  {
+    id: 1,
+    name: "Dobbel-rad karusell",
+    caption: "Se alle leads – alltid ett steg foran",
+    theme: "light" as const,
+    component: <SlidesConceptOne />,
+  },
+  {
+    id: 2,
+    name: "Mørk live-feed",
+    caption: "Din salgspipeline — live og i bevegelse",
+    theme: "dark" as const,
+    component: <SlidesConceptTwo />,
+  },
+  {
+    id: 3,
+    name: "AI-meldingsgenerator",
+    caption: "AI skriver — du sender — kunden svarer",
+    theme: "light" as const,
+    component: <SlidesConceptThree />,
+  },
+  {
+    id: 4,
+    name: "Bransje-explorer",
+    caption: "250 000+ norske bedrifter — finn din neste kunde",
+    theme: "light" as const,
+    component: <SlidesConceptFour />,
+  },
+  {
+    id: 5,
+    name: "Mørk salgstall-scoreboard",
+    caption: "Selgere på Reachr lukker 3× flere deals",
+    theme: "dark" as const,
+    component: <SlidesConceptFive />,
+  },
 ];
-
-function LeadCard({ card }: { card: typeof leadCards[0] }) {
-  return (
-    <div className="mx-3 w-[260px] shrink-0 rounded-2xl border border-[#d8d3c5] bg-[#faf8f2] p-4 shadow-sm">
-      <div className="flex items-start justify-between mb-3">
-        <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-xl bg-[#e8e4d8] flex items-center justify-center shrink-0">
-            <Building2 size={16} className="text-[#6b6660]" />
-          </div>
-          <div>
-            <p className="text-xs font-bold text-[#171717] leading-tight" style={{ fontFamily: "'Inter', sans-serif" }}>{card.name}</p>
-            <p className="text-[10px] text-[#a09b8f] mt-0.5">{card.industry}</p>
-          </div>
-        </div>
-        <span
-          className="text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0"
-          style={{ backgroundColor: card.statusColor, color: card.statusText }}
-        >
-          {card.status}
-        </span>
-      </div>
-      <div className="flex items-center gap-4 text-[10px] text-[#6b6660]">
-        <span className="flex items-center gap-1"><MapPin size={9} />{card.city}</span>
-        <span className="flex items-center gap-1"><Users size={9} />{card.employees} ans.</span>
-        <span className="flex items-center gap-1"><TrendingUp size={9} />{card.revenue}</span>
-      </div>
-    </div>
-  );
-}
 
 export function Hero() {
   const { lang } = useLanguage();
   const industries = lang === "en" ? industriesEn : industriesNo;
-  const doubled = [...leadCards, ...leadCards];
-  const trackRef = useRef<HTMLDivElement>(null);
-  const x = useMotionValue(0);
-
-  useAnimationFrame((_, delta) => {
-    if (!trackRef.current) return;
-    const halfW = trackRef.current.scrollWidth / 2;
-    const next = x.get() - (halfW / 40000) * delta;
-    x.set(next <= -halfW ? next + halfW : next);
-  });
+  const [active, setActive] = useState(0);
 
   return (
     <section className="bg-[#f2efe3] pt-32 pb-0 overflow-hidden">
@@ -151,24 +143,69 @@ export function Hero() {
         </p>
       </motion.div>
 
+      {/* ── Slideshow-konsept-velger ─────────────────────────────────── */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ duration: 1, delay: 0.5 }}
-        className="relative w-full pb-14"
+        transition={{ duration: 0.8, delay: 0.4 }}
+        className="w-full pb-16"
       >
-        <div className="pointer-events-none absolute left-0 top-0 h-full w-28 z-10 bg-gradient-to-r from-[#f2efe3] to-transparent" />
-        <div className="pointer-events-none absolute right-0 top-0 h-full w-28 z-10 bg-gradient-to-l from-[#f2efe3] to-transparent" />
+        {/* Tab-velger */}
+        <div className="mx-auto max-w-4xl px-6 mb-6">
+          <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide">
+            {concepts.map((c, i) => (
+              <button
+                key={c.id}
+                onClick={() => setActive(i)}
+                className="shrink-0 rounded-full px-4 py-1.5 text-[11px] font-semibold transition-all duration-200 border"
+                style={{
+                  backgroundColor: active === i ? "#171717" : "#faf8f2",
+                  color: active === i ? "#09fe94" : "#6b6660",
+                  borderColor: active === i ? "#171717" : "#d8d3c5",
+                  fontFamily: "'Inter', sans-serif",
+                }}
+              >
+                {c.id}. {c.name}
+              </button>
+            ))}
+          </div>
+        </div>
 
-        <motion.div
-          ref={trackRef}
-          className="flex"
-          style={{ x, willChange: "transform" }}
+        {/* Caption */}
+        <AnimatePresence mode="wait">
+          <motion.p
+            key={active}
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -6 }}
+            transition={{ duration: 0.25 }}
+            className="mx-auto max-w-4xl px-6 mb-5 text-[13px] text-[#6b6660] italic"
+            style={{ fontFamily: "'EB Garamond', Georgia, serif" }}
+          >
+            "{concepts[active].caption}"
+          </motion.p>
+        </AnimatePresence>
+
+        {/* Slideshow */}
+        <div
+          className="mx-auto max-w-4xl px-6"
+          style={{
+            // Mørke konsepter (2 og 5) vises på mørk bakgrunn, lyse på krem
+            paddingTop: concepts[active].theme === "dark" ? 0 : 0,
+          }}
         >
-          {doubled.map((card, i) => (
-            <LeadCard key={i} card={card} />
-          ))}
-        </motion.div>
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={active}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -12 }}
+              transition={{ duration: 0.3, ease: "easeOut" }}
+            >
+              {concepts[active].component}
+            </motion.div>
+          </AnimatePresence>
+        </div>
       </motion.div>
     </section>
   );
