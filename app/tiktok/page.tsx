@@ -218,7 +218,7 @@ function S1Slide({ slide, idx, total, showGuide }: { slide: typeof s1Slides[0]; 
             fontWeight: 800,
             fontSize: 16,
             color: "#171717",
-            display: "inline-block",
+            alignSelf: "flex-start",
           }}
         >
           Start gratis →
@@ -342,7 +342,7 @@ function S2Slide({ slide, idx, total, showGuide }: { slide: typeof s2Slides[0]; 
             fontWeight: 800,
             fontSize: 16,
             color: "#171717",
-            textAlign: "center" as const,
+            alignSelf: "flex-start",
           }}
         >
           reachr.no — start gratis →
@@ -648,7 +648,7 @@ function S5Slide({ slide, idx, total, showGuide }: { slide: typeof s5Slides[0]; 
             fontWeight: 800,
             fontSize: 16,
             color: "#171717",
-            textAlign: "center" as const,
+            alignSelf: "flex-start",
           }}
         >
           reachr.no — start gratis →
