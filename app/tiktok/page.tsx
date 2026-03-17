@@ -299,17 +299,17 @@ function S4Slide({ slide, idx, total, showGuide }: { slide: typeof s4Slides[0]; 
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// SERIE 5 — "NORSK B2B I 2025" (Market facts & trends)
-// Caption: "5 ting du må vite om norsk B2B-salg i 2025."
+// SERIE 5 — "NORSK B2B I 2026" (Market facts & trends)
+// Caption: "5 ting du må vite om norsk B2B-salg i 2026."
 // ─────────────────────────────────────────────────────────────────────────────
 const s5Slides = [
-  { type: "hook" as const, headline: "Norsk B2B\ni 2025:\nhva endrer\nseg nå.", sub: "Fem fakta alle norske selgere bør kjenne til." },
+  { type: "hook" as const, headline: "Norsk B2B\ni 2026:\nhva endrer\nseg nå.", sub: "Fem fakta alle norske selgere bør kjenne til." },
   { type: "fact" as const, num: "01", fact: "Beslutnings-\ntagere er\nyngre.", stat: "Gjennomsnittsalder: 38 år", insight: "De forventer rask, digital kommunikasjon. Ikke lange telefonsamtaler." },
   { type: "fact" as const, num: "02", fact: "67 % av\nkjøpsreisen\ner ferdig.", stat: "Før første salgsmøte", insight: "Kunden vet hva de vil. Din jobb er å dukke opp på riktig tidspunkt." },
   { type: "fact" as const, num: "03", fact: "Hyper-\nlokal\nallocation.", stat: "3× høyere konvertering", insight: "Bedrifter kjøper helst lokalt. Kommune-filter i Reachr gir deg fordelen." },
   { type: "fact" as const, num: "04", fact: "Personali-\nsering\nvinner.", stat: "+41 % åpningsrate", insight: "E-poster som nevner bedriftens navn og bransje slår generiske maler." },
   { type: "fact" as const, num: "05", fact: "Oppfølging\ner gull.", stat: "80 % av salg etter kontakt 5+", insight: "De fleste gir opp etter 1–2 forsøk. Automatisering er svaret." },
-  { type: "cta" as const, headline: "Klar for\n2025?", sub: "Reachr er bygget for norsk B2B — akkurat slik det er nå.", cta: "Start på reachr.no →" },
+  { type: "cta" as const, headline: "Klar for\n2026?", sub: "Reachr er bygget for norsk B2B — akkurat slik det er nå.", cta: "Start på reachr.no →" },
 ];
 
 function S5Slide({ slide, idx, total, showGuide }: { slide: typeof s5Slides[0]; idx: number; total: number; showGuide: boolean }) {
@@ -685,7 +685,7 @@ const SERIES = [
   { id: 1, name: "5 tegn på at du trenger Reachr", caption: "Kjenner du deg igjen? Da er Reachr laget for deg.", slides: s2Slides, Renderer: S2Slide as React.FC<{ slide: any; idx: number; total: number; showGuide: boolean }> },
   { id: 2, name: "Pipeline på 30 min", caption: "Vi utfordrer deg: bygg en full pipeline på under 30 minutter med Reachr.", slides: s3Slides, Renderer: S3Slide as React.FC<{ slide: any; idx: number; total: number; showGuide: boolean }> },
   { id: 3, name: "AI-outreach som konverterer", caption: "Hva skiller en AI-melding som konverterer fra en som slettes?", slides: s4Slides, Renderer: S4Slide as React.FC<{ slide: any; idx: number; total: number; showGuide: boolean }> },
-  { id: 4, name: "Norsk B2B i 2025", caption: "5 ting du må vite om norsk B2B-salg i 2025.", slides: s5Slides, Renderer: S5Slide as React.FC<{ slide: any; idx: number; total: number; showGuide: boolean }> },
+  { id: 4, name: "Norsk B2B i 2026", caption: "5 ting du må vite om norsk B2B-salg i 2026.", slides: s5Slides, Renderer: S5Slide as React.FC<{ slide: any; idx: number; total: number; showGuide: boolean }> },
   { id: 5, name: "Aldri mist et lead", caption: "Sånn sørger toppselgere for at ingen leads faller mellom stolene.", slides: s6Slides, Renderer: S6Slide as React.FC<{ slide: any; idx: number; total: number; showGuide: boolean }> },
   { id: 6, name: "Fra fremmed til fast kunde", caption: "De fem stegene fra ukjent bedrift til lojal kunde — med Reachr.", slides: s7Slides, Renderer: S7Slide as React.FC<{ slide: any; idx: number; total: number; showGuide: boolean }> },
   { id: 7, name: "Hva koster én salgsuke?", caption: "Vi regner ut hva en uke uten Reachr faktisk koster deg.", slides: s8Slides, Renderer: S8Slide as React.FC<{ slide: any; idx: number; total: number; showGuide: boolean }> },
