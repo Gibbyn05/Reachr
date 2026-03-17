@@ -110,7 +110,7 @@ function SlideShell({
       {/* ── CONTENT (safe zone) ── */}
       <div
         className="absolute flex flex-col"
-        style={{ top: 80, left: 28, right: 92, bottom: 240 }}
+        style={{ top: 80, left: 28, right: 92, bottom: 268 }}
       >
         {children}
       </div>
