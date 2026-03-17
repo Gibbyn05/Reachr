@@ -103,105 +103,110 @@ export function Hero() {
         initial={{ opacity: 0, y: 28 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.7, ease: "easeOut" }}
-        className="mx-auto max-w-4xl px-6 mb-12"
+        className="mx-auto max-w-5xl px-6 mb-12"
       >
-        <h1
-          className="text-[clamp(2rem,4vw,3rem)] leading-[1.05] tracking-[-0.01em] text-[#171717]"
-          style={{ fontFamily: "'EB Garamond', Georgia, serif" }}
-        >
-          <span className="block font-[700]">
-            {lang === "en" ? "Find customers" : "Finn kunder"}
-          </span>
+        <div className="flex flex-col md:flex-row md:items-start md:gap-12">
+          {/* Left column */}
+          <div className="flex-1 min-w-0">
+            <h1
+              className="text-[clamp(2rem,4vw,3rem)] leading-[1.05] tracking-[-0.01em] text-[#171717]"
+              style={{ fontFamily: "'EB Garamond', Georgia, serif" }}
+            >
+              <span className="block font-[700]">
+                {lang === "en" ? "Find customers" : "Finn kunder"}
+              </span>
 
-          <span className="flex items-center gap-0 flex-nowrap">
-            <span className="italic font-[500] text-[#171717] mr-3">for</span>
-            <span className="border-b-2 border-[#ff470a] pb-0" style={{ borderColor: "#ff470a" }}>
-              <WordRotate
-                key={lang}
-                words={industries}
-                duration={2000}
-                className="italic font-[600] text-[#ff470a]"
-              />
-            </span>
-            <motion.span
-              className="inline-block w-[2px] ml-1.5 rounded-sm bg-[#ff470a]"
-              style={{ height: "0.8em", verticalAlign: "middle", marginBottom: "0.05em" }}
-              animate={{ opacity: [1, 0, 1] }}
-              transition={{ repeat: Infinity, duration: 0.9, ease: "linear", times: [0, 0.49, 0.5] }}
-            />
-          </span>
-        </h1>
+              <span className="flex items-center gap-0 flex-nowrap">
+                <span className="italic font-[500] text-[#171717] mr-3">for</span>
+                <span className="border-b-2 border-[#ff470a] pb-0" style={{ borderColor: "#ff470a" }}>
+                  <WordRotate
+                    key={lang}
+                    words={industries}
+                    duration={2000}
+                    className="italic font-[600] text-[#ff470a]"
+                  />
+                </span>
+                <motion.span
+                  className="inline-block w-[2px] ml-1.5 rounded-sm bg-[#ff470a]"
+                  style={{ height: "0.8em", verticalAlign: "middle", marginBottom: "0.05em" }}
+                  animate={{ opacity: [1, 0, 1] }}
+                  transition={{ repeat: Infinity, duration: 0.9, ease: "linear", times: [0, 0.49, 0.5] }}
+                />
+              </span>
+            </h1>
 
-        <p
-          className="mt-6 text-[1.1rem] text-[#6b6660] max-w-md leading-relaxed"
-          style={{ fontFamily: "'Inter', sans-serif" }}
-        >
-          {lang === "en"
-            ? "Search 250,000+ Norwegian companies. Add them to your pipeline. Let Reachr remind you to follow up."
-            : "Søk i 250 000+ norske bedrifter. Legg dem i pipeline. La Reachr minne deg på oppfølging."}
-        </p>
+            <p
+              className="mt-6 text-[1.1rem] text-[#6b6660] max-w-md leading-relaxed"
+              style={{ fontFamily: "'Inter', sans-serif" }}
+            >
+              {lang === "en"
+                ? "Search 250,000+ Norwegian companies. Add them to your pipeline. Let Reachr remind you to follow up."
+                : "Søk i 250 000+ norske bedrifter. Legg dem i pipeline. La Reachr minne deg på oppfølging."}
+            </p>
 
-        <div className="flex flex-wrap items-center gap-4 mt-9">
-          <Link
-            href="/register"
-            className="inline-flex items-center gap-2 rounded-xl bg-[#09fe94] px-7 py-3.5 text-sm font-bold text-[#171717] shadow-[0_4px_20px_rgba(9,254,148,0.35)] transition-all duration-200 hover:bg-[#00e882] hover:-translate-y-0.5"
-            style={{ fontFamily: "'Inter', sans-serif" }}
-          >
-            {lang === "en" ? "Start for free today" : "Start gratis i dag"} <ArrowRight size={16} />
-          </Link>
-          <Link
-            href="/login"
-            className="text-sm font-semibold text-[#6b6660] hover:text-[#171717] transition-colors"
-            style={{ fontFamily: "'Inter', sans-serif" }}
-          >
-            {lang === "en" ? "Log in →" : "Logg inn →"}
-          </Link>
-        </div>
-        <p className="mt-4 text-xs text-[#a09b8f]" style={{ fontFamily: "'Inter', sans-serif" }}>
-          {lang === "en"
-            ? "3-day free trial · No credit card required"
-            : "3 dagers gratis prøveperiode · Ingen kredittkort"}
-        </p>
-
-        {/* Social proof avatars */}
-        <div className="mt-8 flex items-center gap-3">
-          <div className="flex -space-x-2.5">
-            {heroTestimonials.map((t) => (
-              <div
-                key={t.initials}
-                className="w-8 h-8 rounded-full border-2 border-[#f2efe3] flex items-center justify-center text-[9px] font-extrabold shrink-0"
-                style={{ backgroundColor: t.accent + "22", color: t.accent, filter: t.accent === "#09fe94" ? "brightness(0.65)" : "none" }}
+            <div className="flex flex-wrap items-center gap-4 mt-9">
+              <Link
+                href="/register"
+                className="inline-flex items-center gap-2 rounded-xl bg-[#09fe94] px-7 py-3.5 text-sm font-bold text-[#171717] shadow-[0_4px_20px_rgba(9,254,148,0.35)] transition-all duration-200 hover:bg-[#00e882] hover:-translate-y-0.5"
+                style={{ fontFamily: "'Inter', sans-serif" }}
               >
-                {t.initials}
+                {lang === "en" ? "Start for free today" : "Start gratis i dag"} <ArrowRight size={16} />
+              </Link>
+              <Link
+                href="/login"
+                className="text-sm font-semibold text-[#6b6660] hover:text-[#171717] transition-colors"
+                style={{ fontFamily: "'Inter', sans-serif" }}
+              >
+                {lang === "en" ? "Log in →" : "Logg inn →"}
+              </Link>
+            </div>
+            <p className="mt-4 text-xs text-[#a09b8f]" style={{ fontFamily: "'Inter', sans-serif" }}>
+              {lang === "en"
+                ? "3-day free trial · No credit card required"
+                : "3 dagers gratis prøveperiode · Ingen kredittkort"}
+            </p>
+
+            {/* Social proof avatars */}
+            <div className="mt-8 flex items-center gap-3">
+              <div className="flex -space-x-2.5">
+                {heroTestimonials.map((t) => (
+                  <div
+                    key={t.initials}
+                    className="w-8 h-8 rounded-full border-2 border-[#f2efe3] flex items-center justify-center text-[9px] font-extrabold shrink-0"
+                    style={{ backgroundColor: t.accent + "22", color: t.accent, filter: t.accent === "#09fe94" ? "brightness(0.65)" : "none" }}
+                  >
+                    {t.initials}
+                  </div>
+                ))}
+              </div>
+              <p className="text-xs text-[#6b6660]" style={{ fontFamily: "'Inter', sans-serif" }}>
+                <span className="font-bold text-[#171717]">140+</span>{" "}
+                {lang === "en" ? "Norwegian sellers use Reachr" : "norske selgere bruker Reachr"}
+              </p>
+            </div>
+          </div>
+
+          {/* Right column — Mini testimonials */}
+          <div className="mt-10 md:mt-0 md:w-[340px] shrink-0 flex flex-col gap-3 justify-center">
+            {heroTestimonials.map((t) => (
+              <div key={t.initials} className="flex items-start gap-3 rounded-xl border border-[#d8d3c5] bg-[#faf8f2] px-4 py-3">
+                <div
+                  className="w-7 h-7 rounded-full flex items-center justify-center text-[9px] font-extrabold shrink-0 mt-0.5"
+                  style={{ backgroundColor: t.accent + "22", color: t.accent, filter: t.accent === "#09fe94" ? "brightness(0.65)" : "none" }}
+                >
+                  {t.initials}
+                </div>
+                <div>
+                  <p className="text-xs text-[#3d3a34] leading-relaxed" style={{ fontFamily: "'Inter', sans-serif" }}>
+                    <span className="italic">"{t.quote}"</span>
+                  </p>
+                  <p className="text-[10px] text-[#a09b8f] mt-1" style={{ fontFamily: "'Inter', sans-serif" }}>
+                    — {t.name}, {t.title}
+                  </p>
+                </div>
               </div>
             ))}
           </div>
-          <p className="text-xs text-[#6b6660]" style={{ fontFamily: "'Inter', sans-serif" }}>
-            <span className="font-bold text-[#171717]">140+</span>{" "}
-            {lang === "en" ? "Norwegian sellers use Reachr" : "norske selgere bruker Reachr"}
-          </p>
-        </div>
-
-        {/* Mini testimonials */}
-        <div className="mt-6 flex flex-col gap-3 max-w-lg">
-          {heroTestimonials.map((t) => (
-            <div key={t.initials} className="flex items-start gap-3 rounded-xl border border-[#d8d3c5] bg-[#faf8f2] px-4 py-3">
-              <div
-                className="w-7 h-7 rounded-full flex items-center justify-center text-[9px] font-extrabold shrink-0 mt-0.5"
-                style={{ backgroundColor: t.accent + "22", color: t.accent, filter: t.accent === "#09fe94" ? "brightness(0.65)" : "none" }}
-              >
-                {t.initials}
-              </div>
-              <div>
-                <p className="text-xs text-[#3d3a34] leading-relaxed" style={{ fontFamily: "'Inter', sans-serif" }}>
-                  <span className="italic">"{t.quote}"</span>
-                </p>
-                <p className="text-[10px] text-[#a09b8f] mt-1" style={{ fontFamily: "'Inter', sans-serif" }}>
-                  — {t.name}, {t.title}
-                </p>
-              </div>
-            </div>
-          ))}
         </div>
       </motion.div>
 
