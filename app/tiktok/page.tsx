@@ -65,14 +65,14 @@ function SlideShell({ idx, total, children, showGuide }: { idx: number; total: n
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// SERIE 1 — "LINKEDIN ER METTET" (Bold stats, LinkedIn saturation)
+// SERIE 1 — "LINKEDIN ER METTET" (LinkedIn saturation, bold stats)
 // Caption: "Hvorfor LinkedIn ikke lenger er gullstandarden for norsk B2B-salg."
 // ─────────────────────────────────────────────────────────────────────────────
 const s1Slides = [
   { type: "hook" as const, label: "Hot take 🔥", headline: "LinkedIn\ner\nmettet.", sub: "Innboksen er full. Ingen leser deg. Her er hva som faktisk virker nå." },
   { type: "stat" as const, number: "89 %", claim: "av LinkedIn InMail-er ignoreres", context: "Algoritmene prioriterer annonser. Organisk rekkevidde er nær null." },
   { type: "stat" as const, number: "1 av 12", claim: "kalde LinkedIn-meldinger får svar", context: "Og de fleste svar er negative. Du betaler med tid og omdømme." },
-  { type: "stat" as const, number: "250 000+", claim: "norske bedrifter søkbart i Reachr", context: "Brønnøysundregistrene er åpent. Reachr gjør det søkbart — på sekunder." },
+  { type: "stat" as const, number: "250 000+", claim: "norske bedrifter du kan søke i gratis", context: "Brønnøysundregistrene er åpent. Reachr gjør det søkbart — på sekunder." },
   { type: "insight" as const, label: "Løsningen", headline: "Gå\ndirekte\ntil kilden.", body: "Finn kontakten via offisielle registre. Ikke kamp om oppmerksomhet i feed. Direkte, personlig, relevant." },
   { type: "cta" as const, headline: "Slutt\nå rope\ni tomrom.", cta: "Finn riktige leads på reachr.no →" },
 ];
@@ -91,7 +91,7 @@ function S1Slide({ slide, idx, total, showGuide }: { slide: typeof s1Slides[0]; 
       )}
       {slide.type === "stat" && (
         <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center" }}>
-          <p style={{ fontFamily: "Inter, system-ui, sans-serif", fontSize: 68, fontWeight: 900, color: "#ff470a", lineHeight: 1, letterSpacing: "-3px" }}>{slide.number}</p>
+          <p style={{ fontFamily: "Inter, system-ui, sans-serif", fontSize: 72, fontWeight: 900, color: "#ff470a", lineHeight: 1, letterSpacing: "-3px" }}>{slide.number}</p>
           <p style={{ fontFamily: "Inter, system-ui, sans-serif", fontSize: 18, fontWeight: 700, color: "#171717", lineHeight: 1.2, marginTop: 8, marginBottom: 20 }}>{slide.claim}</p>
           <div style={{ height: 1, background: "#d8d3c5", marginBottom: 16 }} />
           <p style={{ color: "#6b6660", fontSize: 13, lineHeight: 1.65 }}>{slide.context}</p>
@@ -126,10 +126,10 @@ const s2Slides = [
   { type: "hook" as const, headline: "5 tegn på\nat du bruker\nfor mye tid\npå leads.", sub: "Kjenner du deg igjen i to eller flere? Les videre." },
   { type: "sign" as const, num: "01", sign: "Du googler\nbedrifter\nmanuelt.", detail: "Kopi-lim fra nettsider inn i Excel. Igjen og igjen." },
   { type: "sign" as const, num: "02", sign: "Du vet ikke\nhvem som er\nklar til å kjøpe.", detail: "Du ringer alle — uten å vite hvem som faktisk passer." },
-  { type: "sign" as const, num: "03", sign: "Du glemmer\nå følge\nopp leads.", detail: "Deals dør fordi du ikke husket å sende den andre e-posten." },
+  { type: "sign" as const, num: "03", sign: "Du glemmer\nå følge opp\nleads.", detail: "Deals dør fordi du ikke husket å sende den andre e-posten." },
   { type: "sign" as const, num: "04", sign: "Meldingene\ndine er\nkopierte maler.", detail: "Alle ser at du ikke har lest om dem. Svarprosenten lider." },
   { type: "sign" as const, num: "05", sign: "Du vet ikke\nhvor salget\nstår.", detail: "Ingen oversikt. Ingen pipeline. Ingen kontroll." },
-  { type: "cta" as const, headline: "Alle 5?\nDa er\nReachr\nfor deg.", cta: "Start gratis på reachr.no →" },
+  { type: "cta" as const, headline: "Alle 5?\nDa er\nReachr for deg.", cta: "Start gratis på reachr.no →" },
 ];
 
 function S2Slide({ slide, idx, total, showGuide }: { slide: typeof s2Slides[0]; idx: number; total: number; showGuide: boolean }) {
@@ -149,7 +149,7 @@ function S2Slide({ slide, idx, total, showGuide }: { slide: typeof s2Slides[0]; 
           <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#a09b8f", marginBottom: 12 }}>Tegn #{slide.num}</p>
           <div style={{ background: "#faf8f2", border: "2px solid #ff470a22", borderRadius: 16, padding: "20px 18px", marginBottom: 20 }}>
             {slide.sign.split("\n").map((line, i) => (
-              <p key={i} style={{ fontFamily: "Inter, system-ui, sans-serif", fontSize: 36, fontWeight: 900, color: "#ff470a", lineHeight: 1.05, letterSpacing: "-1px" }}>{line}</p>
+              <p key={i} style={{ fontFamily: "Inter, system-ui, sans-serif", fontSize: 38, fontWeight: 900, color: "#ff470a", lineHeight: 1.05, letterSpacing: "-1px" }}>{line}</p>
             ))}
           </div>
           <p style={{ color: "#6b6660", fontSize: 13, lineHeight: 1.65 }}>{slide.detail}</p>
@@ -158,7 +158,7 @@ function S2Slide({ slide, idx, total, showGuide }: { slide: typeof s2Slides[0]; 
       {slide.type === "cta" && (
         <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center" }}>
           {slide.headline.split("\n").map((line, i) => (
-            <p key={i} style={{ fontFamily: "EB Garamond, Georgia, serif", fontSize: 50, fontWeight: 700, color: "#171717", lineHeight: 1.0 }}>{line}</p>
+            <p key={i} style={{ fontFamily: "EB Garamond, Georgia, serif", fontSize: 52, fontWeight: 700, color: "#171717", lineHeight: 1.0 }}>{line}</p>
           ))}
           <div style={{ marginTop: 28, background: "#09fe94", borderRadius: 14, padding: "14px 24px", fontWeight: 800, fontSize: 15, color: "#171717", alignSelf: "flex-start" }}>{slide.cta}</div>
         </div>
@@ -172,9 +172,9 @@ function S2Slide({ slide, idx, total, showGuide }: { slide: typeof s2Slides[0]; 
 // Caption: "Vi utfordrer deg: bygg en full pipeline på under 30 minutter med Reachr."
 // ─────────────────────────────────────────────────────────────────────────────
 const s3Slides = [
-  { type: "hook" as const, label: "30-minutters utfordring ⏱", headline: "Full\npipeline\npå 30\nminutter.", sub: "Vi viser deg hvordan. Steg for steg. Med klokken." },
+  { type: "hook" as const, label: "30-minutters utfordring ⏱", headline: "Full pipeline\npå 30\nminutter.", sub: "Vi viser deg hvordan. Steg for steg. Med klokken." },
   { type: "step" as const, time: "0–5 min", title: "Søk opp\nbransjen din.", body: "Gå til Reachr. Velg bransje, kommune og størrelse. Se resultater umiddelbart.", timer: "5 min" },
-  { type: "step" as const, time: "5–10 min", title: "Legg til\n20 leads.", body: "Klikk «Legg til lead» på de mest relevante bedriftene. Alle havner i pipelinen din.", timer: "10 min" },
+  { type: "step" as const, time: "5–10 min", title: "Legg til\n20 leads.", body: "Klikk «Legg til lead» på de mest relevante bedriftene. Alle havner i din pipeline.", timer: "10 min" },
   { type: "step" as const, time: "10–20 min", title: "Generer\nAI-meldinger.", body: "Velg lead, klikk AI-e-post. Reachr skriver en personlig melding basert på din pitch.", timer: "20 min" },
   { type: "step" as const, time: "20–25 min", title: "Send til\nde fem beste.", body: "Gå gjennom meldingene, tilpass minimalt, send. Fem personlige e-poster — på fem minutter.", timer: "25 min" },
   { type: "step" as const, time: "25–30 min", title: "Sett opp\nvarsler.", body: "Aktiver oppfølgingsvarsler. Reachr sier ifra når det er tid til neste kontakt.", timer: "30 min" },
@@ -263,10 +263,10 @@ function S4Slide({ slide, idx, total, showGuide }: { slide: typeof s4Slides[0]; 
       {slide.type === "element" && (
         <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
-            <div style={{ background: "#09fe94", borderRadius: 99, width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <div style={{ background: "#09fe94", borderRadius: 99, width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center" }}>
               <span style={{ fontSize: 12, fontWeight: 900, color: "#171717" }}>{slide.num}</span>
             </div>
-            <div>
+            <div style={{ flex: 1 }}>
               {slide.name.split("\n").map((line, i) => (
                 <p key={i} style={{ fontFamily: "Inter, system-ui, sans-serif", fontSize: 30, fontWeight: 900, color: "#171717", lineHeight: 1.0, letterSpacing: "-0.5px" }}>{line}</p>
               ))}
@@ -304,12 +304,12 @@ function S4Slide({ slide, idx, total, showGuide }: { slide: typeof s4Slides[0]; 
 // ─────────────────────────────────────────────────────────────────────────────
 const s5Slides = [
   { type: "hook" as const, headline: "Norsk B2B\ni 2025:\nhva endrer\nseg nå.", sub: "Fem fakta alle norske selgere bør kjenne til." },
-  { type: "fact" as const, num: "01", fact: "Beslutnings-\ntagere er\nyngre.", stat: "Snittalder: 38 år", insight: "De forventer rask, digital kommunikasjon. Ikke lange telefonsamtaler." },
+  { type: "fact" as const, num: "01", fact: "Beslutnings-\ntagere er\nyngre.", stat: "Gjennomsnittsalder: 38 år", insight: "De forventer rask, digital kommunikasjon. Ikke lange telefonsamtaler." },
   { type: "fact" as const, num: "02", fact: "67 % av\nkjøpsreisen\ner ferdig.", stat: "Før første salgsmøte", insight: "Kunden vet hva de vil. Din jobb er å dukke opp på riktig tidspunkt." },
-  { type: "fact" as const, num: "03", fact: "Hyper-lokal\ntilstedeværelse\nvinner.", stat: "3× høyere konvertering", insight: "Bedrifter kjøper helst lokalt. Kommune-filter i Reachr gir deg fordelen." },
+  { type: "fact" as const, num: "03", fact: "Hyper-\nlokal\nallocation.", stat: "3× høyere konvertering", insight: "Bedrifter kjøper helst lokalt. Kommune-filter i Reachr gir deg fordelen." },
   { type: "fact" as const, num: "04", fact: "Personali-\nsering\nvinner.", stat: "+41 % åpningsrate", insight: "E-poster som nevner bedriftens navn og bransje slår generiske maler." },
   { type: "fact" as const, num: "05", fact: "Oppfølging\ner gull.", stat: "80 % av salg etter kontakt 5+", insight: "De fleste gir opp etter 1–2 forsøk. Automatisering er svaret." },
-  { type: "cta" as const, headline: "Klar\nfor 2025?", sub: "Reachr er bygget for norsk B2B — akkurat slik det er nå.", cta: "Start på reachr.no →" },
+  { type: "cta" as const, headline: "Klar for\n2025?", sub: "Reachr er bygget for norsk B2B — akkurat slik det er nå.", cta: "Start på reachr.no →" },
 ];
 
 function S5Slide({ slide, idx, total, showGuide }: { slide: typeof s5Slides[0]; idx: number; total: number; showGuide: boolean }) {
@@ -356,11 +356,11 @@ function S5Slide({ slide, idx, total, showGuide }: { slide: typeof s5Slides[0]; 
 // Caption: "Sånn sørger toppselgere for at ingen leads faller mellom stolene."
 // ─────────────────────────────────────────────────────────────────────────────
 const s6Slides = [
-  { type: "hook" as const, label: "Oppfølging 📬", headline: "Deals\ndør i\nstillhet.", sub: "Ikke fordi kunden sa nei. Fordi du glemte å følge opp." },
+  { type: "hook" as const, label: "Oppfølging 📬", headline: "Deals\ndør i\nsansen.", sub: "Ikke fordi kunden sa nei. Fordi du glemte å følge opp." },
   { type: "problem" as const, headline: "Du har\n50 leads.", sub: "Husker du hvem du kontaktet for 12 dager siden?", highlight: "Sannsynligvis ikke." },
   { type: "data" as const, stat: "80 %", claim: "av salg krever 5+ oppfølginger", extra: "Men 44 % av selgere gir opp etter første kontakt." },
   { type: "solution" as const, label: "Reachr løser dette", points: ["Automatisk varsel når det er tid", "Pipeline viser status per lead", "Sist kontaktet — alltid synlig", "Prioritert oppfølgingsliste"] },
-  { type: "flow" as const, steps: [{ label: "Kontakt sendt", color: "#09fe94" }, { label: "Ingen svar", color: "#ffad0a" }, { label: "Varsel dag 3", color: "#ff470a" }, { label: "Oppfølging", color: "#09fe94" }, { label: "Deal lukket 🎯", color: "#171717" }] },
+  { type: "flow" as const, steps: [{ label: "Kontakt", color: "#09fe94" }, { label: "Ingen svar", color: "#ffad0a" }, { label: "Varsel dag 3", color: "#ff470a" }, { label: "Oppfølging", color: "#09fe94" }, { label: "Deal! 🎯", color: "#171717" }] },
   { type: "cta" as const, headline: "Null\ntapte\nleads.", cta: "Start med Reachr på reachr.no →" },
 ];
 
@@ -409,12 +409,13 @@ function S6Slide({ slide, idx, total, showGuide }: { slide: typeof s6Slides[0]; 
         </div>
       )}
       {slide.type === "flow" && (
-        <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", gap: 14 }}>
-          <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#a09b8f", marginBottom: 4 }}>Reachr-flyten</p>
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", gap: 8 }}>
+          <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#a09b8f", marginBottom: 8 }}>Reachr-flyten</p>
           {slide.steps.map((step, i) => (
-            <div key={i} style={{ display: "flex", alignItems: "center", gap: 12 }}>
-              <div style={{ width: 10, height: 10, borderRadius: 99, background: step.color, flexShrink: 0 }} />
+            <div key={i} style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <div style={{ width: 8, height: 8, borderRadius: 99, background: step.color, flexShrink: 0 }} />
               <p style={{ fontSize: 14, fontWeight: i === slide.steps.length - 1 ? 800 : 500, color: i === slide.steps.length - 1 ? "#171717" : "#6b6660" }}>{step.label}</p>
+              {i < slide.steps.length - 1 && <div style={{ width: 1, height: 12, background: "#d8d3c5", marginLeft: 3, position: "absolute", transform: `translateY(${14}px)` }} />}
             </div>
           ))}
         </div>
@@ -437,11 +438,11 @@ function S6Slide({ slide, idx, total, showGuide }: { slide: typeof s6Slides[0]; 
 // ─────────────────────────────────────────────────────────────────────────────
 const s7Slides = [
   { type: "hook" as const, headline: "Fra\nfremmed\ntil fast\nkunde.", sub: "Slik ser den perfekte salgsjourneen ut — steg for steg." },
-  { type: "stage" as const, stage: 1, stageTotal: 5, name: "Oppdagelse", icon: "🔍", desc: "Du finner bedriften via Reachr-søk. Bransje, størrelse og sted er akkurat riktig. 10 sekunder.", color: "#09fe94" },
-  { type: "stage" as const, stage: 2, stageTotal: 5, name: "Første kontakt", icon: "✉️", desc: "AI genererer en personlig e-post basert på bedriftsprofilen. Du sender — de åpner.", color: "#ffad0a" },
-  { type: "stage" as const, stage: 3, stageTotal: 5, name: "Oppfølging", icon: "🔔", desc: "Reachr varsler deg dag 3. Du sender en kort SMS. De husker deg nå.", color: "#ff470a" },
-  { type: "stage" as const, stage: 4, stageTotal: 5, name: "Møte booket", icon: "📅", desc: "Tredje kontaktpunkt. Status oppdateres i pipelinen. Du er klar med kontekst.", color: "#09fe94" },
-  { type: "stage" as const, stage: 5, stageTotal: 5, name: "Deal lukket", icon: "🎯", desc: "De blir kunde. Pipelinen viser 'Kunde'. Du starter prosessen med neste lead.", color: "#09fe94" },
+  { type: "stage" as const, stage: 1, total: 5, name: "Oppdagelse", icon: "🔍", desc: "Du finner bedriften via Reachr-søk. Bransje, størrelse og sted er akkurat riktig. 10 sekunder.", color: "#09fe94" },
+  { type: "stage" as const, stage: 2, total: 5, name: "Første kontakt", icon: "✉️", desc: "AI genererer en personlig e-post basert på bedriftsprofilen. Du sender — de åpner.", color: "#ffad0a" },
+  { type: "stage" as const, stage: 3, total: 5, name: "Oppfølging", icon: "🔔", desc: "Reachr varsler deg dag 3. Du sender en kort SMS. De husker deg nå.", color: "#ff470a" },
+  { type: "stage" as const, stage: 4, total: 5, name: "Møte booket", icon: "📅", desc: "Tredje kontaktpunkt. Status oppdateres i pipelinen. Du er klar med kontekst.", color: "#09fe94" },
+  { type: "stage" as const, stage: 5, total: 5, name: "Deal lukket", icon: "🎯", desc: "De blir kunde. Pipelinen viser 'Kunde'. Du starter prosessen med neste lead.", color: "#09fe94" },
   { type: "cta" as const, headline: "Start\nreisen\ni dag.", cta: "reachr.no — gratis de første 7 dager →" },
 ];
 
@@ -461,13 +462,13 @@ function S7Slide({ slide, idx, total, showGuide }: { slide: typeof s7Slides[0]; 
         <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
             <div style={{ display: "flex", gap: 6 }}>
-              {Array.from({ length: slide.stageTotal }).map((_, i) => (
+              {Array.from({ length: slide.total }).map((_, i) => (
                 <div key={i} style={{ width: i < slide.stage ? 18 : 8, height: 6, borderRadius: 3, background: i < slide.stage ? slide.color : "#d8d3c5", transition: "width 0.2s" }} />
               ))}
             </div>
-            <p style={{ fontSize: 11, color: "#a09b8f", fontWeight: 600 }}>{slide.stage}/{slide.stageTotal}</p>
+            <p style={{ fontSize: 11, color: "#a09b8f", fontWeight: 600 }}>{slide.stage}/{slide.total}</p>
           </div>
-          <div style={{ fontSize: 40, marginBottom: 12 }}>{slide.icon}</div>
+          <div style={{ fontSize: 44, marginBottom: 12 }}>{slide.icon}</div>
           <p style={{ fontFamily: "Inter, system-ui, sans-serif", fontSize: 36, fontWeight: 900, color: "#171717", lineHeight: 1.1, letterSpacing: "-1px", marginBottom: 20 }}>{slide.name}</p>
           <div style={{ background: "#faf8f2", border: `2px solid ${slide.color}33`, borderRadius: 14, padding: "14px 16px" }}>
             <p style={{ color: "#6b6660", fontSize: 13, lineHeight: 1.6 }}>{slide.desc}</p>
@@ -493,9 +494,9 @@ function S7Slide({ slide, idx, total, showGuide }: { slide: typeof s7Slides[0]; 
 const s8Slides = [
   { type: "hook" as const, headline: "Hva koster\nén uke uten\nReachr?", sub: "Spoiler: mye mer enn du tror. Vi regner det ut." },
   { type: "day" as const, day: "Mandag", hours: "2,5 t", task: "Søke opp bedrifter manuelt", cost: "1 500 kr bortkastet" },
-  { type: "day" as const, day: "Tirsdag", hours: "1 t", task: "Skrive generelle e-poster fra bunnen", cost: "600 kr + lav svarprosent" },
+  { type: "day" as const, day: "Tirsdag", hours: "1 t", task: "Skrive generelle e-poster", cost: "600 kr + lav svarprosent" },
   { type: "day" as const, day: "Onsdag", hours: "45 min", task: "Prøve å huske hvem du kontaktet", cost: "450 kr — 3 leads mistet" },
-  { type: "day" as const, day: "Torsdag", hours: "1,5 t", task: "Rapportere og oppdatere Excel-ark", cost: "900 kr i ren administrasjon" },
+  { type: "day" as const, day: "Torsdag", hours: "1,5 t", task: "Rapportere til Excel-ark", cost: "900 kr i ren administrasjon" },
   { type: "total" as const, hours: "6+ timer", cost: "3 600+ kr/uke", yearly: "180 000 kr/år", note: "Bare i bortkastet tid. Ikke medregnet tapte deals." },
   { type: "cta" as const, headline: "Du har\nbedre ting\nå gjøre.", cta: "Spar 6 timer/uke — start gratis →" },
 ];
@@ -559,8 +560,8 @@ const s9Slides = [
   { type: "hook" as const, headline: "Det finnes\nen bedrift\nlaget for\ndeg.", sub: "Du finner den på under ett minutt. Her er hvordan." },
   { type: "filter" as const, label: "Filter 1", name: "Bransje", example: "Bygg & anlegg", why: "Ikke kast bort tid på bedrifter som aldri vil kjøpe av deg.", icon: "🏗" },
   { type: "filter" as const, label: "Filter 2", name: "Omsetning", example: "5–50 MNOK", why: "For store = lang salgssyklus. For små = liten betalingsevne. Treff sweet spot.", icon: "💰" },
-  { type: "filter" as const, label: "Filter 3", name: "Ansatte", example: "10–50 ansatte", why: "Voksende SMB-er kjøper oftest. De har budget og nærme beslutningstagere.", icon: "👥" },
-  { type: "filter" as const, label: "Filter 4", name: "Kommune", example: "Oslo, Bergen, Stavanger", why: "Lokal tilstedeværelse gir 3× høyere konverteringsrate i norsk B2B.", icon: "📍" },
+  { type: "filter" as const, label: "Filter 3", name: "Ansatte", example: "10–50 ansatte", why: "Voksende SMB-er kjøper oftest. De har budget og beslutningstagere tilgjengelig.", icon: "👥" },
+  { type: "filter" as const, label: "Filter 4", name: "Kommune", example: "Oslo, Bergen, Stavanger", why: "Lokal tilstedeværelse = 3× høyere konverteringsrate i norsk B2B.", icon: "📍" },
   { type: "filter" as const, label: "Filter 5", name: "MVA-registrert", example: "Ja (aktive bedrifter)", why: "Sikrer at du bare kontakter bedrifter som faktisk er i drift.", icon: "✅" },
   { type: "cta" as const, headline: "250 000+\nbedrifter.\nDin ideelle\nkunde.", cta: "Søk nå på reachr.no →" },
 ];
@@ -584,8 +585,8 @@ function S9Slide({ slide, idx, total, showGuide }: { slide: typeof s9Slides[0]; 
             <span style={{ fontSize: 32 }}>{slide.icon}</span>
             <p style={{ fontFamily: "Inter, system-ui, sans-serif", fontSize: 36, fontWeight: 900, color: "#171717", lineHeight: 1.0, letterSpacing: "-1px" }}>{slide.name}</p>
           </div>
-          <div style={{ background: "#171717", borderRadius: 12, padding: "10px 14px", marginBottom: 16, alignSelf: "flex-start" }}>
-            <p style={{ fontSize: 12, fontWeight: 700, color: "#09fe94" }}>Ex: {slide.example}</p>
+          <div style={{ background: "#171717", borderRadius: 12, padding: "12px 16px", marginBottom: 16, alignSelf: "flex-start" }}>
+            <p style={{ fontSize: 13, fontWeight: 700, color: "#09fe94" }}>Ex: {slide.example}</p>
           </div>
           <p style={{ color: "#6b6660", fontSize: 13, lineHeight: 1.6 }}>{slide.why}</p>
         </div>
@@ -608,12 +609,12 @@ function S9Slide({ slide, idx, total, showGuide }: { slide: typeof s9Slides[0]; 
 // ─────────────────────────────────────────────────────────────────────────────
 const s10Slides = [
   { type: "hook" as const, headline: "Hele teamet.\nSamme\nretning.", sub: "Slik bruker de beste salgsteamene Reachr — og slår alle." },
-  { type: "problem" as const, issues: ["Hvem kontakter hvem?", "Dobbelt arbeid og konflikter", "Ingen felles pipeline-oversikt", "Sjefen vet ikke status"] },
+  { type: "problem" as const, issues: ["Hvem kontakter hvem?", "Dobbelt arbeid og konflikter", "Ingen felles oversikt", "Sjefen vet ikke status"] },
   { type: "feature" as const, icon: "🗂", name: "Delt\npipeline.", body: "Hele teamet ser alle leads, status og siste kontakt. Ingen overlapp. Ingen hull." },
   { type: "feature" as const, icon: "📊", name: "Team-\noversikt.", body: "Leder ser hvem som jobber med hva, hvor i prosessen de er, og hvem som trenger hjelp." },
   { type: "feature" as const, icon: "🤝", name: "Felles\nkontekst.", body: "Alle notater og AI-meldinger er synlige. En ny teammedlem er oppdatert på sekunder." },
   { type: "result" as const, items: [{ label: "Tid spart per uke", value: "8+ timer" }, { label: "Redusert dobbelt arbeid", value: "−90 %" }, { label: "Økt møtebooking", value: "+3×" }, { label: "Leder-innsikt", value: "Sanntid" }] },
-  { type: "cta" as const, headline: "Bygg et\nteam som\nvinner.", cta: "Se teamfunksjoner på reachr.no →" },
+  { type: "cta" as const, headline: "Bygg\net team\nsom vinner.", cta: "Se teamfunksjoner på reachr.no →" },
 ];
 
 function S10Slide({ slide, idx, total, showGuide }: { slide: typeof s10Slides[0]; idx: number; total: number; showGuide: boolean }) {
