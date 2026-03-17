@@ -48,25 +48,23 @@ function SafeZoneOverlay() {
   );
 }
 
-function SlideShell({ idx, total, children, showGuide, dark }: { idx: number; total: number; children: React.ReactNode; showGuide: boolean; dark?: boolean }) {
-  const bg = dark ? "#171717" : "#f2efe3";
-  const logoTextColor = dark ? "#f2efe3" : "#171717";
+function SlideShell({ idx, total, children, showGuide }: { idx: number; total: number; children: React.ReactNode; showGuide: boolean }) {
   return (
-    <div className="absolute inset-0 select-none" style={{ background: bg }}>
-      <div className="absolute inset-0 pointer-events-none" style={{ background: dark ? "radial-gradient(ellipse at 20% 100%, #09fe9408 0%, transparent 70%)" : "radial-gradient(ellipse at 80% 0%, #e8e4d800 0%, #ede9da60 100%)" }} />
+    <div className="absolute inset-0 select-none" style={{ background: "#f2efe3" }}>
+      <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse at 80% 0%, #e8e4d800 0%, #ede9da60 100%)" }} />
 
       {/* LOGO */}
       <div className="absolute" style={{ top: 28, left: 28 }}>
         <div className="flex items-center gap-2">
           <Image src="/logo.svg" alt="Reachr" width={28} height={28} style={{ display: "block" }} />
-          <span style={{ fontFamily: "EB Garamond, Georgia, serif", fontSize: 19, fontWeight: 700, fontStyle: "italic", color: logoTextColor, lineHeight: 1 }}>Reachr</span>
+          <span style={{ fontFamily: "EB Garamond, Georgia, serif", fontSize: 19, fontWeight: 700, fontStyle: "italic", color: "#171717", lineHeight: 1 }}>Reachr</span>
         </div>
       </div>
 
       {/* DOTS */}
       <div className="absolute flex items-center gap-1.5" style={{ top: 36, right: 92 }}>
         {Array.from({ length: total }).map((_, i) => (
-          <div key={i} style={{ width: i === idx ? 18 : 5, height: 5, borderRadius: 3, background: i === idx ? "#09fe94" : dark ? "#333" : "#d8d3c5", transition: "width 0.25s" }} />
+          <div key={i} style={{ width: i === idx ? 18 : 5, height: 5, borderRadius: 3, background: i === idx ? "#09fe94" : "#d8d3c5", transition: "width 0.25s" }} />
         ))}
       </div>
 
@@ -77,8 +75,8 @@ function SlideShell({ idx, total, children, showGuide, dark }: { idx: number; to
 
       {/* BOTTOM STRIP */}
       <div className="absolute" style={{ bottom: 232, left: 28, right: 92 }}>
-        <div style={{ height: 1, background: dark ? "#2a2a2a" : "#d8d3c5", marginBottom: 10 }} />
-        <p style={{ fontSize: 10, color: dark ? "#555" : "#a09b8f", letterSpacing: "0.06em" }}>reachr.no</p>
+        <div style={{ height: 1, background: "#d8d3c5", marginBottom: 10 }} />
+        <p style={{ fontSize: 10, color: "#a09b8f", letterSpacing: "0.06em" }}>reachr.no</p>
       </div>
 
       {showGuide && <SafeZoneOverlay />}
@@ -126,16 +124,16 @@ const s1Slides = [
 
 function S1Slide({ slide, idx, total, showGuide }: { slide: typeof s1Slides[0]; idx: number; total: number; showGuide: boolean }) {
   return (
-    <SlideShell idx={idx} total={total} showGuide={showGuide} dark>
+    <SlideShell idx={idx} total={total} showGuide={showGuide}>
       {/* Eyebrow */}
-      <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#09fe94", marginBottom: 18 }}>
+      <div style={{ display: "inline-flex", alignSelf: "flex-start", background: "#171717", color: "#09fe94", fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", padding: "4px 12px", borderRadius: 99, marginBottom: 18 }}>
         {slide.eyebrow}
-      </p>
+      </div>
 
       {/* Headline */}
       <div style={{ flex: 1 }}>
         {slide.headline.split("\n").map((line, i) => (
-          <p key={i} style={{ fontFamily: "Inter, system-ui, sans-serif", fontSize: 56, fontWeight: 900, color: "#f2efe3", lineHeight: 0.95, letterSpacing: "-2.5px" }}>
+          <p key={i} style={{ fontFamily: "Inter, system-ui, sans-serif", fontSize: 56, fontWeight: 900, color: "#171717", lineHeight: 0.95, letterSpacing: "-2.5px" }}>
             {line}
           </p>
         ))}
@@ -331,12 +329,12 @@ function S3Slide({ slide, idx, total, showGuide }: { slide: typeof s3Slides[0]; 
             </div>
 
             {/* After */}
-            <div style={{ flex: 1, background: "#171717", border: "1.5px solid #09fe9433", borderRadius: 14, padding: "14px 12px" }}>
+            <div style={{ flex: 1, background: "#faf8f2", border: "2px solid #09fe94", borderRadius: 14, padding: "14px 12px" }}>
               <p style={{ fontSize: 10, fontWeight: 700, color: "#09fe94", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 12 }}>Etter</p>
               {slide.after.map((item, i) => (
                 <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 8, marginBottom: 10 }}>
-                  <span style={{ fontSize: 12, color: "#09fe94", marginTop: 1, flexShrink: 0 }}>✓</span>
-                  <p style={{ fontSize: 12, color: "#d8d3c5", lineHeight: 1.35 }}>{item}</p>
+                  <span style={{ fontSize: 12, color: "#09fe94", marginTop: 1, flexShrink: 0, fontWeight: 800 }}>✓</span>
+                  <p style={{ fontSize: 12, color: "#171717", lineHeight: 1.35, fontWeight: 500 }}>{item}</p>
                 </div>
               ))}
             </div>
@@ -406,14 +404,14 @@ const s4Slides = [
 
 function S4Slide({ slide, idx, total, showGuide }: { slide: typeof s4Slides[0]; idx: number; total: number; showGuide: boolean }) {
   return (
-    <SlideShell idx={idx} total={total} showGuide={showGuide} dark>
+    <SlideShell idx={idx} total={total} showGuide={showGuide}>
       {slide.type === "hook" && (
         <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center" }}>
           <div style={{ display: "inline-flex", alignSelf: "flex-start", background: "#09fe94", color: "#171717", fontSize: 11, fontWeight: 700, padding: "4px 12px", borderRadius: 99, marginBottom: 24 }}>
             {slide.label}
           </div>
           {slide.headline.split("\n").map((line, i) => (
-            <p key={i} style={{ fontFamily: "EB Garamond, Georgia, serif", fontSize: 46, fontWeight: 700, color: "#f2efe3", lineHeight: 1.05 }}>
+            <p key={i} style={{ fontFamily: "EB Garamond, Georgia, serif", fontSize: 46, fontWeight: 700, color: "#171717", lineHeight: 1.05 }}>
               {line}
             </p>
           ))}
@@ -424,17 +422,17 @@ function S4Slide({ slide, idx, total, showGuide }: { slide: typeof s4Slides[0]; 
       {slide.type === "reveal" && (
         <>
           {/* Big number background */}
-          <div className="absolute pointer-events-none" style={{ top: 70, right: -5, fontSize: 120, fontWeight: 900, color: "#09fe94", lineHeight: 1, opacity: 0.07, fontFamily: "Inter, system-ui, sans-serif", letterSpacing: "-4px", userSelect: "none" }}>
+          <div className="absolute pointer-events-none" style={{ top: 70, right: -5, fontSize: 120, fontWeight: 900, color: "#d8d3c5", lineHeight: 1, opacity: 0.5, fontFamily: "Inter, system-ui, sans-serif", letterSpacing: "-4px", userSelect: "none" }}>
             {slide.number}
           </div>
 
-          <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#09fe94", marginBottom: 18 }}>
+          <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#ff470a", marginBottom: 18 }}>
             #{slide.number}
           </p>
 
           <div style={{ flex: 1 }}>
             {slide.title.split("\n").map((line, i) => (
-              <p key={i} style={{ fontFamily: "Inter, system-ui, sans-serif", fontSize: 48, fontWeight: 900, color: "#f2efe3", lineHeight: 0.97, letterSpacing: "-2px" }}>
+              <p key={i} style={{ fontFamily: "Inter, system-ui, sans-serif", fontSize: 48, fontWeight: 900, color: "#171717", lineHeight: 0.97, letterSpacing: "-2px" }}>
                 {line}
               </p>
             ))}
@@ -447,9 +445,9 @@ function S4Slide({ slide, idx, total, showGuide }: { slide: typeof s4Slides[0]; 
 
       {slide.type === "cta" && (
         <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center" }}>
-          <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#09fe94", marginBottom: 20 }}>{slide.label}</p>
+          <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#ff470a", marginBottom: 20 }}>{slide.label}</p>
           {slide.headline.split("\n").map((line, i) => (
-            <p key={i} style={{ fontFamily: "EB Garamond, Georgia, serif", fontSize: 46, fontWeight: 700, color: "#f2efe3", lineHeight: 1.05 }}>
+            <p key={i} style={{ fontFamily: "EB Garamond, Georgia, serif", fontSize: 46, fontWeight: 700, color: "#171717", lineHeight: 1.05 }}>
               {line}
             </p>
           ))}
@@ -558,8 +556,8 @@ function S5Slide({ slide, idx, total, showGuide }: { slide: typeof s5Slides[0]; 
           </div>
 
           {/* Insight */}
-          <div style={{ background: "#171717", borderRadius: 12, padding: "12px 14px" }}>
-            <p style={{ fontSize: 12, color: "#f2efe3", lineHeight: 1.5 }}>{slide.insight}</p>
+          <div style={{ background: "#faf8f2", border: "1.5px solid #d8d3c5", borderRadius: 12, padding: "12px 14px" }}>
+            <p style={{ fontSize: 12, color: "#171717", lineHeight: 1.5, fontStyle: "italic" }}>{slide.insight}</p>
           </div>
         </>
       )}
@@ -570,9 +568,9 @@ function S5Slide({ slide, idx, total, showGuide }: { slide: typeof s5Slides[0]; 
 
           <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 12 }}>
             {slide.items.map((item, i) => (
-              <div key={i} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: "#171717", borderRadius: 12, padding: "12px 16px" }}>
-                <p style={{ fontSize: 13, color: "#d8d3c5", fontWeight: 500 }}>{item.text}</p>
-                <p style={{ fontSize: 13, color: "#09fe94", fontWeight: 800 }}>{item.value}</p>
+              <div key={i} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: "#faf8f2", border: "1.5px solid #d8d3c5", borderRadius: 12, padding: "12px 16px" }}>
+                <p style={{ fontSize: 13, color: "#171717", fontWeight: 500 }}>{item.text}</p>
+                <p style={{ fontSize: 13, color: "#09fe94", fontWeight: 800, background: "#171717", padding: "3px 10px", borderRadius: 99 }}>{item.value}</p>
               </div>
             ))}
           </div>
