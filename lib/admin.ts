@@ -5,6 +5,7 @@ export const ADMIN_EMAILS = [
 
 export const FREE_EMAILS = [
   "emil.silseth@gmail.com",
+  "testbruker@reachr.no",
 ];
 
 export function isAdmin(email: string | null | undefined): boolean {
