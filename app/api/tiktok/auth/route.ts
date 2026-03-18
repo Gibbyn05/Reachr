@@ -33,11 +33,13 @@ export async function GET(req: NextRequest) {
   const codeVerifier = generateRandomString(50);
   const codeChallenge = base64UrlEncode(sha256(codeVerifier));
 
-  const scopes = "user.info.basic video.upload video.publish";
+  // Forenkler scopes for å utelukke rettighetsproblemer
+  const scopes = "user.info.basic";
   const state = Math.random().toString(36).substring(7);
 
   const authUrl = new URL("https://www.tiktok.com/v2/auth/authorize");
   authUrl.searchParams.append("client_key", clientKey);
+  authUrl.searchParams.append("client_id", clientKey); // Fallback for eldre/nyere apper
   authUrl.searchParams.append("scope", scopes);
   authUrl.searchParams.append("response_type", "code");
   authUrl.searchParams.append("redirect_uri", redirectUri);
