@@ -176,7 +176,7 @@ const SERIES = [
 // ─────────────────────────────────────────────────────────────────────────────
 // MAIN PAGE
 // ─────────────────────────────────────────────────────────────────────────────
-export default function TiktokPage() {
+function TiktokContent() {
   const searchParams = useSearchParams();
   const [seriesIdx, setSeriesIdx] = useState(0);
   const [slideIdx, setSlideIdx] = useState(0);
@@ -339,5 +339,15 @@ export default function TiktokPage() {
         {showGuide ? "Skjul safe zone" : "Vis safe zone guide"}
       </button>
     </div>
+  );
+}
+
+import { Suspense } from "react";
+
+export default function TiktokPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#1a1a1a] flex items-center justify-center text-white text-xs">Laster...</div>}>
+      <TiktokContent />
+    </Suspense>
   );
 }

@@ -39,7 +39,6 @@ export async function GET(req: NextRequest) {
 
   const authUrl = new URL("https://www.tiktok.com/v2/auth/authorize");
   authUrl.searchParams.append("client_key", clientKey);
-  authUrl.searchParams.append("client_id", clientKey); // Fallback for eldre/nyere apper
   authUrl.searchParams.append("scope", scopes);
   authUrl.searchParams.append("response_type", "code");
   authUrl.searchParams.append("redirect_uri", redirectUri);
