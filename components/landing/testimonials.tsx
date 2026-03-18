@@ -23,6 +23,27 @@ const testimonialsNo = [
     initials: "IB",
     accent: "#ffad0a",
   },
+  {
+    quote: "AI-e-postene er skremmende gode. Kundene tror faktisk det er skrevet manuelt. Konverteringsraten vår har gått opp 40 %.",
+    name: "Lars Strand",
+    title: "Gründer, Strand IT-tjenester",
+    initials: "LS",
+    accent: "#09fe94",
+  },
+  {
+    quote: "Kartvisningen alene er verdt prisen. Jeg kan se hvilke bedrifter som er nærmest og planlegge besøk på minutter.",
+    name: "Karianne Haugen",
+    title: "Eiendomsmegler, Haugen Eiendom",
+    initials: "KH",
+    accent: "#ff470a",
+  },
+  {
+    quote: "Onboardingen tok 15 minutter og vi var i gang med første kampanje dagen etter. Ingen annen SaaS har vært like rask å ta i bruk.",
+    name: "Petter Rød",
+    title: "Markedssjef, Rød & Partners",
+    initials: "PR",
+    accent: "#ffad0a",
+  },
 ];
 
 const testimonialsEn = [
@@ -45,6 +66,27 @@ const testimonialsEn = [
     name: "Ingrid Bakke",
     title: "Account Manager, Viken Salg",
     initials: "IB",
+    accent: "#ffad0a",
+  },
+  {
+    quote: "The AI emails are frighteningly good. Customers actually think they were written manually. Our conversion rate is up 40%.",
+    name: "Lars Strand",
+    title: "Founder, Strand IT Services",
+    initials: "LS",
+    accent: "#09fe94",
+  },
+  {
+    quote: "The map view alone is worth the price. I can see which companies are closest and plan visits in minutes.",
+    name: "Karianne Haugen",
+    title: "Realtor, Haugen Eiendom",
+    initials: "KH",
+    accent: "#ff470a",
+  },
+  {
+    quote: "Onboarding took 15 minutes and we launched our first campaign the next day. No other SaaS has been this quick to get started with.",
+    name: "Petter Rød",
+    title: "Marketing Manager, Rød & Partners",
+    initials: "PR",
     accent: "#ffad0a",
   },
 ];

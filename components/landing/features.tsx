@@ -146,7 +146,7 @@ export function Features() {
           ))}
         </div>
 
-        <div className="mt-12 grid grid-cols-2 sm:grid-cols-4 gap-px bg-[#d8d3c5] rounded-2xl overflow-hidden">
+        <div className="mt-12 grid grid-cols-1 sm:grid-cols-3 gap-px bg-[#d8d3c5] rounded-2xl overflow-hidden">
           {stats.map(({ value, label }) => (
             <div key={label} className="bg-[#faf8f2] px-8 py-8 text-center">
               <p className="text-3xl font-extrabold text-[#171717]">{value}</p>

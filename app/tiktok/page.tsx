@@ -1,173 +1,192 @@
-import { useRef, useState, useEffect } from "react";
+"use client";
+
+import Image from "next/image";
+import { useState, useRef, useEffect } from "react";
+import React from "react";
 import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { TikTokIcon } from "@/components/ui/tiktok-icon";
-import { Loader2, CheckCircle2, Share2, AlertCircle } from "lucide-react";
+import { Loader2, CheckCircle2, Share2 } from "lucide-react";
 import * as htmlToImage from "html-to-image";
 
-const screenshots = [
-  {
-    id: 1,
-    headline: "Hvorfor LinkedIn ikke lenger er gullstandarden for norsk B2B-salg.",
-    sub: "Innboksen er full. Ingen leser deg. Her er hva som faktisk virker nå.",
-    bg: "#171717",
-    accent: "#09fe94",
-    textColor: "#f2efe3",
-    mockup: "email",
-  },
-  {
-    id: 2,
-    headline: "LinkedIn er mettet.",
-    sub: "Den gylne tiden hvor alle så postene dine er over. Algoritmen er streng og støyen er enorm.",
-    bg: "#f2efe3",
-    accent: "#05c472",
-    textColor: "#171717",
-    mockup: "pipeline",
-  },
-  {
-    id: 3,
-    headline: "Innboksen er full.",
-    sub: "De du vil snakke med får 50 like e-poster hver uke. Du forsvinner i mengden.",
-    bg: "#171717",
-    accent: "#ff470a",
-    textColor: "#f2efe3",
-    mockup: "alerts",
-  },
-  {
-    id: 4,
-    headline: "Her er hva som faktisk virker nå.",
-    sub: "Direkte kontakt med beslutningstakere via intelligente systemer som vet hvem som er kjøpsklare.",
-    bg: "#f2efe3",
-    accent: "#09fe94",
-    textColor: "#171717",
-    mockup: "search",
-  },
-  {
-    id: 5,
-    headline: "Gjør salg enkelt igjen.",
-    sub: "Reachr hjelper deg å finne, kontakte og følge opp de rette folkene — før konkurrentene dine.",
-    bg: "#09fe94",
-    accent: "#171717",
-    textColor: "#171717",
-    mockup: "cta",
-  },
-];
-
-function SearchMockup({ accent }: { accent: string }) {
+function SafeZoneOverlay() {
   return (
-    <div className="w-full flex flex-col gap-3">
-      <div className="bg-[#faf8f2] border border-[#d8d3c5] rounded-xl px-4 py-3 flex items-center gap-2">
-        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="#6b6660" strokeWidth={2}><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-        <span className="text-[#6b6660] text-sm">Søk bedrift eller bransje…</span>
-      </div>
-      {["Rørleggertjenester AS", "Bergen Bygg & Anlegg", "Oslo Tech Solutions"].map((name, i) => (
-        <div key={i} className="bg-[#faf8f2] border border-[#d8d3c5] rounded-xl p-4 flex justify-between items-center">
-          <div>
-            <div className="font-semibold text-[#171717] text-sm">{name}</div>
-            <div className="text-xs text-[#6b6660] mt-0.5">{["Oslo", "Bergen", "Oslo"][i]} · {["12", "8", "34"][i]} ansatte</div>
-          </div>
-          <div style={{ background: accent }} className="rounded-lg px-3 py-1.5 text-xs font-bold text-[#171717]">+ Legg til</div>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function PipelineMockup({ accent }: { accent: string }) {
-  const statuses = [
-    { label: "Ikke kontaktet", count: 5, color: "#d8d3c5" },
-    { label: "Kontaktet", count: 3, color: "#ffad0a" },
-    { label: "Booket møte", count: 2, color: accent },
-    { label: "Kunde", count: 1, color: "#09fe94" },
-  ];
-  return (
-    <div className="w-full flex flex-col gap-3">
-      {statuses.map((s, i) => (
-        <div key={i} className="bg-[#faf8f2] border border-[#d8d3c5] rounded-xl p-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-3 h-3 rounded-full" style={{ background: s.color }} />
-            <span className="text-[#171717] text-sm font-medium">{s.label}</span>
-          </div>
-          <span className="text-[#6b6660] text-sm font-semibold">{s.count}</span>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function EmailMockup({ accent }: { accent: string }) {
-  return (
-    <div className="w-full flex flex-col gap-3">
-      <div className="bg-[#faf8f2] border border-[#d8d3c5] rounded-xl p-4">
-        <div className="text-xs text-[#6b6660] mb-1">Til: kontakt@bergenbygg.no</div>
-        <div className="text-xs font-semibold text-[#171717] mb-2">Emne: Spar tid på prosjektstyring</div>
-        <div className="text-xs text-[#6b6660] leading-relaxed">
-          Hei Lars,<br/><br/>
-          Jeg så at Bergen Bygg & Anlegg nylig har vokst til 8 ansatte — gratulerer! Vi hjelper byggebransjen med å…
-        </div>
-      </div>
-      <div style={{ background: accent }} className="rounded-xl py-3 text-center text-sm font-bold text-[#171717]">
-        ✦ Generer med AI
+    <div className="absolute inset-0 pointer-events-none z-50">
+      <div className="absolute top-0 bottom-0 right-0" style={{ width: 80, background: "rgba(255,0,0,0.08)", borderLeft: "1px dashed rgba(255,0,0,0.3)" }} />
+      <div className="absolute left-0 right-0 bottom-0" style={{ height: 220, background: "rgba(255,0,0,0.08)", borderTop: "1px dashed rgba(255,0,0,0.3)" }} />
+      <div className="absolute left-0 right-0 top-0" style={{ height: 60, background: "rgba(255,165,0,0.06)", borderBottom: "1px dashed rgba(255,165,0,0.3)" }} />
+      <div className="absolute text-center" style={{ left: 0, right: 80, top: 60, bottom: 220, display: "flex", alignItems: "flex-start", justifyContent: "center", paddingTop: 8 }}>
+        <span style={{ fontSize: 9, background: "rgba(0,255,0,0.15)", color: "#09fe94", padding: "2px 6px", borderRadius: 4 }}>✓ SAFE ZONE</span>
       </div>
     </div>
   );
 }
 
-function AlertsMockup({ accent }: { accent: string }) {
-  const alerts = [
-    { name: "Rørleggertjenester AS", msg: "Ingen kontakt på 7 dager", urgent: true },
-    { name: "Oslo Tech Solutions", msg: "Møte i morgen kl. 10:00", urgent: false },
-    { name: "Fjord Consulting", msg: "Ingen kontakt på 14 dager", urgent: true },
-  ];
+function SlideShell({ idx, total, children, showGuide }: { idx: number; total: number; children: React.ReactNode; showGuide: boolean }) {
   return (
-    <div className="w-full flex flex-col gap-3">
-      {alerts.map((a, i) => (
-        <div key={i} className="bg-[#faf8f2] border border-[#d8d3c5] rounded-xl p-4 flex gap-3 items-start">
-          <div className="w-2 h-2 rounded-full mt-1.5 flex-shrink-0" style={{ background: a.urgent ? accent : "#09fe94" }} />
-          <div>
-            <div className="text-[#171717] text-sm font-semibold">{a.name}</div>
-            <div className="text-[#6b6660] text-xs mt-0.5">{a.msg}</div>
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-}
+    <div className="absolute inset-0 select-none" style={{ background: "#f2efe3" }}>
+      <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse at 80% 0%, #e8e4d800 0%, #ede9da60 100%)" }} />
 
-function CtaMockup({ accent }: { accent: string }) {
-  return (
-    <div className="w-full flex flex-col items-center gap-4">
-      <div className="text-6xl">⚡</div>
-      <div className="flex gap-4 w-full">
-        {["12 leads\nfunnet", "3 møter\nbooket", "1 deal\nlukket"].map((stat, i) => (
-          <div key={i} className="flex-1 bg-[#faf8f2] border border-[#d8d3c5] rounded-xl p-3 text-center">
-            {stat.split("\n").map((line, j) => (
-              <div key={j} className={j === 0 ? "text-lg font-bold text-[#171717]" : "text-xs text-[#6b6660]"}>{line}</div>
-            ))}
-          </div>
+      {/* LOGO */}
+      <div className="absolute" style={{ top: 28, left: 28 }}>
+        <div className="flex items-center gap-2">
+          <Image src="/logo.svg" alt="Reachr" width={28} height={28} style={{ display: "block" }} />
+          <span style={{ fontFamily: "EB Garamond, Georgia, serif", fontSize: 19, fontWeight: 700, fontStyle: "italic", color: "#171717", lineHeight: 1 }}>Reachr</span>
+        </div>
+      </div>
+
+      {/* DOTS */}
+      <div className="absolute flex items-center gap-1.5" style={{ top: 36, right: 92 }}>
+        {Array.from({ length: total }).map((_, i) => (
+          <div key={i} style={{ width: i === idx ? 18 : 5, height: 5, borderRadius: 3, background: i === idx ? "#09fe94" : "#d8d3c5", transition: "width 0.25s" }} />
         ))}
       </div>
-      <div style={{ background: accent }} className="w-full rounded-xl py-3 text-center text-sm font-bold text-[#171717]">
-        Start gratis i dag →
+
+      {/* CONTENT */}
+      <div className="absolute flex flex-col" style={{ top: 80, left: 28, right: 92, bottom: 268 }}>
+        {children}
       </div>
+
+      {/* BOTTOM STRIP */}
+      <div className="absolute" style={{ bottom: 232, left: 28, right: 92 }}>
+        <div style={{ height: 1, background: "#d8d3c5", marginBottom: 10 }} />
+        <p style={{ fontSize: 10, color: "#a09b8f", letterSpacing: "0.06em" }}>reachr.no</p>
+      </div>
+
+      {showGuide && <SafeZoneOverlay />}
     </div>
   );
 }
 
-function Mockup({ type, accent }: { type: string; accent: string }) {
-  if (type === "search") return <SearchMockup accent={accent} />;
-  if (type === "pipeline") return <PipelineMockup accent={accent} />;
-  if (type === "email") return <EmailMockup accent={accent} />;
-  if (type === "alerts") return <AlertsMockup accent={accent} />;
-  return <CtaMockup accent={accent} />;
+// ─────────────────────────────────────────────────────────────────────────────
+// SERIE 1 — "LINKEDIN ER METTET"
+// ─────────────────────────────────────────────────────────────────────────────
+const s1Slides = [
+  { type: "hook" as const, label: "Hot take 🔥", headline: "LinkedIn\ner\nmettet.", sub: "Innboksen er full. Ingen leser deg. Her er hva som faktisk virker nå." },
+  { type: "stat" as const, number: "89 %", claim: "av LinkedIn InMail-er ignoreres", context: "Algoritmene prioriterer annonser. Organisk rekkevidde er nær null." },
+  { type: "cta" as const, headline: "Slutt\nå rope\ni tomrom.", cta: "Finn riktige leads på reachr.no →" },
+];
+
+function S1Slide({ slide, idx, total, showGuide }: { slide: any; idx: number; total: number; showGuide: boolean }) {
+  return (
+    <SlideShell idx={idx} total={total} showGuide={showGuide}>
+      {slide.type === "hook" && (
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center" }}>
+          <div style={{ display: "inline-flex", alignSelf: "flex-start", background: "#171717", color: "#09fe94", fontSize: 11, fontWeight: 700, padding: "4px 12px", borderRadius: 99, marginBottom: 20 }}>{slide.label}</div>
+          <p style={{ fontFamily: "Inter, system-ui, sans-serif", fontSize: 64, fontWeight: 900, color: "#171717", lineHeight: 0.9, letterSpacing: "-3px" }}>{slide.headline}</p>
+          <p style={{ color: "#6b6660", fontSize: 13, lineHeight: 1.65, marginTop: 20 }}>{slide.sub}</p>
+        </div>
+      )}
+      {slide.type === "stat" && (
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center" }}>
+          <p style={{ fontFamily: "Inter, system-ui, sans-serif", fontSize: 72, fontWeight: 900, color: "#ff470a", lineHeight: 1 }}>{slide.number}</p>
+          <p style={{ fontFamily: "Inter, system-ui, sans-serif", fontSize: 18, fontWeight: 700, marginTop: 8 }}>{slide.claim}</p>
+          <p style={{ color: "#6b6660", fontSize: 13, marginTop: 16 }}>{slide.context}</p>
+        </div>
+      )}
+      {slide.type === "cta" && (
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center" }}>
+          <p style={{ fontFamily: "Inter, system-ui, sans-serif", fontSize: 58, fontWeight: 900, color: "#171717", lineHeight: 0.93 }}>{slide.headline}</p>
+          <div style={{ marginTop: 28, background: "#09fe94", borderRadius: 14, padding: "14px 24px", fontWeight: 800 }}>{slide.cta}</div>
+        </div>
+      )}
+    </SlideShell>
+  );
 }
 
-export default function TikTokPage() {
+// ─────────────────────────────────────────────────────────────────────────────
+// SERIE 2 — "5 TEGN PÅ AT DU TRENGER REACHR"
+// ─────────────────────────────────────────────────────────────────────────────
+const s2Slides = [
+  { type: "hook" as const, headline: "5 tegn på\nat du bruker\nfor mye tid.", sub: "Kjenner du deg igjen?" },
+  { type: "sign" as const, num: "01", sign: "Du googler manuelt.", detail: "Kopi-lim fra nettsider inn i Excel." },
+  { type: "cta" as const, headline: "Start\ngratis.", cta: "reachr.no →" },
+];
+
+function S2Slide({ slide, idx, total, showGuide }: { slide: any; idx: number; total: number; showGuide: boolean }) {
+  return (
+    <SlideShell idx={idx} total={total} showGuide={showGuide}>
+      {slide.type === "hook" && (
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center" }}>
+          <p style={{ fontFamily: "Inter, system-ui, sans-serif", fontSize: 44, fontWeight: 900 }}>{slide.headline}</p>
+          <p style={{ color: "#6b6660", fontSize: 13, marginTop: 20 }}>{slide.sub}</p>
+        </div>
+      )}
+      {slide.type === "sign" && (
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center" }}>
+          <p style={{ fontSize: 11, fontWeight: 700, color: "#a09b8f" }}>Tegn #{slide.num}</p>
+          <p style={{ fontFamily: "Inter, system-ui, sans-serif", fontSize: 38, fontWeight: 900, color: "#ff470a" }}>{slide.sign}</p>
+          <p style={{ color: "#6b6660", fontSize: 13, marginTop: 20 }}>{slide.detail}</p>
+        </div>
+      )}
+      {slide.type === "cta" && (
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center" }}>
+          <p style={{ fontFamily: "EB Garamond, serif", fontSize: 52, fontWeight: 700 }}>{slide.headline}</p>
+          <div style={{ marginTop: 28, background: "#09fe94", borderRadius: 14, padding: "14px 24px" }}>{slide.cta}</div>
+        </div>
+      )}
+    </SlideShell>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SERIE 3 — "BYGG PIPELINE PÅ 30 MIN"
+// ─────────────────────────────────────────────────────────────────────────────
+const s3Slides = [
+  { type: "hook" as const, headline: "Pipeline på\n30 min.", sub: "Slik gjør du det." },
+  { type: "step" as const, time: "0–5 min", title: "Søk opp bransjen din.", body: "Gå til Reachr. Velg bransje." },
+  { type: "cta" as const, headline: "Prøv nå.", cta: "reachr.no →" },
+];
+
+function S3Slide({ slide, idx, total, showGuide }: { slide: any; idx: number; total: number; showGuide: boolean }) {
+  return (
+    <SlideShell idx={idx} total={total} showGuide={showGuide}>
+      {slide.type === "hook" && (
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center" }}>
+          <p style={{ fontFamily: "Inter, system-ui, sans-serif", fontSize: 54, fontWeight: 900 }}>{slide.headline}</p>
+          <p style={{ color: "#6b6660", fontSize: 13, marginTop: 20 }}>{slide.sub}</p>
+        </div>
+      )}
+      {slide.type === "step" && (
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center" }}>
+          <p style={{ fontSize: 11, fontWeight: 700, color: "#ffad0a" }}>{slide.time}</p>
+          <p style={{ fontFamily: "Inter, system-ui, sans-serif", fontSize: 46, fontWeight: 900 }}>{slide.title}</p>
+          <p style={{ color: "#6b6660", fontSize: 13, marginTop: 16 }}>{slide.body}</p>
+        </div>
+      )}
+      {slide.type === "cta" && (
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center" }}>
+          <p style={{ fontFamily: "Inter, system-ui, sans-serif", fontSize: 52, fontWeight: 900 }}>{slide.headline}</p>
+          <div style={{ marginTop: 28, background: "#09fe94", borderRadius: 14, padding: "14px 24px" }}>{slide.cta}</div>
+        </div>
+      )}
+    </SlideShell>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// CONFIG
+// ─────────────────────────────────────────────────────────────────────────────
+const SERIES = [
+  { id: 0, name: "LinkedIn er mettet", caption: "Hvorfor LinkedIn ikke lenger er gullstandarden.", slides: s1Slides, Renderer: S1Slide },
+  { id: 1, name: "5 tegn på Reachr", caption: "Kjenner du deg igjen?", slides: s2Slides, Renderer: S2Slide },
+  { id: 2, name: "Pipeline på 30 min", caption: "Bygg en full pipeline raskt.", slides: s3Slides, Renderer: S3Slide },
+];
+
+// ─────────────────────────────────────────────────────────────────────────────
+// MAIN PAGE
+// ─────────────────────────────────────────────────────────────────────────────
+export default function TiktokPage() {
   const searchParams = useSearchParams();
+  const [seriesIdx, setSeriesIdx] = useState(0);
+  const [slideIdx, setSlideIdx] = useState(0);
+  const [showGuide, setShowGuide] = useState(false);
   const [isTiktokConnected, setIsTiktokConnected] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
   const [publishedLink, setPublishedLink] = useState<string | null>(null);
   
+  const canvasRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     const connected = searchParams.get("tiktok") === "success";
     if (connected) {
@@ -175,6 +194,15 @@ export default function TikTokPage() {
       toast.success("Koblet til TikTok!");
     }
   }, [searchParams]);
+
+  const series = SERIES[seriesIdx];
+  const { Renderer } = series as any;
+  const total = series.slides.length;
+
+  function changeSeries(i: number) {
+    setSeriesIdx(i);
+    setSlideIdx(0);
+  }
 
   const connectTikTok = () => {
     window.location.href = "/api/tiktok/auth";
@@ -184,18 +212,20 @@ export default function TikTokPage() {
     setIsPublishing(true);
     setPublishedLink(null);
     try {
-      toast.info("Forbereder og tar skjermbilder av slides...");
+      toast.info("Forbereder og tar bilder av alle slides i serien...");
       
       const formData = new FormData();
-      
-      // Capture each slide and add to formData
-      for (let i = 0; i < screenshots.length; i++) {
-        const el = refs.current[i];
-        if (!el) continue;
+      const canvas = canvasRef.current;
+      if (!canvas) throw new Error("Canvas element not found");
+
+      const initialIdx = slideIdx;
+
+      for (let i = 0; i < total; i++) {
+        setSlideIdx(i);
+        await new Promise(r => setTimeout(r, 150));
         
-        // Use html-to-image for high resolution
-        const blob = await htmlToImage.toBlob(el, {
-          pixelRatio: 2, // Retained high detail
+        const blob = await htmlToImage.toBlob(canvas, {
+          pixelRatio: 2,
           quality: 0.95,
         });
         
@@ -204,9 +234,11 @@ export default function TikTokPage() {
         }
       }
       
+      setSlideIdx(initialIdx);
+
       const res = await fetch("/api/tiktok/publish", {
         method: "POST",
-        body: formData, // No Content-Type header needed for FormData
+        body: formData,
       });
       
       const data = await res.json();
@@ -214,160 +246,98 @@ export default function TikTokPage() {
         toast.success("Slideshow publisert til TikTok!");
         setPublishedLink(data.share_url || "https://tiktok.com");
       } else {
-        toast.error(data.error || "Noe gikk galt under publisering.");
+        toast.error(data.error || "Noe gikk galt.");
       }
     } catch (err: any) {
       console.error(err);
-      toast.error("Kunne ikke koble til serveren eller ta bilder.");
+      toast.error("Kunne ikke publisere.");
     } finally {
       setIsPublishing(false);
     }
   };
 
-  const refs = useRef<(HTMLDivElement | null)[]>([]);
-
-  const handleDownload = async (index: number) => {
-    const el = refs.current[index];
-    if (!el) return;
-
-    // Use browser print for now — or instruct user to screenshot
-    alert(`Høyreklikk på skjermbildet og velg "Ta skjermbilde av element" i DevTools, eller bruk Cmd+Shift+4 på Mac.`);
-  };
-
   return (
-    <div className="min-h-screen bg-[#e8e4d8] p-8">
-      <div className="max-w-6xl mx-auto">
-        <div className="mb-12 flex flex-col md:flex-row items-center justify-between gap-6 border-b border-[#d8d3c5] pb-10">
-          <div className="text-left md:w-2/3">
-            <h1 className="text-4xl md:text-5xl font-bold text-[#171717] mb-3" style={{ fontFamily: "EB Garamond, serif" }}>
-              Reachr — TikTok Slideshow
-            </h1>
-            <p className="text-[#6b6660] text-base max-w-xl">
-              Disse kortene er designet for å perfeksjonere "Photo Mode" på TikTok. 
-              Du kan enten laste dem ned manuelt eller koble til kontoen din under for å poste automatisk.
-            </p>
-          </div>
-          
-          <div className="flex flex-col gap-3 w-full md:w-auto">
-            {!isTiktokConnected ? (
-              <button 
-                onClick={connectTikTok}
-                className="flex items-center justify-center gap-3 bg-[#171717] text-white font-bold py-3.5 px-8 rounded-2xl hover:bg-black transition-all shadow-xl hover:scale-[1.02]"
-              >
-                <div className="w-6 h-6 bg-white rounded-full flex items-center justify-center p-1">
-                  <TikTokIcon className="text-black" />
-                </div>
-                Koble til TikTok
-              </button>
-            ) : (
-              <div className="flex flex-col gap-3">
-                <button 
-                  onClick={publishToTikTok}
-                  disabled={isPublishing}
-                  className="flex items-center justify-center gap-3 bg-[#ff0050] text-white font-bold py-3.5 px-8 rounded-2xl hover:bg-[#d60044] transition-all shadow-xl hover:scale-[1.02] disabled:opacity-50 disabled:scale-100"
-                >
-                  {isPublishing ? (
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                  ) : (
-                    <Share2 className="w-5 h-5" />
-                  )}
-                  {isPublishing ? "Publiserer..." : "Publiser til TikTok"}
-                </button>
-                <div className="flex items-center gap-2 justify-center text-xs font-bold text-[#05c472]">
-                  <CheckCircle2 className="w-3.5 h-3.5" />
-                  Konto er tilkoblet
-                </div>
-              </div>
-            )}
-          </div>
+    <div className="min-h-screen flex flex-col items-center justify-center gap-5 py-12 px-4" style={{ background: "#1a1a1a", fontFamily: "Inter, system-ui, sans-serif" }}>
+      
+      {/* Header */}
+      <div className="w-full max-w-2xl flex items-center justify-between border-b border-[#2a2a2a] pb-6 mb-2">
+        <div>
+          <h1 className="text-2xl font-bold text-white mb-1">TikTok Slideshow</h1>
+          <p className="text-xs text-[#666]">Automatisert slideshow-verktøy.</p>
         </div>
-
-        {publishedLink && (
-          <div className="mb-12 animate-in fade-in slide-in-from-top-4 duration-500">
-            <div className="bg-[#09fe94]/10 border-2 border-[#09fe94] rounded-2xl p-6 flex flex-col md:flex-row items-center justify-between gap-4">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-[#09fe94] rounded-xl flex items-center justify-center text-2xl">🎉</div>
-                <div>
-                  <h3 className="font-bold text-[#171717]">Suksess! Slideshowet er på vei ut.</h3>
-                  <p className="text-sm text-[#171717]/70">Det kan ta et par minutter før det vises i profilen din.</p>
-                </div>
-              </div>
-              <a 
-                href={publishedLink} 
-                target="_blank" 
-                rel="noreferrer"
-                className="bg-[#171717] text-[#09fe94] font-bold py-2.5 px-6 rounded-xl hover:bg-black transition-colors flex items-center gap-2"
-              >
-                Se på TikTok <Share2 className="w-4 h-4" />
-              </a>
+        
+        {!isTiktokConnected ? (
+          <button onClick={connectTikTok} className="flex items-center gap-2 bg-white text-black font-bold py-2 px-4 rounded-xl text-sm">
+            <TikTokIcon className="w-4 h-4" />
+            Koble til TikTok
+          </button>
+        ) : (
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1.5 text-[10px] font-bold text-[#05c472]">
+              <CheckCircle2 className="w-3 h-3" />
+              Tilkoblet
             </div>
+            <button 
+              onClick={publishToTikTok}
+              disabled={isPublishing}
+              className="flex items-center gap-2 bg-[#ff0050] text-white font-bold py-2 px-5 rounded-xl text-sm disabled:opacity-50"
+            >
+              {isPublishing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Share2 className="w-4 h-4" />}
+              {isPublishing ? "Publiserer..." : "Publiser til TikTok"}
+            </button>
           </div>
         )}
+      </div>
 
-        <div className="flex flex-wrap gap-6 justify-center">
-          {screenshots.map((s, i) => (
-            <div key={s.id} className="flex flex-col items-center gap-3">
-              {/* iPhone frame */}
-              <div
-                ref={(el) => { refs.current[i] = el; }}
-                onClick={() => handleDownload(i)}
-                className="cursor-pointer relative rounded-[48px] overflow-hidden shadow-2xl"
-                style={{
-                  width: 290,
-                  height: 630,
-                  background: s.bg,
-                  border: "8px solid #2a2a2a",
-                  boxShadow: "0 0 0 2px #444, 0 32px 64px rgba(0,0,0,0.4)",
-                }}
-              >
-                {/* Notch */}
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-28 h-7 bg-[#2a2a2a] rounded-b-2xl z-10" />
+      {publishedLink && (
+        <div className="w-full max-w-2xl bg-[#09fe94]/10 border border-[#09fe94]/30 rounded-xl p-4 flex items-center justify-between mb-4">
+          <div className="text-sm text-white">
+            <span className="font-bold text-[#09fe94]">Suksess!</span> Slideshowet er publisert.
+          </div>
+          <a href={publishedLink} target="_blank" rel="noreferrer" className="text-xs font-bold text-white underline">Se på TikTok →</a>
+        </div>
+      )}
 
-                {/* Content */}
-                <div className="absolute inset-0 flex flex-col px-6 pt-14 pb-10">
-                  {/* Status bar */}
-                  <div className="flex justify-between items-center mb-6 opacity-60">
-                    <span className="text-xs font-semibold" style={{ color: s.textColor }}>9:41</span>
-                    <div className="flex gap-1.5 items-center">
-                      <svg width="16" height="12" viewBox="0 0 16 12" fill={s.textColor}><rect x="0" y="4" width="3" height="8" rx="1"/><rect x="4.5" y="2.5" width="3" height="9.5" rx="1"/><rect x="9" y="0.5" width="3" height="11.5" rx="1"/><rect x="13.5" y="0" width="2.5" height="12" rx="1" opacity="0.3"/></svg>
-                      <svg width="16" height="12" viewBox="0 0 24 24" fill="none" stroke={s.textColor} strokeWidth="2"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><circle cx="12" cy="20" r="1"/></svg>
-                      <svg width="25" height="12" viewBox="0 0 25 12" fill={s.textColor}><rect x="0.5" y="0.5" width="21" height="11" rx="3.5" stroke={s.textColor} strokeOpacity="0.35" fill="none"/><rect x="2" y="2" width="16" height="8" rx="2"/><path d="M23 4.5v3a1.5 1.5 0 0 0 0-3z" fill={s.textColor} fillOpacity="0.4"/></svg>
-                    </div>
-                  </div>
+      {/* Serie tabs */}
+      <div className="flex flex-wrap justify-center gap-2 max-w-2xl">
+        {SERIES.map((s, i) => (
+          <button
+            key={s.id}
+            onClick={() => changeSeries(i)}
+            style={{
+              padding: "6px 14px", borderRadius: 99,
+              fontSize: 11, fontWeight: 600,
+              border: "1.5px solid",
+              borderColor: i === seriesIdx ? "#09fe94" : "#2a2a2a",
+              background: i === seriesIdx ? "#09fe94" : "transparent",
+              color: i === seriesIdx ? "#171717" : "#666",
+              cursor: "pointer",
+            }}
+          >
+            {i + 1}. {s.name}
+          </button>
+        ))}
+      </div>
 
-                  {/* Logo */}
-                  <div className="mb-4">
-                    <span className="text-lg font-bold" style={{ color: s.accent, fontFamily: "EB Garamond, serif" }}>Reachr</span>
-                  </div>
+      {/* Canvas */}
+      <div ref={canvasRef} style={{ width: 405, height: 720, borderRadius: 24, overflow: "hidden", position: "relative", boxShadow: "0 0 80px rgba(0,0,0,0.8)" }}>
+        <Renderer slide={series.slides[slideIdx]} idx={slideIdx} total={total} showGuide={showGuide} />
+      </div>
 
-                  {/* Headline */}
-                  <h2 className="text-2xl font-bold leading-tight mb-3 whitespace-pre-line" style={{ color: s.textColor }}>
-                    {s.headline}
-                  </h2>
-
-                  {/* Sub */}
-                  <p className="text-xs leading-relaxed mb-6 opacity-75" style={{ color: s.textColor }}>
-                    {s.sub}
-                  </p>
-
-                  {/* UI Mockup */}
-                  <div className="flex-1 flex flex-col justify-center">
-                    <Mockup type={s.mockup} accent={s.accent} />
-                  </div>
-                </div>
-              </div>
-
-              <span className="text-xs text-[#6b6660] font-medium">Skjermbilde {s.id}</span>
-            </div>
+      {/* Navigation */}
+      <div className="flex items-center gap-4">
+        <button onClick={() => setSlideIdx((i) => Math.max(0, i - 1))} disabled={slideIdx === 0} style={{ color: "#fff" }}>← Forrige</button>
+        <div className="flex gap-1.5">
+          {series.slides.map((_, i) => (
+            <div key={i} style={{ width: 8, height: 8, borderRadius: 4, background: i === slideIdx ? "#09fe94" : "#333" }} />
           ))}
         </div>
-
-        <div className="mt-10 text-center">
-          <p className="text-[#6b6660] text-sm">
-            Tips: Åpne DevTools (F12) → Høyreklikk på et skjermbilde → "Capture node screenshot" for PNG-eksport
-          </p>
-        </div>
+        <button onClick={() => setSlideIdx((i) => Math.min(total - 1, i + 1))} disabled={slideIdx === total - 1} style={{ color: "#fff" }}>Neste →</button>
       </div>
+
+      <button onClick={() => setShowGuide((v) => !v)} className="text-xs text-[#666] underline">
+        {showGuide ? "Skjul safe zone" : "Vis safe zone guide"}
+      </button>
     </div>
   );
 }

@@ -13,17 +13,23 @@ export async function POST(req: NextRequest) {
     const ipHash = createHash("sha256").update(ip).digest("hex").slice(0, 16);
     const userAgent = req.headers.get("user-agent") ?? "";
 
-    const adminClient = createClient(
+    // Use anon key — table has no RLS, so anon can insert
+    const client = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
     );
 
-    await adminClient.from("page_views").insert({
+    const { error } = await client.from("page_views").insert({
       path: path ?? "/",
       ip_hash: ipHash,
       user_agent: userAgent,
       referrer: referrer ?? null,
     });
+
+    if (error) {
+      console.error("[track] insert error:", error.message);
+      return NextResponse.json({ ok: false }, { status: 500 });
+    }
 
     return NextResponse.json({ ok: true });
   } catch {
