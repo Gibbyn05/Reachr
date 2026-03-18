@@ -12,8 +12,14 @@
  */
 
 import Image from "next/image";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import React from "react";
+import { Suspense } from "react";
+import { useSearchParams } from "next/navigation";
+import { toast } from "sonner";
+import { TikTokIcon } from "@/components/ui/tiktok-icon";
+import { Loader2, CheckCircle2, Share2 } from "lucide-react";
+import * as htmlToImage from "html-to-image";
 
 function SafeZoneOverlay() {
   return (
@@ -695,10 +701,24 @@ const SERIES = [
 // ─────────────────────────────────────────────────────────────────────────────
 // MAIN PAGE
 // ─────────────────────────────────────────────────────────────────────────────
-export default function TiktokPage() {
+function TiktokContent() {
+  const searchParams = useSearchParams();
   const [seriesIdx, setSeriesIdx] = useState(0);
   const [slideIdx, setSlideIdx] = useState(0);
   const [showGuide, setShowGuide] = useState(false);
+  const [isTiktokConnected, setIsTiktokConnected] = useState(false);
+  const [isPublishing, setIsPublishing] = useState(false);
+  const [publishedLink, setPublishedLink] = useState<string | null>(null);
+
+  const canvasRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const connected = searchParams.get("tiktok") === "success";
+    if (connected) {
+      setIsTiktokConnected(true);
+      toast.success("Koblet til TikTok!");
+    }
+  }, [searchParams]);
 
   const series = SERIES[seriesIdx];
   const { Renderer } = series;
@@ -709,12 +729,99 @@ export default function TiktokPage() {
     setSlideIdx(0);
   }
 
+  const connectTikTok = () => {
+    window.location.href = "/api/tiktok/auth";
+  };
+
+  const publishToTikTok = async () => {
+    setIsPublishing(true);
+    setPublishedLink(null);
+    try {
+      toast.info("Forbereder og tar bilder av alle slides i serien...");
+
+      const formData = new FormData();
+      const canvas = canvasRef.current;
+      if (!canvas) throw new Error("Canvas element not found");
+
+      const initialIdx = slideIdx;
+
+      for (let i = 0; i < total; i++) {
+        setSlideIdx(i);
+        await new Promise(r => setTimeout(r, 150));
+
+        const blob = await htmlToImage.toBlob(canvas, {
+          pixelRatio: 2,
+          quality: 0.95,
+        });
+
+        if (blob) {
+          formData.append(`slide_${i}`, blob, `slide_${i}.png`);
+        }
+      }
+
+      setSlideIdx(initialIdx);
+
+      const res = await fetch("/api/tiktok/publish", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        toast.success("Slideshow publisert til TikTok!");
+        setPublishedLink(data.share_url || "https://tiktok.com");
+      } else {
+        toast.error(data.error || "Noe gikk galt.");
+      }
+    } catch (err: unknown) {
+      console.error(err);
+      toast.error("Kunne ikke publisere.");
+    } finally {
+      setIsPublishing(false);
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center gap-5 py-12 px-4" style={{ background: "#1a1a1a", fontFamily: "Inter, system-ui, sans-serif" }}>
+
       {/* Header */}
-      <p style={{ color: "#555", fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase" }}>
-        TikTok Slideshow · 9×16 · Reachr
-      </p>
+      <div className="w-full max-w-2xl flex items-center justify-between border-b border-[#2a2a2a] pb-6 mb-2">
+        <div>
+          <h1 className="text-2xl font-bold text-white mb-1">TikTok Slideshow</h1>
+          <p className="text-xs text-[#666]">Automatisert slideshow-verktøy.</p>
+        </div>
+
+        {!isTiktokConnected ? (
+          <button onClick={connectTikTok} className="flex items-center gap-2 bg-white text-black font-bold py-2 px-4 rounded-xl text-sm">
+            <TikTokIcon className="w-4 h-4" />
+            Koble til TikTok
+          </button>
+        ) : (
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1.5 text-[10px] font-bold text-[#05c472]">
+              <CheckCircle2 className="w-3 h-3" />
+              Tilkoblet
+            </div>
+            <button
+              onClick={publishToTikTok}
+              disabled={isPublishing}
+              className="flex items-center gap-2 bg-[#ff0050] text-white font-bold py-2 px-5 rounded-xl text-sm disabled:opacity-50"
+            >
+              {isPublishing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Share2 className="w-4 h-4" />}
+              {isPublishing ? "Publiserer..." : "Publiser til TikTok"}
+            </button>
+          </div>
+        )}
+      </div>
+
+      {publishedLink && (
+        <div className="w-full max-w-2xl bg-[#09fe94]/10 border border-[#09fe94]/30 rounded-xl p-4 flex items-center justify-between mb-4">
+          <div className="text-sm text-white">
+            <span className="font-bold text-[#09fe94]">Suksess!</span> Slideshowet er publisert.
+          </div>
+          <a href={publishedLink} target="_blank" rel="noreferrer" className="text-xs font-bold text-white underline">Se på TikTok →</a>
+        </div>
+      )}
 
       {/* Serie tabs */}
       <div className="flex flex-wrap justify-center gap-2 max-w-2xl">
@@ -744,7 +851,7 @@ export default function TiktokPage() {
       </p>
 
       {/* 9:16 slide canvas */}
-      <div style={{ width: 405, height: 720, borderRadius: 24, overflow: "hidden", position: "relative", boxShadow: "0 0 80px rgba(0,0,0,0.8), 0 0 0 1px #2a2a2a", flexShrink: 0 }}>
+      <div ref={canvasRef} style={{ width: 405, height: 720, borderRadius: 24, overflow: "hidden", position: "relative", boxShadow: "0 0 80px rgba(0,0,0,0.8), 0 0 0 1px #2a2a2a", flexShrink: 0 }}>
         <Renderer slide={series.slides[slideIdx]} idx={slideIdx} total={total} showGuide={showGuide} />
       </div>
 
@@ -790,5 +897,13 @@ export default function TiktokPage() {
         </p>
       </div>
     </div>
+  );
+}
+
+export default function TiktokPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#1a1a1a] flex items-center justify-center text-white text-xs">Laster...</div>}>
+      <TiktokContent />
+    </Suspense>
   );
 }
