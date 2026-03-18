@@ -1,4 +1,4 @@
--- Tracking for emails sent
+PUSH-- Tracking for emails sent
 CREATE TABLE IF NOT EXISTS email_logs (
   id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
   user_email text NOT NULL,

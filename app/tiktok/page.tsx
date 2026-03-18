@@ -1,48 +1,51 @@
-"use client";
-
-import { useRef } from "react";
+import { useRef, useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
+import { toast } from "sonner";
+import { TikTokIcon } from "@/components/ui/tiktok-icon";
+import { Loader2, CheckCircle2, Share2, AlertCircle } from "lucide-react";
+import * as htmlToImage from "html-to-image";
 
 const screenshots = [
   {
     id: 1,
-    headline: "Finn nye kunder\npå sekunder",
-    sub: "Søk blant 250 000+ norske bedrifter direkte fra Brønnøysundregistrene.",
-    bg: "#171717",
-    accent: "#09fe94",
-    textColor: "#f2efe3",
-    mockup: "search",
-  },
-  {
-    id: 2,
-    headline: "Hold styr på\nhver deal",
-    sub: "Bygg en CRM-pipeline som gir deg full oversikt — fra første kontakt til lukket avtale.",
-    bg: "#f2efe3",
-    accent: "#09fe94",
-    textColor: "#171717",
-    mockup: "pipeline",
-  },
-  {
-    id: 3,
-    headline: "AI skriver\ne-posten for deg",
-    sub: "Generer personlige salgsmeldinger basert på din pitch og kundens profil.",
+    headline: "Hvorfor LinkedIn ikke lenger er gullstandarden for norsk B2B-salg.",
+    sub: "Innboksen er full. Ingen leser deg. Her er hva som faktisk virker nå.",
     bg: "#171717",
     accent: "#09fe94",
     textColor: "#f2efe3",
     mockup: "email",
   },
   {
-    id: 4,
-    headline: "Ikke mist en\noppfølging",
-    sub: "Få varsler når leads trenger kontakt — aldri gå glipp av en mulighet.",
+    id: 2,
+    headline: "LinkedIn er mettet.",
+    sub: "Den gylne tiden hvor alle så postene dine er over. Algoritmen er streng og støyen er enorm.",
     bg: "#f2efe3",
-    accent: "#ff470a",
+    accent: "#05c472",
     textColor: "#171717",
+    mockup: "pipeline",
+  },
+  {
+    id: 3,
+    headline: "Innboksen er full.",
+    sub: "De du vil snakke med får 50 like e-poster hver uke. Du forsvinner i mengden.",
+    bg: "#171717",
+    accent: "#ff470a",
+    textColor: "#f2efe3",
     mockup: "alerts",
   },
   {
+    id: 4,
+    headline: "Her er hva som faktisk virker nå.",
+    sub: "Direkte kontakt med beslutningstakere via intelligente systemer som vet hvem som er kjøpsklare.",
+    bg: "#f2efe3",
+    accent: "#09fe94",
+    textColor: "#171717",
+    mockup: "search",
+  },
+  {
     id: 5,
-    headline: "Selg mer.\nBruk mindre tid.",
-    sub: "Reachr samler søk, CRM og AI i én enkel plattform for norske selgere.",
+    headline: "Gjør salg enkelt igjen.",
+    sub: "Reachr hjelper deg å finne, kontakte og følge opp de rette folkene — før konkurrentene dine.",
     bg: "#09fe94",
     accent: "#171717",
     textColor: "#171717",
@@ -159,7 +162,68 @@ function Mockup({ type, accent }: { type: string; accent: string }) {
   return <CtaMockup accent={accent} />;
 }
 
-export default function ScreenshotsPage() {
+export default function TikTokPage() {
+  const searchParams = useSearchParams();
+  const [isTiktokConnected, setIsTiktokConnected] = useState(false);
+  const [isPublishing, setIsPublishing] = useState(false);
+  const [publishedLink, setPublishedLink] = useState<string | null>(null);
+  
+  useEffect(() => {
+    const connected = searchParams.get("tiktok") === "success";
+    if (connected) {
+      setIsTiktokConnected(true);
+      toast.success("Koblet til TikTok!");
+    }
+  }, [searchParams]);
+
+  const connectTikTok = () => {
+    window.location.href = "/api/tiktok/auth";
+  };
+
+  const publishToTikTok = async () => {
+    setIsPublishing(true);
+    setPublishedLink(null);
+    try {
+      toast.info("Forbereder og tar skjermbilder av slides...");
+      
+      const formData = new FormData();
+      
+      // Capture each slide and add to formData
+      for (let i = 0; i < screenshots.length; i++) {
+        const el = refs.current[i];
+        if (!el) continue;
+        
+        // Use html-to-image for high resolution
+        const blob = await htmlToImage.toBlob(el, {
+          pixelRatio: 2, // Retained high detail
+          quality: 0.95,
+        });
+        
+        if (blob) {
+          formData.append(`slide_${i}`, blob, `slide_${i}.png`);
+        }
+      }
+      
+      const res = await fetch("/api/tiktok/publish", {
+        method: "POST",
+        body: formData, // No Content-Type header needed for FormData
+      });
+      
+      const data = await res.json();
+      if (data.success) {
+        toast.success("Slideshow publisert til TikTok!");
+        setPublishedLink(data.share_url || "https://tiktok.com");
+      } else {
+        toast.error(data.error || "Noe gikk galt under publisering.");
+      }
+    } catch (err: any) {
+      console.error(err);
+      toast.error("Kunne ikke koble til serveren eller ta bilder.");
+    } finally {
+      setIsPublishing(false);
+    }
+  };
+
   const refs = useRef<(HTMLDivElement | null)[]>([]);
 
   const handleDownload = async (index: number) => {
@@ -173,12 +237,72 @@ export default function ScreenshotsPage() {
   return (
     <div className="min-h-screen bg-[#e8e4d8] p-8">
       <div className="max-w-6xl mx-auto">
-        <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold text-[#171717] mb-2" style={{ fontFamily: "EB Garamond, serif" }}>
-            Reachr — App Store Screenshots
-          </h1>
-          <p className="text-[#6b6660] text-sm">iPhone 6.7" format (1290 × 2796px) · Klikk for å laste ned</p>
+        <div className="mb-12 flex flex-col md:flex-row items-center justify-between gap-6 border-b border-[#d8d3c5] pb-10">
+          <div className="text-left md:w-2/3">
+            <h1 className="text-4xl md:text-5xl font-bold text-[#171717] mb-3" style={{ fontFamily: "EB Garamond, serif" }}>
+              Reachr — TikTok Slideshow
+            </h1>
+            <p className="text-[#6b6660] text-base max-w-xl">
+              Disse kortene er designet for å perfeksjonere "Photo Mode" på TikTok. 
+              Du kan enten laste dem ned manuelt eller koble til kontoen din under for å poste automatisk.
+            </p>
+          </div>
+          
+          <div className="flex flex-col gap-3 w-full md:w-auto">
+            {!isTiktokConnected ? (
+              <button 
+                onClick={connectTikTok}
+                className="flex items-center justify-center gap-3 bg-[#171717] text-white font-bold py-3.5 px-8 rounded-2xl hover:bg-black transition-all shadow-xl hover:scale-[1.02]"
+              >
+                <div className="w-6 h-6 bg-white rounded-full flex items-center justify-center p-1">
+                  <TikTokIcon className="text-black" />
+                </div>
+                Koble til TikTok
+              </button>
+            ) : (
+              <div className="flex flex-col gap-3">
+                <button 
+                  onClick={publishToTikTok}
+                  disabled={isPublishing}
+                  className="flex items-center justify-center gap-3 bg-[#ff0050] text-white font-bold py-3.5 px-8 rounded-2xl hover:bg-[#d60044] transition-all shadow-xl hover:scale-[1.02] disabled:opacity-50 disabled:scale-100"
+                >
+                  {isPublishing ? (
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                  ) : (
+                    <Share2 className="w-5 h-5" />
+                  )}
+                  {isPublishing ? "Publiserer..." : "Publiser til TikTok"}
+                </button>
+                <div className="flex items-center gap-2 justify-center text-xs font-bold text-[#05c472]">
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  Konto er tilkoblet
+                </div>
+              </div>
+            )}
+          </div>
         </div>
+
+        {publishedLink && (
+          <div className="mb-12 animate-in fade-in slide-in-from-top-4 duration-500">
+            <div className="bg-[#09fe94]/10 border-2 border-[#09fe94] rounded-2xl p-6 flex flex-col md:flex-row items-center justify-between gap-4">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-[#09fe94] rounded-xl flex items-center justify-center text-2xl">🎉</div>
+                <div>
+                  <h3 className="font-bold text-[#171717]">Suksess! Slideshowet er på vei ut.</h3>
+                  <p className="text-sm text-[#171717]/70">Det kan ta et par minutter før det vises i profilen din.</p>
+                </div>
+              </div>
+              <a 
+                href={publishedLink} 
+                target="_blank" 
+                rel="noreferrer"
+                className="bg-[#171717] text-[#09fe94] font-bold py-2.5 px-6 rounded-xl hover:bg-black transition-colors flex items-center gap-2"
+              >
+                Se på TikTok <Share2 className="w-4 h-4" />
+              </a>
+            </div>
+          </div>
+        )}
 
         <div className="flex flex-wrap gap-6 justify-center">
           {screenshots.map((s, i) => (
