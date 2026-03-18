@@ -39,8 +39,8 @@ export default function PersonvernPage() {
           </section>
 
           <section>
-            <h2 className="text-xl font-bold text-[#171717] mb-3">4. Tredjepartsintegrasjoner (Google og Microsoft)</h2>
-            <p className="leading-relaxed mb-3">Reachr tilbyr valgfri integrasjon med Google (Gmail og Google Kalender) og Microsoft (Outlook og Outlook Kalender). Disse integrasjonene er helt frivillige og aktiveres kun dersom brukeren selv kobler til kontoen sin via OAuth.</p>
+            <h2 className="text-xl font-bold text-[#171717] mb-3">4. Tredjepartsintegrasjoner (Google, Microsoft og TikTok)</h2>
+            <p className="leading-relaxed mb-3">Reachr tilbyr valgfri integrasjon med Google (Gmail og Google Kalender), Microsoft (Outlook og Outlook Kalender) og TikTok. Disse integrasjonene er helt frivillige og aktiveres kun dersom brukeren selv kobler til kontoen sin via OAuth.</p>
             <p className="leading-relaxed font-semibold mb-2">Google-integrasjon:</p>
             <ul className="list-disc list-inside space-y-2 leading-relaxed mb-3">
               <li><strong>Gmail (send/les):</strong> Brukes til å sende og lese e-poster direkte fra Reachr på vegne av brukeren. Vi ber om <code>gmail.send</code>, <code>gmail.readonly</code> og <code>gmail.modify</code>.</li>
@@ -54,7 +54,15 @@ export default function PersonvernPage() {
               <li>Tilsvarende funksjonalitet som Google-integrasjonen, men for Outlook e-post og Outlook Kalender.</li>
               <li>Samme prinsipp gjelder: kun lesing av kalender, kun på brukerens vegne, ingen deling, ingen AI-trening.</li>
             </ul>
-            <p className="leading-relaxed">Reachrs bruk og overføring av informasjon mottatt fra Google API-er overholder <a href="https://developers.google.com/terms/api-services-user-data-policy" className="text-[#ff470a] hover:underline" target="_blank" rel="noopener noreferrer">Googles retningslinjer for brukerdata</a>, inkludert kravene til begrenset bruk.</p>
+            <p className="leading-relaxed font-semibold mb-2">TikTok-integrasjon:</p>
+            <ul className="list-disc list-inside space-y-2 leading-relaxed mb-3">
+              <li><strong>Formål:</strong> Reachr bruker TikTok for Business API for å la brukere publisere og administrere innholdsslideshow direkte fra plattformen til sin TikTok-konto.</li>
+              <li><strong>Tilgang:</strong> Vi ber om tillatelse til å publisere videoer/bilder (<code>video.publish</code>) og lese grunnleggende kontoinformasjon (<code>user.info.basic</code>) på vegne av brukeren. Integrasjonen aktiveres kun ved eksplisitt samtykke via TikToks OAuth-flyt.</li>
+              <li><strong>Databruk:</strong> TikTok-data (bruker-ID, visningsnavn, profilbilde) brukes utelukkende for å identifisere kontoen og bekrefte publisering. Dataene deles ikke med tredjeparter og brukes ikke til reklame eller AI-trening.</li>
+              <li><strong>Lagring:</strong> Access token og refresh token lagres kryptert i brukerens konto i Supabase (EU-region). Ingen TikTok-innhold lagres på våre servere etter publisering.</li>
+              <li><strong>Frakobling:</strong> Brukeren kan koble fra TikTok-kontoen sin når som helst under Innstillinger, og da slettes alle lagrede tokens umiddelbart.</li>
+            </ul>
+            <p className="leading-relaxed">Reachrs bruk og overføring av informasjon mottatt fra Google API-er overholder <a href="https://developers.google.com/terms/api-services-user-data-policy" className="text-[#ff470a] hover:underline" target="_blank" rel="noopener noreferrer">Googles retningslinjer for brukerdata</a>, inkludert kravene til begrenset bruk. TikTok-integrasjonen overholder <a href="https://www.tiktok.com/legal/page/global/privacy-policy/en" className="text-[#ff470a] hover:underline" target="_blank" rel="noopener noreferrer">TikToks personvernpolicy</a> og vilkår for TikTok for Business API.</p>
           </section>
 
           <section>
