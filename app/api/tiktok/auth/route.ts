@@ -33,8 +33,8 @@ export async function GET(req: NextRequest) {
   const codeVerifier = generateRandomString(50);
   const codeChallenge = base64UrlEncode(sha256(codeVerifier));
 
-  // Forenkler scopes for å utelukke rettighetsproblemer
-  const scopes = "user.info.basic";
+  // Prøver komme i stedet for mellomrom for scopes i v2
+  const scopes = "user.info.basic,video.publish,video.upload";
   const state = Math.random().toString(36).substring(7);
 
   const authUrl = new URL("https://www.tiktok.com/v2/auth/authorize");

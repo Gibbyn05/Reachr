@@ -27,7 +27,7 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const tokenUrl = "https://www.tiktok.com/v2/auth/token/";
+    const tokenUrl = "https://open.tiktokapis.com/v2/oauth/token/";
     const formData = new URLSearchParams();
     formData.append("client_key", clientKey!);
     formData.append("client_secret", clientSecret!);
@@ -45,7 +45,14 @@ export async function GET(req: NextRequest) {
       body: formData,
     });
 
-    const data = await response.json();
+    const responseText = await response.text();
+    let data;
+    try {
+      data = JSON.parse(responseText);
+    } catch (e) {
+      console.error("TikTok token exchange failed with non-JSON response:", responseText);
+      return NextResponse.json({ error: "Failed to exchange token", details: responseText.substring(0, 100) }, { status: 500 });
+    }
 
     if (data.error) {
            return NextResponse.json({ error: data.error, description: data.error_description }, { status: 400 });
@@ -54,8 +61,31 @@ export async function GET(req: NextRequest) {
     // Success! We have the access_token.
     // data.access_token, data.open_id, data.expires_in, data.refresh_token
     
+    // Fetch user info to show in the UI (improves demo quality for TikTok review)
+    let displayName = "TikTok Bruker";
+    let avatarUrl = "";
+    
+    try {
+      const userResponse = await fetch("https://open.tiktokapis.com/v2/user/info/?fields=display_name,avatar_url", {
+        headers: { "Authorization": `Bearer ${data.access_token}` }
+      });
+      const userData = await userResponse.json();
+      if (userData.data?.user) {
+        displayName = userData.data.user.display_name;
+        avatarUrl = userData.data.user.avatar_url;
+      }
+    } catch (e) {
+      console.error("Failed to fetch user info:", e);
+    }
+
     // Redirect back to our TikTok page with a success message 
-    const finalResponse = NextResponse.redirect(new URL("/tiktok?tiktok=success", req.url));
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+    const redirectUrl = new URL("/tiktok", appUrl);
+    redirectUrl.searchParams.set("tiktok", "success");
+    redirectUrl.searchParams.set("name", displayName);
+    if (avatarUrl) redirectUrl.searchParams.set("avatar", avatarUrl);
+    
+    const finalResponse = NextResponse.redirect(redirectUrl);
     
     // Store the token in a secure, HTTP-only cookie
     finalResponse.cookies.set("tiktok_access_token", data.access_token, {
