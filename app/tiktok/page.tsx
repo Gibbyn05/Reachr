@@ -27,7 +27,7 @@ function SlideShell({ idx, total, children, showGuide }: { idx: number; total: n
     <div className="absolute inset-0 select-none" style={{ background: "#f2efe3" }}>
       <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse at 80% 0%, #e8e4d800 0%, #ede9da60 100%)" }} />
 
-      {/* LOGO - Flyttet ned for å unngå TikTok-søkebaren */}
+      {/* LOGO */}
       <div className="absolute" style={{ top: 80, left: 28 }}>
         <div className="flex items-center gap-2">
           <Image src="/logo.svg" alt="Reachr" width={28} height={28} style={{ display: "block" }} />
@@ -42,8 +42,8 @@ function SlideShell({ idx, total, children, showGuide }: { idx: number; total: n
         ))}
       </div>
 
-      {/* CONTENT - Flyttet ned for å gi logoen mer plass */}
-      <div className="absolute flex flex-col" style={{ top: 156, left: 28, right: 92, bottom: 268 }}>
+      {/* CONTENT - Justert padding til høyre for å sikre plass for TikTok-knapper */}
+      <div className="absolute flex flex-col" style={{ top: 156, left: 28, right: 100, bottom: 268 }}>
         {children}
       </div>
 
@@ -81,7 +81,7 @@ const s2Slides = [
 const s3Slides = [
   { type: "hook" as const, headline: "Hvorfor\nde beste\nvinner.", sub: "Det handler ikke om flaks. Det handler om datadrevet presisjon." },
   { type: "step" as const, time: "9:00", title: "Få listen servert.", body: "Reachr leverer dagens hotteste leads rett i fanget ditt." },
-  { type: "step" as const, time: "9:15", title: "Kvalifisér på 1-2-3.", body: "Sjekk regnskap og vekst med ett klikk i samme vindu." },
+  { type: "step" as const, time: "9:15", title: "Kvalifiser på 1-2-3.", body: "Sjekk regnskap og vekst med ett klikk i samme vindu." },
   { type: "step" as const, time: "9:30", title: "Send første pitch.", body: "Bruk AI til å skrive en unik melding som faktisk blir lest." },
   { type: "cta" as const, headline: "Bli en\nvinner.", cta: "Sjekk reachr.no" },
 ];
@@ -104,7 +104,7 @@ const s5Slides = [
 const s6Slides = [
   { type: "hook" as const, headline: "Fra 0 til\n100 leads\npå 15 min.", sub: "Høres det ut som magi? Det er bare smart teknologi." },
   { type: "step" as const, time: "Steg 1", title: "Definér din drømmekunde.", body: "Velg bransje, ansatte og omsetning." },
-  { type: "step" as const, time: "Steg 2", title: "Filtrér på beslutningstakere.", body: "Snakk med de som faktisk kan si JA." },
+  { type: "step" as const, time: "Steg 2", title: "Filtrér på beslutning.", body: "Snakk med de som faktisk kan si JA." },
   { type: "step" as const, time: "Steg 3", title: "Trykk 'Generer'.", body: "Få listen med e-post og direkte-nummer umiddelbart." },
   { type: "cta" as const, headline: "Få listen.", cta: "reachr.no" },
 ];
@@ -119,7 +119,7 @@ const s7Slides = [
 
 const s8Slides = [
   { type: "hook" as const, headline: "Manuell\nresearch\ner dødt.", sub: "Verden går for fort til at du kan bruke timer på Google." },
-  { type: "stat" as const, number: "95 %", claim: "mindre manuelt arbeid", context: "for team som bytter til Reachr sine automatiserte søk." },
+  { type: "stat" as const, number: "95 %", claim: "mindre arbeid", context: "for team som bytter til Reachr sine automatiserte søk." },
   { type: "sign" as const, num: "DATA", sign: "Sannhet i sanntid.", detail: "Alt fra Brønnøysund, Proff og sosiale medier — på ett sted." },
   { type: "stat" as const, number: "0", claim: "missete muligheter", context: "Få varsel i det sekundet en potensiell kunde melder behov." },
   { type: "cta" as const, headline: "Gå pro.", cta: "reachr.no →" },
@@ -140,7 +140,6 @@ const s10Slides = [
   { type: "cta" as const, headline: "Se selv.", cta: "Klikk her for reachr.no" },
 ];
 
-// NEW SERIES 11-20 (Light Style)
 const s11Slides = [
   { type: "hook" as const, label: "Intel Ops 📡", headline: "Data\nis the new\nGold.", sub: "I mørket av B2B-markedet er data din eneste lommelykt." },
   { type: "stat" as const, number: "100K", claim: "datapunkter analysert", context: "Reachr skanner sanntids-endringer i hele det norske markedet." },
@@ -219,34 +218,34 @@ function SlideContent({ slide, idx, total, showGuide }: { slide: any; idx: numbe
           {slide.label && (
             <div style={{ display: "inline-flex", alignSelf: "flex-start", background: "#171717", color: "#09fe94", fontSize: 11, fontWeight: 700, padding: "4px 12px", borderRadius: 99, marginBottom: 20 }}>{slide.label}</div>
           )}
-          <p style={{ fontFamily: "Inter, system-ui, sans-serif", fontSize: 64, fontWeight: 900, color: "#171717", lineHeight: 0.9, letterSpacing: "-3px", whiteSpace: "pre-line" }}>{slide.headline}</p>
+          <p style={{ fontFamily: "Inter, system-ui, sans-serif", fontSize: 52, fontWeight: 900, color: "#171717", lineHeight: 0.9, letterSpacing: "-2px", whiteSpace: "pre-line", overflowWrap: "break-word", wordBreak: "break-word" }}>{slide.headline}</p>
           <p style={{ color: "#6b6660", fontSize: 13, lineHeight: 1.65, marginTop: 20 }}>{slide.sub}</p>
         </div>
       )}
       {slide.type === "stat" && (
         <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center" }}>
           <p style={{ fontFamily: "Inter, system-ui, sans-serif", fontSize: 72, fontWeight: 900, color: "#ff470a", lineHeight: 1 }}>{slide.number}</p>
-          <p style={{ fontFamily: "Inter, system-ui, sans-serif", fontSize: 18, fontWeight: 700, marginTop: 8 }}>{slide.claim}</p>
+          <p style={{ fontFamily: "Inter, system-ui, sans-serif", fontSize: 18, fontWeight: 700, marginTop: 8, overflowWrap: "break-word" }}>{slide.claim}</p>
           <p style={{ color: "#6b6660", fontSize: 13, marginTop: 16 }}>{slide.context}</p>
         </div>
       )}
       {slide.type === "sign" && (
         <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center" }}>
           <p style={{ fontSize: 11, fontWeight: 700, color: "#a09b8f" }}>{slide.num}</p>
-          <p style={{ fontFamily: "Inter, system-ui, sans-serif", fontSize: 38, fontWeight: 900, color: "#ff470a", lineHeight: 1 }}>{slide.sign}</p>
+          <p style={{ fontFamily: "Inter, system-ui, sans-serif", fontSize: 32, fontWeight: 900, color: "#ff470a", lineHeight: 1, overflowWrap: "break-word" }}>{slide.sign}</p>
           <p style={{ color: "#6b6660", fontSize: 13, marginTop: 20 }}>{slide.detail}</p>
         </div>
       )}
       {slide.type === "step" && (
         <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center" }}>
           <p style={{ fontSize: 11, fontWeight: 700, color: "#ffad0a" }}>{slide.time}</p>
-          <p style={{ fontFamily: "Inter, system-ui, sans-serif", fontSize: 46, fontWeight: 900, lineHeight: 1 }}>{slide.title}</p>
+          <p style={{ fontFamily: "Inter, system-ui, sans-serif", fontSize: 38, fontWeight: 900, lineHeight: 1, overflowWrap: "break-word", wordBreak: "break-word" }}>{slide.title}</p>
           <p style={{ color: "#6b6660", fontSize: 13, marginTop: 16 }}>{slide.body}</p>
         </div>
       )}
       {slide.type === "cta" && (
         <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center" }}>
-          <p style={{ fontFamily: "Inter, system-ui, sans-serif", fontSize: 58, fontWeight: 900, color: "#171717", lineHeight: 0.93 }}>{slide.headline}</p>
+          <p style={{ fontFamily: "Inter, system-ui, sans-serif", fontSize: 48, fontWeight: 900, color: "#171717", lineHeight: 0.93, letterSpacing: "-1.5px", overflowWrap: "break-word" }}>{slide.headline}</p>
           <div style={{ marginTop: 28, background: "#09fe94", borderRadius: 14, padding: "14px 24px", fontWeight: 800 }}>{slide.cta}</div>
         </div>
       )}
