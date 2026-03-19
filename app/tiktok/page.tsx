@@ -59,66 +59,85 @@ function SlideShell({ idx, total, children, showGuide }: { idx: number; total: n
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// CONTENT SERIES (10 TOTAL)
+// CONTENT SERIES (10 TOTAL, 4-7 SLIDES EACH)
 // ─────────────────────────────────────────────────────────────────────────────
 
 const s1Slides = [
   { type: "hook" as const, label: "Salgs-tips 💎", headline: "Gull\ni din\ninnboks.", sub: "Slutt å lete etter nåla i høystakken. Begynn å plukke gulleplene." },
   { type: "stat" as const, number: "4.2x", claim: "høyere konvertering", context: "med varme leads fra Reachr sammenlignet med kalde lister." },
+  { type: "sign" as const, num: "01", sign: "Kvalitet over kvantitet.", detail: "Det er bedre å sende 5 meldinger som treffer, enn 50 som slettes." },
+  { type: "sign" as const, num: "02", sign: "Timingen er alt.", detail: "Reachr sier ifra når bedrifter vokser eller bytter ledelse." },
+  { type: "stat" as const, number: "80 %", claim: "av salg krever 5+ oppfølginger", context: "Reachr automatiserer påminnelser slik at du aldri glemmer en deal." },
   { type: "cta" as const, headline: "Hent\ngullet.", cta: "Se demo på reachr.no" },
 ];
 
 const s2Slides = [
   { type: "hook" as const, headline: "Kald-ringing\ner\ndødt.", sub: "Ingen tar telefonen fra ukjente nummer lenger. Her er hva du gjør i stedet." },
-  { type: "sign" as const, num: "01", sign: "Bruk sosiale salgssignaler.", detail: "Reachr overvåker markedet for deg 24/7." },
+  { type: "sign" as const, num: "❌", sign: "Stopp kasting av tid.", detail: "Manuelle lister er utdaterte før du rekker å ringe dem." },
+  { type: "sign" as const, num: "✅", sign: "Bruk sosiale signaler.", detail: "Reachr overvåker markedet for deg 24/7." },
+  { type: "stat" as const, number: "6ms", claim: "pr research-søk", context: "Reachr henter info raskere enn du klarer å blunke." },
   { type: "cta" as const, headline: "Ring\nsmartere.", cta: "Prøv Reachr gratis →" },
 ];
 
 const s3Slides = [
   { type: "hook" as const, headline: "Hvorfor\nde beste\nvinner.", sub: "Det handler ikke om flaks. Det handler om datadrevet presisjon." },
   { type: "step" as const, time: "9:00", title: "Få listen servert.", body: "Reachr leverer dagens hotteste leads rett i fanget ditt." },
+  { type: "step" as const, time: "9:15", title: "Kvalifisér på 1-2-3.", body: "Sjekk regnskap og vekst med ett klikk i samme vindu." },
+  { type: "step" as const, time: "9:30", title: "Send første pitch.", body: "Bruk AI til å skrive en unik melding som faktisk blir lest." },
   { type: "cta" as const, headline: "Bli en\nvinner.", cta: "Sjekk reachr.no" },
 ];
 
 const s4Slides = [
   { type: "hook" as const, label: "Autopilot 🚀", headline: "Salg\npå\nautopilot.", sub: "Når var sist gang du brukte 0 sekunder på research?" },
   { type: "stat" as const, number: "10t", claim: "spart pr uke", context: "for hver selger som bruker automatisert lead-fangst." },
+  { type: "sign" as const, num: "TRY", sign: "Gjør som 500+ andre.", detail: "Norske bedrifter bytter til Reachr for å skalere salget." },
+  { type: "stat" as const, number: "100 %", claim: "fokus på salg", context: "Slutt med admin-arbeid. Begynn å lukke avtaler." },
   { type: "cta" as const, headline: "Spar\ntid.", cta: "Sjekk reachr.no" },
 ];
 
 const s5Slides = [
   { type: "hook" as const, headline: "Den største\ntidstyven\ni salg.", sub: "Det er ikke kaffepausen. Det er manuell copy-paste fra Proff." },
   { type: "sign" as const, num: "STOPP", sign: "Slutt å copy-paste.", detail: "Eksportér leads direkte til din CRM med ett klikk." },
+  { type: "stat" as const, number: "1200", claim: "klikk spart daglig", context: "ved å bruke vårt 'ett-klikk-oppslag' i nettleseren." },
   { type: "cta" as const, headline: "Effektiviser.", cta: "reachr.no →" },
 ];
 
 const s6Slides = [
   { type: "hook" as const, headline: "Fra 0 til\n100 leads\npå 15 min.", sub: "Høres det ut som magi? Det er bare smart teknologi." },
+  { type: "step" as const, time: "Steg 1", title: "Definér din drømmekunde.", body: "Velg bransje, ansatte og omsetning." },
   { type: "step" as const, time: "Steg 2", title: "Filtrér på beslutningstakere.", body: "Snakk med de som faktisk kan si JA." },
+  { type: "step" as const, time: "Steg 3", title: "Trykk 'Generer'.", body: "Få listen med e-post og direkte-nummer umiddelbart." },
   { type: "cta" as const, headline: "Få listen.", cta: "reachr.no" },
 ];
 
 const s7Slides = [
   { type: "hook" as const, label: "Fremtiden ✨", headline: "Fremtidens\nB2B-salg\ner her.", sub: "De som tviholder på gamle metoder vil tape. De som adapterer, vinner." },
   { type: "sign" as const, num: "2026", sign: "AI tar over researchen.", detail: "Bli med på reisen før konkurrentene dine gjør det." },
+  { type: "stat" as const, number: "3x", claim: "flere bookede møter", context: "for team som bruker AI til å personalisere outreach." },
+  { type: "sign" as const, num: "JOIN", sign: "Bli fremtidens selger.", detail: "Bruk verktøyene som gir deg en urettferdig fordel." },
   { type: "cta" as const, headline: "Bli med.", cta: "Start i dag på reachr.no" },
 ];
 
 const s8Slides = [
   { type: "hook" as const, headline: "Manuell\nresearch\ner dødt.", sub: "Verden går for fort til at du kan bruke timer på Google." },
   { type: "stat" as const, number: "95 %", claim: "mindre manuelt arbeid", context: "for team som bytter til Reachr sine automatiserte søk." },
+  { type: "sign" as const, num: "DATA", sign: "Sannhet i sanntid.", detail: "Alt fra Brønnøysund, Proff og sosiale medier — på ett sted." },
+  { type: "stat" as const, number: "0", claim: "missete muligheter", context: "Få varsel i det sekundet en potensiell kunde melder behov." },
   { type: "cta" as const, headline: "Gå pro.", cta: "reachr.no →" },
 ];
 
 const s9Slides = [
   { type: "hook" as const, label: "Lynraskt ⚡", headline: "Fyll din\npipeline\ni lunsjen.", sub: "Mens du spiser brødskiva di, kan Reachr bygge hele salgsuken din." },
   { type: "step" as const, time: "Lunch", title: "Klikk på 'Generer'.", body: "Gjør ferdig mandagens møtebooking på minutter." },
+  { type: "step" as const, time: "Kaffe", title: "Se over AI-forslagene.", body: "Godkjenn meldingene AI-en har skrevet for deg." },
+  { type: "step" as const, time: "Ferdig", title: "Nyt ettermiddagen.", body: "Med mandagen klar kan du slappe helt av resten av helgen." },
   { type: "cta" as const, headline: "Begynn.", cta: "reachr.no" },
 ];
 
 const s10Slides = [
   { type: "hook" as const, headline: "Reachr-\neffekten\ner her.", sub: "Se hva som skjer med tallene dine når du har de beste dataene." },
   { type: "sign" as const, num: "REACH", sign: "Nå ut til alle.", detail: "Ubegrenset tilgang på ferske norske B2B-leads." },
+  { type: "stat" as const, number: "40 %", claim: "økt win-rate", context: "når du snakker med de rette personene til rett tid." },
   { type: "cta" as const, headline: "Se selv.", cta: "Klikk her for reachr.no" },
 ];
 
