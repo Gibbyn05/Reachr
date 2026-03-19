@@ -17,6 +17,8 @@ import * as htmlToImage from "html-to-image";
 // COMPONENT HELPERS (Compact and Static)
 // ─────────────────────────────────────────────────────────────────────────────
 
+const Frown = (props: any) => <AlertCircle {...props} />;
+
 function Comparison({ left, right }: { left: string, right: string }) {
   return (
     <div className="flex gap-3 items-stretch h-44 my-3 font-sans">
@@ -373,8 +375,7 @@ function TiktokContent() {
   );
 }
 
-const Download = (props: any) => <TrendingUp {...props} />;
-const Frown = (props: any) => <AlertCircle {...props} />;
+
 
 export default function TiktokPage() {
   return (
