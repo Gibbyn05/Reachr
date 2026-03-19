@@ -13,6 +13,52 @@ import {
 } from "lucide-react";
 import * as htmlToImage from "html-to-image";
 
+// ─────────────────────────────────────────────────────────────────────────────
+// HELPERS & ICONS (MUST BE DEFINED FIRST)
+// ─────────────────────────────────────────────────────────────────────────────
+
+const Activity = (props: any) => <TrendingUp {...props} />;
+const CircleDot = (props: any) => <Target {...props} />;
+const PenTool = (props: any) => <Zap {...props} />;
+const Globe = (props: any) => <Target {...props} />;
+const Compass = (props: any) => <Zap {...props} />;
+const Brain = (props: any) => <Zap {...props} />;
+const Rocket = (props: any) => <TrendingUp {...props} />;
+
+function VisualIllustration({ type }: { type: string }) {
+  if (type === "funnel") return (
+    <div className="flex flex-col items-center justify-center gap-1 opacity-20 my-6">
+      <div style={{ width: 120, height: 16, background: "#171717", borderRadius: 4 }} />
+      <div style={{ width: 90, height: 16, background: "#171717", borderRadius: 4 }} />
+      <div style={{ width: 60, height: 16, background: "#ff470a", borderRadius: 4 }} />
+      <div style={{ width: 30, height: 16, background: "#09fe94", borderRadius: 4 }} />
+    </div>
+  );
+  if (type === "graph") return (
+    <div className="flex items-end justify-center gap-2 h-20 opacity-20 my-6">
+      <div style={{ width: 12, height: "40%", background: "#171717", borderRadius: 2 }} />
+      <div style={{ width: 12, height: "30%", background: "#171717", borderRadius: 2 }} />
+      <div style={{ width: 12, height: "60%", background: "#171717", borderRadius: 2 }} />
+      <div style={{ width: 12, height: "90%", background: "#09fe94", borderRadius: 2 }} />
+    </div>
+  );
+  if (type === "radar") return (
+    <div className="relative w-24 h-24 my-6 opacity-20 flex items-center justify-center">
+      <div className="absolute inset-0 border-2 border-black rounded-full" />
+      <div className="absolute inset-4 border border-black rounded-full" />
+      <div className="absolute inset-[32px] border border-black rounded-full" />
+      <div className="absolute w-1 h-12 bg-black origin-bottom animate-spin" style={{ bottom: "50%", left: "50%" }} />
+    </div>
+  );
+  if (type === "battery") return (
+    <div className="w-20 h-10 border-4 border-black rounded-lg relative my-6 opacity-20 p-1">
+      <div className="h-full bg-[#09fe94] rounded-sm animate-pulse" style={{ width: "85%" }} />
+      <div className="absolute -right-2 top-2 w-2 h-4 bg-black rounded-r-sm" />
+    </div>
+  );
+  return null;
+}
+
 function SafeZoneOverlay() {
   return (
     <div className="absolute inset-0 pointer-events-none z-50">
@@ -66,7 +112,6 @@ function SlideShell({ idx, total, children, showGuide }: { idx: number; total: n
 // CONTENT SERIES (TOTAL 20 UNIVERES)
 // ─────────────────────────────────────────────────────────────────────────────
 
-// ORIGINAL SERIES 1-10 (Simplified for code length)
 const s1Slides = [{ type: "hook", label: "Salgs-tips 💎", headline: "Gull\ni din\ninnboks.", sub: "Slutt å lete etter nåla i høystakken. Begynn å plukke gulleplene." }, { type: "stat", number: "4.2x", claim: "høyere konvertering", context: "med varme leads fra Reachr." }, { type: "cta", headline: "Hent\ngullet.", cta: "reachr.no" }];
 const s2Slides = [{ type: "hook", headline: "Kald-ringing\ner\ndødt.", sub: "Ingen tar telefonen fra ukjente nummer lenger." }, { type: "sign", num: "❌", sign: "Stopp kasting av tid.", detail: "Manuelle lister er utdaterte." }, { type: "cta", headline: "Ring\nsmartere.", cta: "reachr.no" }];
 const s3Slides = [{ type: "hook", headline: "Hvorfor\nde beste\nvinner.", sub: "Det handler om datadrevet presisjon." }, { type: "step", time: "9:00", title: "Få listen servert.", body: "Hotteste leads rett i fanget ditt." }, { type: "cta", headline: "Sjekk reachr.no", cta: "Sjekk nå" }];
@@ -78,17 +123,15 @@ const s8Slides = [{ type: "hook", headline: "Manuell\nresearch\ner dødt.", sub:
 const s9Slides = [{ type: "hook", label: "Lynraskt ⚡", headline: "Fyll din\npipeline\ni lunsjen.", sub: "Bygg hele salgsuken din mens du spiser." }, { type: "step", time: "Lunch", title: "Klikk på 'Generer'.", body: "Ferdig på minutter." }, { type: "cta", headline: "Begynn.", cta: "reachr.no" }];
 const s10Slides = [{ type: "hook", headline: "Reachr-\neffekten\ner her.", sub: "Se hva som skjer med tallene dine." }, { type: "sign", num: "REACH", sign: "Nå ut til alle.", detail: "Ubegrenset tilgang på ferske leads." }, { type: "cta", headline: "Sjekk nå.", cta: "reachr.no" }];
 
-// NEW CREATIVE SERIES 11-20 (Illustrative & Conceptual)
-
 const s11Slides = [
   { type: "concept", icon: Target, title: "Laser-fokusert\nsalgstrakt.", body: "Er trakten din full av grus, eller diamanter?", illustration: "funnel" },
-  { type: "concept", icon: TrendingUp, title: "Fra lekk til\nlønnsom.", body: "Vi tetter hullene i salgsstrategien din med ekte sanntidsdata.", illustration: "graph" },
+  { type: "concept", icon: TrendingUp, title: "Fra lekk til\nlønnsom.", body: "Vi tetter hullene i salgsstrategien din med ekte sanntids data.", illustration: "graph" },
   { type: "cta", headline: "Tett trakten.", sub: "Prøv Reachr i dag.", cta: "reachr.no" },
 ];
 
 const s12Slides = [
   { type: "concept", icon: Shield, title: "Ekte data.\nIngen gjetting.", body: "Godkjenner du leads med hjertet eller hodet?", illustration: "shield" },
-  { type: "stat", number: "99.9 %", claim: "Validert kilde", context: "Alt vi leverer er hentet direkte fra offentlige registre." },
+  { type: "stat", number: "99.9 %", claim: "Validert kilde", context: "Alt vi leverer er hentet direkte fra registre." },
   { type: "cta", headline: "Sikre salget.", cta: "Hent demo" },
 ];
 
@@ -99,19 +142,19 @@ const s13Slides = [
 ];
 
 const s14Slides = [
-  { type: "concept", icon: Search, title: "Bedriften\nsom gjemmer\nseg for deg.", body: "Noen av dine beste kunder venter på at DU skal finne dem først.", illustration: "radar" },
+  { type: "concept", icon: Search, title: "Bedriften\nsom gjemmer\nseg.", body: "Noen av dine beste kunder venter på at DU skal finne dem først.", illustration: "radar" },
   { type: "concept", icon: Layers, title: "Se over\noverflaten.", body: "Vi graver dypere i regnskap og historikk for deg.", illustration: "layers" },
   { type: "cta", headline: "Oppdag dem.", cta: "Sjekk reachr.no" },
 ];
 
 const s15Slides = [
   { type: "concept", icon: BarChart3, title: "Salgshøyden\ni 2026.", body: "Hvordan ser fjellet ditt ut? Vi hjelper deg til toppen.", illustration: "mountain" },
-  { type: "stat", number: "+31 %", claim: "Ekstra vekst", context: "for team som bytter fra Excel til vårt CRM-verktøy." },
+  { type: "stat", number: "+31 %", claim: "Ekstra vekst", context: "for team som bytter fra Excel til vårt CRM." },
   { type: "cta", headline: "Klatre mer.", cta: "reachr.no" },
 ];
 
 const s16Slides = [
-  { type: "concept", icon: Database, title: "Det norske\nregisteret.", body: "Hvorfor betale for dyre utlands-lister når gullet ligger i Norge?", illustration: "norway" },
+  { type: "concept", icon: Database, title: "Det norske\nregisteret.", body: "Hvorfor betale for dyre utlands-lister når gullet ligger her?", illustration: "norway" },
   { type: "concept", icon: CircleDot, title: "Sikt på\nsentrum.", body: "Treff beslutningstakere der de bor. Ikke via sentralbord.", illustration: "target" },
   { type: "cta", headline: "Treff nå.", cta: "reachr.no" },
 ];
@@ -123,68 +166,22 @@ const s17Slides = [
 ];
 
 const s18Slides = [
-  { type: "concept", icon: Users, title: "Ditt nye\nsalgsteam.", body: "Visste du at én person med Reachr kan gjøre jobben til tre?", illustration: "users" },
+  { type: "concept", icon: Users, title: "Ditt nye\nsalgsteam.", body: "Visste du at én person med Reachr gjør jobben til tre?", illustration: "users" },
   { type: "stat", number: "3:1", claim: "Mangedobling", context: "av effektiviteten til hver eneste selger i teamet ditt." },
   { type: "cta", headline: "Bli flere.", cta: "Prøv gratis" },
 ];
 
 const s19Slides = [
   { type: "concept", icon: Globe, title: "Ubegrenset\nhorisont.", body: "Norge er stort. Markedet ditt er større enn du tror.", illustration: "globe" },
-  { type: "concept", icon: Compass, title: "Finn din\nrening.", body: "Bli guidet direkte til selskapene som har størst sjanse for å si ja.", illustration: "compass" },
+  { type: "concept", icon: Compass, title: "Finn din\nrening.", body: "Bli guidet direkte til selskapene som vil si ja.", illustration: "compass" },
   { type: "cta", headline: "Finn vei.", cta: "reachr.no" },
 ];
 
 const s20Slides = [
   { type: "concept", icon: Brain, title: "Intelligens\noverseri.", body: "Vi kombinerer menneskelig intuisjon med rå kraft fra AI.", illustration: "brain" },
   { type: "concept", icon: Rocket, title: "Launch-sekvens\nstartet.", body: "Klar for å løfte salgsavdelingen din til nye høyder?", illustration: "rocket" },
-  { type: "cta", headline: "Løft av.", cta: "start@reachr.no" },
+  { type: "cta", headline: "Løft av.", cta: "reachr.no" },
 ];
-
-// ─────────────────────────────────────────────────────────────────────────────
-// ILLUSTRATIONS & ICONS HELPERS
-// ─────────────────────────────────────────────────────────────────────────────
-
-function VisualIllustration({ type }: { type: string }) {
-  if (type === "funnel") return (
-    <div className="flex flex-col items-center justify-center gap-1 opacity-20 my-6">
-      <div style={{ width: 120, height: 16, background: "#171717", borderRadius: 4 }} />
-      <div style={{ width: 90, height: 16, background: "#171717", borderRadius: 4 }} />
-      <div style={{ width: 60, height: 16, background: "#ff470a", borderRadius: 4 }} />
-      <div style={{ width: 30, height: 16, background: "#09fe94", borderRadius: 4 }} />
-    </div>
-  );
-  if (type === "graph") return (
-    <div className="flex items-end justify-center gap-2 h-20 opacity-20 my-6">
-      <div style={{ width: 12, height: "40%", background: "#171717", borderRadius: 2 }} />
-      <div style={{ width: 12, height: "30%", background: "#171717", borderRadius: 2 }} />
-      <div style={{ width: 12, height: "60%", background: "#171717", borderRadius: 2 }} />
-      <div style={{ width: 12, height: "90%", background: "#09fe94", borderRadius: 2 }} />
-    </div>
-  );
-  if (type === "radar") return (
-    <div className="relative w-24 h-24 my-6 opacity-20 flex items-center justify-center">
-      <div className="absolute inset-0 border-2 border-black rounded-full" />
-      <div className="absolute inset-4 border border-black rounded-full" />
-      <div className="absolute inset-[32px] border border-black rounded-full" />
-      <div className="absolute w-1 h-12 bg-black origin-bottom animate-spin" style={{ bottom: "50%", left: "50%" }} />
-    </div>
-  );
-  if (type === "battery") return (
-    <div className="w-20 h-10 border-4 border-black rounded-lg relative my-6 opacity-20 p-1">
-      <div className="h-full bg-[#09fe94] rounded-sm animate-pulse" style={{ width: "85%" }} />
-      <div className="absolute -right-2 top-2 w-2 h-4 bg-black rounded-r-sm" />
-    </div>
-  );
-  return null;
-}
-
-const Activity = (props: any) => <TrendingUp {...props} />;
-const CircleDot = (props: any) => <Target {...props} />;
-const PenTool = (props: any) => <Zap {...props} />;
-const Globe = (props: any) => <Target {...props} />;
-const Compass = (props: any) => <Zap {...props} />;
-const Brain = (props: any) => <Zap {...props} />;
-const Rocket = (props: any) => <TrendingUp {...props} />;
 
 function SlideContent({ slide, idx, total, showGuide }: { slide: any; idx: number; total: number; showGuide: boolean }) {
   return (
@@ -355,7 +352,6 @@ function TiktokContent() {
         <button onClick={() => setSlideIdx((i) => Math.min(total - 1, i + 1))} className="text-white/40">Neste →</button>
       </div>
 
-      {/* Preview Section */}
       <div className="w-full max-w-[1200px] border-t border-white/5 pt-12 mt-12 px-6">
         <h3 className="text-xl font-bold text-white mb-8 flex items-center gap-2">🛒 Forhåndsvisning</h3>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
