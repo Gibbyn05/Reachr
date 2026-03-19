@@ -27,8 +27,8 @@ function SlideShell({ idx, total, children, showGuide }: { idx: number; total: n
     <div className="absolute inset-0 select-none" style={{ background: "#f2efe3" }}>
       <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse at 80% 0%, #e8e4d800 0%, #ede9da60 100%)" }} />
 
-      {/* LOGO */}
-      <div className="absolute" style={{ top: 28, left: 28 }}>
+      {/* LOGO - Flyttet ned for å unngå TikTok-søkebaren */}
+      <div className="absolute" style={{ top: 80, left: 28 }}>
         <div className="flex items-center gap-2">
           <Image src="/logo.svg" alt="Reachr" width={28} height={28} style={{ display: "block" }} />
           <span style={{ fontFamily: "EB Garamond, Georgia, serif", fontSize: 19, fontWeight: 700, fontStyle: "italic", color: "#171717", lineHeight: 1 }}>Reachr</span>
@@ -36,14 +36,14 @@ function SlideShell({ idx, total, children, showGuide }: { idx: number; total: n
       </div>
 
       {/* DOTS */}
-      <div className="absolute flex items-center gap-1.5" style={{ top: 36, right: 92 }}>
+      <div className="absolute flex items-center gap-1.5" style={{ top: 88, right: 92 }}>
         {Array.from({ length: total }).map((_, i) => (
           <div key={i} style={{ width: i === idx ? 18 : 5, height: 5, borderRadius: 3, background: i === idx ? "#09fe94" : "#d8d3c5", transition: "width 0.25s" }} />
         ))}
       </div>
 
-      {/* CONTENT */}
-      <div className="absolute flex flex-col" style={{ top: 80, left: 28, right: 92, bottom: 268 }}>
+      {/* CONTENT - Flyttet ned for å gi logoen mer plass */}
+      <div className="absolute flex flex-col" style={{ top: 156, left: 28, right: 92, bottom: 268 }}>
         {children}
       </div>
 
