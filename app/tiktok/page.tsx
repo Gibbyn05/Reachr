@@ -399,7 +399,7 @@ function TiktokContent() {
   );
 }
 
-const Download = (props: any) => <TrendingUp {...props} />;
+
 
 export default function TiktokPage() {
   return (
