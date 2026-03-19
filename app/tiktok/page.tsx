@@ -9,9 +9,11 @@ import {
   User, Shield, Target, TrendingUp, Search, 
   Layers, Clock, Smile, Rocket, BarChart, 
   Database, Coffee, CheckCircle2, AlertCircle, 
-  Download, Image as ImageIcon, MessageSquare, Zap
+  Download, Image as ImageIcon, MessageSquare, Zap,
+  FolderDown, Loader2
 } from "lucide-react";
 import * as htmlToImage from "html-to-image";
+import JSZip from "jszip";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // COMPONENT HELPERS
@@ -47,10 +49,10 @@ function RadarEffect() {
 
 function ListProgress({ points }: { points: string[] }) {
   return (
-    <div className="flex flex-col gap-2 my-2 font-sans">
+    <div className="flex flex-col gap-2 my-2 font-sans text-left">
       {points.map((p, i) => (
         <div key={i} className="flex items-center gap-2 bg-white p-2.5 rounded-xl border border-[#171717] shadow-[3px_3px_0px_#171717]">
-          <div className="w-5 h-5 rounded-full bg-[#09fe94] flex items-center justify-center text-[9px] font-black">{i + 1}</div>
+          <div className="w-5 h-5 rounded-full bg-[#09fe94] flex items-center justify-center text-[9px] font-black shrink-0">{i + 1}</div>
           <p className="text-[10px] font-black text-[#171717] uppercase leading-none">{p}</p>
         </div>
       ))}
@@ -70,7 +72,7 @@ function SpeechBubble({ text, side, name }: { text: string, side: "left" | "righ
   );
 }
 
-function SlideShell({ idx, total, children, showGuide }: { idx: number; total: number; children: React.ReactNode; showGuide: boolean }) {
+function SlideShell({ idx, total, children }: { idx: number; total: number; children: React.ReactNode }) {
   return (
     <div className="absolute inset-0 bg-[#f2efe3] overflow-hidden">
       <div className="absolute top-16 left-8 flex items-center gap-2">
@@ -79,7 +81,7 @@ function SlideShell({ idx, total, children, showGuide }: { idx: number; total: n
       </div>
       <div className="absolute top-[68px] right-20 flex items-center gap-1">
         {Array.from({ length: total }).map((_, i) => (
-          <div key={i} className={`h-1.5 rounded-full ${i === idx ? "w-5 bg-[#09fe94]" : "w-1.5 bg-white"}`} />
+          <div key={i} className={`h-1.5 rounded-full ${i === idx ? "w-6 bg-[#09fe94]" : "w-1.5 bg-white/40"}`} />
         ))}
       </div>
       <div className="absolute inset-x-8 top-[110px] bottom-[280px] flex flex-col justify-center">
@@ -92,160 +94,34 @@ function SlideShell({ idx, total, children, showGuide }: { idx: number; total: n
           <span className="text-[7px] font-bold text-[#a09b8f] uppercase">Ekte B2B-data</span>
         </div>
       </div>
-      {showGuide && (
-        <div className="absolute inset-0 pointer-events-none z-50">
-          <div className="absolute bottom-0 h-[220px] bg-red-500/5 border-t border-dashed border-red-500/20" />
-        </div>
-      )}
     </div>
   );
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 20 SERIES (TRIMMED TO 5-8 SLIDES)
+// 20 SERIES (5-8 SLIDES)
 // ─────────────────────────────────────────────────────────────────────────────
 
-const s1Slides = [
-  { type: "hook", headline: "Slutt å grave\ni Excel.", sub: "Du kaster bort timer på kjedelig research hver eneste mandag." },
-  { type: "comparison", title: "Realiteten.", left: "Grave i Proff hele dagen.", right: "AI skanner alt på 5 sekunder." },
-  { type: "stat", number: "3600", label: "Klikk spart", sub: "Det er så mange manuelle klikk du slipper å ta hver uke med Reachr." },
-  { type: "step", label: "AUTO", body: "Koble til CRM-et ditt og se leadsene flyte inn." },
-  { type: "cta", headline: "Begynn nå.", cta: "reachr.no" }
-];
-
-const s2Slides = [
-  { type: "hook", headline: "1.2 Millioner.", sub: "Det er antallet aktive bedrifter i det norske markedet." },
-  { type: "radar", title: "Vår radar ser alt.", body: "Vi skanner samtlige 1.2M selskaper i sanntid for å finne dine leads." },
-  { type: "concept", icon: Database, headline: "Vi siler ut.", sub: "Glem de 99% som aldri vil kjøpe. Vi finner de heteste for deg." },
-  { type: "stat", number: "100 %", label: "Ferske Leads", sub: "Alltid oppdatert rett fra offentlige registre." },
-  { type: "cta", headline: "Sjekk markedet.", cta: "reachr.no" }
-];
-
-const s3Slides = [
-  { type: "hook", headline: "Lenes lunsj-hemmet.", sub: "Hvorfor har Lene alltid tid til lunsj i motsetning til deg?" },
-  { type: "chat", side: "left", name: "Sondre", text: "Lene, kalenderen din er stappfull! Hvor finner du leadsen din?" },
-  { type: "chat", side: "right", name: "Lene", text: "Jeg runder ikke Google lenger. Jeg bruker Reachr." },
-  { type: "stat", number: "10 timer", label: "Fritid vunnet", sub: "Lene får 10 ekstra timer til salg hver uke." },
-  { type: "cta", headline: "Bli som Lene.", cta: "reachr.no" }
-];
-
-const s4Slides = [
-  { type: "hook", headline: "Cold Calling\ner dødt.", sub: "Ingen svarer ukjente nummer lenger. Du ringer i blinde." },
-  { type: "concept", icon: Zap, headline: "Varm opp salget.", sub: "Vi viser deg hvem som faktisk trener dine tjenester akkurat nå." },
-  { type: "list", title: "Tre steg til suksess:", points: ["1. Definer drømmekunden.", "2. La AI finne e-posten.", "3. Send video-pitch."] },
-  { type: "cta", headline: "Vinn markedet.", cta: "reachr.no" }
-];
-
-const s5Slides = [
-  { type: "hook", headline: "ROI som rocker.", sub: "Betaler du for mye for hvert eneste B2B-lead?" },
-  { type: "stat", number: "80 %", label: "Billigere", sub: "Reachr-data er 80% rimeligere enn betalte annonser." },
-  { type: "comparison", title: "Budsjettet.", left: "Går til Google og LinkedIn Ads.", right: "Går rett til ekte leads." },
-  { type: "cta", headline: "Spar penger.", cta: "reachr.no" }
-];
-
-const s6Slides = [
-  { type: "hook", headline: "Sjefen vil vite.", sub: "Hvordan ble teamet plutselig så effektive?" },
-  { type: "chat", side: "left", name: "Sjefen", text: "Vi knuser alle salgsrekordene våre nå! Hva er det dere gjør?" },
-  { type: "chat", side: "right", name: "Teamet", text: "Vi byttet ut gjetting med Reachr-data. Enkelt og greit." },
-  { type: "stat", number: "XXL", label: "Pipeline", sub: "Pipelinen har aldri vært sunnere." },
-  { type: "cta", headline: "Imponer sjefen.", cta: "reachr.no" }
-];
-
-const s7Slides = [
-  { type: "hook", headline: "Viking-fart.", sub: "Slik tar man over det norske markedet i 2026." },
-  { type: "comparison", title: "Evolusjonen.", left: "Gammel og treg research.", right: "Moderne og Reachr-drevet." },
-  { type: "radar", title: "Erobringen...", body: "Vi ser muligheter før konkurrentene dine." },
-  { type: "cta", headline: "Erobre nå.", cta: "reachr.no" }
-];
-
-const s8Slides = [
-  { type: "hook", headline: "Detective Mode.", sub: "Finn de skjulte beslutningstakere i Norge." },
-  { type: "concept", icon: Search, headline: "Bak kulissene.", sub: "Se hvem som faktisk bestemmer over budsjettet." },
-  { type: "step", label: "1 CLICK", body: "Finn direktelinjer rett i nettleseren din." },
-  { type: "cta", headline: "Oppdag sannheten.", cta: "reachr.no" }
-];
-
-const s9Slides = [
-  { type: "hook", headline: "Gull i innboksen.", sub: "Når e-postene dine endelig blir lest." },
-  { type: "chat", side: "left", name: "Erik", text: "Endelig får jeg svar fra folka jeg skriver til!" },
-  { type: "chat", side: "right", name: "Morten", text: "Fordi du sender relevant info til relevante folk." },
-  { type: "stat", number: "40 %", label: "Høyere svarprosent", sub: "Ved bruk av qualified leads fra Reachr." },
-  { type: "cta", headline: "Få flere svar.", cta: "reachr.no" }
-];
-
-const s10Slides = [
-  { type: "hook", headline: "Reachr AI.", sub: "Din nye salgsassistent som aldri sover." },
-  { type: "concept", icon: Rocket, headline: "Launch nå.", sub: "Automatiser grovarbeidet og fokuser på å selge." },
-  { type: "stat", number: "24/7", label: "Jobber for deg", sub: "Finner leads mens du sover eller er i lunsj." },
-  { type: "cta", headline: "Start i dag.", cta: "reachr.no" }
-];
-
-const s11Slides = [
-  { type: "hook", headline: "Møte-maskinen.", sub: "Den beste følelsen i verden er en full kalender." },
-  { type: "stat", number: "+15", label: "Møter i uka", sub: "Standard for de som bruker Reachr-verktøyene proaktivt." },
-  { type: "step", label: "KLAR", body: "Sett opp din søkeradar på 60 sekunder." },
-  { type: "cta", headline: "Book flere møter.", cta: "reachr.no" }
-];
-
-const s12Slides = [
-  { type: "hook", headline: "Data-driven or Die.", sub: "Folk som gjetter i salg har ingen fremtid." },
-  { type: "comparison", title: "Slaget om B2B.", left: "Gjetting og intuisjon.", right: "Datadrevet beslutning." },
-  { type: "stat", number: "100%", label: "Real-time", sub: "Alt i databasen er ferskt og oppdatert nå." },
-  { type: "cta", headline: "Bli moderne.", cta: "reachr.no" }
-];
-
-const s13Slides = [
-  { type: "hook", headline: "LinkedIn Genius.", sub: "Bruk verdens største nettverk på en helt ny måte." },
-  { type: "step", label: "SCAN", body: "Se de hemmelige numrene direkte på LinkedIn-profiler." },
-  { type: "stat", number: "Ett klikk", label: "Import", sub: "Ta leads rett fra LinkedIn til ditt CRM." },
-  { type: "cta", headline: "Bruk Geni-Mode.", cta: "reachr.no" }
-];
-
-const s14Slides = [
-  { type: "hook", headline: "Innboks Null?", sub: "For våre selgere betyr innboks null mangel på muligheter." },
-  { type: "chat", side: "left", name: "Kollega", text: "Hvor ble det av alle kundene dine?" },
-  { type: "chat", side: "right", name: "Reachr-selger", text: "De er her! Innboksen min renner over." },
-  { type: "cta", headline: "Fyll innboksen.", cta: "reachr.no" }
-];
-
-const s15Slides = [
-  { type: "hook", headline: "CRM Magie.", sub: "Slutt å manuelt mate systemet ditt med data." },
-  { type: "concept", icon: Zap, headline: "Auto-Sync.", sub: "Sync leads rett inn i Hubspot eller Pipedrive." },
-  { type: "stat", number: "0 sek", label: "Manuell jobb", sub: "Vi gjør alt grovarbeidet for deg automatisk." },
-  { type: "cta", headline: "Automatiser.", cta: "reachr.no" }
-];
-
-const s16Slides = [
-  { type: "hook", headline: "Hvor er lunsjen?", sub: "Du fortjener en lunsj uten tastaturstøv på skiva." },
-  { type: "comparison", title: "Tidsklemma.", left: "Research foran PC-en.", right: "Nyt kaffen og lunsjen." },
-  { type: "stat", number: "X2", label: "Effektivitet", sub: "Når du lar teknologien ta seg av tidsbruken." },
-  { type: "cta", headline: "Ta lunsj.", cta: "reachr.no" }
-];
-
-const s17Slides = [
-  { type: "hook", headline: "Bullseye.", sub: "Treff blink på hver eneste salgssamtale." },
-  { type: "radar", title: "Targeting...", body: "Vi isolerer de selskapene som har størst kjøpskraft." },
-  { type: "stat", number: "90 %", label: "Treffsikkerhet", sub: "Når du ringer de rette personene til rett tid." },
-  { type: "cta", headline: "Treff blink.", cta: "reachr.no" }
-];
-
-const s18Slides = [
-  { type: "hook", headline: "Vekst-motoren.", sub: "Hold foten din på gassen gjennom hele året." },
-  { type: "stat", number: "60 %", label: "Salgsøkning", sub: "Gjennomsnittlig vekst hos våre mest lojale kunder." },
-  { type: "cta", headline: "Bli en vinner.", cta: "reachr.no" }
-];
-
-const s19Slides = [
-  { type: "hook", headline: "Bli en Reachr.", sub: "Bli med i Norges raskest voksende salgsmiljø." },
-  { type: "stat", number: "5000+", label: "Medlemmer", sub: "Lær av de beste selgerne i bransjen." },
-  { type: "cta", headline: "Bli med oss.", cta: "reachr.no" }
-];
-
-const s20Slides = [
-  { type: "hook", headline: "Finalen er her.", sub: "Er du klar for å ta salget ditt til 2026-nivå?" },
-  { type: "concept", icon: Rocket, headline: "Take-off.", sub: "Ikke vent til neste mandag. Start reisen i dag." },
-  { type: "cta", headline: "Sjekk oss ut.", cta: "reachr.no" }
-];
+const s1Slides = [{ type: "hook", headline: "Slutt å grave\ni Excel.", sub: "Du kaster bort timer på kjedelig research hver eneste mandag." }, { type: "comparison", title: "Realiteten.", left: "Grave i Proff hele dagen.", right: "AI skanner alt på 5 sekunder." }, { type: "stat", number: "3600", label: "Klikk spart", sub: "Det er så mange klikk du slipper med automatisert data." }, { type: "step", label: "AUTO", body: "Koble til CRM-et ditt og se leadsene flyte inn." }, { type: "cta", headline: "Begynn nå.", cta: "reachr.no" }];
+const s2Slides = [{ type: "hook", headline: "1.2 Millioner.", sub: "Det er antallet aktive bedrifter i det norske markedet." }, { type: "radar", title: "Vår radar ser alt.", body: "Vi skanner samtlige 1.2M selskaper i sanntid for å finne dine leads." }, { type: "concept", icon: Database, headline: "Vi siler ut.", sub: "Glem de 99% som aldri vil kjøpe. Vi finner de heteste for deg." }, { type: "stat", number: "100 %", label: "Ferske Leads", sub: "Alltid oppdatert rett fra offentlige registre." }, { type: "cta", headline: "Sjekk markedet.", cta: "reachr.no" }];
+const s3Slides = [{ type: "hook", headline: "Lenes lunsj-hemmet.", sub: "Hvorfor har Lene alltid tid til lunsj i motsetning til deg?" }, { type: "chat", side: "left", name: "Sondre", text: "Lene, kalenderen din er stappfull! Hvor finner du leadsen din?" }, { type: "chat", side: "right", name: "Lene", text: "Jeg runder ikke Google lenger. Jeg bruker Reachr." }, { type: "stat", number: "10 timer", label: "Fritid vunnet", sub: "Lene får 10 ekstra timer til salg hver uke." }, { type: "cta", headline: "Bli som Lene.", cta: "reachr.no" }];
+const s4Slides = [{ type: "hook", headline: "Cold Calling\ner dødt.", sub: "Ingen svarer ukjente nummer lenger. Du ringer i blinde." }, { type: "concept", icon: Zap, headline: "Varm opp salget.", sub: "Vi viser deg hvem som faktisk trenger dine tjenester akkurat nå." }, { type: "list", title: "Tre steg til suksess:", points: ["1. Definer drømmekunden.", "2. La AI finne e-posten.", "3. Send video-pitch."] }, { type: "cta", headline: "Vinn markedet.", cta: "reachr.no" }];
+const s5Slides = [{ type: "hook", headline: "ROI som rocker.", sub: "Betaler du for mye for hvert eneste B2B-lead?" }, { type: "stat", number: "80 %", label: "Billigere", sub: "Reachr-data er 80% rimeligere enn betalte annonser." }, { type: "comparison", title: "Budsjettet.", left: "Går til Google Ads og LinkedIn Ads.", right: "Går rett til ekte leads." }, { type: "cta", headline: "Spar penger.", cta: "reachr.no" }];
+const s6Slides = [{ type: "hook", headline: "Sjefen vil vite.", sub: "Hvordan ble teamet plutselig så effektive?" }, { type: "chat", side: "left", name: "Sjefen", text: "Vi knuser alle salgsrekordene våre nå! Hva er det dere gjør?" }, { type: "chat", side: "right", name: "Teamet", text: "Vi byttet ut gjetting med Reachr-data. Enkelt og greit." }, { type: "stat", number: "XXL", label: "Pipeline", sub: "Pipelinen har aldri vært sunnere." }, { type: "cta", headline: "Imponer sjefen.", cta: "reachr.no" }];
+const s7Slides = [{ type: "hook", headline: "Viking-fart.", sub: "Slik tar man over det norske markedet i 2026." }, { type: "comparison", title: "Evolusjonen.", left: "Gammel og treg research.", right: "Moderne og Reachr-drevet." }, { type: "radar", title: "Erobringen...", body: "Vi ser muligheter før konkurrentene dine." }, { type: "cta", headline: "Erobre nå.", cta: "reachr.no" }];
+const s8Slides = [{ type: "hook", headline: "Detective Mode.", sub: "Finn de skjulte beslutningstakere i Norge." }, { type: "concept", icon: Search, headline: "Bak kulissene.", sub: "Se hvem som faktisk bestemmer over budsjettet." }, { type: "step", label: "1 CLICK", body: "Finn direktelinjer rett i nettleseren din med vår Extension." }, { type: "cta", headline: "Oppdag sannheten.", cta: "reachr.no" }];
+const s9Slides = [{ type: "hook", headline: "Gull i innboksen.", sub: "Når e-postene dine endelig blir lest av rett person." }, { type: "chat", side: "left", name: "Erik", text: "Endelig får jeg svar fra folka jeg skriver til!" }, { type: "chat", side: "right", name: "Morten", text: "Fordi du sender relevant info til relevante folk fra Reachr." }, { type: "stat", number: "40 %", label: "Høyere svarprosent", sub: "Ved bruk av kvalifiserte leads fra Reachr-plattformen." }, { type: "cta", headline: "Få flere svar.", cta: "reachr.no" }];
+const s10Slides = [{ type: "hook", headline: "Reachr AI.", sub: "Din nye salgsassistent som aldri sover." }, { type: "concept", icon: Rocket, headline: "Launch nå.", sub: "Automatiser grovarbeidet og fokuser på å selge." }, { type: "stat", number: "24/7", label: "Jobber for deg", sub: "Finner leads mens du sover eller er i lunsj." }, { type: "cta", headline: "Start i dag.", cta: "reachr.no" }];
+const s11Slides = [{ type: "hook", headline: "Møte-maskinen.", sub: "Den beste følelsen i verden er en full kalender." }, { type: "stat", number: "+15", label: "Møter i uka", sub: "Standard for de som bruker Reachr-verktøyene proaktivt." }, { type: "step", label: "KLAR", body: "Sett opp din søkeradar på 60 sekunder." }, { type: "cta", headline: "Book flere møter.", cta: "reachr.no" }];
+const s12Slides = [{ type: "hook", headline: "Data-driven or Die.", sub: "Folk som gjetter i salg har ingen fremtid." }, { type: "comparison", title: "Slaget om B2B.", left: "Gjetting og intuisjon.", right: "Datadrevet beslutning." }, { type: "stat", number: "100%", label: "Real-time", sub: "Alt i databasen er ferskt og oppdatert nå." }, { type: "cta", headline: "Bli moderne.", cta: "reachr.no" }];
+const s13Slides = [{ type: "hook", headline: "LinkedIn Genius.", sub: "Bruk verdens største nettverk på en helt ny måte." }, { type: "step", label: "SCAN", body: "Se de hemmelige numrene direkte på LinkedIn-profiler." }, { type: "stat", number: "Ett klikk", label: "Import", sub: "Ta leads rett fra LinkedIn til ditt CRM." }, { type: "cta", headline: "Bruk Geni-Mode.", cta: "reachr.no" }];
+const s14Slides = [{ type: "hook", headline: "Innboks Null?", sub: "For våre selgere betyr innboks null mangel på muligheter." }, { type: "chat", side: "left", name: "Kollega", text: "Hvor ble det av alle kundene dine?" }, { type: "chat", side: "right", name: "Selger", text: "De er her! Innboksen min renner over." }, { type: "cta", headline: "Fyll innboksen.", cta: "reachr.no" }];
+const s15Slides = [{ type: "hook", headline: "CRM Magie.", sub: "Slutt å manuelt mate systemet ditt med data." }, { type: "concept", icon: Zap, headline: "Auto-Sync.", sub: "Sync leads rett inn i Hubspot eller Pipedrive." }, { type: "stat", number: "0 sek", label: "Manuell jobb", sub: "Vi gjør alt grovarbeidet for deg automatisk." }, { type: "cta", headline: "Automatiser.", cta: "reachr.no" }];
+const s16Slides = [{ type: "hook", headline: "Hvor er lunsjen?", sub: "Du fortjener en lunsj uten tastaturstøv på matpakka." }, { type: "comparison", title: "Tidsklemma.", left: "Research foran PC-en.", right: "Nyt kaffen og lunsjen ute." }, { type: "stat", number: "X2", label: "Effektivitet", sub: "Når du lar teknologien ta seg av tidsbruken." }, { type: "cta", headline: "Ta lunsj.", cta: "reachr.no" }];
+const s17Slides = [{ type: "hook", headline: "Bullseye.", sub: "Treff blink på hver eneste salgssamtale." }, { type: "radar", title: "Targeting...", body: "Vi isolerer de selskapene som har størst kjøpskraft." }, { type: "stat", number: "90 %", label: "Treffsikkerhet", sub: "Når du ringer de rette personene til rett tid." }, { type: "cta", headline: "Treff blink.", cta: "reachr.no" }];
+const s18Slides = [{ type: "hook", headline: "Vekst-motoren.", sub: "Hold foten din på gassen gjennom hele året." }, { type: "stat", number: "60 %", label: "Salgsøkning", sub: "Gjennomsnittlig vekst hos våre mest lojale kunder." }, { type: "cta", headline: "Bli en vinner.", cta: "reachr.no" }];
+const s19Slides = [{ type: "hook", headline: "Bli en Reachr.", sub: "Bli med i Norges raskest voksende salgsmiljø." }, { type: "stat", number: "5000+", label: "Medlemmer", sub: "Lær av de beste selgerne i bransjen." }, { type: "cta", headline: "Bli med oss.", cta: "reachr.no" }];
+const s20Slides = [{ type: "hook", headline: "Finalen er her.", sub: "Er du klar for å ta salget ditt til 2026-nivå?" }, { type: "concept", icon: Rocket, headline: "Take-off.", sub: "Ikke vent til neste mandag. Start reisen i dag." }, { type: "cta", headline: "Sjekk oss ut.", cta: "reachr.no" }];
 
 const SERIES = [
   { name: "1. Excel-fri", slides: s1Slides },
@@ -270,9 +146,9 @@ const SERIES = [
   { name: "20. Finalen", slides: s20Slides },
 ];
 
-function SlideContent({ slide, idx, total, showGuide }: { slide: any; idx: number; total: number; showGuide: boolean }) {
+function SlideContent({ slide, idx, total }: { slide: any; idx: number; total: number }) {
   return (
-    <SlideShell idx={idx} total={total} showGuide={showGuide} key={idx}>
+    <SlideShell idx={idx} total={total} key={idx}>
       {slide.type === "hook" && (
         <div className="flex-1 flex flex-col justify-center font-sans tracking-tight">
           <h1 className="text-3xl font-black text-[#171717] leading-[0.9] uppercase italic mb-6">{slide.headline}</h1>
@@ -294,7 +170,7 @@ function SlideContent({ slide, idx, total, showGuide }: { slide: any; idx: numbe
       )}
       {slide.type === "list" && (
         <div className="flex-1 flex flex-col justify-center">
-          <h2 className="text-lg font-black text-[#171717] italic uppercase mb-4 leading-none">{slide.title}</h2>
+          <h2 className="text-lg font-black text-[#171717] italic uppercase mb-4 leading-none text-left">{slide.title}</h2>
           <ListProgress points={slide.points} />
         </div>
       )}
@@ -338,68 +214,133 @@ function SlideContent({ slide, idx, total, showGuide }: { slide: any; idx: numbe
 }
 
 function TiktokContent() {
-  const searchParams = useSearchParams();
   const [seriesIdx, setSeriesIdx] = useState(0);
   const [slideIdx, setSlideIdx] = useState(0);
-  const [showGuide, setShowGuide] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
+  const [zipProgress, setZipProgress] = useState<number | null>(null);
   const canvasRef = useRef<HTMLDivElement>(null);
+  const hiddenCanvasRef = useRef<HTMLDivElement>(null);
 
   const series = SERIES[seriesIdx];
   const total = series.slides.length;
 
-  const downloadImage = async () => {
+  const downloadOne = async () => {
     if (!canvasRef.current) return;
     setIsDownloading(true);
     try {
       const dataUrl = await htmlToImage.toPng(canvasRef.current, { pixelRatio: 3, quality: 1 });
       const link = document.createElement('a');
-      link.download = `reachr-${seriesIdx + 1}-${slideIdx + 1}.png`;
+      link.download = `reachr-series-${seriesIdx + 1}-slide-${slideIdx + 1}.png`;
       link.href = dataUrl;
       link.click();
-      toast.success("Lastet ned!");
-    } catch (err) { toast.error("Feil."); }
+      toast.success("Bilte lastet ned!");
+    } catch (err) { toast.error("Klarte ikke laste ned."); }
     finally { setIsDownloading(false); }
+  };
+
+  const downloadFullSeries = async () => {
+    if (!hiddenCanvasRef.current) return;
+    setIsDownloading(true);
+    setZipProgress(0);
+    const zip = new JSZip();
+    
+    try {
+      for (let i = 0; i < series.slides.length; i++) {
+        setZipProgress(Math.round(((i) / series.slides.length) * 100));
+        
+        // Vi bruker en timeout for å sikre at React har rendret ferdig i den skjulte containeren
+        // Dette er en "nødløsning" for å iterere gjennom slides uten å forstyrre visningen til brukeren
+        setSlideIdx(i); // Visuelt hopp for å være sikker
+        await new Promise(r => setTimeout(r, 200)); 
+
+        const dataUrl = await htmlToImage.toPng(hiddenCanvasRef.current, { pixelRatio: 3, quality: 1 });
+        const base64Data = dataUrl.replace(/^data:image\/(png|jpg);base64,/, "");
+        zip.file(`slide-${i + 1}.png`, base64Data, { base64: true });
+      }
+      
+      setZipProgress(100);
+      const content = await zip.generateAsync({ type: "blob" });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(content);
+      link.download = `reachr-series-${seriesIdx + 1}.zip`;
+      link.click();
+      toast.success("Mappe med alle slides er ferdig!");
+    } catch (err) {
+      toast.error("Klarte ikke generere mappe.");
+    } finally {
+      setIsDownloading(false);
+      setZipProgress(null);
+    }
   };
 
   return (
     <div className="min-h-screen bg-[#111] flex flex-col items-center py-12 px-4 select-none font-sans text-white">
-      <div className="w-full max-w-2xl flex items-center justify-between mb-8">
-        <h1 className="text-2xl font-black italic tracking-tighter">STUDIO V7</h1>
-        <button onClick={downloadImage} disabled={isDownloading} className="bg-[#09fe94] text-black font-black py-3 px-6 rounded-2xl flex items-center gap-2 text-xs shadow-xl active:scale-95 transition-all">
-          <Download className="w-4 h-4" />
-          {isDownloading ? "LAGRER..." : "LAST NED"}
-        </button>
+      {/* HEADER WITH ACTIONS */}
+      <div className="w-full max-w-2xl flex flex-col md:flex-row items-center justify-between mb-8 gap-4">
+        <div>
+          <h1 className="text-2xl font-black italic tracking-tighter">STUDIO V7</h1>
+          <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest mt-1">Series Download Enabled</p>
+        </div>
+        
+        <div className="flex items-center gap-3">
+          <button onClick={downloadOne} disabled={isDownloading} className="bg-white/10 hover:bg-white/20 text-white font-black py-3 px-5 rounded-2xl flex items-center gap-2 text-xs transition-all active:scale-95 disabled:opacity-50">
+            <ImageIcon className="w-4 h-4" />
+            DENNE SLIDEN
+          </button>
+          
+          <button onClick={downloadFullSeries} disabled={isDownloading} className="bg-[#09fe94] hover:bg-[#08e685] text-black font-black py-3 px-6 rounded-2xl flex items-center gap-2 text-xs shadow-xl transition-all active:scale-95 disabled:opacity-50">
+            {isDownloading && zipProgress !== null ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <FolderDown className="w-4 h-4" />
+            )}
+            {zipProgress !== null ? `PAKKER ${zipProgress}%` : "LAST NED MAPPE (ZIP)"}
+          </button>
+        </div>
       </div>
 
+      {/* SERIES SELECTOR */}
       <div className="grid grid-cols-10 md:grid-cols-20 gap-1.5 mb-10 max-w-5xl px-4">
         {SERIES.map((_, i) => (
-          <button key={i} onClick={() => { setSeriesIdx(i); setSlideIdx(0); }} className={`w-8 h-8 rounded-lg text-[10px] font-black border transition-all ${i === seriesIdx ? 'bg-[#09fe94] border-[#09fe94] text-black' : 'bg-transparent border-white/10 text-white/40'}`}>
+          <button key={i} onClick={() => { setSeriesIdx(i); setSlideIdx(0); }} className={`w-8 h-8 rounded-lg text-[10px] font-black border transition-all ${i === seriesIdx ? 'bg-[#09fe94] border-[#09fe94] text-black shadow-[0_0_15px_rgba(9,254,148,0.3)]' : 'bg-transparent border-white/10 text-white/40 hover:border-white/30'}`}>
             {i + 1}
           </button>
         ))}
       </div>
 
+      {/* MAIN PREVIEW */}
       <div className="relative group">
         <div ref={canvasRef} className="w-[405px] h-[720px] rounded-[48px] overflow-hidden shadow-2xl bg-white">
-          <SlideContent slide={series.slides[slideIdx]} idx={slideIdx} total={total} showGuide={showGuide} />
+          <SlideContent slide={series.slides[slideIdx]} idx={slideIdx} total={total} />
         </div>
-        <button onClick={() => setSlideIdx(i => Math.max(0, i-1))} className="absolute top-1/2 -left-16 transform -translate-y-1/2 text-white/20 hover:text-white transition-all text-2xl font-black">←</button>
-        <button onClick={() => setSlideIdx(i => Math.min(total-1, i+1))} className="absolute top-1/2 -right-16 transform -translate-y-1/2 text-white/20 hover:text-white transition-all text-2xl font-black">→</button>
+        
+        {/* NAVIGATION BUTTONS */}
+        <button onClick={() => setSlideIdx(i => Math.max(0, i-1))} className="absolute top-1/2 -left-20 transform -translate-y-1/2 text-white/20 hover:text-white transition-all p-4">
+          <span className="text-4xl font-black">←</span>
+        </button>
+        <button onClick={() => setSlideIdx(i => Math.min(total-1, i+1))} className="absolute top-1/2 -right-20 transform -translate-y-1/2 text-white/20 hover:text-white transition-all p-4">
+          <span className="text-4xl font-black">→</span>
+        </button>
       </div>
 
-      <div className="flex gap-2 mt-6">
+      {/* PROGRESS BAR BOTTOM */}
+      <div className="flex gap-2 mt-8">
         {series.slides.map((_, i) => (
-          <div key={i} className={`h-1.5 rounded-full transition-all ${i === slideIdx ? 'w-5 bg-[#09fe94]' : 'w-1.5 bg-white/10'}`} />
+          <div key={i} className={`h-1.5 rounded-full transition-all ${i === slideIdx ? 'w-8 bg-[#09fe94]' : 'w-2 bg-white/10'}`} />
         ))}
       </div>
 
-      <button onClick={() => setShowGuide(!showGuide)} className="mt-8 text-[8px] font-black text-white/10 tracking-[0.4em] uppercase">SAFE ZONES</button>
+      {/* HIDDEN CANVAS FOR ZIP GENERATION */}
+      <div className="fixed -left-[2000px] top-0 opacity-0 pointer-events-none">
+        <div ref={hiddenCanvasRef} className="w-[405px] h-[720px]">
+          <SlideContent slide={series.slides[slideIdx]} idx={slideIdx} total={total} />
+        </div>
+      </div>
+
+      <div className="mt-12 text-[8px] font-black text-white/5 tracking-[0.5em] uppercase">Reachr Studio Creator V7.5</div>
     </div>
   );
 }
-
-
 
 export default function TiktokPage() {
   return (
