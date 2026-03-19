@@ -123,7 +123,7 @@ const s15Slides = [
 
 const s16Slides = [
   { type: "chat", side: "left", name: "Nyansatt", text: "Første dag på jobb... Hvordan skal jeg finne ut hvem som bestemmer i disse selskapene?" },
-  { type: "chat", side: "Mentor", side: "right", name: "Kristin", text: "Ikke stress. Åpne Reachr. Der har du direktelinja til alle du trenger." },
+  { type: "chat", side: "right", name: "Kristin (Mentor)", text: "Ikke stress. Åpne Reachr. Der har du direktelinja til alle du trenger." },
   { type: "chat", side: "left", name: "Nyansatt", text: "Wow, det gjør jo jobben min 10 ganger enklere." },
   { type: "cta", title: "Kickstart salget.", sub: "Bli en stjerne fra dag én.", cta: "Prøv nå" }
 ];
