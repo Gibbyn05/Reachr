@@ -101,6 +101,13 @@ function RegisterForm() {
         return;
       }
 
+      // Notify admin about new user (fire-and-forget)
+      fetch("/api/notify/new-user", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: form.name, email: form.email }),
+      }).catch(() => {});
+
       // If invited, link this user to the team owner
       if (isInvited) {
         if (!signUpData?.session) {
