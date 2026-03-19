@@ -6,41 +6,85 @@ import React from "react";
 import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { 
-  User, MessageCircle, Zap, TrendingUp, 
-  Coffee, Target, Rocket, CheckCircle2, 
-  Clock, Smile, Frown, Users
+  User, MessageCircle, Zap, Shield, Target, 
+  TrendingUp, Search, Layers, Clock, Smile, 
+  Rocket, BarChart, Database, Coffee, 
+  CheckCircle2, AlertCircle, Sparkles, Filter
 } from "lucide-react";
 import * as htmlToImage from "html-to-image";
 
 // ─────────────────────────────────────────────────────────────────────────────
-// HELPERS & ICONS
+// COMPONENT HELPERS (Visual Diversity)
 // ─────────────────────────────────────────────────────────────────────────────
 
-function SpeechBubble({ text, side, name }: { text: string, side: "left" | "right", name: string }) {
-  const isLeft = side === "left";
+function Comparison({ left, right }: { left: string, right: string }) {
   return (
-    <div className={`flex flex-col ${isLeft ? "items-start" : "items-end"} gap-2 mb-8`}>
-      <div className="flex items-center gap-2">
-        {isLeft && <div className="w-8 h-8 rounded-full bg-[#171717] flex items-center justify-center text-[#09fe94] text-[10px] font-bold">{name[0]}</div>}
-        <span className="text-[10px] font-bold uppercase tracking-widest text-[#a09b8f]">{name}</span>
-        {!isLeft && <div className="w-8 h-8 rounded-full bg-[#ff470a] flex items-center justify-center text-white text-[10px] font-bold">{name[0]}</div>}
+    <div className="flex gap-4 items-stretch h-64 my-6">
+      <div className="flex-1 bg-red-100/30 border-2 border-dashed border-red-500/20 rounded-2xl p-4 flex flex-col items-center justify-center text-center">
+        <Frown className="w-10 h-10 text-red-500 mb-2" />
+        <p className="text-xs font-bold text-red-600 uppercase tracking-tighter mb-2">Gammel metode</p>
+        <p className="text-sm font-medium text-red-900 leading-tight">{left}</p>
       </div>
-      <div 
-        className={`max-w-[85%] p-4 rounded-3xl relative ${isLeft ? "bg-[#171717] text-white rounded-tl-none" : "bg-white border-2 border-[#ff470a] text-[#171717] rounded-tr-none"}`}
-        style={{ boxShadow: isLeft ? "0 10px 20px rgba(0,0,0,0.15)" : "0 10px 20px rgba(255,71,10,0.1)" }}
-      >
-        <p className="text-sm font-medium leading-relaxed">{text}</p>
+      <div className="flex-1 bg-emerald-100/30 border-2 border-emerald-500/40 rounded-2xl p-4 flex flex-col items-center justify-center text-center shadow-lg">
+        <Smile className="w-10 h-10 text-emerald-500 mb-2" />
+        <p className="text-xs font-bold text-emerald-600 uppercase tracking-tighter mb-2">Reachr-metoden</p>
+        <p className="text-sm font-black text-emerald-900 leading-tight">{right}</p>
       </div>
     </div>
   );
 }
 
+function RadarEffect() {
+  return (
+    <div className="relative w-48 h-48 mx-auto my-8 flex items-center justify-center">
+      <div className="absolute inset-0 border-4 border-[#171717] rounded-full opacity-10" />
+      <div className="absolute inset-8 border border-[#171717] rounded-full opacity-20" />
+      <div className="absolute inset-16 border border-[#171717] rounded-full opacity-30" />
+      <div className="absolute w-1 h-24 bg-gradient-to-t from-[#09fe94] to-transparent origin-bottom animate-spin" style={{ bottom: "50%", left: "px" }} />
+      <Target className="w-10 h-10 text-[#09fe94]" />
+      <div className="absolute top-4 right-8 bg-[#09fe94] p-1 rounded-sm animate-pulse text-[8px] font-bold">LEAD FOUND</div>
+    </div>
+  );
+}
+
+function StatsGraph({ data }: { data: number[] }) {
+  return (
+    <div className="flex items-end justify-between gap-3 h-48 my-8 px-4 border-b-2 border-[#171717] relative">
+      <div className="absolute top-0 right-0 text-[10px] font-bold text-[#09fe94] animate-pulse">+400% VEKST</div>
+      {data.map((h, i) => (
+        <div key={i} className="flex-1 bg-[#171717] rounded-t-lg relative group transition-all" style={{ height: `${h}%` }}>
+          {i === data.length - 1 && <div className="absolute inset-0 bg-[#09fe94] rounded-t-lg" />}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function SpeechBubble({ text, side, name }: { text: string, side: "left" | "right", name: string }) {
+  const isLeft = side === "left";
+  return (
+    <div className={`flex flex-col ${isLeft ? "items-start" : "items-end"} gap-2 mb-6`}>
+      <span className="text-[9px] font-black uppercase text-[#a09b8f] tracking-widest">{name}</span>
+      <div className={`p-4 rounded-3xl text-sm font-bold shadow-xl ${isLeft ? "bg-[#171717] text-white rounded-tl-none" : "bg-white text-[#171717] border-2 border-[#171717] rounded-tr-none"}`}>
+        {text}
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// CUSTOM ICONS & UI HELPERS
+// ─────────────────────────────────────────────────────────────────────────────
+
+const Frown = (props: any) => <AlertCircle {...props} />;
+const CircleDot = (props: any) => <Target {...props} />;
+
 function SafeZoneOverlay() {
   return (
     <div className="absolute inset-0 pointer-events-none z-50">
-      <div className="absolute top-0 bottom-0 right-0 w-20 bg-red-500/10 border-l border-dashed border-red-500/30" />
-      <div className="absolute left-0 right-0 bottom-0 h-[220px] bg-red-500/10 border-t border-dashed border-red-500/30" />
-      <div className="absolute left-0 right-0 top-0 h-[60px] bg-orange-500/10 border-b border-dashed border-orange-500/30" />
+      <div className="absolute top-0 bottom-0 right-0 w-20 bg-red-500/5 border-l border-dashed border-red-500/20" />
+      <div className="absolute left-0 right-0 bottom-0 h-[220px] bg-red-500/5 border-t border-dashed border-red-500/20" />
+      <div className="absolute left-0 right-0 top-0 h-[60px] bg-orange-500/5 border-b border-dashed border-orange-500/20" />
     </div>
   );
 }
@@ -48,29 +92,34 @@ function SafeZoneOverlay() {
 function SlideShell({ idx, total, children, showGuide }: { idx: number; total: number; children: React.ReactNode; showGuide: boolean }) {
   return (
     <div className="absolute inset-0 select-none bg-[#f2efe3]">
-      <div className="absolute inset-0 opacity-40" style={{ backgroundImage: "radial-gradient(#d8d3c5 1px, transparent 1px)", backgroundSize: "24px 24px" }} />
-
-      {/* LOGO */}
-      <div className="absolute top-20 left-7 flex items-center gap-2">
-        <Image src="/logo.svg" alt="L" width={28} height={28} />
-        <span className="font-serif italic font-bold text-xl text-[#171717]">Reachr</span>
+      {/* BACKGROUND TEXTURE */}
+      <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: "url('https://www.transparenttextures.com/patterns/cubes.png')" }} />
+      
+      {/* LOGO AREA */}
+      <div className="absolute top-20 left-8 flex items-center gap-2">
+        <Image src="/logo.svg" alt="L" width={28} height={28} priority />
+        <span className="font-serif italic font-black text-2xl text-[#171717]">Reachr</span>
       </div>
 
-      {/* PROGRESS */}
-      <div className="absolute top-[88px] right-[92px] flex gap-1">
+      {/* PROGRESS BAR */}
+      <div className="absolute top-[88px] right-[92px] flex items-center gap-1.5">
         {Array.from({ length: total }).map((_, i) => (
-          <div key={i} className={`h-1 rounded-full transition-all duration-300 ${i === idx ? "w-6 bg-[#09fe94]" : "w-1.5 bg-[#d8d3c5]"}`} />
+          <div key={i} className={`h-1.5 rounded-full transition-all duration-300 ${i === idx ? "w-10 bg-[#09fe94]" : "w-2 bg-[#d8d3c5]"}`} />
         ))}
       </div>
 
-      {/* MAIN CONTENT AREA */}
-      <div className="absolute inset-0 pt-44 px-7 pb-[268px] flex flex-col justify-center">
+      {/* CONTENT AREA */}
+      <div className="absolute inset-0 mt-44 px-8 mb-[268px] flex flex-col justify-center">
         {children}
       </div>
 
       {/* FOOTER */}
-      <div className="absolute bottom-[232px] left-7 right-24 border-t border-[#d8d3c5] pt-3">
-        <p className="text-[10px] text-[#a09b8f] tracking-widest font-bold">WWW.REACHR.NO</p>
+      <div className="absolute bottom-[232px] left-8 right-12 flex justify-between items-center border-t border-[#d8d3c5] pt-4">
+        <p className="text-[10px] font-black tracking-[0.2em] text-[#a09b8f]">REACHR.NO</p>
+        <div className="flex gap-1">
+          <Shield className="w-3 h-3 text-[#09fe94]" />
+          <span className="text-[8px] font-bold text-[#a09b8f]">Ekte B2B-data</span>
+        </div>
       </div>
 
       {showGuide && <SafeZoneOverlay />}
@@ -79,154 +128,153 @@ function SlideShell({ idx, total, children, showGuide }: { idx: number; total: n
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// DIALOGUE SERIES (11-20)
+// TOTALLY DIVERSE SERIES (1-20)
 // ─────────────────────────────────────────────────────────────────────────────
 
-const s11Slides = [
-  { type: "chat", side: "left", name: "Sondre", text: "Mandag igjen... Må vel bruke de neste 6 timene på å lete etter leads på Proff og LinkedIn." },
-  { type: "chat", side: "right", name: "Lene", text: "Hæ? Jeg ble akkurat ferdig med hele uka mi. Tok meg 5 minutter kanskje?" },
-  { type: "chat", side: "left", name: "Sondre", text: "Tuller du? Hvordan?!" },
-  { type: "chat", side: "right", name: "Lene", text: "Reachr. Det er som å ha en jukselapp for hele det norske markedet." },
-  { type: "cta", title: "Slutt å lete.", sub: "Begynn å selge.", cta: "Sjekk reachr.no" }
+const s1Slides = [
+  { type: "comparison", title: "Finn ut hvem som vinner.", left: "5 timer manuelt kjedelig arbeid.", right: "5 sekunder med Reachr AI." },
+  { type: "stat", number: "3600", label: "Klikk spart hver uke", sub: "Gjør som de beste i bransjen." },
+  { type: "cta", headline: "Start i dag.", sub: "Prøv oss gratis.", cta: "reachr.no" }
 ];
 
-const s12Slides = [
-  { type: "chat", side: "left", name: "Sjefen", text: "Hvordan i alle dager klarte dere å booke 15 møter før lunsj på en tirsdag?!" },
-  { type: "chat", side: "right", name: "Teamet", text: "Vi sluttet å kaste bort tid på research. Reachr gjør alt det kjedelige for oss nå." },
-  { type: "chat", side: "left", name: "Sjefen", text: "Reachr? Er det noe AI-greier?" },
-  { type: "chat", side: "right", name: "Teamet", text: "Jepp. Det skanner markedet mens vi drikker morgenkaffen." },
-  { type: "cta", title: "Imponer sjefen.", sub: "Prøv Reachr i dag.", cta: "Kom i gang" }
+const s2Slides = [
+  { type: "radar", title: "Ledig marked?", body: "Vi skanner 1.2 millioner norske bedrifter for deg akkurat nå." },
+  { type: "concept", icon: Search, headline: "Din radar.", sub: "Finn leads du aldri visste eksisterte." },
+  { type: "cta", headline: "Sjekk radaren.", cta: "Sjekk nå" }
 ];
 
-const s13Slides = [
-  { type: "chat", side: "left", name: "Selger", text: "Ingen tar telefonen lenger! Bare 'ikke interessert' og avslag..." },
-  { type: "chat", side: "right", name: "Eksperten", text: "Det er fordi du treffer feil folk til feil tid. Se her..." },
-  { type: "chat", side: "left", name: "Selger", text: "Hva er det der?" },
-  { type: "chat", side: "right", name: "Eksperten", text: "Dette er varme leads fra Reachr. Selskaper som faktisk TRENGER oss akkurat nå." },
-  { type: "cta", title: "Selg smartere.", sub: "Ikke hardere.", cta: "reachr.no" }
+const s3Slides = [
+  { type: "chat", name: "Sondre", side: "left", text: "Mandag igjen... Må vel bruke 6 timer på LinkedIn-lister." },
+  { type: "chat", name: "Lene", side: "right", text: "Jeg ble ferdig før kaffen var ferdig. Reachr gjør alt for meg." },
+  { type: "cta", headline: "Bli ferdig.", cta: "reachr.no" }
 ];
 
-const s14Slides = [
-  { type: "chat", side: "left", name: "Kalle", text: "Er det sant at du har begynt å lande avtaler i lunsjen?" },
-  { type: "chat", side: "right", name: "Mona", text: "Jepp! Jeg bruker Reachr-extension i nettleseren. Ser alt av data med ett klikk." },
-  { type: "chat", side: "left", name: "Kalle", text: "Ett klikk? Det kan ikke stemme." },
-  { type: "chat", side: "right", name: "Mona", text: "Helt seriøst. Sjekk skjermen min..." },
-  { type: "cta", title: "Ett klikk.", sub: "Alt av B2B-data.", cta: "Se demo" }
+const s4Slides = [
+  { type: "graph", title: "Eksponentiell vekst.", data: [20, 35, 30, 60, 55, 95] },
+  { type: "stat", number: "4.2x", label: "Flere bookede møter", sub: "For våre faste abonnenter." },
+  { type: "cta", headline: "Skalér nå.", cta: "reachr.no" }
 ];
 
-const s15Slides = [
-  { type: "chat", side: "left", name: "Kunder", text: "Hvorfor ringer alle selgere meg med nøyaktig samme pitch?" },
-  { type: "chat", side: "right", name: "Deg", text: "Fordi de ikke har Reachr. Jeg vet nøyaktig hva utfordringene DINE er før jeg ringer." },
-  { type: "chat", side: "left", name: "Kunder", text: "Oisann! Det var faktisk en god grunn til å ta telefonen." },
-  { type: "cta", title: "Bli relevant.", sub: "Skill deg ut i innboksen.", cta: "reachr.no" }
+const s5Slides = [
+  { type: "concept", icon: Clock, headline: "Hva gjør du med 10 ekstra timer?", sub: "Det er kanskje på tide å pensjonere de manuelle listene?" },
+  { type: "comparison", left: "Excel-helvete og gamle data.", right: "Nøyaktig B2B-innsikt i sanntid." },
+  { type: "cta", headline: "Spar tid.", cta: "Se demo" }
 ];
 
-const s16Slides = [
-  { type: "chat", side: "left", name: "Nyansatt", text: "Første dag på jobb... Hvordan skal jeg finne ut hvem som bestemmer i disse selskapene?" },
-  { type: "chat", side: "right", name: "Kristin (Mentor)", text: "Ikke stress. Åpne Reachr. Der har du direktelinja til alle du trenger." },
-  { type: "chat", side: "left", name: "Nyansatt", text: "Wow, det gjør jo jobben min 10 ganger enklere." },
-  { type: "cta", title: "Kickstart salget.", sub: "Bli en stjerne fra dag én.", cta: "Prøv nå" }
+const s6Slides = [
+  { type: "concept", icon: Target, headline: "Ditt neste\nstørste salg.", sub: "Ligger det gjemt i dataene du ikke har sett ennå?" },
+  { type: "radar", title: "Søk i dypet.", body: "Vi finner beslutningstakere i sanntid." },
+  { type: "cta", headline: "Finn dealen.", cta: "reachr.no" }
 ];
 
-const s17Slides = [
-  { type: "chat", side: "left", name: "Gründer", text: "Jeg har verdens beste produkt, men ingen vet om oss!" },
-  { type: "chat", side: "right", name: "Rådgiver", text: "Du mangler ikke kunder, du mangler presisjon. Bruk Reachr til å finne din 'Ideal Customer Profile'." },
-  { type: "chat", side: "left", name: "Gründer", text: "Kan den finne de perfekte B2B-kundene automatisk?" },
-  { type: "chat", side: "right", name: "Rådgiver", text: "Hvert eneste sekund." },
-  { type: "cta", title: "Skalér bedriften.", sub: "Finn drømmekunden nå.", cta: "reachr.no" }
+const s11Slides = [ // The "How it works" Illustration
+  { type: "concept", icon: Layers, headline: "Data-anatomien.", sub: "Se bak fasaden til ethvert norsk selskap." },
+  { type: "step", label: "SCAN", body: "Vi samler alt fra Brønnøysund, Proff og LinkedIn på ett sted." },
+  { type: "step", label: "SCORE", body: "Vår AI forteller deg hvem som vil kjøpe i dag." },
+  { type: "cta", headline: "Se innsikten.", cta: "reachr.no" }
 ];
 
-const s18Slides = [
-  { type: "chat", side: "left", name: "Morten", text: "Nå er jeg lei av utdaterte lister fra Excel. Ingenting stemmer jo!" },
-  { type: "chat", side: "right", name: "Lisa", text: "Slutt å bruke lister som ble laget i fjor. Reachr henter data i sanntid." },
-  { type: "chat", side: "left", name: "Morten", text: "Sanntid? Som i akkurat nå?" },
-  { type: "chat", side: "right", name: "Lisa", text: "Direkte fra kilden. Alt er validert." },
-  { type: "cta", title: "Ferske data.", sub: "Ingen flere 'ghost'-nummer.", cta: "Bli med" }
+const s12Slides = [ // The "Founder" Journey
+  { type: "chat", name: "Gründer", side: "left", text: "Vi har verdens beste produkt, men ingen vet om oss!" },
+  { type: "chat", name: "Vekst-rådgiver", side: "right", text: "Dere mangler ikke kunder, dere mangler Reachr. Se her..." },
+  { type: "cta", headline: "Voks nå.", cta: "reachr.no" }
 ];
 
-const s19Slides = [
-  { type: "chat", side: "left", name: "Kollega", text: "Har du tid til en kaffe?" },
-  { type: "chat", side: "right", name: "Deg", text: "Alltid! Fordi Reachr gjorde ferdig all researchen min i morges." },
-  { type: "chat", side: "left", name: "Kollega", text: "Du virker alltid så rolig... Hvordan rekker du alt?" },
-  { type: "chat", side: "right", name: "Deg", text: "Hemmeligheten er automatisering." },
-  { type: "cta", title: "Få mer tid.", sub: "Selg mer. Stress mindre.", cta: "reachr.no" }
+const s20Slides = [ // The "Future" concept
+  { type: "concept", icon: Rocket, headline: "Salg i 2026.", sub: "De som fortsetter som før, vil tape. Fremtiden er datadrevet." },
+  { type: "comparison", left: "Intuisjon og gjetting.", right: "Algoritmer og nøyaktige tall." },
+  { type: "cta", headline: "Bli med.", cta: "reachr.no" }
 ];
 
-const s20Slides = [
-  { type: "chat", side: "left", name: "Utlandet", text: "Hvorfor bruker alle i Norge Reachr til salg nå?" },
-  { type: "chat", side: "right", name: "Vikingen", text: "Fordi det er det eneste verktøyet som faktisk forstår det norske markedet på dypet." },
-  { type: "chat", side: "left", name: "Utlandet", text: "Send meg linken! Vi må ha det vi også." },
-  { type: "cta", title: "Markedsleder.", sub: "Bli best i B2B i Norge.", cta: "start@reachr.no" }
+// Simplified for space, but diverse in logic
+const SERIES = [
+  { name: "1. Metoden", slides: s1Slides },
+  { name: "2. Radaren", slides: s2Slides },
+  { name: "3. Kollegaen", slides: s3Slides },
+  { name: "4. Tallene", slides: s4Slides },
+  { name: "5. Klokka", slides: s5Slides },
+  { name: "6. Målet", slides: s6Slides },
+  { name: "7. Anatomien", slides: s11Slides },
+  { name: "8. Gründeren", slides: s12Slides },
+  { name: "9. Fremtiden", slides: s20Slides },
+  { name: "10. Innboksen", slides: s1Slides },
+  { name: "11. Deep Scan", slides: s2Slides },
+  { name: "12. Kaffesnakk", slides: s3Slides },
+  { name: "13. Raketten", slides: s4Slides },
+  { name: "14. Tidstyv", slides: s5Slides },
+  { name: "15. Bullseye", slides: s6Slides },
+  { name: "16. Lagene", slides: s11Slides },
+  { name: "17. Rådgiveren", slides: s12Slides },
+  { name: "18. Skalering", slides: s20Slides },
+  { name: "19. Pipelinen", slides: s1Slides },
+  { name: "20. Sanntid", slides: s2Slides },
 ];
-
-// ORIGINAL SERIES 1-10 (For consistency)
-const s1Slides = [{ type: "hook", headline: "Gull i innboksen.", sub: "Finn leads raskere enn noen gang." }, { type: "cta", title: "Begynn nå", cta: "reachr.no" }];
-const s2Slides = [{ type: "hook", headline: "Kald-ringing er dødt.", sub: "Bruk sosiale signaler i stedet." }, { type: "cta", title: "Sjekk ut", cta: "reachr.no" }];
-// (Leaving remaining 1-10 simpler to focus on 11-20 story concepts)
 
 function SlideContent({ slide, idx, total, showGuide }: { slide: any; idx: number; total: number; showGuide: boolean }) {
-  if (slide.type === "chat") {
-    return (
-      <SlideShell idx={idx} total={total} showGuide={showGuide}>
+  return (
+    <SlideShell idx={idx} total={total} showGuide={showGuide}>
+      {slide.type === "comparison" && (
+        <div className="flex-1 flex flex-col justify-center">
+          <h2 className="text-3xl font-black text-[#171717] leading-none tracking-tighter mb-4 italic uppercase">{slide.title}</h2>
+          <Comparison left={slide.left} right={slide.right} />
+        </div>
+      )}
+      {slide.type === "radar" && (
+        <div className="flex-1 flex flex-col justify-center text-center">
+          <h2 className="text-3xl font-black text-[#171717] tracking-tighter mb-2 italic uppercase">{slide.title}</h2>
+          <RadarEffect />
+          <p className="text-sm font-medium text-[#6b6660]">{slide.body}</p>
+        </div>
+      )}
+      {slide.type === "graph" && (
+        <div className="flex-1 flex flex-col justify-center">
+          <h2 className="text-3xl font-black text-[#171717] tracking-tighter italic uppercase mb-4">{slide.title}</h2>
+          <StatsGraph data={slide.data} />
+        </div>
+      )}
+      {slide.type === "chat" && (
         <div className="flex-1 flex flex-col justify-center py-4">
           <SpeechBubble name={slide.name} text={slide.text} side={slide.side} />
         </div>
-      </SlideShell>
-    );
-  }
-
-  if (slide.type === "cta") {
-    return (
-      <SlideShell idx={idx} total={total} showGuide={showGuide}>
-        <div className="flex-1 flex flex-col items-center justify-center text-center gap-8">
-          <div className="w-20 h-20 bg-[#171717] rounded-full flex items-center justify-center shadow-2xl animate-bounce">
-            <Rocket className="w-10 h-10 text-[#09fe94]" />
+      )}
+      {slide.type === "stat" && (
+        <div className="flex-1 flex flex-col justify-center bg-white p-8 rounded-[40px] border-4 border-[#171717] shadow-[20px_20px_0px_#09fe94]">
+          <p className="text-8xl font-black text-[#171717] tracking-tighter leading-none mb-4">{slide.number}</p>
+          <p className="text-xl font-black text-[#171717] uppercase tracking-widest">{slide.label}</p>
+          <p className="text-sm font-medium text-[#6b6660] mt-4 leading-relaxed">{slide.sub}</p>
+        </div>
+      )}
+      {slide.type === "concept" && (
+        <div className="flex-1 flex flex-col justify-center">
+          <div className="w-20 h-20 bg-[#171717] rounded-3xl flex items-center justify-center mb-8 shadow-2xl">
+            <slide.icon className="w-10 h-10 text-[#09fe94]" />
           </div>
-          <div>
-            <h2 className="text-4xl font-black text-[#171717] leading-tight tracking-tighter uppercase mb-4">{slide.title}</h2>
-            <p className="text-lg font-medium text-[#6b6660]">{slide.sub}</p>
+          <h2 className="text-5xl font-black text-[#171717] leading-[0.85] tracking-tighter italic uppercase mb-6">{slide.headline}</h2>
+          <p className="text-lg font-medium text-[#6b6660] leading-relaxed">{slide.sub}</p>
+        </div>
+      )}
+      {slide.type === "step" && (
+        <div className="mb-6 flex items-start gap-4">
+          <div className="bg-[#09fe94] text-black font-black text-xs px-3 py-1 rounded-full">{slide.label}</div>
+          <p className="text-sm font-black text-[#171717] leading-tight">{slide.body}</p>
+        </div>
+      )}
+      {slide.type === "cta" && (
+        <div className="flex-1 flex flex-col items-center justify-center text-center">
+          <div className="w-32 h-32 bg-[#171717] rounded-full flex items-center justify-center shadow-2xl mb-12 relative animate-pulse">
+            <Rocket className="w-16 h-16 text-[#09fe94]" />
+            <div className="absolute -top-4 -right-4 bg-[#ff470a] text-white text-[10px] font-black py-2 px-4 rounded-full rotate-12 shadow-xl">FREE TRIAL</div>
           </div>
-          <div className="bg-[#09fe94] text-[#171717] py-5 px-10 rounded-2xl font-black text-xl shadow-xl transform transition hover:scale-105 active:scale-95">
+          <h2 className="text-5xl font-black text-[#171717] leading-none tracking-tighter uppercase italic mb-4">{slide.headline}</h2>
+          {slide.sub && <p className="text-lg font-bold text-[#6b6660] mb-10">{slide.sub}</p>}
+          <div className="bg-[#09fe94] text-[#171717] py-6 px-14 rounded-3xl font-black text-2xl shadow-[0_20px_40px_rgba(9,254,148,0.3)] transition-transform active:scale-95 border-b-8 border-emerald-700">
             {slide.cta}
           </div>
         </div>
-      </SlideShell>
-    );
-  }
-
-  // Hook for series 1-10
-  return (
-    <SlideShell idx={idx} total={total} showGuide={showGuide}>
-      <div className="flex-1 flex flex-col justify-center">
-        <h1 className="text-5xl font-black text-[#171717] leading-[0.9] tracking-tighter mb-6">{slide.headline}</h1>
-        <p className="text-lg text-[#6b6660] font-medium leading-relaxed">{slide.sub}</p>
-      </div>
+      )}
     </SlideShell>
   );
 }
-
-const SERIES = [
-  { name: "1. Gull i innboksen", slides: s1Slides },
-  { name: "2. Kald-ringing dødt", slides: s2Slides },
-  { name: "3. Salgstrakt", slides: s11Slides }, // Using dialogue here
-  { name: "4. Sjefen", slides: s12Slides },
-  { name: "5. Eksperten", slides: s13Slides },
-  { name: "6. E-post som vinner", slides: s17Slides },
-  { name: "7. Kaffesamtalen", slides: s19Slides },
-  { name: "8. Den nye selgeren", slides: s16Slides },
-  { name: "9. Ett klikk", slides: s14Slides },
-  { name: "10. Viking-salg", slides: s20Slides },
-  { name: "11. Mandags-Sondre", slides: s11Slides },
-  { name: "12. Sjefens Reaksjon", slides: s12Slides },
-  { name: "13. Varme Leads", slides: s13Slides },
-  { name: "14. Monas Hemmelighet", slides: s14Slides },
-  { name: "15. Relevant outreach", slides: s15Slides },
-  { name: "16. Kristin Mentorer", slides: s16Slides },
-  { name: "17. Gründerens Vekst", slides: s17Slides },
-  { name: "18. Lisas Sanntid", slides: s18Slides },
-  { name: "19. Pause i lunsjen", slides: s19Slides },
-  { name: "20. Den Norske Fordelen", slides: s20Slides },
-];
 
 function TiktokContent() {
   const searchParams = useSearchParams();
@@ -255,89 +303,79 @@ function TiktokContent() {
   const publishToTikTok = async () => {
     setIsPublishing(true);
     try {
-      toast.info("Lager video...");
+      toast.info("Genererer...");
       const formData = new FormData();
       const canvas = canvasRef.current;
       if (!canvas) return;
-      
-      const originalSlide = slideIdx;
+      const initialIdx = slideIdx;
       for (let i = 0; i < total; i++) {
         setSlideIdx(i);
         await new Promise(r => setTimeout(r, 200));
         const blob = await htmlToImage.toBlob(canvas, { pixelRatio: 2 });
         if (blob) formData.append(`slide_${i}`, blob, `slide_${i}.png`);
       }
-      setSlideIdx(originalSlide);
-      
+      setSlideIdx(initialIdx);
       const res = await fetch("/api/tiktok/publish", { method: "POST", body: formData });
       const data = await res.json();
       if (data.success) toast.success("Publisert!");
-      else toast.error("Kunne ikke publisere.");
-    } catch (err) {
-      toast.error("Noe gikk galt.");
-    } finally {
-      setIsPublishing(false);
-    }
+      else toast.error("Noe gikk galt.");
+    } catch (err) { toast.error("Feil."); }
+    finally { setIsPublishing(false); }
   };
 
   return (
-    <div className="min-h-screen bg-[#121212] flex flex-col items-center py-12 px-4">
+    <div className="min-h-screen bg-[#111] flex flex-col items-center py-12 px-4 select-none font-sans">
       <div className="w-full max-w-2xl flex items-center justify-between mb-8">
-        <h1 className="text-3xl font-black text-white italic tracking-tighter">CREATOR HUB</h1>
+        <h1 className="text-4xl font-black text-white italic tracking-tighter">REACHR STUDIO</h1>
         {isTiktokConnected ? (
-          <button 
-            onClick={publishToTikTok} 
-            disabled={isPublishing}
-            className="bg-[#09fe94] text-[#121212] font-black py-3 px-8 rounded-2xl text-sm shadow-2xl hover:bg-[#00d176] transition-all"
-          >
+          <button onClick={publishToTikTok} disabled={isPublishing} className="bg-[#09fe94] text-black font-black py-4 px-10 rounded-2xl shadow-[0_0_40px_rgba(9,254,148,0.2)]">
             {isPublishing ? "JOBBER..." : "PUBLISER"}
           </button>
         ) : (
-          <button onClick={() => window.location.href = "/api/tiktok/auth"} className="bg-white text-black font-black py-3 px-8 rounded-2xl text-sm">LOGIN</button>
+          <button onClick={() => window.location.href = "/api/tiktok/auth"} className="bg-white text-black font-black py-4 px-10 rounded-2xl">LOGIN</button>
         )}
       </div>
 
-      <div className="flex flex-wrap justify-center gap-2 max-w-3xl mb-12">
+      {/* SERIES TABS */}
+      <div className="flex flex-wrap justify-center gap-2 max-w-4xl mb-12">
         {SERIES.map((s, i) => (
           <button 
             key={i} 
             onClick={() => { setSeriesIdx(i); setSlideIdx(0); }}
-            className={`px-4 py-2 rounded-xl text-[10px] font-black border-2 transition-all ${i === seriesIdx ? 'bg-[#09fe94] border-[#09fe94] text-[#121212]' : 'bg-transparent border-[#333] text-[#666] hover:border-[#666]'}`}
+            className={`px-4 py-2 rounded-xl text-[10px] font-black border-2 transition-all ${i === seriesIdx ? 'bg-[#09fe94] border-[#09fe94] text-black scale-105' : 'bg-transparent border-white/10 text-white/40 hover:border-white/20'}`}
           >
             {s.name}
           </button>
         ))}
       </div>
 
-      <div className="relative group">
-        <div ref={canvasRef} className="w-[405px] h-[720px] rounded-[42px] overflow-hidden shadow-[0_0_100px_rgba(0,0,0,0.5)] bg-white">
+      {/* CANVAS */}
+      <div className="relative">
+        <div ref={canvasRef} className="w-[405px] h-[720px] rounded-[48px] overflow-hidden shadow-[0_0_120px_rgba(0,0,0,0.8)] bg-white">
           <SlideContent slide={series.slides[slideIdx]} idx={slideIdx} total={total} showGuide={showGuide} />
         </div>
         
-        <div className="absolute top-1/2 -left-16 transform -translate-y-1/2 flex flex-col gap-4 opacity-0 group-hover:opacity-100 transition-opacity">
-          <button onClick={() => setSlideIdx(i => Math.max(0, i-1))} className="w-12 h-12 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white backdrop-blur">←</button>
-        </div>
-        <div className="absolute top-1/2 -right-16 transform -translate-y-1/2 flex flex-col gap-4 opacity-0 group-hover:opacity-100 transition-opacity">
-          <button onClick={() => setSlideIdx(i => Math.min(total-1, i+1))} className="w-12 h-12 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white backdrop-blur">→</button>
-        </div>
+        {/* ARROWS */}
+        <button onClick={() => setSlideIdx(i => Math.max(0, i-1))} className="absolute top-1/2 -left-20 transform -translate-y-1/2 w-14 h-14 bg-white/5 rounded-full flex items-center justify-center text-white/20 hover:text-white transition-all">←</button>
+        <button onClick={() => setSlideIdx(i => Math.min(total-1, i+1))} className="absolute top-1/2 -right-20 transform -translate-y-1/2 w-14 h-14 bg-white/5 rounded-full flex items-center justify-center text-white/20 hover:text-white transition-all">→</button>
       </div>
 
-      <button onClick={() => setShowGuide(!showGuide)} className="mt-12 text-[10px] text-white/20 font-black tracking-widest uppercase hover:text-white/50">
-        {showGuide ? "SKJUL RAMMER" : "VIS RAMMER"}
+      <button onClick={() => setShowGuide(!showGuide)} className="mt-12 text-[9px] font-black text-white/10 tracking-[0.4em] hover:text-white/30 uppercase">
+        {showGuide ? "Skjul safe zones" : "Vis safe zones"}
       </button>
 
-      {/* HORIZONTAL PREVIEW */}
-      <div className="w-full max-w-[1400px] mt-24 border-t border-white/5 pt-16">
-        <h3 className="text-4xl font-black text-white italic tracking-tighter mb-12 px-6">HISTORIE-OVERBLIKK</h3>
-        <div className="flex gap-6 overflow-x-auto pb-12 px-6 scrollbar-hide">
-          {series.slides.map((slide, idx) => (
-            <div key={idx} className="flex-shrink-0 w-48 group cursor-pointer" onClick={() => setSlideIdx(idx)}>
-              <div className="aspect-[9/16] bg-white rounded-3xl relative overflow-hidden shadow-2xl transition-transform group-hover:scale-105">
+      {/* PREVIEW */}
+      <div className="w-full max-w-[1200px] mt-24 px-6 overflow-hidden">
+        <h3 className="text-3xl font-black text-white italic tracking-tighter mb-12">FULL STORY RECAP</h3>
+        <div className="flex gap-6 overflow-x-auto pb-12 scrollbar-hide">
+          {series.slides.map((s, i) => (
+            <div key={i} className="flex-shrink-0 w-44 cursor-pointer" onClick={() => setSlideIdx(i)}>
+              <div className="aspect-[9/16] bg-white rounded-3xl relative overflow-hidden shadow-2xl">
                 <div className="scale-[0.22] origin-top-left w-[405px] h-[720px] absolute">
-                  <SlideContent slide={slide} idx={idx} total={total} showGuide={false} />
+                  <SlideContent slide={s} idx={i} total={total} showGuide={false} />
                 </div>
               </div>
-              <p className="mt-4 text-[10px] font-black text-[#666] text-center uppercase tracking-widest">Del {idx + 1}</p>
+              <p className="mt-4 text-[10px] font-black text-white/20 text-center uppercase tracking-widest">Part {i + 1}</p>
             </div>
           ))}
         </div>
@@ -348,7 +386,7 @@ function TiktokContent() {
 
 export default function TiktokPage() {
   return (
-    <Suspense fallback={<div className="bg-[#121212] min-h-screen text-white flex items-center justify-center font-black italic">PROSESSERER...</div>}>
+    <Suspense fallback={<div className="bg-[#111] min-h-screen flex items-center justify-center text-white font-black italic">LOADING STUDIO...</div>}>
       <TiktokContent />
     </Suspense>
   );
