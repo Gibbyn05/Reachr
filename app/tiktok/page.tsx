@@ -100,6 +100,17 @@ function Comparison({ left, right, theme }: { left: string, right: string, theme
   );
 }
 
+function RadarEffect() {
+  return (
+    <div className="relative w-24 h-24 mx-auto my-2 flex items-center justify-center">
+      <div className="absolute inset-0 border-2 border-[#171717] rounded-full opacity-10" />
+      <div className="absolute inset-6 border border-[#171717] rounded-full opacity-10" />
+      <div className="absolute w-1 h-12 bg-gradient-to-t from-[#09fe94] to-transparent origin-bottom rotate-45" style={{ bottom: "50%" }} />
+      <Target className="w-6 h-6 text-[#09fe94]" />
+    </div>
+  );
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // 10 UNIQUE SERIES (STUDIO V9)
 // ─────────────────────────────────────────────────────────────────────────────
