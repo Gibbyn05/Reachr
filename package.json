@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "remotion": "remotion studio remotion/index.ts",
+    "remotion:render": "remotion render remotion/index.ts GiveawayVideo --codec h264 --output out/giveaway.mp4"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.78.0",
@@ -50,6 +52,8 @@
     "zustand": "^5.0.11"
   },
   "devDependencies": {
+    "@remotion/cli": "^4.0.438",
+    "@remotion/google-fonts": "^4.0.438",
     "@tailwindcss/postcss": "^4",
     "@types/canvas-confetti": "^1.9.0",
     "@types/node": "^20",
@@ -57,6 +61,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
+    "remotion": "^4.0.438",
     "tailwindcss": "^4",
     "typescript": "^5"
   }
