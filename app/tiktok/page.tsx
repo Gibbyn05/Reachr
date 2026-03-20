@@ -465,6 +465,8 @@ function TiktokContent() {
   const [slideIdx, setSlideIdx] = useState(0);
   const [isDownloading, setIsDownloading] = useState(false);
   const [zipProgress, setZipProgress] = useState<number | null>(null);
+  const [isRecordingLive, setIsRecordingLive] = useState(false);
+  const [liveProgress, setLiveProgress] = useState<{ slide: number; total: number; pct: number } | null>(null);
   const canvasRef = useRef<HTMLDivElement>(null);
   const hiddenCanvasRef = useRef<HTMLDivElement>(null);
 
@@ -476,18 +478,18 @@ function TiktokContent() {
     setIsDownloading(true);
     setZipProgress(0);
     const zip = new JSZip();
-    
+
     try {
       for (let i = 0; i < series.slides.length; i++) {
         setZipProgress(Math.round(((i) / series.slides.length) * 100));
-        setSlideIdx(i); 
-        await new Promise(r => setTimeout(r, 200)); 
+        setSlideIdx(i);
+        await new Promise(r => setTimeout(r, 200));
 
         const dataUrl = await htmlToImage.toPng(hiddenCanvasRef.current, { pixelRatio: 3, quality: 1 });
         const base64Data = dataUrl.replace(/^data:image\/(png|jpg);base64,/, "");
         zip.file(`slide-${i + 1}.png`, base64Data, { base64: true });
       }
-      
+
       setZipProgress(100);
       const content = await zip.generateAsync({ type: "blob" });
       const link = document.createElement('a');
@@ -502,19 +504,152 @@ function TiktokContent() {
     }
   };
 
+  // ── LIVE PHOTO RECORDING ────────────────────────────────────────────────────
+  // Records each slide as a 3-second WebM video using canvas.captureStream()
+  // + MediaRecorder. The hidden div's CSS animations are sampled at ~12 fps
+  // via html-to-image, giving a smooth "live photo" feel on TikTok.
+  const downloadLivePhotos = async () => {
+    const sourceEl = hiddenCanvasRef.current;
+    if (!sourceEl) return;
+
+    if (typeof window === "undefined" || !window.MediaRecorder) {
+      toast.error("Nettleseren din støtter ikke video-opptak. Bruk Chrome eller Edge.");
+      return;
+    }
+
+    const DURATION_MS = 3000;   // 3 seconds per slide
+    const FPS         = 12;     // frames captured per second
+    const FRAME_MS    = 1000 / FPS;
+    const W = 405, H = 720;
+
+    setIsRecordingLive(true);
+    setLiveProgress({ slide: 0, total: series.slides.length, pct: 0 });
+    const zip = new JSZip();
+
+    try {
+      for (let i = 0; i < series.slides.length; i++) {
+        setLiveProgress({ slide: i + 1, total: series.slides.length, pct: Math.round((i / series.slides.length) * 100) });
+        setSlideIdx(i);
+        // Wait for React render + animation start (css @keyframes restart on mount)
+        await new Promise(r => setTimeout(r, 500));
+
+        // Offscreen canvas — MediaRecorder streams from this
+        const offCanvas = document.createElement("canvas");
+        offCanvas.width  = W;
+        offCanvas.height = H;
+        const ctx = offCanvas.getContext("2d")!;
+
+        // Pick best supported codec
+        const mimeType = ["video/webm;codecs=vp9", "video/webm;codecs=vp8", "video/webm"]
+          .find(m => MediaRecorder.isTypeSupported(m)) ?? "video/webm";
+
+        const stream   = offCanvas.captureStream(FPS);
+        const recorder = new MediaRecorder(stream, { mimeType, videoBitsPerSecond: 3_000_000 });
+        const chunks: Blob[] = [];
+        recorder.ondataavailable = (e) => { if (e.data.size > 0) chunks.push(e.data); };
+        recorder.start(80); // collect chunks every 80 ms
+
+        // Frame capture loop
+        const startTime = Date.now();
+        while (Date.now() - startTime < DURATION_MS) {
+          const t0 = Date.now();
+          try {
+            const blob = await htmlToImage.toBlob(sourceEl, { pixelRatio: 1, cacheBust: true });
+            if (blob) {
+              const bmp = await createImageBitmap(blob);
+              ctx.drawImage(bmp, 0, 0, W, H);
+              bmp.close();
+            }
+          } catch { /* skip frame on transient error */ }
+          const elapsed = Date.now() - t0;
+          await new Promise(r => setTimeout(r, Math.max(4, FRAME_MS - elapsed)));
+        }
+
+        // Finalise
+        recorder.stop();
+        await new Promise<void>(res => { recorder.onstop = () => res(); });
+        const videoBlob = new Blob(chunks, { type: mimeType });
+        zip.file(`slide-${i + 1}-live.webm`, videoBlob);
+
+        // Stop all stream tracks to release resources
+        stream.getTracks().forEach(t => t.stop());
+      }
+
+      setLiveProgress({ slide: series.slides.length, total: series.slides.length, pct: 100 });
+      toast.info("Pakker ZIP…");
+      const content = await zip.generateAsync({ type: "blob" });
+      const link    = document.createElement("a");
+      link.href     = URL.createObjectURL(content);
+      link.download = `reachr-livephotos-${seriesIdx + 1}.zip`;
+      link.click();
+      toast.success("Live photos lastet ned! Importer .webm-filene i TikTok slideshow.");
+    } catch (err) {
+      console.error(err);
+      toast.error("Kunne ikke ta opp live photos.");
+    } finally {
+      setIsRecordingLive(false);
+      setLiveProgress(null);
+    }
+  };
+
+  const isBusy = isDownloading || isRecordingLive;
+
   return (
     <div className="min-h-screen bg-[#111] flex flex-col items-center py-12 px-4 select-none font-sans text-white">
       <div className="w-full max-w-2xl flex flex-col md:flex-row items-center justify-between mb-8 gap-4">
         <div>
           <h1 className="text-2xl font-black italic tracking-tighter">STUDIO V9</h1>
-          <p className="text-[10px] font-bold text-[#09fe94] uppercase tracking-widest mt-1">10 Unique Themes Active</p>
+          <p className="text-[10px] font-bold text-[#09fe94] uppercase tracking-widest mt-1">11 Unique Themes Active</p>
         </div>
-        
-        <button onClick={downloadFullSeries} disabled={isDownloading} className="bg-[#09fe94] hover:bg-[#08e685] text-black font-black py-4 px-8 rounded-2xl flex items-center gap-2 text-xs shadow-xl transition-all active:scale-95 disabled:opacity-50">
-          {isDownloading ? <Loader2 className="w-4 h-4 animate-spin" /> : <FolderDown className="w-4 h-4" />}
-          {zipProgress !== null ? `${zipProgress}%` : "LAST NED MAPPE (ZIP)"}
-        </button>
+
+        <div className="flex items-center gap-3">
+          {/* Static PNG ZIP */}
+          <button
+            onClick={downloadFullSeries}
+            disabled={isBusy}
+            title="Last ned alle slides som statiske PNG-bilder"
+            className="bg-[#09fe94] hover:bg-[#08e685] text-black font-black py-3 px-5 rounded-2xl flex items-center gap-2 text-xs shadow-xl transition-all active:scale-95 disabled:opacity-40"
+          >
+            {isDownloading ? <Loader2 className="w-4 h-4 animate-spin" /> : <FolderDown className="w-4 h-4" />}
+            {zipProgress !== null ? `${zipProgress}%` : "PNG ZIP"}
+          </button>
+
+          {/* Live Photo WebM ZIP */}
+          <button
+            onClick={downloadLivePhotos}
+            disabled={isBusy}
+            title="Ta opp hvert slide som en 3-sekunders video med animasjoner"
+            className="relative bg-[#ff470a] hover:bg-[#e03d08] text-white font-black py-3 px-5 rounded-2xl flex items-center gap-2 text-xs shadow-xl transition-all active:scale-95 disabled:opacity-40 overflow-hidden"
+          >
+            {isRecordingLive && (
+              <span className="absolute inset-0 bg-white/10 animate-pulse rounded-2xl" />
+            )}
+            {isRecordingLive
+              ? <Loader2 className="w-4 h-4 animate-spin relative z-10" />
+              : <span className="text-sm relative z-10">📸</span>}
+            <span className="relative z-10">
+              {liveProgress
+                ? `Slide ${liveProgress.slide}/${liveProgress.total} — ${liveProgress.pct}%`
+                : "LIVE PHOTOS (WebM)"}
+            </span>
+          </button>
+        </div>
       </div>
+
+      {/* Live recording progress bar */}
+      {liveProgress && (
+        <div className="w-full max-w-2xl mb-6">
+          <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-[#ff470a] rounded-full transition-all duration-300"
+              style={{ width: `${liveProgress.pct}%` }}
+            />
+          </div>
+          <p className="text-[10px] text-[#ff470a] font-bold mt-1.5 text-center tracking-widest uppercase">
+            Tar opp live photo for slide {liveProgress.slide} av {liveProgress.total}…
+          </p>
+        </div>
+      )}
 
       <div className="flex flex-wrap justify-center gap-2 mb-10 max-w-5xl px-4">
         {SERIES.map((s, i) => (
@@ -525,10 +660,14 @@ function TiktokContent() {
       </div>
 
       <div className="relative">
+        {/* Recording indicator ring */}
+        {isRecordingLive && (
+          <div className="absolute inset-0 rounded-[48px] border-4 border-[#ff470a] animate-pulse z-20 pointer-events-none" />
+        )}
         <div ref={canvasRef} className="w-[405px] h-[720px] rounded-[48px] overflow-hidden shadow-2xl bg-[#f2efe3] border-4 border-white/10">
           <SlideContent slide={series.slides[slideIdx]} idx={slideIdx} total={total} theme={series.theme} />
         </div>
-        
+
         <button onClick={() => setSlideIdx(i => Math.max(0, i-1))} className="absolute top-1/2 -left-16 transform -translate-y-1/2 text-white/10 hover:text-white transition-all p-4 text-3xl font-black">←</button>
         <button onClick={() => setSlideIdx(i => Math.min(total-1, i+1))} className="absolute top-1/2 -right-16 transform -translate-y-1/2 text-white/10 hover:text-white transition-all p-4 text-3xl font-black">→</button>
       </div>
@@ -539,7 +678,8 @@ function TiktokContent() {
         ))}
       </div>
 
-      <div className="fixed -left-[2000px] top-0 opacity-0 pointer-events-none">
+      {/* Hidden render target — off-screen, no opacity so html-to-image captures correctly */}
+      <div style={{ position: "fixed", left: -2000, top: 0, pointerEvents: "none" }}>
         <div ref={hiddenCanvasRef} className="w-[405px] h-[720px]">
           <SlideContent slide={series.slides[slideIdx]} idx={slideIdx} total={total} theme={series.theme} />
         </div>
