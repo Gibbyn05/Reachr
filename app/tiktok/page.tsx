@@ -466,7 +466,11 @@ function TiktokContent() {
   const [isDownloading, setIsDownloading] = useState(false);
   const [zipProgress, setZipProgress] = useState<number | null>(null);
   const [isRecordingLive, setIsRecordingLive] = useState(false);
-  const [liveProgress, setLiveProgress] = useState<{ slide: number; total: number; pct: number } | null>(null);
+  const [liveProgress, setLiveProgress] = useState<{
+    slide: number; total: number;
+    phase: "capture" | "encode";
+    frame: number; frames: number;
+  } | null>(null);
   const canvasRef = useRef<HTMLDivElement>(null);
   const hiddenCanvasRef = useRef<HTMLDivElement>(null);
 
@@ -505,87 +509,99 @@ function TiktokContent() {
   };
 
   // ── LIVE PHOTO RECORDING ────────────────────────────────────────────────────
-  // Records each slide as a 3-second WebM video using canvas.captureStream()
-  // + MediaRecorder. The hidden div's CSS animations are sampled at ~12 fps
-  // via html-to-image, giving a smooth "live photo" feel on TikTok.
+  // Two-phase per slide:
+  //   Phase 1 — CAPTURE: sample the VISIBLE on-screen slide via html-to-image
+  //             every ~220ms (animasjoner kjører alltid på synlig element).
+  //             Vi samler N PNG-blobs som "frames".
+  //   Phase 2 — ENCODE: play frames tilbake på et offscreen canvas ved riktig
+  //             fps mens MediaRecorder tar opp → korrekt video-lengde & fps.
   const downloadLivePhotos = async () => {
-    const sourceEl = hiddenCanvasRef.current;
+    const sourceEl = canvasRef.current; // visible on-screen element — animations always run
     if (!sourceEl) return;
 
     if (typeof window === "undefined" || !window.MediaRecorder) {
-      toast.error("Nettleseren din støtter ikke video-opptak. Bruk Chrome eller Edge.");
+      toast.error("Nettleseren støtter ikke video-opptak. Bruk Chrome eller Edge.");
       return;
     }
 
-    const DURATION_MS = 3000;   // 3 seconds per slide
-    const FPS         = 12;     // frames captured per second
-    const FRAME_MS    = 1000 / FPS;
+    const OUTPUT_FPS    = 15;          // output video fps
+    const NUM_FRAMES    = 30;          // frames to capture per slide (= 2 sec @ 15fps)
+    const CAPTURE_INTERVAL = 220;      // ms between html-to-image captures
     const W = 405, H = 720;
 
+    const mimeType = ["video/webm;codecs=vp9", "video/webm;codecs=vp8", "video/webm"]
+      .find(m => MediaRecorder.isTypeSupported(m)) ?? "video/webm";
+
     setIsRecordingLive(true);
-    setLiveProgress({ slide: 0, total: series.slides.length, pct: 0 });
     const zip = new JSZip();
 
     try {
       for (let i = 0; i < series.slides.length; i++) {
-        setLiveProgress({ slide: i + 1, total: series.slides.length, pct: Math.round((i / series.slides.length) * 100) });
         setSlideIdx(i);
-        // Wait for React render + animation start (css @keyframes restart on mount)
-        await new Promise(r => setTimeout(r, 500));
+        // Let React render + CSS animations start before capturing
+        await new Promise(r => setTimeout(r, 600));
 
-        // Offscreen canvas — MediaRecorder streams from this
+        // ── Phase 1: Capture frames ──────────────────────────────────────────
+        const frames: ImageBitmap[] = [];
+        for (let f = 0; f < NUM_FRAMES; f++) {
+          setLiveProgress({ slide: i + 1, total: series.slides.length, phase: "capture", frame: f + 1, frames: NUM_FRAMES });
+          try {
+            const blob = await htmlToImage.toBlob(sourceEl, {
+              pixelRatio: 1,
+              cacheBust: true,
+              // Strip visual chrome so output is clean 405×720
+              style: { borderRadius: "0", border: "none", boxShadow: "none" },
+            });
+            if (blob && blob.size > 2000) {
+              frames.push(await createImageBitmap(blob));
+            }
+          } catch (e) {
+            console.warn(`Slide ${i + 1} frame ${f + 1} capture error:`, e);
+          }
+          await new Promise(r => setTimeout(r, CAPTURE_INTERVAL));
+        }
+
+        if (frames.length === 0) {
+          toast.error(`Slide ${i + 1}: Ingen frames fanget — hopper over.`);
+          continue;
+        }
+
+        // ── Phase 2: Encode captured frames → WebM at OUTPUT_FPS ─────────────
         const offCanvas = document.createElement("canvas");
         offCanvas.width  = W;
         offCanvas.height = H;
-        const ctx = offCanvas.getContext("2d")!;
-
-        // Pick best supported codec
-        const mimeType = ["video/webm;codecs=vp9", "video/webm;codecs=vp8", "video/webm"]
-          .find(m => MediaRecorder.isTypeSupported(m)) ?? "video/webm";
-
-        const stream   = offCanvas.captureStream(FPS);
-        const recorder = new MediaRecorder(stream, { mimeType, videoBitsPerSecond: 3_000_000 });
+        const ctx    = offCanvas.getContext("2d")!;
+        const stream = offCanvas.captureStream(OUTPUT_FPS);
+        const recorder = new MediaRecorder(stream, { mimeType, videoBitsPerSecond: 4_000_000 });
         const chunks: Blob[] = [];
         recorder.ondataavailable = (e) => { if (e.data.size > 0) chunks.push(e.data); };
-        recorder.start(80); // collect chunks every 80 ms
+        recorder.start();
 
-        // Frame capture loop
-        const startTime = Date.now();
-        while (Date.now() - startTime < DURATION_MS) {
-          const t0 = Date.now();
-          try {
-            const blob = await htmlToImage.toBlob(sourceEl, { pixelRatio: 1, cacheBust: true });
-            if (blob) {
-              const bmp = await createImageBitmap(blob);
-              ctx.drawImage(bmp, 0, 0, W, H);
-              bmp.close();
-            }
-          } catch { /* skip frame on transient error */ }
-          const elapsed = Date.now() - t0;
-          await new Promise(r => setTimeout(r, Math.max(4, FRAME_MS - elapsed)));
+        for (let f = 0; f < frames.length; f++) {
+          setLiveProgress({ slide: i + 1, total: series.slides.length, phase: "encode", frame: f + 1, frames: frames.length });
+          ctx.drawImage(frames[f], 0, 0, W, H);
+          await new Promise(r => setTimeout(r, 1000 / OUTPUT_FPS));
         }
 
-        // Finalise
         recorder.stop();
         await new Promise<void>(res => { recorder.onstop = () => res(); });
+        stream.getTracks().forEach(t => t.stop());
+        frames.forEach(bmp => bmp.close());
+
         const videoBlob = new Blob(chunks, { type: mimeType });
         zip.file(`slide-${i + 1}-live.webm`, videoBlob);
-
-        // Stop all stream tracks to release resources
-        stream.getTracks().forEach(t => t.stop());
       }
 
-      setLiveProgress({ slide: series.slides.length, total: series.slides.length, pct: 100 });
       toast.info("Pakker ZIP…");
       const content = await zip.generateAsync({ type: "blob" });
       const link    = document.createElement("a");
       link.href     = URL.createObjectURL(content);
       link.download = `reachr-livephotos-${seriesIdx + 1}.zip`;
       link.click();
-      toast.success("Live photos lastet ned! Importer .webm-filene i TikTok slideshow.");
+      toast.success("Live photos lastet ned! Dra .webm-filene rett inn i TikTok slideshow.");
     } catch (err) {
       console.error(err);
-      toast.error("Kunne ikke ta opp live photos.");
+      toast.error("Kunne ikke lage live photos.");
     } finally {
       setIsRecordingLive(false);
       setLiveProgress(null);
@@ -629,7 +645,7 @@ function TiktokContent() {
               : <span className="text-sm relative z-10">📸</span>}
             <span className="relative z-10">
               {liveProgress
-                ? `Slide ${liveProgress.slide}/${liveProgress.total} — ${liveProgress.pct}%`
+                ? `Slide ${liveProgress.slide}/${liveProgress.total} — ${liveProgress.phase === "capture" ? "📸" : "🎬"}`
                 : "LIVE PHOTOS (WebM)"}
             </span>
           </button>
@@ -639,14 +655,23 @@ function TiktokContent() {
       {/* Live recording progress bar */}
       {liveProgress && (
         <div className="w-full max-w-2xl mb-6">
+          <div className="flex justify-between text-[10px] font-bold mb-1.5">
+            <span className="text-[#ff470a] uppercase tracking-widest">
+              Slide {liveProgress.slide}/{liveProgress.total} —{" "}
+              {liveProgress.phase === "capture" ? "📸 Fanger animasjon" : "🎬 Koder video"}
+            </span>
+            <span className="text-white/30">{liveProgress.frame}/{liveProgress.frames} frames</span>
+          </div>
           <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
             <div
-              className="h-full bg-[#ff470a] rounded-full transition-all duration-300"
-              style={{ width: `${liveProgress.pct}%` }}
+              className="h-full bg-[#ff470a] rounded-full transition-all duration-150"
+              style={{ width: `${Math.round((liveProgress.frame / liveProgress.frames) * 100)}%` }}
             />
           </div>
-          <p className="text-[10px] text-[#ff470a] font-bold mt-1.5 text-center tracking-widest uppercase">
-            Tar opp live photo for slide {liveProgress.slide} av {liveProgress.total}…
+          <p className="text-[9px] text-white/20 mt-1 text-center">
+            {liveProgress.phase === "capture"
+              ? "Animasjonene spilles av live mens frames fanges…"
+              : "Spiller frames tilbake til video ved riktig hastighet…"}
           </p>
         </div>
       )}
