@@ -10,6 +10,21 @@ interface Props {
   showConfetti?: boolean;
 }
 
+// Layout constants — absolute px for 1080×1920 canvas
+// Original web design: 405×720. SC = 2.667.
+// Correct mapping: original_y * SC = canvas_y
+const LOGO_TOP    = 72  * SC;  // 192px
+const LOGO_LEFT   = 28  * SC;  // 75px
+const DOTS_TOP    = 84  * SC;  // 224px  (vertically centred with logo)
+const DOTS_RIGHT  = 32  * SC;  // 85px
+const CON_TOP     = 160 * SC;  // 427px  (below logo + gap)
+const CON_LEFT    = 28  * SC;  // 75px
+const CON_RIGHT   = 28  * SC;  // 75px
+const CON_BOTTOM  = 180 * SC;  // 480px  (above strip)
+const STRIP_BOT   = 130 * SC;  // 347px
+const STRIP_LEFT  = 28  * SC;
+const STRIP_RIGHT = 28  * SC;
+
 export const SlideShell: React.FC<Props> = ({ children, slideIdx, totalSlides, showConfetti }) => {
   const frame = useCurrentFrame();
   const { durationInFrames } = useVideoConfig();
@@ -23,7 +38,7 @@ export const SlideShell: React.FC<Props> = ({ children, slideIdx, totalSlides, s
   );
 
   // Slight upward slide on entry
-  const slideY = interpolate(frame, [0, 18], [36 * SC, 0], {
+  const slideY = interpolate(frame, [0, 18], [30 * SC, 0], {
     extrapolateRight: "clamp",
   });
 
@@ -36,7 +51,7 @@ export const SlideShell: React.FC<Props> = ({ children, slideIdx, totalSlides, s
         pointerEvents: "none",
       }} />
 
-      {/* Glow blobs (giveaway theme) */}
+      {/* Glow blobs */}
       <div style={{
         position: "absolute", top: -W * 0.3, left: -W * 0.2,
         width: W * 0.8, height: W * 0.8,
@@ -58,61 +73,66 @@ export const SlideShell: React.FC<Props> = ({ children, slideIdx, totalSlides, s
 
       {showConfetti && <Confetti />}
 
-      {/* Main content wrapper — matches TikTok safe zone */}
+      {/* Main content wrapper */}
       <div style={{ transform: `translateY(${slideY}px)`, height: "100%", position: "relative", zIndex: 3 }}>
-        {/* LOGO — top-left, clear of TikTok navigation bar */}
+
+        {/* LOGO */}
         <div style={{
-          position: "absolute", top: 190 * SC, left: 28 * SC,
+          position: "absolute", top: LOGO_TOP, left: LOGO_LEFT,
           display: "flex", alignItems: "center", gap: 8 * SC,
         }}>
-          {/* Reachr wordmark */}
           <div style={{
-            width: 36 * SC, height: 36 * SC, borderRadius: 8 * SC,
+            width: 34 * SC, height: 34 * SC, borderRadius: 7 * SC,
             background: C.dark,
             display: "flex", alignItems: "center", justifyContent: "center",
+            flexShrink: 0,
           }}>
-            <span style={{ color: C.green, fontSize: 20 * SC, fontWeight: 900, fontFamily: GARAMOND }}>R</span>
+            <span style={{ color: C.green, fontSize: 19 * SC, fontWeight: 900, fontFamily: GARAMOND }}>R</span>
           </div>
-          <span style={{ fontFamily: GARAMOND, fontSize: 26 * SC, fontWeight: 700, fontStyle: "italic", color: C.dark, lineHeight: 1 }}>
+          <span style={{ fontFamily: GARAMOND, fontSize: 24 * SC, fontWeight: 700, fontStyle: "italic", color: C.dark, lineHeight: 1 }}>
             Reachr
           </span>
         </div>
 
         {/* SLIDE DOTS */}
         <div style={{
-          position: "absolute", top: 202 * SC, right: 36 * SC,
-          display: "flex", alignItems: "center", gap: 6 * SC,
+          position: "absolute", top: DOTS_TOP, right: DOTS_RIGHT,
+          display: "flex", alignItems: "center", gap: 5 * SC,
         }}>
           {Array.from({ length: totalSlides }).map((_, i) => (
             <div key={i} style={{
-              width:        i === slideIdx ? 28 * SC : 8 * SC,
-              height:       6 * SC,
+              width:        i === slideIdx ? 24 * SC : 7 * SC,
+              height:       5 * SC,
               borderRadius: 3 * SC,
               background:   i === slideIdx ? C.green : C.border,
-              transition:   "width 0.2s",
             }} />
           ))}
         </div>
 
-        {/* CONTENT AREA — safe zone: x 28-377, y 300-1480 (original scale) */}
+        {/* CONTENT AREA */}
         <div style={{
           position: "absolute",
-          top:    310 * SC,
-          left:   28 * SC,
-          right:  28 * SC,
-          bottom: 440 * SC,
+          top:    CON_TOP,
+          left:   CON_LEFT,
+          right:  CON_RIGHT,
+          bottom: CON_BOTTOM,
           display: "flex", flexDirection: "column",
+          overflow: "hidden",
         }}>
           {children}
         </div>
 
         {/* BOTTOM STRIP */}
-        <div style={{ position: "absolute", bottom: 390 * SC, left: 28 * SC, right: 28 * SC }}>
-          <div style={{ height: 1.5, background: C.border, marginBottom: 12 * SC }} />
-          <span style={{ fontSize: 12 * SC, color: C.faint, letterSpacing: "0.06em", fontFamily: INTER }}>
+        <div style={{
+          position: "absolute",
+          bottom: STRIP_BOT, left: STRIP_LEFT, right: STRIP_RIGHT,
+        }}>
+          <div style={{ height: 1.5, background: C.border, marginBottom: 10 * SC }} />
+          <span style={{ fontSize: 11 * SC, color: C.faint, letterSpacing: "0.06em", fontFamily: INTER }}>
             reachr.no
           </span>
         </div>
+
       </div>
     </AbsoluteFill>
   );

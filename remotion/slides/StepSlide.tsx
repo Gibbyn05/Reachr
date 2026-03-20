@@ -62,12 +62,13 @@ export const StepSlide: React.FC<Props> = ({ num, emoji, action, detail, slideId
           {emoji}
         </div>
 
-        {/* Action headline */}
+        {/* Action headline — 48*SC keeps longest word "Del videoen!" within 960px content width */}
         <p style={{
-          fontFamily: INTER, fontSize: 66 * SC, fontWeight: 900,
-          color: C.dark, lineHeight: 0.95, letterSpacing: -2.5 * SC,
-          margin: 0, marginBottom: 22 * SC,
+          fontFamily: INTER, fontSize: 48 * SC, fontWeight: 900,
+          color: C.dark, lineHeight: 1.0, letterSpacing: -1.5 * SC,
+          margin: 0, marginBottom: 20 * SC,
           opacity: actionS, transform: `translateY(${(1 - actionS) * 24 * SC}px)`,
+          wordBreak: "keep-all",
         }}>
           {action}
         </p>
