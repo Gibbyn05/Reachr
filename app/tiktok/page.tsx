@@ -24,9 +24,10 @@ import JSZip from "jszip";
 function SlideShell({ idx, total, children, theme }: { idx: number; total: number; children: React.ReactNode; theme: string }) {
   const isAlt = theme === "modern" || theme === "blueprint";
   const isDark = theme === "impact";
-  
+  const isGiveaway = theme === "giveaway";
+
   return (
-    <div className={`absolute inset-0 overflow-hidden transition-colors duration-500 ${isDark ? 'bg-[#171717]' : 'bg-[#f2efe3]'}`}>
+    <div className={`absolute inset-0 overflow-hidden transition-colors duration-500 ${isDark ? 'bg-[#171717]' : isGiveaway ? 'bg-[#f2efe3]' : 'bg-[#f2efe3]'}`}>
       {/* BACKGROUND TEXTURES PER THEME */}
       {theme === "blueprint" && (
         <div className="absolute inset-0 opacity-[0.05]" style={{ backgroundImage: "linear-gradient(#171717 1px, transparent 1px), linear-gradient(90deg, #171717 1px, transparent 1px)", backgroundSize: "40px 40px" }} />
@@ -36,6 +37,13 @@ function SlideShell({ idx, total, children, theme }: { idx: number; total: numbe
       )}
       {theme === "minimal" && (
         <div className="absolute top-0 right-0 w-64 h-64 bg-[#09fe94] blur-[120px] opacity-10 rounded-full -translate-y-1/2 translate-x-1/2" />
+      )}
+      {isGiveaway && (
+        <>
+          <div className="absolute top-0 left-0 w-48 h-48 bg-[#09fe94] blur-[90px] opacity-20 rounded-full -translate-y-1/4 -translate-x-1/4" />
+          <div className="absolute bottom-0 right-0 w-48 h-48 bg-[#ff470a] blur-[90px] opacity-15 rounded-full translate-y-1/4 translate-x-1/4" />
+          <ConfettiCanvas />
+        </>
       )}
 
       {/* HEADER - DIFFERENT PER THEME */}
@@ -65,6 +73,73 @@ function SlideShell({ idx, total, children, theme }: { idx: number; total: numbe
           <span className={`text-[8px] font-black uppercase tracking-widest ${isDark ? 'text-white/30' : 'text-[#a09b8f]'}`}>Verified</span>
         </div>
       </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// CONFETTI + GIVEAWAY ANIMATIONS
+// ─────────────────────────────────────────────────────────────────────────────
+
+const CONFETTI_COLORS = ["#09fe94","#ff470a","#ffad0a","#171717","#faf8f2","#ff0050","#fff"];
+const CONFETTI_SHAPES = ["■","●","▲","★","♦","✦"];
+
+function ConfettiCanvas() {
+  const particles = React.useMemo(() =>
+    Array.from({ length: 40 }, (_, i) => ({
+      id: i,
+      color: CONFETTI_COLORS[i % CONFETTI_COLORS.length],
+      shape: CONFETTI_SHAPES[i % CONFETTI_SHAPES.length],
+      left: `${(i * 11 + 5) % 94}%`,
+      delay: `${(i * 0.15) % 3.2}s`,
+      duration: `${2.2 + (i % 6) * 0.35}s`,
+      size: 8 + (i % 5) * 3,
+    }))
+  , []);
+
+  return (
+    <div className="absolute inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 2 }}>
+      <style>{`
+        @keyframes confettiFall {
+          0%   { transform: translateY(-20px) rotate(0deg)   scale(1);   opacity: 1; }
+          80%  { opacity: 1; }
+          100% { transform: translateY(760px) rotate(740deg) scale(0.7); opacity: 0; }
+        }
+        @keyframes pulseBadge {
+          0%, 100% { transform: scale(1); }
+          50%       { transform: scale(1.09); }
+        }
+        @keyframes floatPrize {
+          0%, 100% { transform: translateY(0px)  rotate(-1deg); }
+          50%       { transform: translateY(-7px) rotate(1deg); }
+        }
+        @keyframes starSpin {
+          from { transform: rotate(0deg) scale(1); }
+          50%  { transform: rotate(180deg) scale(1.25); }
+          to   { transform: rotate(360deg) scale(1); }
+        }
+        @keyframes glowPulse {
+          0%, 100% { box-shadow: 0 0 0px 0px #09fe9444; }
+          50%       { box-shadow: 0 0 24px 6px #09fe9477; }
+        }
+        @keyframes slideUp {
+          from { opacity: 0; transform: translateY(18px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
+      {particles.map((p) => (
+        <div
+          key={p.id}
+          style={{
+            position: "absolute", top: -20, left: p.left,
+            fontSize: p.size, color: p.color,
+            animation: `confettiFall ${p.duration} ${p.delay} infinite linear`,
+            userSelect: "none",
+          }}
+        >
+          {p.shape}
+        </div>
+      ))}
     </div>
   );
 }
@@ -217,6 +292,18 @@ const SERIES = [
       { type: "stat", number: "X3", label: "Møter", sub: "Gjennomsnittlig økning i aktivitet når planen følges." },
       { type: "cta", headline: "Få din plan.", cta: "reachr.no" }
     ]
+  },
+  {
+    name: "🎉 GIVEAWAY — Vinn 1 år!",
+    theme: "giveaway",
+    slides: [
+      { type: "giveaway-hook" },
+      { type: "giveaway-prize" },
+      { type: "giveaway-step", num: "1", emoji: "❤️", action: "Følg oss!", detail: "Trykk følg-knappen nå — du kan ikke vinne uten!" },
+      { type: "giveaway-step", num: "2", emoji: "💬", action: "Kommenter!", detail: "Skriv hvem du vil ha med på teamet ditt. Tagg dem direkte!" },
+      { type: "giveaway-step", num: "3", emoji: "📤", action: "Del videoen!", detail: "Del med minst 1 person. Jo flere ser, jo høyere sjanser (for deg!)." },
+      { type: "giveaway-winner" },
+    ]
   }
 ];
 
@@ -285,6 +372,87 @@ function SlideContent({ slide, idx, total, theme }: { slide: any; idx: number; t
           <h2 className={`text-4xl font-black uppercase italic mb-8 p-1 tracking-tighter leading-none ${isDark ? 'text-[#09fe94]' : 'text-[#171717]'}`}>{slide.headline}</h2>
           <div className="bg-[#09fe94] text-black py-5 px-10 rounded-2xl font-black text-xl border-b-6 border-emerald-700 shadow-xl">
             {slide.cta}
+          </div>
+        </div>
+      )}
+
+      {/* ── GIVEAWAY SLIDE TYPES ── */}
+      {slide.type === "giveaway-hook" && (
+        <div className="flex-1 flex flex-col justify-center relative z-10">
+          <div style={{ display: "inline-flex", alignSelf: "flex-start", background: "#ff470a", color: "#fff", fontSize: 11, fontWeight: 900, letterSpacing: "0.1em", textTransform: "uppercase", padding: "5px 14px", borderRadius: 99, marginBottom: 18, animation: "pulseBadge 1.4s ease-in-out infinite" }}>
+            🎉 GIVEAWAY
+          </div>
+          <p className="font-sans font-black text-[#171717] leading-[0.88] tracking-[-3px]" style={{ fontSize: 68 }}>Vinn</p>
+          <p className="font-sans font-black text-[#09fe94] leading-[0.88] tracking-[-3px]" style={{ fontSize: 68 }}>1 år</p>
+          <p className="font-sans font-black text-[#171717] leading-[0.88] tracking-[-3px]" style={{ fontSize: 68 }}>gratis!</p>
+          <p className="text-[#6b6660] text-[13px] leading-relaxed mt-4">Hele salgsteamet ditt (2–5 pers) får ett år med Reachr Team — helt gratis. 🚀</p>
+          <div style={{ marginTop: 16, display: "inline-flex", alignItems: "center", gap: 8, background: "#171717", borderRadius: 12, padding: "10px 14px", alignSelf: "flex-start", animation: "glowPulse 2s ease-in-out infinite" }}>
+            <span style={{ fontSize: 18 }}>🏆</span>
+            <p style={{ fontSize: 12, fontWeight: 700, color: "#09fe94" }}>Verdi: over 20 000 kr</p>
+          </div>
+        </div>
+      )}
+
+      {slide.type === "giveaway-prize" && (
+        <div className="flex-1 flex flex-col justify-center relative z-10">
+          <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "#ff470a", marginBottom: 14 }}>Premien 🎁</p>
+          <div style={{ background: "#171717", borderRadius: 18, padding: "20px 18px", border: "2px solid #09fe94", animation: "floatPrize 3s ease-in-out infinite" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
+              <span style={{ fontSize: 28, animation: "starSpin 4s linear infinite", display: "inline-block" }}>⭐</span>
+              <div>
+                <p style={{ fontFamily: "EB Garamond, Georgia, serif", fontSize: 22, fontWeight: 700, color: "#09fe94", lineHeight: 1.1 }}>Reachr Team</p>
+                <p style={{ fontSize: 11, color: "#a09b8f" }}>1 helt år — gratis</p>
+              </div>
+            </div>
+            <div style={{ height: 1, background: "#2a2a2a", marginBottom: 12 }} />
+            {["250 000+ bedrifter å søke i","AI-genererte e-poster & SMS","Delt CRM-pipeline for hele teamet","Automatiske oppfølgingsvarsler","2–5 brukere inkludert"].map((feat, i) => (
+              <div key={i} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 7 }}>
+                <span style={{ color: "#09fe94", fontSize: 11, fontWeight: 800 }}>✓</span>
+                <p style={{ fontSize: 11, color: "#f2efe3", lineHeight: 1.4 }}>{feat}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {slide.type === "giveaway-step" && (
+        <div className="flex-1 flex flex-col justify-center relative z-10">
+          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 18 }}>
+            <div style={{ width: 36, height: 36, borderRadius: 99, background: "#09fe94", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, animation: "pulseBadge 1.6s ease-in-out infinite" }}>
+              <span style={{ fontSize: 15, fontWeight: 900, color: "#171717" }}>{slide.num}</span>
+            </div>
+            <p style={{ fontSize: 11, fontWeight: 700, color: "#a09b8f", letterSpacing: "0.08em", textTransform: "uppercase" }}>Steg {slide.num} av 3</p>
+          </div>
+          <div style={{ fontSize: 50, marginBottom: 14, animation: "floatPrize 2.5s ease-in-out infinite" }}>{slide.emoji}</div>
+          <p className="font-sans font-black text-[#171717] leading-[0.95] tracking-[-2px] mb-4" style={{ fontSize: 52 }}>{slide.action}</p>
+          <div style={{ background: "#faf8f2", border: "2px solid #09fe9455", borderRadius: 14, padding: "14px 16px", animation: "glowPulse 2.5s ease-in-out infinite" }}>
+            <p style={{ color: "#6b6660", fontSize: 13, lineHeight: 1.6 }}>{slide.detail}</p>
+          </div>
+        </div>
+      )}
+
+      {slide.type === "giveaway-winner" && (
+        <div className="flex-1 flex flex-col justify-center relative z-10">
+          <div style={{ fontSize: 52, textAlign: "center", marginBottom: 14, animation: "floatPrize 2s ease-in-out infinite" }}>🏆</div>
+          <p className="font-sans font-black text-center leading-[0.92] tracking-[-2.5px]" style={{ fontSize: 50, animation: "slideUp 0.6s ease both" }}>
+            Trekker<br />
+            <span style={{ color: "#09fe94" }}>vinner</span><br />
+            snart!
+          </p>
+          <div style={{ height: 2, background: "#d8d3c5", margin: "18px 0" }} />
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            {[{ icon: "❤️", text: "Følg oss" }, { icon: "💬", text: "Kommenter teamet ditt" }, { icon: "📤", text: "Del med minst 1 person" }].map((item, i) => (
+              <div key={i} style={{ display: "flex", alignItems: "center", gap: 10, background: "#faf8f2", border: "1.5px solid #d8d3c5", borderRadius: 10, padding: "10px 12px" }}>
+                <span style={{ fontSize: 15 }}>{item.icon}</span>
+                <p style={{ fontSize: 12, fontWeight: 600, color: "#171717" }}>{item.text}</p>
+                <div style={{ marginLeft: "auto", width: 16, height: 16, borderRadius: 99, background: "#09fe94", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <span style={{ fontSize: 8, fontWeight: 900, color: "#171717" }}>✓</span>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div style={{ marginTop: 14, background: "#ff470a", borderRadius: 12, padding: "11px 14px", textAlign: "center", animation: "pulseBadge 1.5s ease-in-out infinite" }}>
+            <p style={{ fontSize: 12, fontWeight: 800, color: "#fff" }}>Lykke til! 🍀 Del med noen som fortjener det!</p>
           </div>
         </div>
       )}
