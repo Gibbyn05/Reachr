@@ -10,8 +10,8 @@ export const FPS            = 30;
 export const W              = 1080;
 export const H              = 1920;
 
-const SLIDE_FRAMES   = 100; // frames each slide is on screen
-const OVERLAP_FRAMES = 12;  // cross-fade overlap between slides
+const SLIDE_FRAMES   = 180; // frames each slide is on screen (~6s at 30fps)
+const OVERLAP_FRAMES = 15;  // cross-fade overlap between slides
 const SLIDE_NET      = SLIDE_FRAMES - OVERLAP_FRAMES; // net frames per slide slot
 
 const SLIDES = 6;
