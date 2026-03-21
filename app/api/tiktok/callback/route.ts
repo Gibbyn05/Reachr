@@ -17,7 +17,8 @@ export async function GET(req: NextRequest) {
 
   const clientKey = process.env.TIKTOK_CLIENT_KEY;
   const clientSecret = process.env.TIKTOK_CLIENT_SECRET;
-  const redirectUri = process.env.TIKTOK_REDIRECT_URI;
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://reachr.no";
+  const redirectUri = process.env.TIKTOK_REDIRECT_URI || `${appUrl}/api/tiktok/callback`;
 
   // Retrieve code_verifier from the cookie (required for PKCE)
   const codeVerifier = req.cookies.get("tiktok_code_verifier")?.value;

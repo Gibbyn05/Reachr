@@ -23,9 +23,10 @@ function base64UrlEncode(buffer: Buffer): string {
 
 export async function GET(req: NextRequest) {
   const clientKey = process.env.TIKTOK_CLIENT_KEY;
-  const redirectUri = process.env.TIKTOK_REDIRECT_URI;
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://reachr.no";
+  const redirectUri = process.env.TIKTOK_REDIRECT_URI || `${appUrl}/api/tiktok/callback`;
   
-  if (!clientKey || !redirectUri) {
+  if (!clientKey) {
     return NextResponse.json({ error: "TikTok credentials missing" }, { status: 500 });
   }
 
