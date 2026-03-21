@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const code = searchParams.get("code");
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://reachr.no";
 
   if (!code) {
     return NextResponse.redirect(`${appUrl}/innstillinger?tab=epost&error=no_code`);

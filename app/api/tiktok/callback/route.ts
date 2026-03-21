@@ -79,7 +79,7 @@ export async function GET(req: NextRequest) {
     }
 
     // Redirect back to our TikTok page with a success message 
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://reachr.no";
     const redirectUrl = new URL("/tiktok", appUrl);
     redirectUrl.searchParams.set("tiktok", "success");
     redirectUrl.searchParams.set("name", displayName);

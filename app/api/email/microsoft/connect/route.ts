@@ -10,7 +10,7 @@ export async function GET(req: NextRequest) {
 
   const clientId = process.env.MICROSOFT_CLIENT_ID;
   const tenantId = process.env.MICROSOFT_TENANT_ID;
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://reachr.no";
 
   if (!clientId || !tenantId) {
     return NextResponse.redirect(`${appUrl}/innstillinger?tab=epost&error=not_configured`);

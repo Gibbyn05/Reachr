@@ -51,7 +51,7 @@ export async function sendEmail({
   stepId?: string;
 }) {
   const db = createServiceClient();
-  const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://www.reachr.no";
+  const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://reachr.no";
 
   // 1. Create email log
   const { data: log, error: logErr } = await db.from("email_logs").insert({

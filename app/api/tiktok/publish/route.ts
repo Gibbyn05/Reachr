@@ -11,7 +11,7 @@ if (!fs.existsSync(TEMP_DIR)) {
 
 export async function POST(req: NextRequest) {
   const tiktokToken = req.cookies.get("tiktok_access_token")?.value;
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://dimple-unphrased-thu.ngrok-free.dev";
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://reachr.no";
 
   if (!tiktokToken) {
     return NextResponse.json({ error: "TikTok not connected. Please connect first." }, { status: 401 });
@@ -40,7 +40,7 @@ export async function POST(req: NextRequest) {
     }
 
     // 2. Prepare the TikTok API Request (Content Posting API v2)
-    const publishUrl = "https://open.tiktokapis.com/v2/post/publish/content/init/";
+    const initUrl = "https://open.tiktokapis.com/v2/post/publish/content/init/";
     
     // CAPTION
     const caption = "LinkedIn er mettet. Her er hvordan vi bygger pipeline på 30 min med Reachr.no! 🚀 #sales #b2b #marketing #startup #reachr";
@@ -60,14 +60,27 @@ export async function POST(req: NextRequest) {
       }
     };
 
-    // Da vi bruker ngrok, vil TikTok-roboten ofte bli blokkert av ngrok sin "warning"-side.
-    // For å få ferdig demo-videoen din til TikTok-teamet, returnerer vi nå en suksess-melding.
-    // TikTok-teamet sjekker kun grensesnittet i denne fasen.
+    // 3. Call TikTok API
+    const response = await fetch(initUrl, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${tiktokToken}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(body)
+    });
+
+    const result = await response.json();
+    
+    if (result.error && result.error.code !== "ok") {
+       console.error("TikTok API error:", result.error);
+       return NextResponse.json({ error: result.error.message || "TikTok API error" }, { status: 400 });
+    }
     
     return NextResponse.json({ 
       success: true, 
       message: "Slideshow lastet opp! Sjekk TikTok-appen din for å publisere.",
-      data: { publish_id: "demo_mode_success" }
+      data: result.data
     });
 
   } catch (err: any) {

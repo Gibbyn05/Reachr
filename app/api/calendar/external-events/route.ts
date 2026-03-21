@@ -33,7 +33,7 @@ async function refreshGoogleToken(refreshToken: string): Promise<string | null> 
 
 async function refreshMicrosoftToken(refreshToken: string): Promise<string | null> {
   try {
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://reachr.no";
     const res = await fetch(`https://login.microsoftonline.com/${process.env.MICROSOFT_TENANT_ID ?? "common"}/oauth2/v2.0/token`, {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
