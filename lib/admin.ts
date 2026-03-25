@@ -1,6 +1,7 @@
 export const ADMIN_EMAILS = [
   "fredriik8@gmail.com",
   "fredrik.nerlandsrem@gmail.com",
+  "kristijonas.sta@gmail.com",
 ];
 
 export const FREE_EMAILS = [
