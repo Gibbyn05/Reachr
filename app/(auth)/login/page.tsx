@@ -170,7 +170,7 @@ function LoginForm() {
           <div>
             <div className="flex items-center justify-between mb-1.5">
               <label className="block text-sm font-medium text-[#3d3a34]">Passord</label>
-              <Link href="#" className="text-xs text-[#ff470a] hover:underline">
+              <Link href="/glemt-passord" className="text-xs text-[#ff470a] hover:underline">
                 Glemt passord?
               </Link>
             </div>
