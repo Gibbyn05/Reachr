@@ -59,43 +59,87 @@ const INDUSTRY_CATEGORIES: { label: string; nace: string }[] = [
   { label: "Utdanning & kurs", nace: "85" },
   { label: "Finans & forsikring", nace: "64" },
   { label: "Juridisk & konsulentvirksomhet", nace: "70" },
+  { label: "Sport & idrett", nace: "93" },
+  { label: "Overnatting", nace: "55" },
+  { label: "Kultur & underholdning", nace: "90" },
+  { label: "Landbruk & fiskeri", nace: "01" },
+  { label: "Bilhandel & bilverksted", nace: "45" },
 ];
 
-/** Map a NACE code (e.g. "47.110") to the broad category label */
+/**
+ * Display label for a company's NACE code.
+ * Always prefer Brreg's own beskrivelse (it is specific and accurate).
+ * The broad INDUSTRY_CATEGORIES labels are only used for the filter dropdown.
+ */
 function naceToCategory(kode: string | undefined, beskrivelse: string | undefined): string {
-  if (!kode) return beskrivelse ? capitalize(beskrivelse) : "—";
+  if (beskrivelse) return capitalize(beskrivelse);
+  if (!kode) return "—";
   const prefix2 = kode.slice(0, 2);
-  const prefix1 = kode.slice(0, 1);
-  const cat =
-    INDUSTRY_CATEGORIES.find(c => c.nace && prefix2 === c.nace) ??
-    INDUSTRY_CATEGORIES.find(c => c.nace && prefix1 === c.nace);
-  return cat ? cat.label : (beskrivelse ? capitalize(beskrivelse) : "—");
+  const cat = INDUSTRY_CATEGORIES.find(c => c.nace && prefix2 === c.nace);
+  return cat ? cat.label : "—";
 }
 
+// Keys must be specific enough to avoid false substring matches.
+// Short keys (< 4 chars) require whole-word matching in guessNace.
 const NACE_MAP: Record<string, string> = {
-  // Use 2-digit codes for reliable prefix matching on Brreg
-  frisør: "96", frisørsalong: "96", hår: "96", negl: "96", skjønnhet: "96",
+  // Personlig service
+  frisør: "96", frisørsalong: "96", hårpleie: "96", negl: "96", skjønnhet: "96", barber: "96",
+  // Regnskap / jus
   regnskap: "69", revisjon: "69", bokføring: "69", regnskapsfører: "69",
+  advokat: "69", jus: "69", juridisk: "70", konsulent: "70",
+  // Bygg
   bygg: "41", byggentreprenør: "41", entreprenør: "43",
-  it: "62", software: "62", teknologi: "62", dataprogrammering: "62",
-  restaurant: "56", kafé: "56", kafe: "56", catering: "56",
-  transport: "49", frakt: "52", logistikk: "52",
-  elektro: "43", elektriker: "43", rørlegger: "43", vvs: "43",
-  advokat: "69", jus: "69",
-  eiendom: "68", megling: "68",
-  helse: "86", lege: "86", tannlege: "86", fysioterapi: "86",
-  rengjøring: "81", renhold: "81", vakt: "80",
-  markedsføring: "73", reklame: "73",
-  butikk: "47", handel: "46", import: "46", grossist: "46",
-  industri: "25", produksjon: "25", maskin: "28",
-  finans: "64", bank: "64", forsikring: "65",
-  utdanning: "85", kurs: "85",
+  elektro: "43", elektriker: "43", rørlegger: "43", vvs: "43", snekker: "43", maler: "43",
+  // IT — NB: "it" er for kort og matcher norske ord som "aktivitet"; bruk bare lengre nøkler
+  software: "62", teknologi: "62", dataprogrammering: "62", utvikling: "62", programmering: "62",
+  "it-tjenester": "62", datasystem: "62", ikt: "62",
+  // Mat & drikke
+  restaurant: "56", kafé: "56", kafe: "56", catering: "56", bakeri: "10", konditori: "10",
+  bar: "56", pub: "56", gatekjøkken: "56",
+  // Transport
+  transport: "49", frakt: "49", logistikk: "52", speditør: "52", bud: "53",
+  // Helse
+  helse: "86", lege: "86", tannlege: "86", fysioterapi: "86", psykolog: "86",
+  apotek: "47", optiker: "47",
+  // Eiendom
+  eiendom: "68", megling: "68", utleie: "68",
+  // Markedsføring
+  markedsføring: "73", reklame: "73", pr: "73", media: "73",
+  // Handel
+  butikk: "47", dagligvare: "47", klesbutikk: "47", motebutikk: "47",
+  grossist: "46", engros: "46", import: "46",
+  // Rengjøring / service
+  rengjøring: "81", renhold: "81", vakthold: "80", sikkerhet: "80",
+  // Industri
+  industri: "25", produksjon: "25", maskin: "28", verksted: "33",
+  // Finans
+  finans: "64", bank: "64", forsikring: "65", investering: "64",
+  // Utdanning
+  utdanning: "85", barnehage: "85", skole: "85",
+  // Sport / fritid
+  sport: "93", idrett: "93", treningssenter: "93", fitness: "93", gym: "93",
+  idrettslag: "93", sportsarena: "93", svømmehall: "93", fotball: "93",
+  // Overnatting
+  hotell: "55", overnatting: "55", camping: "55", hostel: "55",
+  // Kultur / underholdning
+  museum: "91", bibliotek: "91", teater: "90", kino: "59", kunst: "90",
+  // Landbruk / fiskeri
+  landbruk: "01", fisk: "03", oppdrett: "03", jordbruk: "01",
+  // Bil
+  bilforhandler: "45", bilverksted: "45", bildeler: "45",
 };
 
 function guessNace(q: string): string | undefined {
   const lower = q.toLowerCase().trim();
   for (const [key, code] of Object.entries(NACE_MAP)) {
-    if (lower.includes(key)) return code;
+    if (key.length <= 3) {
+      // Short keys: require whole-word match to avoid false positives
+      // e.g. "it" should not match "aktivitet"
+      const re = new RegExp(`(?:^|\\s)${key}(?:\\s|$)`, "i");
+      if (re.test(lower)) return code;
+    } else {
+      if (lower.includes(key)) return code;
+    }
   }
   return undefined;
 }
