@@ -10,8 +10,9 @@ import {
   X, Phone, Inbox, MessageSquareText, ChevronRight, Trash2,
   UserCheck, Clock, Building2, BellRing, Check, Loader2, Sparkles, Send, Copy, ExternalLink,
   FileUp, FileDown, RefreshCw, Layers, CheckCircle2,
-  MousePointer2, Eye, SlidersHorizontal
+  MousePointer2, Eye, SlidersHorizontal, Info,
 } from "lucide-react";
+import { CompanyDetailModal } from "@/components/leads/company-detail-modal";
 import { useAppStore } from "@/store/app-store";
 import { Lead, LeadStatus } from "@/lib/mock-data";
 import { toast } from "sonner";
@@ -651,6 +652,7 @@ function LeadRow({
   const [reminderSending, setReminderSending] = useState(false);
   const [reminderSent, setReminderSent] = useState(false);
   const [findingEmail, setFindingEmail] = useState(false);
+  const [companyDetailOpen, setCompanyDetailOpen] = useState(false);
   const [activities, setActivities] = useState<any[]>([]);
   const [loadingActivities, setLoadingActivities] = useState(false);
 
@@ -956,7 +958,14 @@ function LeadRow({
                       <Building2 className="w-3.5 h-3.5" />{lead.address || "—"}
                     </p>
                   </div>
-                  <div className="mt-3 flex items-center gap-2">
+                  <div className="mt-3 flex items-center gap-2 flex-wrap">
+                  <button
+                    onClick={(e) => { e.stopPropagation(); setCompanyDetailOpen(true); }}
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-[#f0ece0] text-[#6b6660] text-xs font-semibold rounded-lg hover:bg-[#e8e4d8] transition-colors border border-[#d8d3c5]"
+                  >
+                    <Info className="w-3.5 h-3.5" />
+                    Firmadetaljer
+                  </button>
                   <button
                     onClick={(e) => { e.stopPropagation(); setEmailModalOpen(true); }}
                     className="flex items-center gap-1.5 px-3 py-1.5 bg-accent-dark/10 text-accent-dark text-xs font-semibold rounded-lg hover:bg-accent-dark/20 transition-colors border border-accent-dark/20"
@@ -1360,6 +1369,15 @@ function LeadRow({
           salesPitch={salesPitch}
           onClose={() => setSmsModalOpen(false)}
           onSmsSent={handleSmsSent}
+        />
+      )}
+
+      {/* Company detail modal */}
+      {companyDetailOpen && (
+        <CompanyDetailModal
+          orgNumber={lead.orgNumber}
+          initialName={lead.name}
+          onClose={() => setCompanyDetailOpen(false)}
         />
       )}
     </>

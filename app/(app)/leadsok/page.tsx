@@ -5,9 +5,10 @@ import { TopBar } from "@/components/layout/top-bar";
 import {
   Search, MapPin, SlidersHorizontal, Plus, Check,
   Phone, Globe, Building2, X, ChevronUp, ChevronDown,
-  Loader2, AlertCircle, List, Map as MapIcon, UserCheck,
+  Loader2, AlertCircle, List, Map as MapIcon, UserCheck, Info,
 } from "lucide-react";
 import { useAppStore } from "@/store/app-store";
+import { CompanyDetailModal } from "@/components/leads/company-detail-modal";
 
 const MapView = dynamic(() => import("@/components/map/MapView"), { ssr: false });
 
@@ -141,6 +142,7 @@ export default function LeadsokPage() {
 
   const [filters, setFilters] = useState<Filters>({ ansatte: "all", mva: false, bransje: "" });
   const [pendingFilters, setPendingFilters] = useState<Filters>({ ansatte: "all", mva: false, bransje: "" });
+  const [detailCompany, setDetailCompany] = useState<BrregEnhet | null>(null);
 
   const filterRef = useRef<HTMLDivElement>(null);
   const searchTokenRef = useRef(0);       // incremented on every new search
@@ -897,9 +899,20 @@ export default function LeadsokPage() {
                             fontSize: 11, fontWeight: 700, color: "#475569",
                           }}>{initials}</div>
                           <div style={{ minWidth: 0 }}>
-                            <p style={{ fontSize: 13, fontWeight: 600, color: "#171717", margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                            <button
+                              onClick={(e) => { e.stopPropagation(); setDetailCompany(enhet); }}
+                              style={{
+                                fontSize: 13, fontWeight: 600, color: "#171717", margin: 0,
+                                whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+                                background: "none", border: "none", padding: 0, cursor: "pointer",
+                                textAlign: "left", display: "flex", alignItems: "center", gap: 4,
+                                maxWidth: "100%",
+                              }}
+                              title="Vis firmadetaljer"
+                            >
                               {capitalize(enhet.navn)}
-                            </p>
+                              <Info size={11} color="#a09b8f" style={{ flexShrink: 0 }} />
+                            </button>
                             <p style={{ fontSize: 11, color: "#a09b8f", margin: 0 }}>{enhet.organisasjonsnummer}</p>
                           </div>
                         </div>
@@ -1056,6 +1069,21 @@ export default function LeadsokPage() {
           </>
         )}
       </div>
+
+      {/* Company detail modal */}
+      {detailCompany && (
+        <CompanyDetailModal
+          orgNumber={detailCompany.organisasjonsnummer}
+          initialName={detailCompany.navn}
+          onClose={() => setDetailCompany(null)}
+          onAddToPipeline={
+            existingIds.has(detailCompany.organisasjonsnummer) || addedIds.has(detailCompany.organisasjonsnummer)
+              ? undefined
+              : () => handleAdd(detailCompany)
+          }
+          alreadyInPipeline={existingIds.has(detailCompany.organisasjonsnummer) || addedIds.has(detailCompany.organisasjonsnummer)}
+        />
+      )}
     </div>
   );
 }
