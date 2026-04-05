@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
-import { ArrowRight, Lock, Check, Shield, Users, User } from "lucide-react";
+import { ArrowRight, Lock, Check, Shield, Users, User, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const PLANS = [
@@ -39,7 +39,26 @@ export default function BetalingPage() {
   const [selected, setSelected] = useState<"solo" | "team">("solo");
   const [interval, setInterval] = useState<"monthly" | "yearly">("monthly");
   const [loading, setLoading] = useState(false);
+  const [portalLoading, setPortalLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const handleManageExisting = async () => {
+    setPortalLoading(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/stripe/portal", { method: "POST" });
+      const data = await res.json();
+      if (!res.ok || !data.url) {
+        setError("Kunne ikke åpne administrasjonspanelet. Kontakt oss på Help@reachr.no");
+        return;
+      }
+      window.location.href = data.url;
+    } catch {
+      setError("Noe gikk galt. Kontakt oss på Help@reachr.no");
+    } finally {
+      setPortalLoading(false);
+    }
+  };
 
   const handleStart = async () => {
     setLoading(true);
@@ -199,7 +218,7 @@ export default function BetalingPage() {
 
         {/* Buttons */}
         <div className="flex gap-3">
-          <Link href="/register" className="flex-1">
+          <Link href="/login" className="flex-1">
             <Button type="button" variant="secondary" size="lg" className="w-full justify-center">
               Tilbake
             </Button>
@@ -232,6 +251,24 @@ export default function BetalingPage() {
 
         <p className="text-center text-xs text-[#a09b8f] mt-6">
           Du belastes ikke før prøveperioden er over. Avslutt gratis innen 3 dager.
+        </p>
+      </div>
+
+      {/* Existing subscription management */}
+      <div className="mt-6 text-center space-y-3">
+        <button
+          onClick={handleManageExisting}
+          disabled={portalLoading}
+          className="flex items-center gap-2 text-sm text-[#6b6660] hover:text-[#171717] transition-colors mx-auto"
+        >
+          <Settings className="w-4 h-4" />
+          {portalLoading ? "Åpner administrasjonspanel..." : "Administrer eller avslutt eksisterende abonnement"}
+        </button>
+        <p className="text-xs text-[#a09b8f]">
+          Spørsmål? Ta kontakt på{" "}
+          <a href="mailto:Help@reachr.no" className="text-[#ff470a] hover:underline">
+            Help@reachr.no
+          </a>
         </p>
       </div>
     </div>
