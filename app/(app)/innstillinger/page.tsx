@@ -26,6 +26,8 @@ import {
   Trash2,
   GripVertical,
   ArrowRight,
+  AlertTriangle,
+  X,
 } from "lucide-react";
 
 const tabs = [
@@ -333,6 +335,7 @@ export default function InnstillingerPage() {
   const [showPlanModal, setShowPlanModal] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState("Pro");
   const [cancellingSubscription, setCancellingSubscription] = useState(false);
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   const [openingPortal, setOpeningPortal] = useState(false);
   const [stripeSubscription, setStripeSubscription] = useState<{
     id: string;
@@ -343,11 +346,15 @@ export default function InnstillingerPage() {
     cancel_at_period_end: boolean;
   } | null | "loading">("loading");
 
-  useEffect(() => {
+  const refreshSubscription = () => {
     fetch("/api/stripe/subscription")
       .then((r) => r.json())
       .then((data) => setStripeSubscription(data.subscription ?? null))
       .catch(() => setStripeSubscription(null));
+  };
+
+  useEffect(() => {
+    refreshSubscription();
   }, []);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -896,55 +903,106 @@ export default function InnstillingerPage() {
                       </div>
 
                       {!stripeSubscription.cancel_at_period_end && (
-                        <div className="flex gap-3 mt-6">
-                          <Button 
-                            variant="secondary" 
-                            size="md" 
-                            disabled={openingPortal}
-                            onClick={async () => {
-                              setOpeningPortal(true);
-                              try {
-                                const res = await fetch("/api/stripe/portal", { method: "POST" });
-                                const data = await res.json();
-                                if (data.url) {
-                                  window.location.href = data.url;
-                                } else {
-                                  toast.error("Kunne ikke åpne Stripe-portalen: " + (data.error || "Ukjent feil"));
+                        <div className="mt-6 space-y-3">
+                          <div className="flex gap-3">
+                            <Button
+                              variant="secondary"
+                              size="md"
+                              disabled={openingPortal}
+                              onClick={async () => {
+                                setOpeningPortal(true);
+                                try {
+                                  const res = await fetch("/api/stripe/portal", { method: "POST" });
+                                  const data = await res.json();
+                                  if (data.url) {
+                                    window.location.href = data.url;
+                                  } else {
+                                    toast.error("Kunne ikke åpne Stripe-portalen: " + (data.error || "Ukjent feil"));
+                                  }
+                                } catch (err: any) {
+                                  toast.error("Nettverksfeil: " + err.message);
+                                } finally {
+                                  setOpeningPortal(false);
                                 }
-                              } catch (err: any) {
-                                toast.error("Nettverksfeil: " + err.message);
-                              } finally {
-                                setOpeningPortal(false);
-                              }
-                            }}
-                          >
-                            {openingPortal ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
-                            Endre abonnement
-                          </Button>
-                          <Button variant="ghost" size="md" className="text-red-500 hover:text-red-600 hover:bg-red-50"
-                            disabled={openingPortal}
-                            onClick={async () => {
-                              setOpeningPortal(true);
-                              try {
-                                const res = await fetch("/api/stripe/portal", { method: "POST" });
-                                const data = await res.json();
-                                if (data.url) {
-                                  window.location.href = data.url;
-                                } else {
-                                  toast.error("Kunne ikke åpne Stripe-portalen: " + (data.error || "Ukjent feil"));
-                                }
-                              } catch (err: any) {
-                                toast.error("Nettverksfeil: " + err.message);
-                              } finally {
-                                setOpeningPortal(false);
-                              }
-                            }}>
-                            {openingPortal ? (
-                              <><Loader2 className="w-4 h-4 animate-spin mr-2" /> Åpner Stripe...</>
-                            ) : (
-                              "Administrer & avbryt i Stripe"
-                            )}
-                          </Button>
+                              }}
+                            >
+                              {openingPortal ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+                              Endre abonnement
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="md"
+                              className="text-red-500 hover:text-red-600 hover:bg-red-50"
+                              disabled={cancellingSubscription}
+                              onClick={() => setShowCancelConfirm(true)}
+                            >
+                              Avslut abonnement
+                            </Button>
+                          </div>
+
+                          {showCancelConfirm && (
+                            <div className="rounded-xl border border-red-200 bg-red-50 p-5">
+                              <div className="flex items-start gap-3 mb-4">
+                                <AlertTriangle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
+                                <div>
+                                  <p className="text-sm font-semibold text-red-700">Avslut abonnement?</p>
+                                  <p className="text-sm text-red-600 mt-1">
+                                    Du beholder tilgang til{" "}
+                                    <strong>
+                                      {new Date(stripeSubscription.current_period_end).toLocaleDateString("nb-NO", { day: "numeric", month: "long", year: "numeric" })}
+                                    </strong>
+                                    . Etter det avsluttes abonnementet og du mister tilgangen.
+                                  </p>
+                                </div>
+                                <button
+                                  onClick={() => setShowCancelConfirm(false)}
+                                  className="ml-auto text-red-400 hover:text-red-600"
+                                >
+                                  <X className="w-4 h-4" />
+                                </button>
+                              </div>
+                              <div className="flex gap-3">
+                                <Button
+                                  variant="secondary"
+                                  size="md"
+                                  onClick={() => setShowCancelConfirm(false)}
+                                  disabled={cancellingSubscription}
+                                >
+                                  Nei, behold abonnementet
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="md"
+                                  className="text-red-600 hover:text-red-700 hover:bg-red-100 font-semibold"
+                                  disabled={cancellingSubscription}
+                                  onClick={async () => {
+                                    setCancellingSubscription(true);
+                                    try {
+                                      const res = await fetch("/api/stripe/cancel", { method: "POST" });
+                                      const data = await res.json();
+                                      if (!res.ok) {
+                                        toast.error("Kunne ikke avslute: " + (data.error || "Ukjent feil"));
+                                      } else {
+                                        toast.success("Abonnementet er avsluttet. Du beholder tilgang til perioden er over.");
+                                        setShowCancelConfirm(false);
+                                        refreshSubscription();
+                                      }
+                                    } catch (err: any) {
+                                      toast.error("Nettverksfeil: " + err.message);
+                                    } finally {
+                                      setCancellingSubscription(false);
+                                    }
+                                  }}
+                                >
+                                  {cancellingSubscription ? (
+                                    <><Loader2 className="w-4 h-4 animate-spin mr-2" /> Avslutter...</>
+                                  ) : (
+                                    "Ja, avslut abonnementet"
+                                  )}
+                                </Button>
+                              </div>
+                            </div>
+                          )}
                         </div>
                       )}
                     </>
