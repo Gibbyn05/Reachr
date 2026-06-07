@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import dynamic from "next/dynamic";
 import { TopBar } from "@/components/layout/top-bar";
 import {
@@ -166,8 +166,8 @@ function toKommune(city: string) {
 /* ─── Component ───────────────────────────────────────────── */
 export default function LeadsokPage() {
   const { leads, addLead, loadLeads, currentUser } = useAppStore();
-  const existingIds = new Set(leads.map((l) => l.id));
-  const existingLeadMap = new Map(leads.map((l) => [l.id, l]));
+  const existingIds = useMemo(() => new Set(leads.map((l) => l.id)), [leads]);
+  const existingLeadMap = useMemo(() => new Map(leads.map((l) => [l.id, l])), [leads]);
 
   const [locationQ, setLocationQ]   = useState("");
   const [industryQ, setIndustryQ]   = useState("");
@@ -431,7 +431,7 @@ export default function LeadsokPage() {
     else { setSortField(field); setSortDir("asc"); }
   };
 
-  const sorted = [...results].sort((a, b) => {
+  const sorted = useMemo(() => [...results].sort((a, b) => {
     if (!sortField) return 0;
     // Numeric sorts
     if (sortField === "ansatte") {
@@ -472,9 +472,9 @@ export default function LeadsokPage() {
     else if (sortField === "bransje") { av = naceToCategory(a.naeringskode1?.kode, a.naeringskode1?.beskrivelse); bv = naceToCategory(b.naeringskode1?.kode, b.naeringskode1?.beskrivelse); }
     else { av = ""; bv = ""; }
     return sortDir === "asc" ? String(av).localeCompare(String(bv), "nb") : String(bv).localeCompare(String(av), "nb");
-  });
+  }), [results, sortField, sortDir]);
 
-  const handleAdd = (e: BrregEnhet) => {
+  const handleAdd = useCallback((e: BrregEnhet) => {
     if (existingIds.has(e.organisasjonsnummer) || addedIds.has(e.organisasjonsnummer)) return;
     addLead({
       id: e.organisasjonsnummer,
@@ -522,7 +522,7 @@ export default function LeadsokPage() {
         })
         .catch(() => {/* silent fail */});
     }
-  };
+  }, [existingIds, addedIds, addLead, currentUser]);
 
   const SortBtn = ({ field, label }: { field: string; label: string }) => (
     <button

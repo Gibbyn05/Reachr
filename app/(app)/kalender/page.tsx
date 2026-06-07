@@ -697,7 +697,7 @@ export default function KalenderPage() {
                 </div>
               </div>
               {connectedSources.includes("gmail") ? (
-                <span className="text-[10px] font-black text-[#09fe94] bg-[#09fe94]/10 px-2 py-1 rounded-lg">Aktiv</span>
+                <span className="text-[10px] font-black text-[#05c472] bg-[#09fe94]/15 px-2 py-1 rounded-lg">Aktiv</span>
               ) : (
                 <a href="/api/email/google/connect" className="text-[10px] font-black text-white bg-[#4285F4] hover:bg-[#3367d6] px-3 py-2 rounded-xl transition-colors">
                   Koble til
@@ -713,7 +713,7 @@ export default function KalenderPage() {
                 </div>
               </div>
               {connectedSources.includes("outlook") ? (
-                <span className="text-[10px] font-black text-[#09fe94] bg-[#09fe94]/10 px-2 py-1 rounded-lg">Aktiv</span>
+                <span className="text-[10px] font-black text-[#05c472] bg-[#09fe94]/15 px-2 py-1 rounded-lg">Aktiv</span>
               ) : (
                 <a href="/api/email/microsoft/connect" className="text-[10px] font-black text-white bg-[#0078D4] hover:bg-[#006bb3] px-3 py-2 rounded-xl transition-colors">
                   Koble til
@@ -840,7 +840,7 @@ export default function KalenderPage() {
                 <p className="text-xs text-[#a09b8f]">Møter og oppfølginger for i dag</p>
               </div>
             </div>
-            <Badge className="bg-[#09fe94]/10 text-[#09fe94] border-none font-bold px-3 py-1">
+            <Badge className="bg-[#09fe94]/15 text-[#05c472] border-none font-bold px-3 py-1">
               {todayTasks.length - completedTasks.filter(id => todayTasks.find(t => t.id === id)).length} Gjenstår
             </Badge>
           </div>
@@ -975,7 +975,7 @@ export default function KalenderPage() {
                 <div className="flex justify-between items-center mb-2">
                   <label className="text-[10px] uppercase tracking-widest font-black text-[#a09b8f] block">Samtalenotater</label>
                   <button onClick={toggleRecording} className={`flex items-center gap-2 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all border ${
-                    isRecording ? "bg-red-500 text-white border-red-400 shadow-[0_0_20px_rgba(239,68,68,0.3)] animate-pulse" : "bg-white dark:bg-[#141414] text-[#09fe94] border-[#d8d3c5] dark:border-[#262626] hover:border-[#09fe94] shadow-sm"
+                    isRecording ? "bg-red-500 text-white border-red-400 shadow-[0_0_20px_rgba(239,68,68,0.3)] animate-pulse" : "bg-white dark:bg-[#141414] text-[#171717] dark:text-white border-[#d8d3c5] dark:border-[#262626] hover:border-[#09fe94] shadow-sm"
                   }`}>
                     {isRecording ? <Square className="w-3.5 h-3.5 fill-current" /> : <Mic className="w-3.5 h-3.5" />}
                     {isRecording ? "STOPP OPPTAK" : "START AI LYTTING"}

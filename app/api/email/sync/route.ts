@@ -158,7 +158,7 @@ export async function POST(req: NextRequest) {
               const now = new Date();
               const isoToday = now.toISOString().split("T")[0]; // Use ISO for context
               const aiResponse = await anthropic.messages.create({
-                model: "claude-3-haiku-20240307",
+                model: "claude-haiku-4-5-20251001",
                 max_tokens: 300,
                 system: `Du er en norsk salgsassistent. I dag er ${isoToday}.
                 Oppgave: Finn møtedato og tidspunkt i svaret. 
