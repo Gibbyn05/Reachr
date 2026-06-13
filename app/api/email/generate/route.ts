@@ -40,6 +40,8 @@ Krav til e-posten:
 - Bruk en personlig og uformell tone (f.eks "Hei igjen,").
 - Referer til forrige e-post (f.eks "Ville bare sjekke om du hadde sjanse til å lese min forrige e-post").
 - Avslutt med en enkel CTA (f.eks "Hører gjerne fra deg").
+- IKKE bruk punktlister, bindestrek som listemarkør eller Markdown-formatering.
+- Skriv som vanlig løpende tekst.
 ${comment ? `- Tilleggsinstruksjoner: ${comment}` : ""}
 
 Format:
@@ -59,6 +61,8 @@ Krav til e-posten:
 - Start med "Hei {{bedrift}}," eller "Hei {{navn}},"
 - Introduser kort hvorfor du kontakter dem basert på salgspitchen ovenfor.
 - Naturlig og uformell tone.
+- IKKE bruk punktlister, bindestrek som listemarkør eller Markdown-formatering.
+- Skriv som vanlig løpende tekst.
 ${comment ? `- Tilleggsinstruksjoner: ${comment}` : ""}
 
 Format:
@@ -79,8 +83,12 @@ ${senderName}`;
     const text = message.content[0].type === "text" ? message.content[0].text : "";
     console.log("[/api/email/generate] Received text length:", text.length);
 
-    // Strip markdown formatting that Claude may include (**, *, __, _, ##, etc.)
-    const stripMd = (s: string) => s.replace(/\*\*|__|\*|_|#{1,6} /g, "").trim();
+    // Strip markdown formatting that Claude may include
+    const stripMd = (s: string) => s
+      .replace(/\*\*|__|\*|#{1,6} /g, "")   // bold, italic, headers
+      .replace(/^[\s]*[-•]\s+/gm, "")        // bullet points (- or •) at line start
+      .replace(/\n{3,}/g, "\n\n")            // collapse excessive blank lines
+      .trim();
 
     // Robust parse subject and body
     let subject = "";
