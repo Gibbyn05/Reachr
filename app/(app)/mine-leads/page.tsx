@@ -16,6 +16,7 @@ import { CompanyDetailModal } from "@/components/leads/company-detail-modal";
 import { useAppStore } from "@/store/app-store";
 import { Lead, LeadStatus } from "@/lib/mock-data";
 import { toast } from "sonner";
+import { createClient } from "@/lib/supabase/client";
 import { ActivityTimeline } from "@/components/leads/activity-timeline";
 
 /* ── Calendar URL helpers ─────────────────────────────────── */
@@ -225,6 +226,7 @@ function AiEmailModal({
   senderName,
   salesPitch,
   targetCustomers,
+  aiEmailInstructions,
   onClose,
   onEmailSent,
 }: {
@@ -232,13 +234,15 @@ function AiEmailModal({
   senderName: string;
   salesPitch?: string;
   targetCustomers?: string;
+  aiEmailInstructions?: string;
   onClose: () => void;
   onEmailSent?: (subject: string, body: string) => void;
 }) {
+  const { setCurrentUser, currentUser } = useAppStore();
   const [subject, setSubject] = useState("");
   const [body, setBody] = useState("");
   const [toEmail, setToEmail] = useState(lead.email && lead.email !== "—" ? lead.email : "");
-  const [comment, setComment] = useState("");
+  const [comment, setComment] = useState(aiEmailInstructions ?? "");
   const [generating, setGenerating] = useState(false);
   const [sending, setSending] = useState(false);
   const [sentOk, setSentOk] = useState(false);
@@ -266,6 +270,17 @@ function AiEmailModal({
   const generateDraft = async () => {
     setGenerating(true);
     setError("");
+
+    // Persist instruction changes so they apply to future emails too
+    if (comment !== (aiEmailInstructions ?? "")) {
+      const supabase = createClient();
+      supabase.auth.updateUser({ data: { ai_email_instructions: comment } }).then(() => {
+        if (currentUser) {
+          setCurrentUser({ ...currentUser, aiEmailInstructions: comment });
+        }
+      });
+    }
+
     try {
       const res = await fetch("/api/email/generate", {
         method: "POST",
@@ -572,6 +587,7 @@ function LeadRow({
   senderName,
   salesPitch,
   targetCustomers,
+  aiEmailInstructions,
 }: {
   lead: Lead;
   onStatusChange: (id: string, status: string) => void;
@@ -585,6 +601,7 @@ function LeadRow({
   senderName: string;
   salesPitch?: string;
   targetCustomers?: string;
+  aiEmailInstructions?: string;
 }) {
   const statusOptions = useAppStore(s => s.pipelineStages);
   const updateLeadEmail = useAppStore(s => s.updateLeadEmail);
@@ -1356,6 +1373,7 @@ function LeadRow({
           senderName={senderName}
           salesPitch={salesPitch}
           targetCustomers={targetCustomers}
+          aiEmailInstructions={aiEmailInstructions}
           onClose={() => setEmailModalOpen(false)}
           onEmailSent={handleEmailSent}
         />
@@ -1861,6 +1879,7 @@ function MineLeadsContent() {
                     senderName={currentUser?.name ?? ""}
                     salesPitch={currentUser?.salesPitch}
                     targetCustomers={currentUser?.targetCustomers}
+                    aiEmailInstructions={currentUser?.aiEmailInstructions}
                   />
                 ))}
               </tbody>

@@ -110,6 +110,7 @@ export function Sidebar() {
           company: user.user_metadata?.company ?? "",
           salesPitch: user.user_metadata?.sales_pitch ?? undefined,
           targetCustomers: user.user_metadata?.target_customers ?? undefined,
+          aiEmailInstructions: user.user_metadata?.ai_email_instructions ?? undefined,
         });
         // Clear avatar and phone so previous user's data doesn't bleed through
         useAppStore.getState().setAvatarUrl(null);
