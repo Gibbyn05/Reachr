@@ -53,7 +53,7 @@ export async function GET(request: NextRequest) {
   const params = new URLSearchParams();
   const poststed = sp.get("poststed");
   const navn     = sp.get("navn");
-  const nkode    = sp.get("naeringskode");
+  const nkoder   = sp.getAll("naeringskode"); // supports multiple B2B codes
   const fra      = sp.get("fraAntallAnsatte");
   const til      = sp.get("tilAntallAnsatte");
   const mva      = sp.get("mva");
@@ -64,7 +64,7 @@ export async function GET(request: NextRequest) {
 
   if (poststed) params.set("forretningsadresse.poststed", poststed.toUpperCase());
   if (navn)     params.set("navn", navn);
-  if (nkode)    params.set("naeringskode", nkode);
+  for (const kode of nkoder) params.append("naeringskode", kode);
   if (fra)      params.set("fraAntallAnsatte", fra);
   if (til)      params.set("tilAntallAnsatte", til);
   if (mva === "true") params.set("registrertIMvaregisteret", "true");

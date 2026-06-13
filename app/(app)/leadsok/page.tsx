@@ -40,8 +40,35 @@ interface Filters {
 }
 
 /* ─── Industry categories ─────────────────────────────────── */
+
+// NACE codes for companies that primarily sell to other businesses.
+// Excludes retail (47), restaurants (56), hotels (55), personal services (96),
+// consumer health (86) — those sell to consumers, not businesses.
+const B2B_NACE_CODES = [
+  "46", // Grossisthandel — selger til butikker/bedrifter, ikke forbrukere
+  "62", // IT-tjenester og programvareutvikling
+  "63", // Informasjonstjenester
+  "69", // Regnskap, revisjon, juridisk — betjener bedrifter
+  "70", // Konsulentvirksomhet og ledelsesrådgivning
+  "71", // Ingeniørtjenester og teknisk konsulentvirksomhet
+  "72", // Forskning og utvikling
+  "73", // Reklame, markedsføring og markedsundersøkelser
+  "74", // Annen faglig og vitenskapelig virksomhet
+  "77", // Utleie og leasing av utstyr — primært til bedrifter
+  "78", // Bemanningsbyrå og vikartjenester
+  "80", // Vakttjenester og sikkerhet
+  "81", // Tjenester tilknyttet eiendomsdrift (facilities management)
+  "82", // Forretningsmessige støttetjenester (kontortjenester, call center)
+  "25", // Produksjon av metallvarer — selger til industri
+  "28", // Produksjon av maskiner og utstyr — B2B
+  "41", // Oppføring av bygninger — jobber for næringsliv/offentlig
+  "43", // Spesialisert bygge- og anleggsvirksomhet
+  "52", // Lagring og tjenester tilknyttet transport
+];
+
 const INDUSTRY_CATEGORIES: { label: string; nace: string }[] = [
   { label: "Alle bransjer", nace: "" },
+  { label: "B2B-bedrifter", nace: "B2B" },
   { label: "Handel & butikk", nace: "47" },
   { label: "Grossist & import", nace: "46" },
   { label: "Bygg & anlegg", nace: "41" },
@@ -234,7 +261,10 @@ export default function LeadsokPage() {
     const params = new URLSearchParams({ size: "100", page: String(page) });
     if (loc) params.set("poststed", loc.trim().toUpperCase());
     // bransje category takes priority over free-text industry search
-    if (f.bransje) {
+    if (f.bransje === "B2B") {
+      // Send all B2B NACE codes — Brreg supports multiple naeringskode values
+      for (const code of B2B_NACE_CODES) params.append("naeringskode", code);
+    } else if (f.bransje) {
       params.set("naeringskode", f.bransje);
     } else if (ind) {
       const nace = guessNace(ind);
