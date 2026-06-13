@@ -79,18 +79,21 @@ ${senderName}`;
     const text = message.content[0].type === "text" ? message.content[0].text : "";
     console.log("[/api/email/generate] Received text length:", text.length);
 
+    // Strip markdown formatting that Claude may include (**, *, __, _, ##, etc.)
+    const stripMd = (s: string) => s.replace(/\*\*|__|\*|_|#{1,6} /g, "").trim();
+
     // Robust parse subject and body
     let subject = "";
     let body = "";
 
     const subjectMatch = text.match(/Emne:\s*(.*)/i);
     if (subjectMatch) {
-      subject = subjectMatch[1].trim();
-      body = text.replace(subjectMatch[0], "").trim();
+      subject = stripMd(subjectMatch[1].trim());
+      body = stripMd(text.replace(subjectMatch[0], "").trim());
     } else {
       // Fallback if AI skips "Emne:"
       subject = isSequence ? "Oppfølging" : `Henvendelse til ${lead?.name || "bedrift"}`;
-      body = text.trim();
+      body = stripMd(text.trim());
     }
 
     return NextResponse.json({ subject, body });
