@@ -6,7 +6,15 @@ import { isAdmin } from "@/lib/admin";
 import {
   Users, CreditCard, TrendingUp, AlertCircle,
   CheckCircle2, Clock, XCircle, ShieldCheck, Building2, Eye, BarChart2,
+  Plus, Trash2, Loader2, Gift,
 } from "lucide-react";
+
+interface FreeUser {
+  id: string;
+  email: string;
+  name: string;
+  grantedUntil: string;
+}
 
 interface PageviewStats {
   total: number;
@@ -67,8 +75,18 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [pageviews, setPageviews] = useState<PageviewStats | null>(null);
+  const [freeUsers, setFreeUsers] = useState<FreeUser[]>([]);
+  const [freeEmail, setFreeEmail] = useState("");
+  const [freeDays, setFreeDays] = useState("");
+  const [freeLoading, setFreeLoading] = useState(false);
+  const [freeError, setFreeError] = useState("");
+  const [removingId, setRemovingId] = useState<string | null>(null);
 
   const allowed = isAdmin(currentUser?.email);
+
+  const loadFreeUsers = () => {
+    fetch("/api/admin/free-access").then(r => r.json()).then(d => setFreeUsers(d.users ?? []));
+  };
 
   useEffect(() => {
     if (!allowed) return;
@@ -79,7 +97,48 @@ export default function AdminPage() {
     fetch("/api/admin/pageviews")
       .then(r => r.json())
       .then(data => setPageviews(data));
+    loadFreeUsers();
   }, [allowed]);
+
+  const handleAddFreeUser = async () => {
+    if (!freeEmail.trim()) return;
+    setFreeLoading(true);
+    setFreeError("");
+    try {
+      const res = await fetch("/api/admin/free-access", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: freeEmail.trim(),
+          days: freeDays ? parseInt(freeDays) : undefined,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) { setFreeError(data.error); return; }
+      setFreeEmail("");
+      setFreeDays("");
+      loadFreeUsers();
+    } catch {
+      setFreeError("Nettverksfeil");
+    } finally {
+      setFreeLoading(false);
+    }
+  };
+
+  const handleRemoveFreeUser = async (userId: string) => {
+    if (!confirm("Fjerne tilgang? Brukeren blir logget ut og sendt til hjemmesiden.")) return;
+    setRemovingId(userId);
+    try {
+      await fetch("/api/admin/free-access", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId }),
+      });
+      loadFreeUsers();
+    } finally {
+      setRemovingId(null);
+    }
+  };
 
   if (!allowed) {
     return (
@@ -194,6 +253,88 @@ export default function AdminPage() {
             <p className="text-xs text-[#a09b8f]">Totalt alle tider: <span className="font-semibold text-[#6b6660]">{pageviews.total.toLocaleString("nb-NO")} visninger</span></p>
           </div>
         )}
+
+        {/* Free access management */}
+        <div className="bg-[#faf8f2] rounded-xl border border-[#d8d3c5] overflow-hidden" style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.08)" }}>
+          <div className="px-6 py-4 border-b border-[#e8e4d8] flex items-center gap-2">
+            <Gift className="w-4 h-4 text-[#09fe94]" />
+            <h3 className="font-semibold text-[#171717]">Gratis tilgang</h3>
+            <span className="text-xs text-[#a09b8f] ml-1">Gi brukere tilgang uten betaling</span>
+          </div>
+
+          <div className="px-6 py-4 border-b border-[#e8e4d8]">
+            <div className="flex gap-2 items-end">
+              <div className="flex-1">
+                <label className="text-xs font-medium text-[#6b6660] mb-1 block">E-post</label>
+                <input
+                  value={freeEmail}
+                  onChange={e => setFreeEmail(e.target.value)}
+                  onKeyDown={e => e.key === "Enter" && handleAddFreeUser()}
+                  placeholder="bruker@eksempel.no"
+                  className="w-full text-sm px-3 py-2 border border-[#d8d3c5] rounded-lg bg-[#f2efe3] focus:outline-none focus:border-[#09fe94] text-[#171717] placeholder:text-[#a09b8f]"
+                />
+              </div>
+              <div className="w-28">
+                <label className="text-xs font-medium text-[#6b6660] mb-1 block">Dager (valgfritt)</label>
+                <input
+                  value={freeDays}
+                  onChange={e => setFreeDays(e.target.value.replace(/\D/g, ""))}
+                  onKeyDown={e => e.key === "Enter" && handleAddFreeUser()}
+                  placeholder="Ubegrenset"
+                  className="w-full text-sm px-3 py-2 border border-[#d8d3c5] rounded-lg bg-[#f2efe3] focus:outline-none focus:border-[#09fe94] text-[#171717] placeholder:text-[#a09b8f]"
+                />
+              </div>
+              <button
+                onClick={handleAddFreeUser}
+                disabled={freeLoading || !freeEmail.trim()}
+                className="flex items-center gap-1.5 px-4 py-2 bg-[#09fe94] hover:bg-[#00e882] disabled:opacity-50 text-[#171717] font-semibold text-sm rounded-lg transition-colors"
+              >
+                {freeLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
+                Legg til
+              </button>
+            </div>
+            {freeError && (
+              <p className="text-xs text-[#ff470a] mt-2">{freeError}</p>
+            )}
+          </div>
+
+          {freeUsers.length > 0 ? (
+            <div className="divide-y divide-[#f2efe3]">
+              {freeUsers.map(u => (
+                <div key={u.id} className="px-6 py-3 flex items-center justify-between hover:bg-[#f2efe3] transition-colors">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-8 h-8 rounded-full bg-[#09fe94]/15 flex items-center justify-center text-xs font-bold text-[#059669] shrink-0">
+                      {(u.name || u.email).slice(0, 2).toUpperCase()}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium text-[#171717] truncate">{u.name}</p>
+                      <p className="text-xs text-[#a09b8f] truncate">{u.email}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 shrink-0">
+                    <span className="text-xs text-[#6b6660]">
+                      {new Date(u.grantedUntil).getFullYear() > 2030
+                        ? "Ubegrenset"
+                        : `Til ${new Date(u.grantedUntil).toLocaleDateString("nb-NO", { day: "numeric", month: "short", year: "numeric" })}`}
+                    </span>
+                    <button
+                      onClick={() => handleRemoveFreeUser(u.id)}
+                      disabled={removingId === u.id}
+                      className="p-1.5 text-[#a09b8f] hover:text-[#ff470a] hover:bg-[#ff470a]/10 rounded-lg transition-colors"
+                      title="Fjern tilgang"
+                    >
+                      {removingId === u.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="px-6 py-8 text-center text-sm text-[#a09b8f]">
+              Ingen brukere med gratis tilgang
+            </div>
+          )}
+        </div>
 
         {/* Users table */}
         <div className="bg-[#faf8f2] rounded-xl border border-[#d8d3c5] overflow-hidden" style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.08)" }}>

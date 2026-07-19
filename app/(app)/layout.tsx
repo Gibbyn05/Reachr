@@ -23,7 +23,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         const isActive = sub && (sub.status === "active" || sub.status === "trialing");
         
         if (!isActive) {
-          router.replace("/onboarding/betaling");
+          router.replace("/");
         } else {
           setSubChecked(true);
         }
