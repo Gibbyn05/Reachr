@@ -106,7 +106,9 @@ function RegisterForm() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: form.name, email: form.email }),
-      }).catch(() => {});
+      }).then(r => {
+        if (!r.ok) r.json().then(d => console.error("[new-user notify] failed:", r.status, d)).catch(() => {});
+      }).catch(e => console.error("[new-user notify] network error:", e));
 
       // Send welcome email to new user (fire-and-forget)
       fetch("/api/notify/welcome", {

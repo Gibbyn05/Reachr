@@ -7,9 +7,10 @@ const NOTIFY_EMAILS = ["Fredrik.nerlandsrem@gmail.com", "help@reachr.no"];
 export async function POST(req: NextRequest) {
   try {
     const { name, email } = await req.json();
+    console.log(`[new-user notify] Ny bruker: ${name || "–"} (${email})`);
 
     if (!RESEND_API_KEY) {
-      console.warn("[new-user notify] RESEND_API_KEY ikke konfigurert");
+      console.error("[new-user notify] RESEND_API_KEY mangler i miljøvariabler!");
       return NextResponse.json({ error: "E-posttjenesten er ikke konfigurert" }, { status: 503 });
     }
 
@@ -87,11 +88,13 @@ export async function POST(req: NextRequest) {
 
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
-      console.error("[new-user notify] Resend error:", err);
-      return NextResponse.json({ error: "Kunne ikke sende varsling" }, { status: 500 });
+      console.error("[new-user notify] Resend feilet:", res.status, JSON.stringify(err));
+      return NextResponse.json({ error: "Kunne ikke sende varsling", details: err }, { status: 500 });
     }
 
-    return NextResponse.json({ success: true });
+    const result = await res.json().catch(() => ({}));
+    console.log("[new-user notify] Sendt OK:", result.id);
+    return NextResponse.json({ success: true, id: result.id });
   } catch (e) {
     console.error("[new-user notify] Feil:", e);
     return NextResponse.json({ error: "Serverfeil" }, { status: 500 });
