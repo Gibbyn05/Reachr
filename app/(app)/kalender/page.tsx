@@ -4,7 +4,8 @@ import { useAppStore } from "@/store/app-store";
 import {
   CalendarCheck2, CheckCircle2, Clock, Phone, ArrowRight, User,
   Mic, Square, Search, Sparkles, BarChart3, Plus, ExternalLink,
-  ChevronLeft, ChevronRight, Inbox, RefreshCw, Copy, Check, Link2
+  ChevronLeft, ChevronRight, Inbox, RefreshCw, Copy, Check, Link2,
+  Calendar, CalendarDays, Globe, MapPin
 } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
@@ -581,13 +582,13 @@ export default function KalenderPage() {
                     const timeStr = ev.allDay ? "Hele dagen" : new Date(ev.start).toLocaleTimeString("nb-NO", { hour: "2-digit", minute: "2-digit" });
                     const isGoogle = ev.source === "google";
                     return (
-                      <div key={ev.id} className="p-3 bg-white dark:bg-[#1a1a1a] border border-[#d8d3c5] dark:border-[#262626] rounded-2xl">
+                      <div key={ev.id} className="p-3 bg-[#faf8f2] dark:bg-[#1a1a1a] border border-[#d8d3c5] dark:border-[#262626] rounded-2xl">
                         <div className="flex items-start gap-3">
                           <div
-                            className="p-2 rounded-xl shrink-0 text-white text-[9px] font-black w-7 h-7 flex items-center justify-center"
+                            className="p-2 rounded-xl shrink-0 w-7 h-7 flex items-center justify-center"
                             style={{ backgroundColor: isGoogle ? "#4285F4" : "#0078D4" }}
                           >
-                            {isGoogle ? "G" : "O"}
+                            {isGoogle ? <Calendar className="w-3.5 h-3.5 text-white" /> : <CalendarDays className="w-3.5 h-3.5 text-white" />}
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-1.5">
@@ -597,7 +598,7 @@ export default function KalenderPage() {
                               </span>
                             </div>
                             {ev.location && (
-                              <p className="text-[10px] text-[#6b6660] truncate mt-0.5">📍 {ev.location}</p>
+                              <p className="text-[10px] text-[#6b6660] truncate mt-0.5 flex items-center gap-0.5"><MapPin className="w-3 h-3 shrink-0" />{ev.location}</p>
                             )}
                             <p className="text-[10px] font-bold text-[#a09b8f] mt-0.5">
                               <Clock className="w-3 h-3 inline mr-0.5" />{timeStr}
@@ -630,8 +631,8 @@ export default function KalenderPage() {
                     style={{ width: `${todayTasks.length > 0 ? (completedTasks.length / todayTasks.length) * 100 : 100}%` }}
                   />
                 </div>
-                <div className="flex items-center gap-2 mt-3 p-3 bg-white dark:bg-[#1a1a1a] rounded-2xl border border-[#d8d3c5] dark:border-[#262626]">
-                  <Sparkles className="w-4 h-4 text-yellow-500 shrink-0" />
+                <div className="flex items-center gap-2 mt-3 p-3 bg-[#faf8f2] dark:bg-[#1a1a1a] rounded-2xl border border-[#d8d3c5] dark:border-[#262626]">
+                  <Sparkles className="w-4 h-4 text-[#ffad0a] shrink-0" />
                   <p className="text-[10px] text-[#6b6660] dark:text-[#a09b8f] font-medium leading-tight">
                     {completedTasks.length === todayTasks.length && todayTasks.length > 0
                       ? "Fantastisk! Du har tømt lista for i dag. 😎"
@@ -690,7 +691,7 @@ export default function KalenderPage() {
           <div className="mb-6 grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className={`flex items-center justify-between p-4 rounded-2xl border ${connectedSources.includes("gmail") ? "bg-[#4285F4]/5 border-[#4285F4]/30" : "bg-white dark:bg-[#1a1a1a] border-[#d8d3c5] dark:border-[#262626]"}`}>
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-xl flex items-center justify-center text-white text-sm font-black" style={{ backgroundColor: "#4285F4" }}>G</div>
+                <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ backgroundColor: "#4285F4" }}><Calendar className="w-4 h-4 text-white" /></div>
                 <div>
                   <p className="text-xs font-black text-[#171717] dark:text-white">Google Kalender</p>
                   <p className="text-[10px] text-[#a09b8f]">{connectedSources.includes("gmail") ? "Koblet til — hendelser vises i kalenderen" : "Ikke koblet til"}</p>
@@ -706,7 +707,7 @@ export default function KalenderPage() {
             </div>
             <div className={`flex items-center justify-between p-4 rounded-2xl border ${connectedSources.includes("outlook") ? "bg-[#0078D4]/5 border-[#0078D4]/30" : "bg-white dark:bg-[#1a1a1a] border-[#d8d3c5] dark:border-[#262626]"}`}>
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-xl flex items-center justify-center text-white text-sm font-black" style={{ backgroundColor: "#0078D4" }}>O</div>
+                <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ backgroundColor: "#0078D4" }}><CalendarDays className="w-4 h-4 text-white" /></div>
                 <div>
                   <p className="text-xs font-black text-[#171717] dark:text-white">Outlook Kalender</p>
                   <p className="text-[10px] text-[#a09b8f]">{connectedSources.includes("outlook") ? "Koblet til — hendelser vises i kalenderen" : "Ikke koblet til"}</p>
@@ -769,7 +770,7 @@ export default function KalenderPage() {
                   "Velg «Fra URL»",
                   "Lim inn URL-en over",
                 ],
-                icon: "G",
+                icon: Calendar,
               },
               {
                 name: "Microsoft Outlook",
@@ -780,7 +781,7 @@ export default function KalenderPage() {
                   "Velg «Abonner fra nett»",
                   "Lim inn URL-en over",
                 ],
-                icon: "O",
+                icon: CalendarDays,
               },
               {
                 name: "Apple Kalender",
@@ -791,7 +792,7 @@ export default function KalenderPage() {
                   "Lim inn URL-en over",
                   "Klikk Abonner",
                 ],
-                icon: "A",
+                icon: CalendarCheck2,
               },
               {
                 name: "Andre apper",
@@ -802,29 +803,32 @@ export default function KalenderPage() {
                   "Lim inn URL-en over",
                   "Støttes av alle kalenderapper",
                 ],
-                icon: "✦",
+                icon: Globe,
               },
-            ].map(service => (
-              <div key={service.name} className="bg-white dark:bg-[#1a1a1a] border border-[#d8d3c5] dark:border-[#262626] rounded-2xl p-4">
-                <div className="flex items-center gap-2 mb-3">
-                  <div
-                    className="w-7 h-7 rounded-lg flex items-center justify-center text-white text-xs font-black shrink-0"
-                    style={{ backgroundColor: service.color }}
-                  >
-                    {service.icon}
+            ].map(service => {
+              const Icon = service.icon;
+              return (
+                <div key={service.name} className="bg-[#faf8f2] dark:bg-[#1a1a1a] border border-[#d8d3c5] dark:border-[#262626] rounded-2xl p-4">
+                  <div className="flex items-center gap-2 mb-3">
+                    <div
+                      className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
+                      style={{ backgroundColor: service.color }}
+                    >
+                      <Icon className="w-3.5 h-3.5 text-white" />
+                    </div>
+                    <span className="text-xs font-black text-[#171717] dark:text-white">{service.name}</span>
                   </div>
-                  <span className="text-xs font-black text-[#171717] dark:text-white">{service.name}</span>
+                  <ol className="space-y-1">
+                    {service.steps.map((step, i) => (
+                      <li key={i} className="flex items-start gap-1.5 text-[10px] text-[#6b6660] dark:text-[#a09b8f]">
+                        <span className="font-black text-[#09fe94] shrink-0">{i + 1}.</span>
+                        {step}
+                      </li>
+                    ))}
+                  </ol>
                 </div>
-                <ol className="space-y-1">
-                  {service.steps.map((step, i) => (
-                    <li key={i} className="flex items-start gap-1.5 text-[10px] text-[#6b6660] dark:text-[#a09b8f]">
-                      <span className="font-black text-[#09fe94] shrink-0">{i + 1}.</span>
-                      {step}
-                    </li>
-                  ))}
-                </ol>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 

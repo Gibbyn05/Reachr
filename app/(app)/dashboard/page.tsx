@@ -1,6 +1,6 @@
 "use client";
 import { TopBar } from "@/components/layout/top-bar";
-import { BarChart3, Contact, CalendarCheck2, ShieldCheck, ArrowUpRight, ArrowRight, Phone, Mail, AlertCircle, Trophy, Target, LayoutDashboard } from "lucide-react";
+import { BarChart3, Contact, CalendarCheck2, ShieldCheck, ArrowUpRight, ArrowRight, Phone, Mail, AlertCircle, Trophy, Target, LayoutDashboard, Sparkles } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -139,7 +139,7 @@ export default function DashboardPage() {
         {/* Welcome banner */}
         <div className="bg-[#171717] rounded-2xl p-5 sm:p-6 text-white flex flex-col sm:flex-row sm:items-center gap-4 sm:justify-between">
           <div>
-            <h2 className="text-xl font-bold mb-1">Velkommen til Reachr 👋</h2>
+            <h2 className="text-xl font-bold mb-1">Velkommen til Reachr <Sparkles className="w-5 h-5 text-[#09fe94] inline-block align-middle" /></h2>
             <p className="text-white/70 text-sm">
               {leads.length === 0
                 ? "Start med å søke etter leads og bygg din pipeline."
@@ -164,7 +164,7 @@ export default function DashboardPage() {
                 <div className={`w-10 h-10 ${color} rounded-lg flex items-center justify-center`}>
                   <Icon className={`w-5 h-5 ${iconColor}`} />
                 </div>
-                <ArrowUpRight className="w-4 h-4 text-gray-300" />
+                <ArrowUpRight className="w-4 h-4 text-[#d8d3c5]" />
               </div>
               <p className="text-3xl font-extrabold text-[#171717] mb-1">{value}</p>
               <p className="text-sm text-[#6b6660]">{title}</p>
@@ -192,7 +192,7 @@ export default function DashboardPage() {
           </div>
           {needsFollowUp.length === 0 ? (
             <div className="text-center py-12 text-[#a09b8f]">
-              <Contact className="w-10 h-10 mx-auto mb-3 text-gray-200" />
+              <Contact className="w-10 h-10 mx-auto mb-3 text-[#d8d3c5]" />
               <p className="text-sm font-medium text-[#6b6660]">Ingen leads trenger oppfølging akkurat nå</p>
               <p className="text-xs mt-1">
                 <Link href="/leadsok" className="text-accent-dark hover:underline font-medium">Søk etter leads</Link> for å komme i gang.
@@ -216,13 +216,13 @@ export default function DashboardPage() {
                       {reason}
                     </span>
                   </div>
-                  <div className="hidden sm:flex items-center gap-2 text-gray-300 flex-shrink-0">
+                  <div className="hidden sm:flex items-center gap-2 text-[#d8d3c5] flex-shrink-0">
                     {lead.phone && lead.phone !== "—" && (
-                      <a href={`tel:${lead.phone}`} className="p-1.5 hover:bg-gray-100 rounded-lg hover:text-accent transition-colors">
+                      <a href={`tel:${lead.phone}`} className="p-1.5 hover:bg-[#e8e4d8] rounded-lg hover:text-accent transition-colors">
                         <Phone className="w-3.5 h-3.5" />
                       </a>
                     )}
-                    <button className="p-1.5 hover:bg-gray-100 rounded-lg hover:text-accent transition-colors">
+                    <button className="p-1.5 hover:bg-[#e8e4d8] rounded-lg hover:text-accent transition-colors">
                       <Mail className="w-3.5 h-3.5" />
                     </button>
                   </div>
@@ -235,7 +235,7 @@ export default function DashboardPage() {
         {/* Funnel / Pipeline overview */}
         <div className="bg-[#faf8f2] rounded-xl border border-[#d8d3c5] p-6 lg:p-8" style={{boxShadow: "0 1px 3px rgba(0,0,0,0.08)"}}>
           <h3 className="font-semibold text-[#171717] mb-6 flex items-center gap-2">
-            <Target className="w-5 h-5 text-gray-500" />
+            <Target className="w-5 h-5 text-[#6b6660]" />
             Salgstrakt (Funnel)
           </h3>
           <div className="flex flex-col md:flex-row gap-4 md:gap-2 items-end min-h-[140px] pt-8">
@@ -268,11 +268,11 @@ export default function DashboardPage() {
           {/* Hit Rate / Conversion Card */}
           <div className="bg-[#faf8f2] rounded-xl border border-[#d8d3c5] p-6 lg:p-8 flex flex-col items-center justify-center text-center" style={{boxShadow: "0 1px 3px rgba(0,0,0,0.08)"}}>
             <h3 className="font-semibold text-[#171717] w-full text-left mb-6 flex items-center gap-2">
-              <BarChart3 className="w-5 h-5 text-gray-500" />
+              <BarChart3 className="w-5 h-5 text-[#6b6660]" />
               Salgskonvertering (Hit Rate)
             </h3>
             
-            <div className="relative w-32 h-32 flex items-center justify-center rounded-full bg-white border-4 border-[#e8e4d8] shadow-inner mb-4">
+            <div className="relative w-32 h-32 flex items-center justify-center rounded-full bg-[#faf8f2] border-4 border-[#e8e4d8] shadow-inner mb-4">
               <svg className="absolute top-0 left-0 w-full h-full transform -rotate-90">
                 {hitRate > 0 && (
                   <circle
@@ -293,31 +293,31 @@ export default function DashboardPage() {
             </div>
             
             <p className="text-sm text-[#6b6660] font-medium max-w-xs">
-              Møter booket eller vunnet som andel av totalt ukontaktede leads. Du har kontaktet <strong className="text-black">{totalContacted}</strong> prospekter og landet <strong className="text-green-600">{totalSuccess}</strong>!
+              Møter booket eller vunnet som andel av totalt ukontaktede leads. Du har kontaktet <strong className="text-black">{totalContacted}</strong> prospekter og landet <strong className="text-[#05c472]">{totalSuccess}</strong>!
             </p>
           </div>
 
           {/* Leaderboard Card */}
           <div className="bg-[#faf8f2] rounded-xl border border-[#d8d3c5] p-6 lg:p-8" style={{boxShadow: "0 1px 3px rgba(0,0,0,0.08)"}}>
             <h3 className="font-semibold text-[#171717] mb-6 flex items-center gap-2">
-              <Trophy className="w-5 h-5 text-yellow-500" />
+              <Trophy className="w-5 h-5 text-[#ffad0a]" />
               Toppselgere i Teamet
             </h3>
             
             {leaderboardArray.length === 0 ? (
               <div className="text-center py-8 text-[#a09b8f]">
-                <Target className="w-10 h-10 mx-auto mb-2 text-gray-300" />
+                <Target className="w-10 h-10 mx-auto mb-2 text-[#d8d3c5]" />
                 <p className="text-sm">Ingen bookede møter enda.</p>
               </div>
             ) : (
               <div className="space-y-4">
                 {leaderboardArray.map(([name, stats], index) => (
-                  <div key={name} className="flex items-center justify-between p-3 rounded-lg bg-white border border-[#e8e4d8]">
+                  <div key={name} className="flex items-center justify-between p-3 rounded-lg bg-[#faf8f2] border border-[#e8e4d8]">
                     <div className="flex items-center gap-3">
                       <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${
-                        index === 0 ? "bg-yellow-100 text-yellow-700" :
-                        index === 1 ? "bg-gray-100 text-gray-600" :
-                        "bg-orange-100 text-orange-700"
+                        index === 0 ? "bg-[#ffad0a]/15 text-[#c47e00]" :
+                        index === 1 ? "bg-[#e8e4d8] text-[#6b6660]" :
+                        "bg-[#ff470a]/10 text-[#ff470a]"
                       }`}>
                         #{index + 1}
                       </div>
@@ -327,7 +327,7 @@ export default function DashboardPage() {
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="text-sm font-bold text-green-600">{stats.success} Wins</p>
+                      <p className="text-sm font-bold text-[#05c472]">{stats.success} Wins</p>
                     </div>
                   </div>
                 ))}
