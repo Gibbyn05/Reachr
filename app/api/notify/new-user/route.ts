@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
 const FROM_EMAIL = process.env.RESEND_FROM_EMAIL ?? "noreply@reachr.no";
-const NOTIFY_EMAIL = "Fredrik.nerlandsrem@gmail.com";
+const NOTIFY_EMAILS = ["Fredrik.nerlandsrem@gmail.com", "help@reachr.no"];
 
 export async function POST(req: NextRequest) {
   try {
@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
       },
       body: JSON.stringify({
         from: `Reachr <${FROM_EMAIL}>`,
-        to: [NOTIFY_EMAIL],
+        to: NOTIFY_EMAILS,
         subject: `Ny bruker registrert: ${name || email}`,
         text: `En ny bruker har registrert seg på Reachr.\n\nNavn: ${name || "–"}\nE-post: ${email}`,
         html: `<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
