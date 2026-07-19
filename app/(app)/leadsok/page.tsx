@@ -69,28 +69,94 @@ const B2B_NACE_CODES = [
 const INDUSTRY_CATEGORIES: { label: string; nace: string }[] = [
   { label: "Alle bransjer", nace: "" },
   { label: "B2B-bedrifter", nace: "B2B" },
+
+  // Handel
   { label: "Handel & butikk", nace: "47" },
   { label: "Grossist & import", nace: "46" },
-  { label: "Bygg & anlegg", nace: "41" },
-  { label: "Håndverk & installasjoner", nace: "43" },
-  { label: "IT & teknologi", nace: "62" },
-  { label: "Restaurant & mat", nace: "56" },
-  { label: "Transport & logistikk", nace: "49" },
-  { label: "Helse & velvære", nace: "86" },
-  { label: "Regnskap & økonomi", nace: "69" },
-  { label: "Eiendom", nace: "68" },
-  { label: "Markedsføring & reklame", nace: "73" },
-  { label: "Rengjøring & service", nace: "81" },
-  { label: "Personlig service (frisør, negler…)", nace: "96" },
-  { label: "Industri & produksjon", nace: "25" },
-  { label: "Utdanning & kurs", nace: "85" },
-  { label: "Finans & forsikring", nace: "64" },
-  { label: "Juridisk & konsulentvirksomhet", nace: "70" },
-  { label: "Sport & idrett", nace: "93" },
-  { label: "Overnatting", nace: "55" },
-  { label: "Kultur & underholdning", nace: "90" },
-  { label: "Landbruk & fiskeri", nace: "01" },
   { label: "Bilhandel & bilverksted", nace: "45" },
+
+  // Bygg & håndverk
+  { label: "Bygg & anlegg", nace: "41" },
+  { label: "Anleggsvirksomhet (vei, bro, tunnel)", nace: "42" },
+  { label: "Håndverk & installasjoner", nace: "43" },
+
+  // IT & teknologi
+  { label: "IT & programvare", nace: "62" },
+  { label: "IT-tjenester & data", nace: "63" },
+  { label: "Telekommunikasjon", nace: "61" },
+
+  // Industri & produksjon
+  { label: "Møbelproduksjon", nace: "31" },
+  { label: "Næringsmiddelproduksjon", nace: "10" },
+  { label: "Drikkevareproduksjon", nace: "11" },
+  { label: "Tekstil & klær", nace: "14" },
+  { label: "Trelast & trevarer", nace: "16" },
+  { label: "Trykking & grafisk", nace: "18" },
+  { label: "Kjemisk industri", nace: "20" },
+  { label: "Gummi & plastprodukter", nace: "22" },
+  { label: "Glass, betong & keramikk", nace: "23" },
+  { label: "Metallindustri", nace: "24" },
+  { label: "Metallvarer & konstruksjon", nace: "25" },
+  { label: "Elektronikkproduksjon", nace: "26" },
+  { label: "Elektrisk utstyr", nace: "27" },
+  { label: "Maskiner & utstyr", nace: "28" },
+  { label: "Motorvogner & deler", nace: "29" },
+  { label: "Annen industri (smykker, leker…)", nace: "32" },
+  { label: "Reparasjon & installasjon av maskiner", nace: "33" },
+
+  // Mat & drikke
+  { label: "Restaurant & servering", nace: "56" },
+
+  // Transport & logistikk
+  { label: "Veitransport & gods", nace: "49" },
+  { label: "Sjøfart & maritim", nace: "50" },
+  { label: "Lagring & spedisjon", nace: "52" },
+  { label: "Post & budtjenester", nace: "53" },
+
+  // Helse & omsorg
+  { label: "Helse & legetjenester", nace: "86" },
+  { label: "Pleie & omsorg", nace: "87" },
+  { label: "Sosiale tjenester", nace: "88" },
+  { label: "Veterinær", nace: "75" },
+
+  // Tjenester & rådgiving
+  { label: "Regnskap & revisjon", nace: "69" },
+  { label: "Juridisk & konsulentvirksomhet", nace: "70" },
+  { label: "Arkitektur & ingeniørtjenester", nace: "71" },
+  { label: "Forskning & utvikling (FoU)", nace: "72" },
+  { label: "Markedsføring & reklame", nace: "73" },
+  { label: "Design & foto", nace: "74" },
+  { label: "Bemanningsbyrå", nace: "78" },
+  { label: "Reisebyrå & turisme", nace: "79" },
+  { label: "Sikkerhet & vakthold", nace: "80" },
+  { label: "Rengjøring & service", nace: "81" },
+  { label: "Kontortjenester & admin", nace: "82" },
+
+  // Eiendom & finans
+  { label: "Eiendom", nace: "68" },
+  { label: "Finans & bank", nace: "64" },
+  { label: "Forsikring", nace: "65" },
+
+  // Media & kreativ
+  { label: "Forlag & utgivelse", nace: "58" },
+  { label: "Film, TV & produksjon", nace: "59" },
+
+  // Energi & miljø
+  { label: "Energi & kraft", nace: "35" },
+  { label: "Avfall & gjenvinning", nace: "38" },
+  { label: "Bergverk & utvinning", nace: "08" },
+
+  // Andre
+  { label: "Overnatting & hotell", nace: "55" },
+  { label: "Utdanning & kurs", nace: "85" },
+  { label: "Sport & idrett", nace: "93" },
+  { label: "Kultur & underholdning", nace: "90" },
+  { label: "Personlig service (frisør, negler…)", nace: "96" },
+  { label: "Reparasjon av varer", nace: "95" },
+  { label: "Organisasjoner & foreninger", nace: "94" },
+  { label: "Landbruk", nace: "01" },
+  { label: "Skogbruk", nace: "02" },
+  { label: "Fiske & akvakultur", nace: "03" },
 ];
 
 /**
@@ -111,49 +177,107 @@ function naceToCategory(kode: string | undefined, beskrivelse: string | undefine
 const NACE_MAP: Record<string, string> = {
   // Personlig service
   frisør: "96", frisørsalong: "96", hårpleie: "96", negl: "96", skjønnhet: "96", barber: "96",
+  tattoo: "96", tatovering: "96", hudpleie: "96", vaskeri: "96",
   // Regnskap / jus
   regnskap: "69", revisjon: "69", bokføring: "69", regnskapsfører: "69",
   advokat: "69", jus: "69", juridisk: "70", konsulent: "70",
   // Bygg
   bygg: "41", byggentreprenør: "41", entreprenør: "43",
   elektro: "43", elektriker: "43", rørlegger: "43", vvs: "43", snekker: "43", maler: "43",
-  // IT — NB: "it" er for kort og matcher norske ord som "aktivitet"; bruk bare lengre nøkler
+  taktekker: "43", isolasjon: "43", glassarbeid: "43", stilas: "43",
+  anlegg: "42", veibygging: "42", brobygging: "42", grunnarbeid: "42",
+  // IT
   software: "62", teknologi: "62", dataprogrammering: "62", utvikling: "62", programmering: "62",
-  "it-tjenester": "62", datasystem: "62", ikt: "62",
+  "it-tjenester": "62", datasystem: "62", ikt: "62", apputvikling: "62", webutvikling: "62",
+  hosting: "63", databehandling: "63", nettportal: "63",
+  telekom: "61", telecom: "61", bredbånd: "61", fiber: "61",
   // Mat & drikke
   restaurant: "56", kafé: "56", kafe: "56", catering: "56", bakeri: "10", konditori: "10",
   bar: "56", pub: "56", gatekjøkken: "56",
+  næringsmiddel: "10", matproduksjon: "10", slakteri: "10", meieri: "10", fiskeindustri: "10",
+  bryggeri: "11", drikkevare: "11", mineralvann: "11", destilleri: "11",
   // Transport
   transport: "49", frakt: "49", logistikk: "52", speditør: "52", bud: "53",
-  // Helse
+  drosje: "49", taxi: "49", lastebil: "49", buss: "49", flyttebyrå: "49",
+  sjøfart: "50", shipping: "50", rederi: "50", ferge: "50", båt: "50",
+  lager: "52", tollklarering: "52",
+  post: "53", kurer: "53", pakkelevering: "53",
+  // Helse & omsorg
   helse: "86", lege: "86", tannlege: "86", fysioterapi: "86", psykolog: "86",
-  apotek: "47", optiker: "47",
+  apotek: "47", optiker: "47", kiropraktor: "86", sykehus: "86",
+  sykehjem: "87", hjemmehjelp: "87", eldreomsorg: "87", omsorgsbolig: "87",
+  barnevern: "88", sosialtjeneste: "88",
+  veterinær: "75", dyreklinikk: "75", dyrlege: "75",
   // Eiendom
-  eiendom: "68", megling: "68", utleie: "68",
-  // Markedsføring
-  markedsføring: "73", reklame: "73", pr: "73", media: "73",
+  eiendom: "68", megling: "68", utleie: "68", eiendomsutvikling: "68", bolig: "68",
+  // Markedsføring & kreativ
+  markedsføring: "73", reklame: "73", media: "73", reklamebyrå: "73",
+  design: "74", grafisk: "74", fotograf: "74", interiørdesign: "74", industridesign: "74",
   // Handel
-  butikk: "47", dagligvare: "47", klesbutikk: "47", motebutikk: "47",
+  butikk: "47", dagligvare: "47", klesbutikk: "47", motebutikk: "47", nettbutikk: "47",
   grossist: "46", engros: "46", import: "46",
-  // Rengjøring / service
-  rengjøring: "81", renhold: "81", vakthold: "80", sikkerhet: "80",
-  // Industri
-  industri: "25", produksjon: "25", maskin: "28", verksted: "33",
+  // Rengjøring / sikkerhet
+  rengjøring: "81", renhold: "81", vakthold: "80", sikkerhet: "80", alarmtjenester: "80",
+  // Industri & produksjon — møbler
+  møbel: "31", møbelproduksjon: "31", møbelprodusent: "31", innredning: "31", kjøkkenprodusent: "31",
+  // Industri — metall
+  industri: "25", metallvare: "25", sveising: "25", stålkonstruksjon: "25",
+  metallindustri: "24", støperi: "24", smelteverk: "24", aluminium: "24", stål: "24",
+  // Industri — maskin & elektro
+  maskin: "28", maskinproduksjon: "28", verktøy: "28", pumper: "28",
+  elektronikk: "26", halvleder: "26", kretskort: "26",
+  elektroproduksjon: "27", kabel: "27", belysning: "27",
+  // Industri — tre, papir, trykk
+  trelast: "16", sagbruk: "16", snekkerverksted: "16", treemballasje: "16",
+  trykkeri: "18", boktrykk: "18", emballasje: "18",
+  // Industri — kjemi, plast, glass
+  kjemisk: "20", kjemi: "20", maling: "20", kosmetikk: "20", rengjøringsmiddel: "20",
+  plast: "22", gummi: "22", plastproduksjon: "22", emballasjeproduksjon: "22",
+  betong: "23", glass: "23", keramikk: "23", fliser: "23", sement: "23",
+  // Industri — tekstil, klær
+  tekstil: "14", klesproduksjon: "14", konfeksjon: "14", skredder: "14",
+  // Industri — motor, reparasjon, diverse
+  bilproduksjon: "29", motorvogn: "29", karosseri: "29",
+  verksted: "33", vedlikehold: "33", maskinreparasjon: "33",
+  smykker: "32", gullsmed: "32", leker: "32", sportsutstyr: "32",
+  // Arkitektur & ingeniør
+  arkitekt: "71", arkitektur: "71", ingeniør: "71", rådgivende: "71", geoteknikk: "71",
+  // FoU
+  forskning: "72", laboratorium: "72", bioteknologi: "72",
+  // Bemanning & kontor
+  bemanning: "78", vikarbyrå: "78", rekruttering: "78",
+  reisebyrå: "79", turisme: "79", turoperatør: "79",
+  kontortjenester: "82", callsenter: "82", inkasso: "82",
+  // Forlag & film
+  forlag: "58", bokforlag: "58", avis: "58", tidsskrift: "58",
+  filmproduksjon: "59", videoproduksjon: "59", lydstudio: "59", podcast: "59",
   // Finans
   finans: "64", bank: "64", forsikring: "65", investering: "64",
+  fondsforvaltning: "64", kapitalforvaltning: "64",
+  // Energi & miljø
+  energi: "35", kraftverk: "35", solenergi: "35", vindkraft: "35", strøm: "35",
+  avfallshåndtering: "38", gjenvinning: "38", resirkulering: "38", avfall: "38",
+  bergverk: "08", steinbrudd: "08", gruve: "08",
   // Utdanning
-  utdanning: "85", barnehage: "85", skole: "85",
+  utdanning: "85", barnehage: "85", skole: "85", kursvirksomhet: "85", fagskole: "85",
   // Sport / fritid
   sport: "93", idrett: "93", treningssenter: "93", fitness: "93", gym: "93",
   idrettslag: "93", sportsarena: "93", svømmehall: "93", fotball: "93",
   // Overnatting
-  hotell: "55", overnatting: "55", camping: "55", hostel: "55",
+  hotell: "55", overnatting: "55", camping: "55", hostel: "55", hytteutleie: "55",
   // Kultur / underholdning
   museum: "91", bibliotek: "91", teater: "90", kino: "59", kunst: "90",
-  // Landbruk / fiskeri
-  landbruk: "01", fisk: "03", oppdrett: "03", jordbruk: "01",
+  konsert: "90", festival: "90", galleri: "90",
+  // Landbruk / fiskeri / skog
+  landbruk: "01", jordbruk: "01", gartneri: "01", husdyr: "01", planteproduksjon: "01",
+  skogbruk: "02", tømmer: "02", hogst: "02",
+  fisk: "03", oppdrett: "03", fiskeri: "03", havbruk: "03",
   // Bil
   bilforhandler: "45", bilverksted: "45", bildeler: "45",
+  // Reparasjon av varer
+  skomaker: "95", urmaker: "95", datamaskinreparasjon: "95", mobilreparasjon: "95",
+  // Foreninger
+  fagforening: "94", bransjeorganisasjon: "94", interesseorganisasjon: "94",
 };
 
 function guessNace(q: string): string | undefined {
