@@ -26,6 +26,21 @@ export async function GET() {
       });
     }
 
+    // Free trial granted via admin (no Stripe involved)
+    const freeTrialEnd = user.user_metadata?.free_trial_end;
+    if (freeTrialEnd && new Date(freeTrialEnd) > new Date()) {
+      return NextResponse.json({
+        subscription: {
+          id: "free_trial",
+          status: "trialing",
+          plan: "solo",
+          interval: "monthly",
+          current_period_end: freeTrialEnd,
+          cancel_at_period_end: true,
+        },
+      });
+    }
+
     // Check Supabase subscriptions table first
     const { data: sub } = await supabase
       .from("subscriptions")
