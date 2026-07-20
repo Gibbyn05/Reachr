@@ -20,7 +20,11 @@ function LoginForm() {
   const [email, setEmail] = useState(inviteEmail);
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(
+    searchParams.get("error") === "invalid_link"
+      ? "Tilbakestillingslenken er ugyldig eller utløpt. Be om en ny lenke."
+      : null,
+  );
   const [checkingSession, setCheckingSession] = useState(isInvited);
 
   // If already logged in with the invited email, link team and go to dashboard

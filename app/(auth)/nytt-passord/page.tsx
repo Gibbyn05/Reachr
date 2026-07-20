@@ -1,7 +1,8 @@
 "use client";
 import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Eye, EyeOff, ArrowRight, CheckCircle } from "lucide-react";
+import Link from "next/link";
+import { Eye, EyeOff, ArrowRight, ArrowLeft, CheckCircle, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { createClient } from "@/lib/supabase/client";
@@ -16,12 +17,17 @@ function NyttPassordForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
+  const [ready, setReady] = useState(false);
+  const [expired, setExpired] = useState(false);
 
-  // Supabase sends the tokens as hash params; the client SDK picks them up automatically
   useEffect(() => {
     const supabase = createClient();
-    supabase.auth.onAuthStateChange((event) => {
-      // PASSWORD_RECOVERY event fires when user arrives via the reset link
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user) {
+        setReady(true);
+      } else {
+        setExpired(true);
+      }
     });
   }, []);
 
@@ -57,6 +63,47 @@ function NyttPassordForm() {
       setLoading(false);
     }
   };
+
+  if (!ready && !expired) {
+    return (
+      <div className="w-full max-w-md flex items-center justify-center h-48">
+        <div className="w-6 h-6 border-2 border-[#09fe94] border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (expired) {
+    return (
+      <div className="w-full max-w-md">
+        <div className="bg-[#faf8f2] rounded-2xl border border-[#d8d3c5] shadow-sm p-8">
+          <div className="text-center mb-6">
+            <div className="flex justify-center mb-4">
+              <AlertTriangle className="w-12 h-12 text-[#ffad0a]" />
+            </div>
+            <h1 className="text-2xl font-bold text-[#171717] mb-2">Lenken er ugyldig eller utløpt</h1>
+            <p className="text-[#6b6660] text-sm">
+              Tilbakestillingslenken du brukte er utløpt eller allerede brukt. Be om en ny lenke for å tilbakestille passordet ditt.
+            </p>
+          </div>
+          <Link
+            href="/glemt-passord"
+            className="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-[#09fe94] text-[#171717] font-bold text-sm hover:bg-[#00e882] transition-all duration-200"
+          >
+            Be om ny lenke <ArrowRight className="w-4 h-4" />
+          </Link>
+          <div className="mt-4 text-center">
+            <Link
+              href="/login"
+              className="inline-flex items-center gap-1.5 text-sm text-[#6b6660] hover:text-[#171717]"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Tilbake til innlogging
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full max-w-md">

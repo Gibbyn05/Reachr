@@ -20,7 +20,7 @@ export default function GlemtPassordPage() {
     try {
       const supabase = createClient();
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/nytt-passord`,
+        redirectTo: `${window.location.origin}/auth/callback?next=/nytt-passord`,
       });
 
       if (error) {
