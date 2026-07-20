@@ -4,7 +4,6 @@ import { HowItWorks } from "@/components/landing/how-it-works";
 import { Features } from "@/components/landing/features";
 import { Comparison } from "@/components/landing/comparison";
 import { Pricing } from "@/components/landing/pricing";
-import { Testimonials } from "@/components/landing/testimonials";
 import { OmOss } from "@/components/landing/om-oss";
 import { Kontakt } from "@/components/landing/kontakt";
 import { CtaBanner } from "@/components/landing/cta-banner";
@@ -19,7 +18,6 @@ export default function LandingPage() {
       <Features />
       <Comparison />
       <Pricing />
-      <Testimonials />
       <OmOss />
       <Kontakt />
       <CtaBanner />
