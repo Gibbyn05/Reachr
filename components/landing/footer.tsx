@@ -18,16 +18,16 @@ export function Footer() {
       ];
 
   return (
-    <footer style={{ backgroundColor: "#171717", color: "white", padding: "72px 24px 40px" }}>
-      <div style={{ maxWidth: 1200, margin: "0 auto" }}>
-        <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr", gap: 48, marginBottom: 56 }}>
+    <footer className="bg-[#171717] text-white pt-[72px] pb-10 px-6">
+      <div className="max-w-[1200px] mx-auto">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-12 mb-14">
           {/* Brand */}
-          <div>
-            <Link href="/" style={{ display: "flex", alignItems: "center", gap: 10, textDecoration: "none", marginBottom: 16 }}>
-              <img src="/logo.svg" alt="Reachr" style={{ width: 36, height: 36 }} />
-              <span style={{ fontWeight: 800, fontSize: 18, color: "white" }}>Reachr</span>
+          <div className="sm:col-span-2 lg:col-span-1">
+            <Link href="/" className="flex items-center gap-2.5 no-underline mb-4">
+              <img src="/logo.svg" alt="Reachr" className="w-9 h-9" />
+              <span className="font-extrabold text-lg text-white">Reachr</span>
             </Link>
-            <p style={{ fontSize: 14, color: "rgba(255,255,255,0.45)", lineHeight: 1.7, maxWidth: 260, margin: 0 }}>
+            <p className="text-sm text-white/45 leading-[1.7] max-w-[260px]">
               {lang === "en"
                 ? "Norway's B2B tool for lead search and sales pipeline. Helping hundreds of companies find and close new customers."
                 : "Norges B2B-verktøy for leadsøk og salgspipeline. Hjelper hundrevis av bedrifter finne og lukke nye kunder."}
@@ -36,14 +36,16 @@ export function Footer() {
 
           {columns.map(({ title, links }) => (
             <div key={title}>
-              <p style={{ fontSize: 13, fontWeight: 700, color: "white", marginBottom: 16, textTransform: "uppercase", letterSpacing: "0.06em" }}>{title}</p>
-              <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 10 }}>
+              <p className="text-[13px] font-bold text-white mb-4 uppercase tracking-[0.06em]">{title}</p>
+              <ul className="list-none p-0 m-0 flex flex-col gap-2.5">
                 {links.map(([label, href]) => (
                   <li key={label}>
-                    <a href={href} style={{ fontSize: 14, color: "rgba(255,255,255,0.45)", textDecoration: "none", transition: "color 0.15s" }}
-                      onMouseEnter={e => (e.currentTarget.style.color = "white")}
-                      onMouseLeave={e => (e.currentTarget.style.color = "rgba(255,255,255,0.45)")}
-                    >{label}</a>
+                    <a
+                      href={href}
+                      className="text-sm text-white/45 no-underline transition-colors duration-150 hover:text-white"
+                    >
+                      {label}
+                    </a>
                   </li>
                 ))}
               </ul>
@@ -51,11 +53,11 @@ export function Footer() {
           ))}
         </div>
 
-        <div style={{ borderTop: "1px solid rgba(255,255,255,0.1)", paddingTop: 28, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
-          <p style={{ fontSize: 13, color: "rgba(255,255,255,0.35)", margin: 0 }}>
+        <div className="border-t border-white/10 pt-7 flex justify-between items-center flex-wrap gap-3">
+          <p className="text-[13px] text-white/35 m-0">
             {lang === "en" ? "© 2026 Reachr AS. All rights reserved." : "© 2026 Reachr AS. Alle rettigheter forbeholdt."}
           </p>
-          <p style={{ fontSize: 13, color: "rgba(255,255,255,0.35)", margin: 0 }}>Help@reachr.no</p>
+          <p className="text-[13px] text-white/35 m-0">Help@reachr.no</p>
         </div>
       </div>
     </footer>
