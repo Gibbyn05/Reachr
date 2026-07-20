@@ -122,6 +122,30 @@ I `mine-leads/page.tsx` — `AiEmailModal` og `AiSmsModal` kaller `/api/ai/email
 
 ---
 
+## Design Context
+
+Full design system captured in `PRODUCT.md` and `DESIGN.md` at the project root.
+
+**Creative North Star:** "The Nordic Sales Floor" — the interface disappears into the work.
+**Register:** Both brand (landing) and product (app).
+**References:** native.no. **Anti-references:** HubSpot, Salesforce, Outreach/Apollo.
+
+**5 design principles:**
+1. Nordic understatement — confidence through restraint, not volume
+2. Speed as the product — every interaction feels faster than the alternative
+3. Data first — leads and pipeline are the hero; chrome serves them
+4. Locally honest — Norwegian language, data, and business norms throughout
+5. Progressive depth — simple to start, powerful to scale
+
+**Key constraints for any agent working in this repo:**
+- Never blue — not `#2563EB` or any neighbor
+- Signal Green (`#09fe94`) is scarce by design — CTA, active states, success badges only
+- EB Garamond: logotype and landing display headings only, never in the app
+- All borders: Stone (`#d8d3c5`) — the one border color, everywhere
+- `bg-white` forbidden — use `#faf8f2` (Linen) or `#f2efe3` (Birch)
+
+---
+
 ## Kjøring lokalt
 ```bash
 npm install

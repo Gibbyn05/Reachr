@@ -1,0 +1,85 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-07-20T00:00:00Z",
+  "title": "Design System: Reachr",
+  "extensions": {
+    "colorMeta": {
+      "signal-green": {
+        "role": "primary",
+        "displayName": "Signal Green",
+        "canonical": "#09fe94",
+        "hover": "#00e882",
+        "accessible": "#008f52",
+        "glow": "rgba(9,254,148,0.3)",
+        "usage": "CTA buttons, active states, success badges. Max 10% of viewport."
+      },
+      "ember-orange": {
+        "role": "secondary",
+        "displayName": "Ember Orange",
+        "canonical": "#ff470a",
+        "hover": "#e03c08",
+        "usage": "Links, secondary CTA, warnings, destructive actions"
+      },
+      "amber-marker": {
+        "role": "tertiary",
+        "displayName": "Amber Marker",
+        "canonical": "#ffad0a",
+        "usage": "Meeting status, tertiary accents"
+      }
+    },
+    "neutralMeta": {
+      "kull": { "hex": "#171717", "role": "darkest", "usage": "Sidebar, dark sections, primary text" },
+      "ink": { "hex": "#3d3a34", "role": "body-text", "usage": "Body text, form values" },
+      "stein": { "hex": "#6b6660", "role": "secondary-text", "usage": "Labels, descriptions" },
+      "svak": { "hex": "#a09b8f", "role": "muted-text", "usage": "Placeholders, metadata only — fails AA on light bg" },
+      "stone": { "hex": "#d8d3c5", "role": "border", "usage": "The one border color everywhere" },
+      "driftwood": { "hex": "#e8e4d8", "role": "hover-bg", "usage": "Hover backgrounds, separators" },
+      "sand": { "hex": "#ede9da", "role": "alt-bg", "usage": "Alternating sections" },
+      "birch": { "hex": "#f2efe3", "role": "page-bg", "usage": "Page background" },
+      "linen": { "hex": "#faf8f2", "role": "card-bg", "usage": "Cards, modals, elevated content" }
+    }
+  },
+  "components": {
+    "button-primary": {
+      "label": "Primary Button",
+      "snippet": "<button class=\"inline-flex items-center gap-2 px-6 py-2.5 text-sm font-bold rounded-lg bg-[#09fe94] hover:bg-[#00e882] text-[#171717] shadow-[0_2px_12px_rgba(9,254,148,0.3)] transition-all duration-200\">Start gratis</button>"
+    },
+    "button-secondary": {
+      "label": "Secondary Button",
+      "snippet": "<button class=\"inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg bg-[#faf8f2] hover:bg-[#e8e4d8] text-[#171717] border border-[#d8d3c5] transition-all duration-200\">Avbryt</button>"
+    },
+    "button-ghost": {
+      "label": "Ghost Button",
+      "snippet": "<button class=\"inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg bg-transparent hover:bg-[#e8e4d8] text-[#3d3a34] transition-all duration-200\">Mer info</button>"
+    },
+    "button-danger": {
+      "label": "Danger Button",
+      "snippet": "<button class=\"inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg bg-[#ff470a] hover:bg-[#e03c08] text-white shadow-sm transition-all duration-200\">Slett</button>"
+    },
+    "input": {
+      "label": "Text Input",
+      "snippet": "<input type=\"text\" placeholder=\"Søk...\" class=\"w-full px-4 py-2 text-sm rounded-lg bg-[#faf8f2] border border-[#d8d3c5] text-[#171717] placeholder:text-[#a09b8f] focus:outline-none focus:border-[#09fe94]/60 focus:ring-2 focus:ring-[#09fe94]/15 transition-all\" />"
+    },
+    "lead-card": {
+      "label": "Lead Card",
+      "snippet": "<div class=\"rounded-2xl border border-[#d8d3c5] bg-[#faf8f2] p-4 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_32px_rgba(0,0,0,0.07)]\"><div class=\"flex items-center justify-between mb-2\"><span class=\"text-sm font-bold text-[#171717]\">Bjørnstad VVS AS</span><span class=\"text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#09fe94] text-[#065c3a]\">Kontaktet</span></div><p class=\"text-xs text-[#6b6660]\">Oslo · 12 ans. · 8,2 mill</p></div>"
+    },
+    "status-badge": {
+      "label": "Status Badges",
+      "snippet": "<div class=\"flex gap-2 flex-wrap\"><span class=\"text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#e8e4d8] text-[#6b6660]\">Ikke kontaktet</span><span class=\"text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#09fe94] text-[#065c3a]\">Kontaktet</span><span class=\"text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#ffad0a] text-[#7a4f00]\">Booket møte</span><span class=\"text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#171717] text-[#09fe94]\">Kunde</span></div>"
+    },
+    "nav-item": {
+      "label": "Sidebar Nav Item",
+      "snippet": "<a class=\"flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-white/60 hover:text-white hover:bg-white/10 transition-colors\"><svg class=\"w-5 h-5\" /><span>Dashboard</span></a>"
+    }
+  },
+  "rules": {
+    "no-blue": "Never use #2563EB or any blue. Green for primary, orange for links.",
+    "no-bg-white": "Never bg-white. Use #faf8f2 (Linen) or #f2efe3 (Birch).",
+    "stone-borders": "All borders use #d8d3c5. Never gray-200.",
+    "signal-green-ceiling": "Signal Green max 10% of viewport. Accent, not surface.",
+    "garamond-ceiling": "EB Garamond for logotype and landing display headings only.",
+    "green-glow-monopoly": "Only primary CTA button gets the green glow shadow.",
+    "svak-text-warning": "#a09b8f fails AA on light bg. Metadata only, never labels."
+  }
+}
