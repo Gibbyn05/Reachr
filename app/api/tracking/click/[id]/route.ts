@@ -1,11 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
-
 export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -19,10 +14,13 @@ export async function GET(
   }
 
   try {
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
     const userAgent = req.headers.get("user-agent") || "unknown";
     const ip = req.headers.get("x-forwarded-for") || "unknown";
 
-    // Record click event
     await supabase.from("email_events").insert({
       email_log_id: id,
       event_type: "click",
@@ -31,7 +29,6 @@ export async function GET(
       ip_address: ip,
     });
 
-    // Redirect to the original URL
     return NextResponse.redirect(new URL(targetUrl));
   } catch (error) {
     console.error("Click tracking error:", error);

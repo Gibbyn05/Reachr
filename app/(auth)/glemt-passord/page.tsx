@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { ArrowRight, ArrowLeft, CheckCircle } from "lucide-react";
@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { createClient } from "@/lib/supabase/client";
 
-export default function GlemtPassordPage() {
+function GlemtPassordForm() {
   const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
@@ -121,5 +121,13 @@ export default function GlemtPassordPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function GlemtPassordPage() {
+  return (
+    <Suspense fallback={<div className="w-full max-w-md h-96 bg-[#faf8f2] rounded-2xl border border-[#d8d3c5] animate-pulse" />}>
+      <GlemtPassordForm />
+    </Suspense>
   );
 }
