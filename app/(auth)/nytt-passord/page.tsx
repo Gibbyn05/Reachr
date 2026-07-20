@@ -24,42 +24,24 @@ function NyttPassordForm() {
     const supabase = createClient();
     let settled = false;
 
-    const settle = (isReady: boolean, source: string) => {
+    const settle = (isReady: boolean) => {
       if (settled) return;
       settled = true;
-      console.log(`[nytt-passord] settle(${isReady}) via ${source}`);
       if (isReady) setReady(true);
       else setExpired(true);
     };
 
-    console.log("[nytt-passord] URL:", window.location.href);
-    console.log("[nytt-passord] hash:", window.location.hash);
-    console.log("[nytt-passord] search:", window.location.search);
-
-    // 1) PKCE code in query params
-    const code = searchParams.get("code");
-    if (code) {
-      console.log("[nytt-passord] Found code param, exchanging...");
-      supabase.auth.exchangeCodeForSession(code).then(({ data, error }) => {
-        console.log("[nytt-passord] exchangeCode result:", { error: error?.message, hasSession: !!data?.session });
-        settle(!error, "exchangeCodeForSession");
-      });
-    }
-
-    // 2) Hash fragment tokens (implicit flow)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log("[nytt-passord] onAuthStateChange:", event, !!session);
-      if (session) settle(true, `onAuthStateChange(${event})`);
+    // Middleware handles ?code= exchange and redirects here without code.
+    // onAuthStateChange catches hash-fragment flow as fallback.
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session) settle(true);
     });
 
-    // 3) Existing session (from cookies / callback)
     supabase.auth.getSession().then(({ data: { session } }) => {
-      console.log("[nytt-passord] getSession:", !!session);
-      if (session) settle(true, "getSession");
+      if (session) settle(true);
     });
 
-    // 4) Timeout — no session found
-    const timer = setTimeout(() => settle(false, "timeout"), 5000);
+    const timer = setTimeout(() => settle(false), 3000);
 
     return () => {
       subscription.unsubscribe();
