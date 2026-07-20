@@ -24,33 +24,42 @@ function NyttPassordForm() {
     const supabase = createClient();
     let settled = false;
 
-    const settle = (isReady: boolean) => {
+    const settle = (isReady: boolean, source: string) => {
       if (settled) return;
       settled = true;
+      console.log(`[nytt-passord] settle(${isReady}) via ${source}`);
       if (isReady) setReady(true);
       else setExpired(true);
     };
 
-    // 1) Handle PKCE code in URL (old emails that redirect directly here)
+    console.log("[nytt-passord] URL:", window.location.href);
+    console.log("[nytt-passord] hash:", window.location.hash);
+    console.log("[nytt-passord] search:", window.location.search);
+
+    // 1) PKCE code in query params
     const code = searchParams.get("code");
     if (code) {
-      supabase.auth.exchangeCodeForSession(code).then(({ error }) => {
-        settle(!error);
+      console.log("[nytt-passord] Found code param, exchanging...");
+      supabase.auth.exchangeCodeForSession(code).then(({ data, error }) => {
+        console.log("[nytt-passord] exchangeCode result:", { error: error?.message, hasSession: !!data?.session });
+        settle(!error, "exchangeCodeForSession");
       });
     }
 
-    // 2) Listen for auth events (hash fragment flow fires PASSWORD_RECOVERY)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session) settle(true);
+    // 2) Hash fragment tokens (implicit flow)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log("[nytt-passord] onAuthStateChange:", event, !!session);
+      if (session) settle(true, `onAuthStateChange(${event})`);
     });
 
-    // 3) Fast path: session already in cookies (callback flow)
+    // 3) Existing session (from cookies / callback)
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) settle(true);
+      console.log("[nytt-passord] getSession:", !!session);
+      if (session) settle(true, "getSession");
     });
 
-    // 4) If nothing resolved after 4s, the link is invalid/expired
-    const timer = setTimeout(() => settle(false), 4000);
+    // 4) Timeout — no session found
+    const timer = setTimeout(() => settle(false, "timeout"), 5000);
 
     return () => {
       subscription.unsubscribe();
