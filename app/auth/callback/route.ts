@@ -33,5 +33,5 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  return NextResponse.redirect(new URL("/login?error=invalid_link", origin));
+  return NextResponse.redirect(new URL("/glemt-passord?error=expired", origin));
 }

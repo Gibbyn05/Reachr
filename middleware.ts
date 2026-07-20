@@ -34,15 +34,15 @@ export async function middleware(request: NextRequest) {
   const code = request.nextUrl.searchParams.get("code");
   if (code && !request.nextUrl.pathname.startsWith("/auth/")) {
     const { error } = await supabase.auth.exchangeCodeForSession(code);
+    const url = request.nextUrl.clone();
+    url.searchParams.delete("code");
+    const redirect = NextResponse.redirect(url);
     if (!error) {
-      const url = request.nextUrl.clone();
-      url.searchParams.delete("code");
-      const redirect = NextResponse.redirect(url);
       supabaseResponse.cookies.getAll().forEach((c) =>
         redirect.cookies.set(c.name, c.value),
       );
-      return redirect;
     }
+    return redirect;
   }
 
   // Refresh session – keeps the user logged in

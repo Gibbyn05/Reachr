@@ -1,15 +1,21 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { ArrowRight, ArrowLeft, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { createClient } from "@/lib/supabase/client";
 
 export default function GlemtPassordPage() {
+  const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(
+    searchParams.get("error") === "expired"
+      ? "Lenken har utløpt eller er allerede brukt. Be om en ny lenke."
+      : null,
+  );
   const [sent, setSent] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
