@@ -2,44 +2,38 @@
 import { Search, Users, Bell, Map, Sparkles, BarChart3 } from "lucide-react";
 import { motion } from "framer-motion";
 
-const bentoItems = [
+const featureItems = [
   {
-    span: "lg:col-span-2",
     icon: Search,
     accent: "#09fe94",
     title: "Leadsøk i Brønnøysundregistrene",
     description: "Søk blant 250 000+ norske bedrifter etter bransje, sted, omsetning og antall ansatte. Reachr henter også kontaktpersoner og e-postadresser automatisk.",
   },
   {
-    span: "lg:col-span-1",
     icon: Map,
     accent: "#ff470a",
     title: "Kartvisning",
     description: "Se alle treff som punkter på kart. Perfekt for feltsalg og regionsbasert prospektering.",
   },
   {
-    span: "lg:col-span-1",
     icon: Users,
     accent: "#ffad0a",
     title: "CRM-pipeline",
     description: "6 statusnivåer med farger. Tildel leads til teammedlemmer, legg til notater og spor hele salgsprosessen.",
   },
   {
-    span: "lg:col-span-2",
     icon: Sparkles,
     accent: "#09fe94",
     title: "AI-genererte e-poster og SMS",
     description: "Én klikk og AI skriver en personlig salgsmelding tilpasset hver bedrift — basert på din salgspitch og målgruppe. Send direkte fra Reachr via Gmail eller Outlook, eller kopier teksten og send selv.",
   },
   {
-    span: "lg:col-span-2",
     icon: Bell,
     accent: "#ff470a",
     title: "Automatiske varsler og sekvenser",
     description: "Reachr minner deg på oppfølging basert på siste aktivitet. Sett opp e-postsekvenser som kjører automatisk – aldri la et lead bli glemt igjen.",
   },
   {
-    span: "lg:col-span-1",
     icon: BarChart3,
     accent: "#ffad0a",
     title: "Statistikk og oversikt",
@@ -76,36 +70,32 @@ export function Features() {
           </h2>
         </motion.div>
 
-        {/* Bento grid */}
+        {/* Features list */}
         <motion.div
-          className="grid grid-cols-1 gap-4 lg:grid-cols-3"
+          className="grid grid-cols-1 md:grid-cols-2 gap-x-16 gap-y-12"
           variants={gridContainerVariants}
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: "-80px" }}
         >
-          {bentoItems.map(({ span, icon: Icon, accent, title, description }) => (
-            <motion.div
-              key={title}
-              variants={gridItemVariants}
-              className={`${span} rounded-2xl border border-[#d8d3c5] bg-[#faf8f2] p-7 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_32px_rgba(0,0,0,0.07)]`}
-            >
-              <h3 className="text-lg font-extrabold text-[#171717] mb-2 flex items-center gap-2.5">
+          {featureItems.map(({ icon: Icon, accent, title, description }) => (
+            <motion.div key={title} variants={gridItemVariants}>
+              <h3 className="text-base font-extrabold text-[#171717] mb-2 flex items-center gap-2.5">
                 <Icon
-                  size={18}
+                  size={16}
                   style={{ color: accent, filter: accent === "#09fe94" ? "brightness(0.65)" : "none" }}
                   className="shrink-0"
                 />
                 {title}
               </h3>
-              <p className="text-sm text-[#6b6660] leading-relaxed">{description}</p>
+              <p className="text-sm text-[#6b6660] leading-relaxed max-w-md">{description}</p>
             </motion.div>
           ))}
         </motion.div>
 
         {/* Stats strip */}
         <motion.div
-          className="mt-12 grid grid-cols-2 sm:grid-cols-4 gap-px bg-[#d8d3c5] rounded-2xl overflow-hidden"
+          className="mt-12 grid grid-cols-1 sm:grid-cols-3 gap-px bg-[#d8d3c5] rounded-2xl overflow-hidden max-w-3xl mx-auto"
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-80px" }}
