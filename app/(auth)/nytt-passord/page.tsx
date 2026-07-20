@@ -22,14 +22,41 @@ function NyttPassordForm() {
 
   useEffect(() => {
     const supabase = createClient();
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      if (user) {
-        setReady(true);
-      } else {
-        setExpired(true);
-      }
+    let settled = false;
+
+    const settle = (isReady: boolean) => {
+      if (settled) return;
+      settled = true;
+      if (isReady) setReady(true);
+      else setExpired(true);
+    };
+
+    // 1) Handle PKCE code in URL (old emails that redirect directly here)
+    const code = searchParams.get("code");
+    if (code) {
+      supabase.auth.exchangeCodeForSession(code).then(({ error }) => {
+        settle(!error);
+      });
+    }
+
+    // 2) Listen for auth events (hash fragment flow fires PASSWORD_RECOVERY)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session) settle(true);
     });
-  }, []);
+
+    // 3) Fast path: session already in cookies (callback flow)
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) settle(true);
+    });
+
+    // 4) If nothing resolved after 4s, the link is invalid/expired
+    const timer = setTimeout(() => settle(false), 4000);
+
+    return () => {
+      subscription.unsubscribe();
+      clearTimeout(timer);
+    };
+  }, [searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
