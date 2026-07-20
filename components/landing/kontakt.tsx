@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { Mail, MessageSquare, ArrowRight, Loader2 } from "lucide-react";
+import { ArrowRight, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 
 export function Kontakt() {
@@ -65,20 +65,14 @@ export function Kontakt() {
               Har du spørsmål om Reachr, ønsker du en demo, eller trenger du hjelp? Send oss en melding så tar vi kontakt innen én virkedag.
             </p>
 
-            <div className="space-y-5">
-              <div className="flex items-center gap-3">
-                <Mail size={16} className="text-[#ff470a] shrink-0" />
-                <div>
-                  <p className="text-xs font-semibold text-[#6b6660] mb-0.5">E-post</p>
-                  <a href="mailto:Help@reachr.no" className="text-sm font-semibold text-[#ff470a] hover:underline">Help@reachr.no</a>
-                </div>
+            <div className="space-y-4">
+              <div>
+                <p className="text-xs font-semibold text-[#6b6660] mb-0.5">E-post</p>
+                <a href="mailto:Help@reachr.no" className="text-sm font-semibold text-[#ff470a] hover:underline">Help@reachr.no</a>
               </div>
-              <div className="flex items-center gap-3">
-                <MessageSquare size={16} style={{ color: "#09fe94", filter: "brightness(0.65)" }} className="shrink-0" />
-                <div>
-                  <p className="text-xs font-semibold text-[#6b6660] mb-0.5">Svartid</p>
-                  <p className="text-sm font-semibold text-[#171717]">Innen 1 virkedag</p>
-                </div>
+              <div>
+                <p className="text-xs font-semibold text-[#6b6660] mb-0.5">Svartid</p>
+                <p className="text-sm font-semibold text-[#171717]">Innen 1 virkedag</p>
               </div>
             </div>
           </motion.div>
@@ -98,7 +92,6 @@ export function Kontakt() {
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.4, ease: "easeOut" }}
               >
-                <MessageSquare size={28} style={{ color: "#065c3a" }} className="mx-auto mb-4" />
                 <p className="text-lg font-extrabold text-[#171717] mb-2">Melding sendt!</p>
                 <p className="text-sm text-[#6b6660]">Vi tar kontakt med deg innen én virkedag.</p>
               </motion.div>

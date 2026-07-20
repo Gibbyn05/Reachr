@@ -1,41 +1,28 @@
 "use client";
-import { Search, Users, Bell, Map, Sparkles, BarChart3 } from "lucide-react";
 import { motion } from "framer-motion";
 
 const featureItems = [
   {
-    icon: Search,
-    accent: "#09fe94",
     title: "Leadsøk i Brønnøysundregistrene",
     description: "Søk blant 250 000+ norske bedrifter etter bransje, sted, omsetning og antall ansatte. Reachr henter også kontaktpersoner og e-postadresser automatisk.",
   },
   {
-    icon: Map,
-    accent: "#ff470a",
     title: "Kartvisning",
     description: "Se alle treff som punkter på kart. Perfekt for feltsalg og regionsbasert prospektering.",
   },
   {
-    icon: Users,
-    accent: "#ffad0a",
     title: "CRM-pipeline",
     description: "6 statusnivåer med farger. Tildel leads til teammedlemmer, legg til notater og spor hele salgsprosessen.",
   },
   {
-    icon: Sparkles,
-    accent: "#09fe94",
     title: "AI-genererte e-poster og SMS",
     description: "Én klikk og AI skriver en personlig salgsmelding tilpasset hver bedrift — basert på din salgspitch og målgruppe. Send direkte fra Reachr via Gmail eller Outlook, eller kopier teksten og send selv.",
   },
   {
-    icon: Bell,
-    accent: "#ff470a",
     title: "Automatiske varsler og sekvenser",
     description: "Reachr minner deg på oppfølging basert på siste aktivitet. Sett opp e-postsekvenser som kjører automatisk – aldri la et lead bli glemt igjen.",
   },
   {
-    icon: BarChart3,
-    accent: "#ffad0a",
     title: "Statistikk og oversikt",
     description: "Dashboard med antall leads, bookede møter, konverteringsrate og teamstatistikk.",
   },
@@ -72,22 +59,15 @@ export function Features() {
 
         {/* Features list */}
         <motion.div
-          className="grid grid-cols-1 md:grid-cols-2 gap-x-16 gap-y-12"
+          className="grid grid-cols-1 md:grid-cols-2 gap-x-16 gap-y-10"
           variants={gridContainerVariants}
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: "-80px" }}
         >
-          {featureItems.map(({ icon: Icon, accent, title, description }) => (
+          {featureItems.map(({ title, description }) => (
             <motion.div key={title} variants={gridItemVariants}>
-              <h3 className="text-base font-extrabold text-[#171717] mb-2 flex items-center gap-2.5">
-                <Icon
-                  size={16}
-                  style={{ color: accent, filter: accent === "#09fe94" ? "brightness(0.65)" : "none" }}
-                  className="shrink-0"
-                />
-                {title}
-              </h3>
+              <h3 className="text-base font-extrabold text-[#171717] mb-2">{title}</h3>
               <p className="text-sm text-[#6b6660] leading-relaxed max-w-md">{description}</p>
             </motion.div>
           ))}
@@ -95,7 +75,7 @@ export function Features() {
 
         {/* Stats strip */}
         <motion.div
-          className="mt-12 grid grid-cols-1 sm:grid-cols-3 gap-px bg-[#d8d3c5] rounded-2xl overflow-hidden max-w-3xl mx-auto"
+          className="mt-16 grid grid-cols-1 sm:grid-cols-3 gap-px bg-[#d8d3c5] rounded-2xl overflow-hidden max-w-3xl mx-auto"
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-80px" }}

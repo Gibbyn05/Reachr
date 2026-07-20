@@ -1,5 +1,4 @@
 "use client";
-import { Flag, Layers, HeartHandshake } from "lucide-react";
 import { motion } from "framer-motion";
 
 const statsContainerVariants = { hidden: {}, visible: { transition: { staggerChildren: 0.12 } } };
@@ -11,20 +10,14 @@ const values = [
   {
     title: "Bygget for norsk B2B",
     desc: "Reachr er laget spesifikt for norske salgsorganisasjoner – med Brønnøysundregistrene i kjernen.",
-    accent: "#09fe94",
-    icon: Flag,
   },
   {
     title: "Enkelhet fremfor alt",
     desc: "Vi tror det beste verktøyet er det du faktisk bruker. Reachr er designet for å være raskt og intuitivt.",
-    accent: "#ff470a",
-    icon: Layers,
   },
   {
     title: "Kunden i sentrum",
     desc: "Hvert nytt produkt vi lanserer er basert på tilbakemeldinger fra ekte brukere – ikke hypoteser.",
-    accent: "#ffad0a",
-    icon: HeartHandshake,
   },
 ];
 
@@ -109,22 +102,14 @@ export function OmOss() {
             whileInView="visible"
             viewport={{ once: true, margin: "-80px" }}
           >
-            {values.map(({ title, desc, accent, icon: Icon }) => (
+            {values.map(({ title, desc }) => (
               <motion.div key={title} className="bg-[#faf8f2] border border-[#d8d3c5] rounded-2xl p-7" variants={valuesItemVariants}>
-                <h4 className="text-base font-extrabold text-[#171717] mb-2 flex items-center gap-2.5">
-                  <Icon
-                    size={18}
-                    style={{ color: accent, filter: accent === "#09fe94" ? "brightness(0.65)" : "none" }}
-                    className="shrink-0"
-                  />
-                  {title}
-                </h4>
+                <h4 className="text-base font-extrabold text-[#171717] mb-2">{title}</h4>
                 <p className="text-sm text-[#6b6660] leading-relaxed">{desc}</p>
               </motion.div>
             ))}
           </motion.div>
         </motion.div>
-
 
       </div>
     </section>
