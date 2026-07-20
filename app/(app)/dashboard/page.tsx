@@ -272,17 +272,26 @@ export default function DashboardPage() {
               Salgskonvertering (Hit Rate)
             </h3>
             
-            <div className="relative w-32 h-32 flex items-center justify-center rounded-full bg-[#faf8f2] border-4 border-[#e8e4d8] shadow-inner mb-4">
-              <svg className="absolute top-0 left-0 w-full h-full transform -rotate-90">
+            <div className="relative w-36 h-36 flex items-center justify-center mb-4">
+              <svg className="absolute inset-0 w-full h-full transform -rotate-90" viewBox="0 0 136 136">
+                <circle
+                  cx="68"
+                  cy="68"
+                  r="58"
+                  stroke="#e8e4d8"
+                  strokeWidth="8"
+                  fill="transparent"
+                />
                 {hitRate > 0 && (
                   <circle
-                    cx="64"
-                    cy="64"
-                    r="60"
+                    cx="68"
+                    cy="68"
+                    r="58"
                     stroke="#09fe94"
                     strokeWidth="8"
                     fill="transparent"
-                    strokeDasharray={`${(hitRate / 100) * 377} 377`}
+                    strokeLinecap="round"
+                    strokeDasharray={`${(hitRate / 100) * 2 * Math.PI * 58} ${2 * Math.PI * 58}`}
                     className="transition-all duration-1000 ease-out"
                   />
                 )}
