@@ -19,9 +19,6 @@ export function CtaBanner() {
           viewport={{ once: true, margin: "-80px" }}
           transition={{ duration: 0.6 }}
         >
-          <p className="text-sm font-bold uppercase tracking-widest text-[#6b6660] mb-6">
-            Klar til å begynne?
-          </p>
           <h2 className="font-display text-[clamp(3rem,7vw,6rem)] font-bold leading-[0.93] tracking-[-0.02em] text-white mb-8">
             Finn dine neste
             <br />

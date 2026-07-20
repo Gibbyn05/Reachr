@@ -54,9 +54,6 @@ export function Comparison() {
           viewport={{ once: true, margin: "-80px" }}
           transition={{ duration: 0.5 }}
         >
-          <p className="text-sm font-bold uppercase tracking-widest text-[#6b6660] mb-4">
-            Reachr vs. tradisjonelt salg
-          </p>
           <h2 className="font-display text-[clamp(2.5rem,5vw,4.5rem)] font-bold leading-[0.95] tracking-[-0.01em] text-white">
             Manuell prospektering
             <br />

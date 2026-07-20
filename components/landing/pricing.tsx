@@ -69,9 +69,6 @@ export function Pricing() {
           viewport={{ once: true, margin: "-80px" }}
           transition={{ duration: 0.5 }}
         >
-          <p className="text-sm font-bold uppercase tracking-widest text-[#a09b8f] mb-4">
-            Priser
-          </p>
           <h2 className="font-display text-[clamp(2.5rem,5vw,4.5rem)] font-bold leading-[0.95] tracking-[-0.01em] text-[#171717]">
             Én pris.
             <br />

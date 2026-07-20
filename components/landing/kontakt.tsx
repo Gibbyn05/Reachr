@@ -44,7 +44,6 @@ export function Kontakt() {
           viewport={{ once: true, margin: "-80px" }}
           transition={{ duration: 0.5 }}
         >
-          <p className="text-sm font-bold uppercase tracking-widest text-[#a09b8f] mb-4">Kontakt</p>
           <h2 className="font-display text-[clamp(2.5rem,5vw,4.5rem)] font-bold leading-[0.95] tracking-[-0.01em] text-[#171717]">
             Ta gjerne kontakt –
             <br />
@@ -67,40 +66,20 @@ export function Kontakt() {
             </p>
 
             <div className="space-y-5">
-              {[
-                {
-                  icon: Mail,
-                  label: "E-post",
-                  value: "Help@reachr.no",
-                  accent: "#ff470a",
-                },
-                {
-                  icon: MessageSquare,
-                  label: "Svartid",
-                  value: "Innen 1 virkedag",
-                  accent: "#09fe94",
-                },
-              ].map(({ icon: Icon, label, value, accent }) => (
-                <div key={label} className="flex items-center gap-4">
-                  <div
-                    className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
-                    style={{ backgroundColor: accent + "18" }}
-                  >
-                    <Icon
-                      size={17}
-                      style={{ color: accent, filter: accent === "#09fe94" ? "brightness(0.65)" : "none" }}
-                    />
-                  </div>
-                  <div>
-                    <p className="text-xs font-bold text-[#a09b8f] uppercase tracking-wide">{label}</p>
-                    {label === "E-post" ? (
-                      <a href={`mailto:${value}`} className="text-sm font-semibold text-[#ff470a] hover:underline">{value}</a>
-                    ) : (
-                      <p className="text-sm font-semibold text-[#171717]">{value}</p>
-                    )}
-                  </div>
+              <div className="flex items-center gap-3">
+                <Mail size={16} className="text-[#ff470a] shrink-0" />
+                <div>
+                  <p className="text-xs font-semibold text-[#6b6660] mb-0.5">E-post</p>
+                  <a href="mailto:Help@reachr.no" className="text-sm font-semibold text-[#ff470a] hover:underline">Help@reachr.no</a>
                 </div>
-              ))}
+              </div>
+              <div className="flex items-center gap-3">
+                <MessageSquare size={16} style={{ color: "#09fe94", filter: "brightness(0.65)" }} className="shrink-0" />
+                <div>
+                  <p className="text-xs font-semibold text-[#6b6660] mb-0.5">Svartid</p>
+                  <p className="text-sm font-semibold text-[#171717]">Innen 1 virkedag</p>
+                </div>
+              </div>
             </div>
           </motion.div>
 
@@ -119,9 +98,7 @@ export function Kontakt() {
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.4, ease: "easeOut" }}
               >
-                <div className="w-14 h-14 bg-[#09fe94]/15 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <MessageSquare size={24} style={{ color: "#065c3a" }} />
-                </div>
+                <MessageSquare size={28} style={{ color: "#065c3a" }} className="mx-auto mb-4" />
                 <p className="text-lg font-extrabold text-[#171717] mb-2">Melding sendt!</p>
                 <p className="text-sm text-[#6b6660]">Vi tar kontakt med deg innen én virkedag.</p>
               </motion.div>
@@ -134,7 +111,7 @@ export function Kontakt() {
                 )}
                 <form onSubmit={handleSubmit} className="space-y-5">
                 <div>
-                  <label className="block text-xs font-bold text-[#a09b8f] uppercase tracking-widest mb-2">Navn</label>
+                  <label className="block text-sm font-medium text-[#3d3a34] mb-1.5">Navn</label>
                   <input
                     type="text"
                     required
@@ -145,7 +122,7 @@ export function Kontakt() {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-[#a09b8f] uppercase tracking-widest mb-2">E-post</label>
+                  <label className="block text-sm font-medium text-[#3d3a34] mb-1.5">E-post</label>
                   <input
                     type="email"
                     required
@@ -156,7 +133,7 @@ export function Kontakt() {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-[#a09b8f] uppercase tracking-widest mb-2">Melding</label>
+                  <label className="block text-sm font-medium text-[#3d3a34] mb-1.5">Melding</label>
                   <textarea
                     required
                     rows={5}

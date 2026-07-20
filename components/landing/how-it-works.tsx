@@ -149,9 +149,6 @@ export function HowItWorks() {
           viewport={{ once: true, margin: "-80px" }}
           transition={{ duration: 0.5 }}
         >
-          <p className="text-sm font-bold uppercase tracking-widest text-[#a09b8f] mb-4">
-            Slik fungerer det
-          </p>
           <h2 className="font-display text-[clamp(2.5rem,5vw,4.5rem)] font-bold leading-[0.95] tracking-[-0.01em] text-[#171717]">
             Fire steg til
             <br />
@@ -172,12 +169,12 @@ export function HowItWorks() {
             >
               {/* Text */}
               <div className="flex-1">
-                <div
-                  className="inline-flex items-center justify-center w-12 h-12 rounded-2xl mb-6 text-xl font-extrabold"
-                  style={{ backgroundColor: step.accent + "22", color: step.accent, filter: step.accent === "#09fe94" ? "brightness(0.65)" : "none" }}
+                <span
+                  className="text-sm font-bold mb-4 inline-block"
+                  style={{ color: step.accent, filter: step.accent === "#09fe94" ? "brightness(0.65)" : "none" }}
                 >
-                  {step.number}
-                </div>
+                  Steg {step.number}
+                </span>
                 <h3 className="font-display text-[2rem] sm:text-[2.4rem] font-bold text-[#171717] mb-4 leading-[1] tracking-[-0.01em]">
                   {step.title}
                 </h3>

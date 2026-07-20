@@ -1,5 +1,5 @@
 "use client";
-import { Search, Users, Bell, Map, Mail, BarChart3, MessageSquare, Sparkles } from "lucide-react";
+import { Search, Users, Bell, Map, Sparkles, BarChart3 } from "lucide-react";
 import { motion } from "framer-motion";
 
 const bentoItems = [
@@ -69,9 +69,6 @@ export function Features() {
           viewport={{ once: true, margin: "-80px" }}
           transition={{ duration: 0.5 }}
         >
-          <p className="text-sm font-bold uppercase tracking-widest text-[#a09b8f] mb-4">
-            Funksjoner
-          </p>
           <h2 className="font-display text-[clamp(2.5rem,5vw,4.5rem)] font-bold leading-[0.95] tracking-[-0.01em] text-[#171717]">
             Alt du trenger
             <br />
@@ -93,16 +90,14 @@ export function Features() {
               variants={gridItemVariants}
               className={`${span} rounded-2xl border border-[#d8d3c5] bg-[#faf8f2] p-7 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_32px_rgba(0,0,0,0.07)]`}
             >
-              <div
-                className="w-10 h-10 rounded-xl flex items-center justify-center mb-5"
-                style={{ backgroundColor: accent + "18" }}
-              >
+              <h3 className="text-lg font-extrabold text-[#171717] mb-2 flex items-center gap-2.5">
                 <Icon
-                  size={20}
+                  size={18}
                   style={{ color: accent, filter: accent === "#09fe94" ? "brightness(0.65)" : "none" }}
+                  className="shrink-0"
                 />
-              </div>
-              <h3 className="text-lg font-extrabold text-[#171717] mb-2">{title}</h3>
+                {title}
+              </h3>
               <p className="text-sm text-[#6b6660] leading-relaxed">{description}</p>
             </motion.div>
           ))}
