@@ -70,9 +70,8 @@ export function OmOss() {
           >
             {[
               { value: "2026", label: "Grunnlagt" },
-              { value: "3 dager", label: "Gratis prøveperiode" },
+              { value: "14 dager", label: "Gratis prøveperiode" },
               { value: "250 000+", label: "Bedrifter tilgjengelig" },
-              { value: "4.9/5", label: "Brukervurdering" },
             ].map(({ value, label }) => (
               <motion.div
                 key={label}

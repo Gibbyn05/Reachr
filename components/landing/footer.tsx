@@ -8,12 +8,12 @@ export function Footer() {
   const columns = lang === "en"
     ? [
         { title: "Product", links: [["Features", "#features"], ["Pricing", "#pricing"], ["Updates", "/oppdateringer"]] },
-        { title: "Company", links: [["About", "#om-oss"], ["Contact", "#kontakt"], ["Support", "mailto:Help@reachr.no"]] },
+        { title: "Company", links: [["About", "#om-oss"], ["Contact", "#kontakt"], ["Support", "mailto:help@reachr.no"]] },
         { title: "Legal", links: [["Privacy", "/personvern"], ["Terms", "/vilkaar"], ["GDPR", "/personvern#gdpr"]] },
       ]
     : [
         { title: "Produkt", links: [["Funksjoner", "#features"], ["Priser", "#pricing"], ["Oppdateringer", "/oppdateringer"]] },
-        { title: "Selskap", links: [["Om oss", "#om-oss"], ["Kontakt", "#kontakt"], ["Support", "mailto:Help@reachr.no"]] },
+        { title: "Selskap", links: [["Om oss", "#om-oss"], ["Kontakt", "#kontakt"], ["Support", "mailto:help@reachr.no"]] },
         { title: "Juridisk", links: [["Personvern", "/personvern"], ["Vilkår", "/vilkaar"], ["GDPR", "/personvern#gdpr"]] },
       ];
 
@@ -29,8 +29,8 @@ export function Footer() {
             </Link>
             <p className="text-sm text-white/45 leading-[1.7] max-w-[260px]">
               {lang === "en"
-                ? "Norway's B2B tool for lead search and sales pipeline. Helping hundreds of companies find and close new customers."
-                : "Norges B2B-verktøy for leadsøk og salgspipeline. Hjelper hundrevis av bedrifter finne og lukke nye kunder."}
+                ? "Norway's B2B tool for lead search and sales pipeline. Search 250,000+ companies and manage your sales in one place."
+                : "Norges B2B-verktøy for leadsøk og salgspipeline. Søk blant 250 000+ bedrifter og styr salget ditt på ett sted."}
             </p>
           </div>
 
@@ -57,7 +57,7 @@ export function Footer() {
           <p className="text-[13px] text-white/35 m-0">
             {lang === "en" ? "© 2026 Reachr AS. All rights reserved." : "© 2026 Reachr AS. Alle rettigheter forbeholdt."}
           </p>
-          <p className="text-[13px] text-white/35 m-0">Help@reachr.no</p>
+          <p className="text-[13px] text-white/35 m-0">help@reachr.no</p>
         </div>
       </div>
     </footer>

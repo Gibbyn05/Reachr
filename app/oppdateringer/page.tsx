@@ -65,7 +65,7 @@ const updates = [
       "CRM-pipeline med 6 statusnivåer",
       "Automatiske oppfølgingsvarsler basert på aktivitet",
       "Dashboard med statistikk og oversikt",
-      "Stripe-betaling med 3 dagers gratis prøveperiode",
+      "Stripe-betaling med 14 dagers gratis prøveperiode",
     ],
   },
 ];
@@ -107,7 +107,7 @@ export default function OppdateringerPage() {
         </div>
 
         <div className="mt-16 pt-8 border-t border-[#d8d3c5] text-center">
-          <p className="text-sm text-[#a09b8f]">Spørsmål eller forslag? <a href="mailto:Help@reachr.no" className="text-[#ff470a] hover:underline">Help@reachr.no</a></p>
+          <p className="text-sm text-[#a09b8f]">Spørsmål eller forslag? <a href="mailto:help@reachr.no" className="text-[#ff470a] hover:underline">help@reachr.no</a></p>
         </div>
       </div>
     </div>

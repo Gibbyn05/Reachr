@@ -115,11 +115,12 @@ export function Pricing() {
           <motion.div className="rounded-2xl border border-[#d8d3c5] bg-[#faf8f2] p-8" variants={cardVariants}>
             <p className="text-xs font-bold text-[#a09b8f] uppercase tracking-widest mb-1">Solo</p>
             <p className="text-sm text-[#6b6660] mb-6">For deg som jobber alene med salg.</p>
-            <div className="flex items-end gap-1 mb-6">
+            <div className="flex items-end gap-1 mb-1">
               <span className="text-5xl font-extrabold text-[#171717] leading-none">{soloPrice}</span>
               <span className="text-lg text-[#a09b8f] mb-1">kr</span>
               <span className="text-xs text-[#a09b8f] mb-1.5">/mnd</span>
             </div>
+            <p className="text-xs text-[#a09b8f] mb-6">ekskl. MVA</p>
             <button
               onClick={() => handleCheckout("solo")}
               disabled={loading === "solo"}
@@ -145,11 +146,12 @@ export function Pricing() {
             </div>
             <p className="text-xs font-bold text-[#05c472] uppercase tracking-widest mb-1">Team</p>
             <p className="text-sm text-[#6b6660] mb-6">2–5 brukere. Perfekt for salgsteam.</p>
-            <div className="flex items-end gap-1 mb-6">
+            <div className="flex items-end gap-1 mb-1">
               <span className="text-5xl font-extrabold text-[#171717] leading-none">{teamPrice}</span>
               <span className="text-lg text-[#a09b8f] mb-1">kr</span>
               <span className="text-xs text-[#a09b8f] mb-1.5">/bruker/mnd</span>
             </div>
+            <p className="text-xs text-[#a09b8f] mb-6">ekskl. MVA</p>
             <button
               onClick={() => handleCheckout("team")}
               disabled={loading === "team"}
@@ -193,7 +195,7 @@ export function Pricing() {
         </motion.div>
 
         <p className="text-center text-xs text-[#a09b8f] mt-8">
-          Alle planer inkluderer 3 dagers gratis prøveperiode · Ingen kredittkort nødvendig · Kan avbestilles når som helst
+          Alle planer inkluderer 14 dagers gratis prøveperiode · Ingen kredittkort nødvendig · Kan avbestilles når som helst
         </p>
       </div>
     </section>

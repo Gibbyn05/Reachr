@@ -148,8 +148,8 @@ export function Hero() {
             </div>
             <p className="mt-4 text-xs text-[#a09b8f]" style={{ fontFamily: "'Inter', sans-serif" }}>
               {lang === "en"
-                ? "3-day free trial · No credit card required"
-                : "3 dagers gratis prøveperiode · Ingen kredittkort"}
+                ? "14-day free trial · No credit card required"
+                : "14 dagers gratis prøveperiode · Ingen kredittkort"}
             </p>
 
         </div>

@@ -49,12 +49,12 @@ export default function BetalingPage() {
       const res = await fetch("/api/stripe/portal", { method: "POST" });
       const data = await res.json();
       if (!res.ok || !data.url) {
-        setError("Kunne ikke åpne administrasjonspanelet. Kontakt oss på Help@reachr.no");
+        setError("Kunne ikke åpne administrasjonspanelet. Kontakt oss på help@reachr.no");
         return;
       }
       window.location.href = data.url;
     } catch {
-      setError("Noe gikk galt. Kontakt oss på Help@reachr.no");
+      setError("Noe gikk galt. Kontakt oss på help@reachr.no");
     } finally {
       setPortalLoading(false);
     }
@@ -110,7 +110,7 @@ export default function BetalingPage() {
         {/* Header */}
         <div className="text-center mb-6">
           <h1 className="text-2xl font-bold text-[#171717] mb-2">Velg din plan</h1>
-          <p className="text-[#6b6660] text-sm">3 dager gratis — ingen binding, avslutt når som helst</p>
+          <p className="text-[#6b6660] text-sm">14 dager gratis — ingen binding, avslutt når som helst</p>
         </div>
 
         {/* Interval toggle */}
@@ -174,7 +174,7 @@ export default function BetalingPage() {
                 </p>
                 <p className={`text-lg font-extrabold ${isSelected ? "text-[#171717]" : "text-[#3d3a34]"}`}>
                   {price} kr
-                  <span className="text-xs font-normal text-[#a09b8f]">/mnd</span>
+                  <span className="text-xs font-normal text-[#a09b8f]">/mnd ekskl. MVA</span>
                 </p>
                 {interval === "yearly" && (
                   <p className="text-xs text-[#6b6660] mt-0.5">
@@ -250,7 +250,7 @@ export default function BetalingPage() {
         </div>
 
         <p className="text-center text-xs text-[#a09b8f] mt-6">
-          Du belastes ikke før prøveperioden er over. Avslutt gratis innen 3 dager.
+          Du belastes ikke før prøveperioden er over. Avslutt gratis innen 14 dager.
         </p>
       </div>
 
@@ -266,8 +266,8 @@ export default function BetalingPage() {
         </button>
         <p className="text-xs text-[#a09b8f]">
           Spørsmål? Ta kontakt på{" "}
-          <a href="mailto:Help@reachr.no" className="text-[#ff470a] hover:underline">
-            Help@reachr.no
+          <a href="mailto:help@reachr.no" className="text-[#ff470a] hover:underline">
+            help@reachr.no
           </a>
         </p>
       </div>

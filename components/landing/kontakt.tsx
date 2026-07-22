@@ -68,7 +68,7 @@ export function Kontakt() {
             <div className="space-y-4">
               <div>
                 <p className="text-xs font-semibold text-[#6b6660] mb-0.5">E-post</p>
-                <a href="mailto:Help@reachr.no" className="text-sm font-semibold text-[#ff470a] hover:underline">Help@reachr.no</a>
+                <a href="mailto:help@reachr.no" className="text-sm font-semibold text-[#ff470a] hover:underline">help@reachr.no</a>
               </div>
               <div>
                 <p className="text-xs font-semibold text-[#6b6660] mb-0.5">Svartid</p>

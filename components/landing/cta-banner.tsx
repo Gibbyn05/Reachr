@@ -26,7 +26,7 @@ export function CtaBanner() {
           </h2>
           <p className="text-base text-white/50 max-w-md mx-auto mb-10 leading-relaxed">
             Kom i gang på under 2 minutter. Ingen kredittkort, ingen bindingstid –
-            bare 3 dager gratis for å se om Reachr er noe for deg.
+            bare 14 dager gratis for å se om Reachr er noe for deg.
           </p>
         </motion.div>
         <motion.div

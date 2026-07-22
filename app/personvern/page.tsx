@@ -13,7 +13,7 @@ export default function PersonvernPage() {
         <div className="space-y-10 text-[#3d3a34]">
           <section>
             <h2 className="text-xl font-bold text-[#171717] mb-3">1. Behandlingsansvarlig</h2>
-            <p className="leading-relaxed">Reachr AS er behandlingsansvarlig for personopplysninger som behandles i forbindelse med bruk av tjenesten reachr.no. Spørsmål om personvern kan rettes til <a href="mailto:Help@reachr.no" className="text-[#ff470a] hover:underline">Help@reachr.no</a>.</p>
+            <p className="leading-relaxed">Reachr AS er behandlingsansvarlig for personopplysninger som behandles i forbindelse med bruk av tjenesten reachr.no. Spørsmål om personvern kan rettes til <a href="mailto:help@reachr.no" className="text-[#ff470a] hover:underline">help@reachr.no</a>.</p>
           </section>
 
           <section>
@@ -80,7 +80,7 @@ export default function PersonvernPage() {
               <li>Protestere mot behandling eller kreve begrensning</li>
               <li>Dataportabilitet – motta dine data i maskinlesbart format</li>
             </ul>
-            <p className="leading-relaxed mt-3">Send forespørsler til <a href="mailto:Help@reachr.no" className="text-[#ff470a] hover:underline">Help@reachr.no</a>. Du kan også klage til Datatilsynet (datatilsynet.no).</p>
+            <p className="leading-relaxed mt-3">Send forespørsler til <a href="mailto:help@reachr.no" className="text-[#ff470a] hover:underline">help@reachr.no</a>. Du kan også klage til Datatilsynet (datatilsynet.no).</p>
           </section>
 
           <section>
@@ -90,7 +90,7 @@ export default function PersonvernPage() {
 
           <section>
             <h2 className="text-xl font-bold text-[#171717] mb-3">8. Kontakt</h2>
-            <p className="leading-relaxed">Spørsmål om personvern? Kontakt oss på <a href="mailto:Help@reachr.no" className="text-[#ff470a] hover:underline">Help@reachr.no</a>.</p>
+            <p className="leading-relaxed">Spørsmål om personvern? Kontakt oss på <a href="mailto:help@reachr.no" className="text-[#ff470a] hover:underline">help@reachr.no</a>.</p>
           </section>
         </div>
       </div>

@@ -13,7 +13,7 @@ export default function VilkaarPage() {
         <div className="space-y-10 text-[#3d3a34]">
           <section>
             <h2 className="text-xl font-bold text-[#171717] mb-3">1. Tjenesteleverandør</h2>
-            <p className="leading-relaxed">Reachr AS leverer denne tjenesten. Ved å opprette en konto aksepterer du disse vilkårene. Spørsmål rettes til <a href="mailto:Help@reachr.no" className="text-[#ff470a] hover:underline">Help@reachr.no</a>.</p>
+            <p className="leading-relaxed">Reachr AS leverer denne tjenesten. Ved å opprette en konto aksepterer du disse vilkårene. Spørsmål rettes til <a href="mailto:help@reachr.no" className="text-[#ff470a] hover:underline">help@reachr.no</a>.</p>
           </section>
 
           <section>
@@ -60,7 +60,7 @@ export default function VilkaarPage() {
 
           <section>
             <h2 className="text-xl font-bold text-[#171717] mb-3">8. Kontakt</h2>
-            <p className="leading-relaxed">Spørsmål om vilkår? Kontakt oss på <a href="mailto:Help@reachr.no" className="text-[#ff470a] hover:underline">Help@reachr.no</a>.</p>
+            <p className="leading-relaxed">Spørsmål om vilkår? Kontakt oss på <a href="mailto:help@reachr.no" className="text-[#ff470a] hover:underline">help@reachr.no</a>.</p>
           </section>
         </div>
       </div>
