@@ -9,7 +9,7 @@ function addSecurityHeaders(response: NextResponse) {
   response.headers.set("Permissions-Policy", "geolocation=(), microphone=(), camera=()");
   response.headers.set(
     "Content-Security-Policy",
-    "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://polyfill.io; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://api.reachr.no https://api.resend.com https://api.stripe.com https://*.stripe.com wss:; frame-src 'self' https://*.stripe.com;"
+    "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://polyfill.io; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://*.supabase.co https://api.reachr.no https://api.resend.com https://api.stripe.com https://*.stripe.com wss:; frame-src 'self' https://*.stripe.com;"
   );
 }
 
