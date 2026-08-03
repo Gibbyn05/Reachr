@@ -5,10 +5,55 @@ const RESEND_API_KEY = process.env.RESEND_API_KEY;
 const FROM_EMAIL = process.env.RESEND_FROM_EMAIL ?? "noreply@reachr.no";
 const APP_URL = (process.env.NEXT_PUBLIC_APP_URL ?? "https://www.reachr.no").replace(/\/$/, "");
 
+const lastEmailTime = new Map<string, number>();
+const EMAIL_COOLDOWN_MS = 2000;
+
+async function sendEmailWithRetry(body: Record<string, unknown>, maxRetries = 3) {
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      const res = await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${RESEND_API_KEY}`, "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+
+      if (res.ok) return { ok: true, data: await res.json() };
+
+      const err = await res.json().catch(() => ({}));
+      if (res.status === 429) {
+        const waitTime = Math.pow(2, attempt) * 1000;
+        if (attempt < maxRetries - 1) {
+          await new Promise(resolve => setTimeout(resolve, waitTime));
+          continue;
+        }
+        return { ok: false, status: 429, error: "Rate limited" };
+      }
+      return { ok: false, status: res.status, error: err };
+    } catch (e) {
+      if (attempt < maxRetries - 1) {
+        await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 1000));
+      } else {
+        return { ok: false, status: 500, error: e instanceof Error ? e.message : "Unknown error" };
+      }
+    }
+  }
+  return { ok: false, status: 500, error: "Max retries exceeded" };
+}
+
 export async function POST(req: NextRequest) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user?.email) return NextResponse.json({ error: "Ikke innlogget" }, { status: 401 });
+
+  const now = Date.now();
+  const lastTime = lastEmailTime.get(user.id) ?? 0;
+  if (now - lastTime < EMAIL_COOLDOWN_MS) {
+    return NextResponse.json(
+      { skipped: true, reason: "Rate limited - please wait before adding another lead" },
+      { status: 429 }
+    );
+  }
+  lastEmailTime.set(user.id, now);
 
   // Respect notification setting
   const settings = user.user_metadata?.notification_settings ?? {};
@@ -59,21 +104,22 @@ export async function POST(req: NextRequest) {
   </table>
 </body></html>`;
 
-  const res = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: { Authorization: `Bearer ${RESEND_API_KEY}`, "Content-Type": "application/json" },
-    body: JSON.stringify({
-      from: `Reachr <${FROM_EMAIL}>`,
-      to: [user.email],
-      subject: `🆕 Nytt lead: ${leadName} – Reachr`,
-      text: `Hei ${name},\n\nEt nytt lead er lagt til: ${leadName}${industry ? `\nBransje: ${industry}` : ""}${city ? `\nBy: ${city}` : ""}\n\nÅpne pipeline: ${APP_URL}/mine-leads\n\n-- Reachr`,
-      html,
-    }),
+  const result = await sendEmailWithRetry({
+    from: `Reachr <${FROM_EMAIL}>`,
+    to: [user.email],
+    subject: `🆕 Nytt lead: ${leadName} – Reachr`,
+    text: `Hei ${name},\n\nEt nytt lead er lagt til: ${leadName}${industry ? `\nBransje: ${industry}` : ""}${city ? `\nBy: ${city}` : ""}\n\nÅpne pipeline: ${APP_URL}/mine-leads\n\n-- Reachr`,
+    html,
   });
 
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    return NextResponse.json({ error: "Kunne ikke sende e-post", detail: err }, { status: 500 });
+  if (!result.ok) {
+    if (result.status === 429) {
+      return NextResponse.json(
+        { queued: true, reason: "Email service temporarily rate limited - notification will be sent shortly" },
+        { status: 202 }
+      );
+    }
+    return NextResponse.json({ error: "Kunne ikke sende e-post", detail: result.error }, { status: result.status ?? 500 });
   }
   return NextResponse.json({ success: true });
 }
