@@ -221,6 +221,101 @@ function AiSmsModal({
 }
 
 /* ── AI Email modal ────────────────────────────────────────── */
+/* ── Follow-up workflow modal ────────────────────────────── */
+function FollowUpModal({
+  leadName,
+  onSave,
+  onClose,
+}: {
+  leadName: string;
+  onSave: (date: string) => void;
+  onClose: () => void;
+}) {
+  const [followUpDays, setFollowUpDays] = useState("3");
+  const [customDate, setCustomDate] = useState("");
+  const [useCustom, setUseCustom] = useState(false);
+
+  const handleSave = () => {
+    if (useCustom && customDate) {
+      onSave(customDate);
+    } else if (!useCustom && followUpDays) {
+      const date = new Date();
+      date.setDate(date.getDate() + parseInt(followUpDays));
+      onSave(date.toISOString().split("T")[0]);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40" onClick={onClose}>
+      <div className="bg-[#faf8f2] rounded-2xl shadow-xl p-6 w-96" onClick={(e) => e.stopPropagation()}>
+        <h3 className="text-sm font-bold text-[#171717] mb-1">Når skal du følge opp?</h3>
+        <p className="text-xs text-[#a09b8f] mb-4">{leadName}</p>
+
+        <div className="space-y-3 mb-5">
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="radio"
+              checked={!useCustom}
+              onChange={() => setUseCustom(false)}
+              className="cursor-pointer"
+            />
+            <span className="text-sm text-[#171717] font-medium">Om X dager:</span>
+          </label>
+          {!useCustom && (
+            <div className="flex gap-2 ml-6">
+              {["1", "2", "3", "7"].map((days) => (
+                <button
+                  key={days}
+                  onClick={() => setFollowUpDays(days)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                    followUpDays === days
+                      ? "bg-[#09fe94] text-[#171717]"
+                      : "bg-[#ede9da] text-[#6b6660] hover:bg-[#d8d3c5]"
+                  }`}
+                >
+                  {days}d
+                </button>
+              ))}
+            </div>
+          )}
+
+          <label className="flex items-center gap-2 cursor-pointer mt-4">
+            <input
+              type="radio"
+              checked={useCustom}
+              onChange={() => setUseCustom(true)}
+              className="cursor-pointer"
+            />
+            <span className="text-sm text-[#171717] font-medium">Spesifikk dato:</span>
+          </label>
+          {useCustom && (
+            <input
+              type="date"
+              value={customDate}
+              onChange={(e) => setCustomDate(e.target.value)}
+              className="ml-6 w-full text-sm border border-[#d8d3c5] rounded-lg px-3 py-1.5 focus:outline-none focus:border-[#09fe94]/60 bg-[#faf8f2] text-[#171717]"
+              autoFocus
+            />
+          )}
+        </div>
+
+        <div className="flex gap-2">
+          <button
+            onClick={handleSave}
+            disabled={useCustom ? !customDate : !followUpDays}
+            className="flex-1 py-2 bg-[#09fe94] text-[#171717] text-sm font-semibold rounded-lg hover:bg-[#00e882] disabled:opacity-40"
+          >
+            Lagre
+          </button>
+          <button onClick={onClose} className="px-4 py-2 border border-[#d8d3c5] text-sm rounded-lg hover:bg-[#f0ece0]">
+            Avbryt
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function AiEmailModal({
   lead,
   senderName,
@@ -588,6 +683,7 @@ function LeadRow({
   salesPitch,
   targetCustomers,
   aiEmailInstructions,
+  onFollowUpClick,
 }: {
   lead: Lead;
   onStatusChange: (id: string, status: string) => void;
@@ -602,6 +698,7 @@ function LeadRow({
   salesPitch?: string;
   targetCustomers?: string;
   aiEmailInstructions?: string;
+  onFollowUpClick?: () => void;
 }) {
   const statusOptions = useAppStore(s => s.pipelineStages);
   const updateLeadEmail = useAppStore(s => s.updateLeadEmail);
@@ -1075,12 +1172,24 @@ function LeadRow({
                     <p className="text-xs font-semibold text-[#a09b8f] uppercase tracking-wider mb-2 flex items-center gap-1.5">
                       <Clock className="w-3.5 h-3.5" /> Sist kontaktet
                     </p>
-                    <input
-                      type="date"
-                      value={lead.lastContacted ?? ""}
-                      onChange={(e) => onLastContactedChange(lead.id, e.target.value || null)}
-                      className="text-sm border border-[#d8d3c5] rounded-lg px-2 py-1.5 text-[#171717] focus:outline-none focus:border-[#09fe94]/60 bg-[#faf8f2] w-full"
-                    />
+                    <div className="flex gap-2">
+                      <input
+                        type="date"
+                        value={lead.lastContacted ?? ""}
+                        onChange={(e) => onLastContactedChange(lead.id, e.target.value || null)}
+                        className="flex-1 text-sm border border-[#d8d3c5] rounded-lg px-2 py-1.5 text-[#171717] focus:outline-none focus:border-[#09fe94]/60 bg-[#faf8f2]"
+                      />
+                      <button
+                        onClick={async () => {
+                          const today = new Date().toISOString().split("T")[0];
+                          await onLastContactedChange(lead.id, today);
+                          onFollowUpClick?.();
+                        }}
+                        className="px-3 py-1.5 bg-[#09fe94] text-[#171717] font-semibold text-xs rounded-lg hover:bg-[#00e882] whitespace-nowrap transition-colors"
+                      >
+                        Jeg har ringt
+                      </button>
+                    </div>
                   </div>
 
                   {/* Meeting date */}
@@ -1445,6 +1554,9 @@ function MineLeadsContent() {
   const [teamMembers, setTeamMembers] = useState<string[]>([]);
   const [isImporting, setIsImporting] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
+  const [showFollowUpModal, setShowFollowUpModal] = useState(false);
+  const [followUpLeadId, setFollowUpLeadId] = useState<string | null>(null);
+  const [followUpDate, setFollowUpDate] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleSyncEmails = async () => {
@@ -1892,6 +2004,10 @@ function MineLeadsContent() {
                     meetingDate={meetingDates[lead.id]}
                     onMeetingDateSave={setMeetingDate}
                     teamMembers={teamMembers}
+                    onFollowUpClick={() => {
+                      setFollowUpLeadId(lead.id);
+                      setShowFollowUpModal(true);
+                    }}
                     senderName={currentUser?.name ?? ""}
                     salesPitch={currentUser?.salesPitch}
                     targetCustomers={currentUser?.targetCustomers}
@@ -1923,6 +2039,19 @@ function MineLeadsContent() {
           </div>
         </div>
       </div>
+
+      {/* Follow-up modal */}
+      {showFollowUpModal && followUpLeadId && (
+        <FollowUpModal
+          leadName={leads.find(l => l.id === followUpLeadId)?.name || "Lead"}
+          onSave={async (date) => {
+            await setMeetingDate(followUpLeadId, date + "T09:00");
+            setShowFollowUpModal(false);
+            toast.success("Oppfølgingsdato satt!");
+          }}
+          onClose={() => setShowFollowUpModal(false)}
+        />
+      )}
     </div>
   );
 }
