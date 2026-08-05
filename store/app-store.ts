@@ -111,10 +111,8 @@ export const useAppStore = create<AppStore>()(
         if (!res.ok) {
           const data = await res.json().catch(() => ({}));
           console.error("[addLead] API error:", data);
-        } else {
-          // Refresh leads from DB to confirm persistence
-          const userEmail = get().currentUser?.email;
-            await get().loadLeads();
+          // Remove from local state if API call failed
+          set((state) => ({ leads: state.leads.filter((l) => l.id !== lead.id) }));
         }
       },
 

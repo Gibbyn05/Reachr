@@ -389,7 +389,7 @@ export function CompanyDetailModal({
                     },
                     {
                       label: "Brreg.no",
-                      url: `https://www.brreg.no/finn-foretak/sok-i-bronnoysunsregistrene/?q=${orgNumber}`,
+                      url: `https://www.brreg.no/bedrift/${orgNumber}/`,
                     },
                     {
                       label: "1881.no",

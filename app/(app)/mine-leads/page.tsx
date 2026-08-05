@@ -1516,10 +1516,11 @@ function MineLeadsContent() {
         const statusIdx = getIdx(["status", "kontaktet"]);
         const notesIdx = getIdx(["notater", "notes", "notat"]);
 
+        const leadsToAdd: Lead[] = [];
         for (let i = 1; i < rows.length; i++) {
             const row = rows[i];
             if (row.length === 0 || !row[nameIdx]) continue; // skip empty rows
-            
+
             let status = "Ikke kontaktet";
             if (statusIdx >= 0) {
               const sval = row[statusIdx]?.toLowerCase() || "";
@@ -1529,7 +1530,7 @@ function MineLeadsContent() {
               else if (["avslått", "nei"].includes(sval)) status = "Avslått";
               else if (["kunde", "vunnet"].includes(sval)) status = "Kunde";
               else if (sval && ["ikke kontaktet", "kontaktet", "kontaktet - ikke svar", "booket møte", "avslått", "kunde"].includes(row[statusIdx])) {
-                 status = row[statusIdx]; // try to use it directly if it matches exactly
+                 status = row[statusIdx];
               }
             }
 
@@ -1554,8 +1555,23 @@ function MineLeadsContent() {
                notes: notesIdx >= 0 && row[notesIdx] ? row[notesIdx] : "",
                lastContacted: null,
             };
-            // sequentially add to avoid overwhelming API immediately
-            await addLead(newLead);
+            leadsToAdd.push(newLead);
+        }
+
+        // Batch import all leads at once
+        if (leadsToAdd.length > 0) {
+          const res = await fetch("/api/leads/batch", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ leads: leadsToAdd }),
+          });
+          if (res.ok) {
+            // Add to local state and reload from DB
+            leadsToAdd.forEach(lead => useAppStore.getState().leads.push(lead));
+            await loadLeads();
+          } else {
+            throw new Error("Batch import failed");
+          }
         }
         toast.success("Leads importert suksessfullt!");
       } catch (err) {
